@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { FacebookIcon, GithubIcon } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,10 +21,12 @@ import { PasswordInput } from "@/components/utils/password-input";
 import type { SignInFormData, UserAuthFormProps } from "@/types/auth/sign-in";
 import { signInFormSchema } from "@/types/auth/sign-in";
 import { toast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
+  const router = useRouter();
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInFormSchema),
@@ -42,6 +44,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         title: "Success",
         description: "You have been signed in.",
       });
+      router.push("/dashboard");
     } catch {
       toast({
         title: "Error",

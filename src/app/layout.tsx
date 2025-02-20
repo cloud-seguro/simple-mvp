@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/providers/auth-provider";
 
 const APP_NAME = "POSITIVE-NEXT";
 const APP_DESCRIPTION = "Your Mind's Best Friend";
@@ -55,18 +56,20 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>{children}</QueryProvider>
-        <Toaster />
+        <AuthProvider>
+          <QueryProvider>{children}</QueryProvider>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
