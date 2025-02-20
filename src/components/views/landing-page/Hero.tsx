@@ -16,7 +16,7 @@ export default function Hero() {
               Learn to harness the power of your mind with POSITIVE-Next.
             </p>
             <Link
-              href="/signup"
+              href="/sign-up"
               className="inline-flex items-center bg-primary text-primary-foreground px-8 py-3 rounded-md text-lg font-medium hover:bg-primary/90 transition-colors animate-pulse"
             >
               Get Started

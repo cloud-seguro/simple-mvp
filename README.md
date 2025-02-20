@@ -169,3 +169,21 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - [Prisma](https://www.prisma.io/)
 - [Supabase](https://supabase.com/)
 - [TanStack Query](https://tanstack.com/query)
+
+
+## Credentials
+
+### Supabase
+- Project name: POSITIVE-Next-Template
+- DB Password: e9zKY_Km5HbkiiF
+- Anon Public Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3Zmd2ZmhwbWljd3B0dXBqeWtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwNjY4NDksImV4cCI6MjA1NTY0Mjg0OX0.OiccFqJXdAM6tPIvULA3EaZxtCOsuwhiMugjyGzXNFk
+- Service Role Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3Zmd2ZmhwbWljd3B0dXBqeWtvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MDA2Njg0OSwiZXhwIjoyMDU1NjQyODQ5fQ.jOx413xoAvBdez9ofCGU8DEIunRI2SU9SXWJsm_IY2Q
+- Project URL: https://swfgvfhpmicwptupjyko.supabase.co
+
+- PRISMA URLs:
+    # Connect to Supabase via connection pooling with Supavisor.
+    DATABASE_URL="postgresql://postgres.swfgvfhpmicwptupjyko:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+    # Direct connection to the database. Used for migrations.
+    DIRECT_URL="postgresql://postgres.swfgvfhpmicwptupjyko:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
+        

@@ -1,15 +1,15 @@
+import type { Metadata } from "next";
 import { Card } from "@/components/ui/card";
 import AuthLayout from "@/components/auth/auth-layout";
 import { SignUpForm } from "@/components/auth/sign-up/components/sign-up-form";
 import Link from "next/link";
-import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sign Up",
   description: "Create a new account",
 };
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
   return (
     <AuthLayout>
       <Card className="p-6">

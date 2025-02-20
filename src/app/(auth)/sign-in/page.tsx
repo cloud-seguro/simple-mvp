@@ -1,15 +1,15 @@
+import type { Metadata } from "next";
 import { Card } from "@/components/ui/card";
 import AuthLayout from "@/components/auth/auth-layout";
 import { UserAuthForm } from "@/components/auth/sign-in/components/user-auth-form";
 import Link from "next/link";
-import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sign In",
   description: "Sign in to your account",
 };
 
-export default function SignInPage() {
+export default async function SignInPage() {
   return (
     <AuthLayout>
       <Card className="p-6">

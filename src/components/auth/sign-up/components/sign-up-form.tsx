@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FacebookIcon, GithubIcon } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,9 +18,11 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/utils/password-input";
 import type { SignUpFormProps, SignUpFormData } from "@/types/auth/sign-up";
 import { signUpFormSchema } from "@/types/auth/sign-up";
+import { toast } from "@/components/ui/use-toast";
 
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { signUp } = useAuth();
 
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpFormSchema),
@@ -30,14 +33,23 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
     },
   });
 
-  function onSubmit(data: SignUpFormData) {
-    setIsLoading(true);
-
-    console.log(data);
-
-    setTimeout(() => {
+  async function onSubmit(data: SignUpFormData) {
+    try {
+      setIsLoading(true);
+      await signUp(data.email, data.password);
+      toast({
+        title: "Success",
+        description: "Check your email to confirm your account.",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 3000);
+    }
   }
 
   return (

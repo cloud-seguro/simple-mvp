@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { FacebookIcon, GithubIcon } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +20,11 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/utils/password-input";
 import type { SignInFormData, UserAuthFormProps } from "@/types/auth/sign-in";
 import { signInFormSchema } from "@/types/auth/sign-in";
+import { toast } from "@/components/ui/use-toast";
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInFormSchema),
@@ -31,14 +34,23 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     },
   });
 
-  function onSubmit(data: SignInFormData) {
-    setIsLoading(true);
-
-    console.log(data);
-
-    setTimeout(() => {
+  async function onSubmit(data: SignInFormData) {
+    try {
+      setIsLoading(true);
+      await signIn(data.email, data.password);
+      toast({
+        title: "Success",
+        description: "You have been signed in.",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Invalid email or password.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 3000);
+    }
   }
 
   return (

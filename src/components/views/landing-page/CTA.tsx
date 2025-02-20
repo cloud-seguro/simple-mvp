@@ -11,7 +11,7 @@ export default function CTA() {
             Join POSITIVE-Next today and start your journey to mental fitness and emotional intelligence.
           </p>
           <Link
-            href="/signup"
+            href="/sign-up"
             className="inline-flex items-center bg-primary-foreground text-primary px-8 py-3 rounded-md text-lg font-medium hover:bg-primary-foreground/90 transition-colors"
           >
             Get Started Now
