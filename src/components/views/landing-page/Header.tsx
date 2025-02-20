@@ -39,13 +39,13 @@ export default function Header() {
           </nav>
           <div className="hidden md:flex space-x-4">
             <Link
-              href="/signin"
+              href="/sign-in"
               className="text-primary hover:text-primary-foreground hover:bg-primary px-4 py-2 rounded-md transition-colors"
             >
               Sign In
             </Link>
             <Link
-              href="/signup"
+              href="/sign-up"
               className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
             >
               Sign Up
@@ -84,13 +84,13 @@ export default function Header() {
               Testimonials
             </Link>
             <Link
-              href="/signin"
+              href="/sign-in"
               className="block px-3 py-2 text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors"
             >
               Sign In
             </Link>
             <Link
-              href="/signup"
+              href="/sign-up"
               className="block px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               Sign Up
