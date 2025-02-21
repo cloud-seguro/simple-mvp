@@ -5,6 +5,10 @@ import { SearchProvider } from "@/context/search-context";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import SkipToMain from "@/components/skip-to-main";
+import { Header } from "@/components/sidebar/header";
+import { Search } from "@/components/sidebar/search";
+import { ThemeSwitch } from "@/components/sidebar/theme-switch";
+import { ProfileDropdown } from "@/components/sidebar/profile-dropdown";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -28,6 +32,13 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
             "group-data-[scroll-locked=1]/body:has-[main.fixed-main]:min-h-screen"
           )}
         >
+          <Header>
+            <div className="ml-auto flex items-center space-x-4">
+              <Search />
+              <ThemeSwitch />
+              <ProfileDropdown />
+            </div>
+          </Header>
           {children}
         </div>
       </SidebarProvider>
