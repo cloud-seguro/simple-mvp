@@ -1,20 +1,19 @@
-import type { HTMLAttributes } from "react";
-import type { z } from "zod";
-import { string, object } from "zod";
+import { z } from "zod";
 
-export type SignUpFormProps = HTMLAttributes<HTMLDivElement>;
+export const signUpFormSchema = z
+  .object({
+    email: z.string().email(),
+    username: z.string().min(3).max(20),
+    fullName: z.string().min(2).max(50),
+    birthDate: z.date(),
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-export const signUpFormSchema = object({
-  email: string()
-    .min(1, { message: "Please enter your email" })
-    .email({ message: "Invalid email address" }),
-  password: string()
-    .min(1, { message: "Please enter your password" })
-    .min(7, { message: "Password must be at least 7 characters long" }),
-  confirmPassword: string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match.",
-  path: ["confirmPassword"],
-});
+export type SignUpFormData = z.infer<typeof signUpFormSchema>;
 
-export type SignUpFormData = z.infer<typeof signUpFormSchema>; 
+export type SignUpFormProps = React.HTMLAttributes<HTMLDivElement>;

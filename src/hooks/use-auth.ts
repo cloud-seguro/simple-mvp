@@ -48,16 +48,40 @@ export function useAuth() {
   };
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    if (error) throw error;
-    return { success: true, user: data.user };
+      if (error) {
+        throw error;
+      }
+
+      if (data?.session) {
+        setSession(data.session);
+        setUser(data.session.user);
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+      }
+
+      return { 
+        success: true, 
+        user: data.user,
+        session: data.session,
+        error: null 
+      };
+    } catch (error) {
+      console.error("Sign up error:", error);
+      return {
+        success: false,
+        user: null,
+        session: null,
+        error
+      };
+    }
   };
 
   const signOut = async () => {

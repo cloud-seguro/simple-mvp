@@ -1,10 +1,11 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { motion, useAnimation, useInView } from "motion/react";
 import { useEffect, useRef } from "react";
 
 interface BoxRevealProps {
-  children: JSX.Element;
+  children: ReactElement;
   width?: "fit-content" | "100%";
   boxColor?: string;
   duration?: number;
