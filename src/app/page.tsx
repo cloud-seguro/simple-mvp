@@ -10,19 +10,22 @@ import Footer from "@/components/views/landing-page/Footer";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background to-secondary/20">
       <Head>
         <title>POSITIVE-Next: Your Mind&apos;s Best Friend</title>
         <meta
           name="description"
-          content="POSITIVE-Next helps you turn your mind into your best friend and overcome mental saboteurs."
+          content="Transform your mindset with POSITIVE-Next - the AI-powered mental fitness companion that helps you overcome mental saboteurs."
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Header />
 
-      <main className="flex-grow">
+      <main className="flex-grow relative">
+        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-transparent -z-10" />
+
         <Hero />
         <SocialProof />
         <Features />
