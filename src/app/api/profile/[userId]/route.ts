@@ -26,3 +26,32 @@ export async function GET(
     );
   }
 }
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ userId: string }> }
+) {
+  try {
+    const { userId } = await params;
+    const json = await request.json();
+
+    const profile = await prisma.profile.update({
+      where: {
+        userId,
+      },
+      data: {
+        username: json.username,
+        fullName: json.fullName,
+        bio: json.bio,
+      },
+    });
+
+    return NextResponse.json({ profile });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

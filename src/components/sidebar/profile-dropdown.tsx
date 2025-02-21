@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
+import { BadgeCheck, Bell, CreditCard, LogOut } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
