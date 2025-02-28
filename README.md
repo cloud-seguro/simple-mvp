@@ -1,33 +1,30 @@
-# Modern Next.js Template
+# Boring Next.js Template
 
-A modern, full-stack Next.js template with Prisma, Supabase, React Query, and more. Built with TypeScript and featuring a complete development setup.
+A modern Next.js template with Supabase authentication, profiles, and file uploads.
 
 ## 🚀 Features
 
-- ⚡️ Next.js 15 with App Router
+- ⚡️ Next.js 14 with App Router
 - 🔋 Prisma ORM with PostgreSQL
-- 🔑 Authentication with NextAuth.js
-- 🎨 Tailwind CSS for styling
-- 📊 React Query for data fetching
-- 🏢 Type-safe database queries
-- 🔄 React Hook Form with Zod validation
-- 📅 Date handling with date-fns
-- 🎭 Dark mode support with next-themes
-- 📊 Recharts for data visualization
+- 🔑 Authentication with Supabase Auth
+- 🎨 Tailwind CSS + shadcn/ui
+- 📁 File uploads with Supabase Storage
+- 🔄 Type-safe database queries
+- 🎭 Dark mode with next-themes
 - 🛠 Complete TypeScript support
 
 ## 📦 Prerequisites
 
 - Node.js 18+ 
-- PostgreSQL database (local or Supabase)
 - pnpm (recommended) or npm
+- Supabase account
 
 ## 🛠 Setup
 
 1. Clone the repository:
 ```bash
-git clone [your-repo-url]
-cd [your-project-name]
+git clone https://github.com/yourusername/boring-next.git
+cd boring-next
 ```
 
 2. Install dependencies:
@@ -37,28 +34,30 @@ pnpm install
 
 3. Set up your environment variables:
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-4. Configure your `.env` file:
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=public"
+4. Create a Supabase project:
+   - Go to [supabase.com](https://supabase.com)
+   - Create a new project
+   - Get your project credentials from Settings > API
+   - Create a storage bucket named "avatars" in Storage
 
-# Supabase
+5. Configure your `.env.local`:
+```env
+# Supabase Project Settings
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
-# NextAuth.js
-NEXTAUTH_SECRET=your-secret-key
-NEXTAUTH_URL=http://localhost:3000
+# Database URLs
+DATABASE_URL="postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[YOUR-REGION].pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[YOUR-REGION].pooler.supabase.com:5432/postgres"
 
-# Optional: OAuth Providers
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+# Storage
+NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET=avatars
 ```
 
-5. Initialize Prisma:
+6. Initialize Prisma:
 ```bash
 pnpm prisma generate
 pnpm prisma db push
@@ -73,21 +72,31 @@ pnpm dev
 
 Your app will be available at `http://localhost:3000`
 
-## 📝 Database Management
+## 🏗 Project Structure
 
-### Initialize Prisma
-```bash
-pnpm prisma init
+```
+├── app/                   # Next.js App Router
+│   ├── api/              # API routes
+│   ├── auth/             # Auth routes
+│   └── (dashboard)/      # Protected routes
+├── components/           # React components
+│   ├── ui/              # UI components
+│   └── settings/        # Settings components
+├── lib/                  # Utility functions
+├── providers/           # React context providers
+└── public/              # Static assets
 ```
 
-### Create a migration
+## 📝 Database Management
+
+### Push schema changes
 ```bash
-pnpm prisma migrate dev --name init
+pnpm prisma db push
 ```
 
 ### Reset database
 ```bash
-pnpm prisma migrate reset
+pnpm prisma db reset
 ```
 
 ### Open Prisma Studio
@@ -95,65 +104,29 @@ pnpm prisma migrate reset
 pnpm prisma studio
 ```
 
-## 🏗 Project Structure
-
-```
-├── app/                   # Next.js App Router
-│   ├── api/              # API routes
-│   ├── (auth)/          # Authentication routes
-│   └── (dashboard)/     # Protected dashboard routes
-├── components/           # React components
-├── lib/                  # Utility functions
-├── prisma/              # Prisma schema and migrations
-└── public/              # Static assets
-```
-
-## 🧪 Testing
-
-```bash
-pnpm test        # Run tests
-pnpm test:watch  # Run tests in watch mode
-```
-
-## 🚀 Deployment
-
-1. Build the application:
-```bash
-pnpm build
-```
-
-2. Start the production server:
-```bash
-pnpm start
-```
-
-## 📚 Key Dependencies
-
-- Next.js 15.1.7
-- React 19.0.0
-- Prisma 6.4.0
-- TanStack Query 5.66.7
-- NextAuth.js 4.24.11
-- React Hook Form 7.54.2
-- Zod 3.24.2
-- Tailwind CSS 3.4.17
-
 ## 🔧 Common Issues & Solutions
 
-### Prisma Client Issues
-If you encounter Prisma Client issues, try:
-```bash
-pnpm prisma generate
+### Image Loading Issues
+Add your Supabase storage domain to `next.config.js`:
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: [
+      "your-project-ref.supabase.co"
+    ],
+  },
+}
 ```
 
 ### Database Connection Issues
-- Verify your DATABASE_URL in .env
-- Ensure PostgreSQL is running
-- Check network access and firewall settings
+- Verify your DATABASE_URL in .env.local
+- Ensure you're using the correct Supabase connection strings
+- Check if your IP is allowed in Supabase dashboard
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
@@ -168,7 +141,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - [Next.js](https://nextjs.org/)
 - [Prisma](https://www.prisma.io/)
 - [Supabase](https://supabase.com/)
-- [TanStack Query](https://tanstack.com/query)
+- [shadcn/ui](https://ui.shadcn.com/)
 
 
 ## Credentials
