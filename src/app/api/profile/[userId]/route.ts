@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
@@ -8,21 +7,29 @@ export async function GET(
   try {
     const { userId } = await params;
     const profile = await prisma.profile.findUnique({
-      where: {
-        userId: userId,
-      },
+      where: { userId },
     });
 
     if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      return new Response(JSON.stringify({ error: "Profile not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    return NextResponse.json({ profile });
+    return new Response(JSON.stringify({ profile }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Error fetching profile:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: "Internal server error", details: errorMessage }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
 }
@@ -36,23 +43,28 @@ export async function PATCH(
     const json = await request.json();
 
     const profile = await prisma.profile.update({
-      where: {
-        userId: userId,
-      },
+      where: { userId },
       data: {
-        firstName: json.firstName,
-        lastName: json.lastName,
-        avatarUrl: json.avatarUrl,
-        birthDate: json.birthDate ? new Date(json.birthDate) : null,
+        firstName: json.firstName || undefined,
+        lastName: json.lastName || undefined,
+        avatarUrl: json.avatarUrl || undefined,
+        birthDate: json.birthDate ? new Date(json.birthDate) : undefined,
       },
     });
 
-    return NextResponse.json({ profile });
+    return new Response(JSON.stringify({ profile }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Error updating profile:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: "Internal server error", details: errorMessage }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
 }

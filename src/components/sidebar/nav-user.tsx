@@ -37,6 +37,20 @@ export function NavUser() {
 
   if (!profile || !user) return null;
 
+  const displayName = [profile.firstName, profile.lastName]
+    .filter(Boolean)
+    .join(" ");
+
+  const getInitials = () => {
+    if (profile.firstName || profile.lastName) {
+      return [profile.firstName?.[0], profile.lastName?.[0]]
+        .filter(Boolean)
+        .join("")
+        .toUpperCase();
+    }
+    return user.email?.[0]?.toUpperCase() || "U";
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -47,13 +61,18 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg ring-2 ring-primary/10">
-                <AvatarImage src={profile.avatarUrl || ""} alt={profile.fullName} />
+                <AvatarImage 
+                  src={profile.avatarUrl || ""} 
+                  alt={displayName || user.email || "User"} 
+                />
                 <AvatarFallback className="rounded-lg bg-primary/10">
-                  {profile.fullName.split(' ').map(n => n[0]).join('')}
+                  {getInitials()}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{profile.fullName}</span>
+                <span className="truncate font-semibold">
+                  {displayName || user.email}
+                </span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -68,13 +87,18 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg ring-2 ring-primary/10">
-                  <AvatarImage src={profile.avatarUrl || ""} alt={profile.fullName} />
+                  <AvatarImage 
+                    src={profile.avatarUrl || ""} 
+                    alt={displayName || user.email || "User"} 
+                  />
                   <AvatarFallback className="rounded-lg bg-primary/10">
-                    {profile.fullName.split(' ').map(n => n[0]).join('')}
+                    {getInitials()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{profile.fullName}</span>
+                  <span className="truncate font-semibold">
+                    {displayName || user.email}
+                  </span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>

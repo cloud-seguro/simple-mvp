@@ -39,11 +39,10 @@ export function ProfileForm() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      username: profile?.username || "",
-      fullName: profile?.fullName || "",
+      firstName: profile?.firstName || "",
+      lastName: profile?.lastName || "",
       bio: profile?.bio || "",
       birthDate: profile?.birthDate ? new Date(profile.birthDate) : null,
-      role: profile?.role || "USER",
       avatarUrl: null,
     },
   });

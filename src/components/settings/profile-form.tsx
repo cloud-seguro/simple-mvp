@@ -20,13 +20,13 @@ import { profileFormSchema } from "@/lib/validations/profile";
 import type { ProfileFormValues } from "@/lib/validations/profile";
 
 export function ProfileForm() {
-  const { profile, user } = useAuth();
+  const { profile } = useAuth();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      username: profile?.username || "",
-      fullName: profile?.fullName || "",
+      firstName: profile?.firstName || "",
+      lastName: profile?.lastName || "",
       bio: profile?.bio || "",
     },
   });
