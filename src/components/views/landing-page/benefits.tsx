@@ -13,9 +13,12 @@ export default function Benefits() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">Beneficios de nuestras evaluaciones</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Beneficios de nuestras evaluaciones
+        </h2>
         <p className="text-lg max-w-3xl mx-auto">
-          Descubre cómo nuestras evaluaciones pueden ayudarte a mejorar la seguridad de tu empresa
+          Descubre cómo nuestras evaluaciones pueden ayudarte a mejorar la
+          seguridad de tu empresa
         </p>
       </motion.div>
 
@@ -31,10 +34,13 @@ export default function Benefits() {
           <div className="mb-6 text-black">
             <CheckCircle size={48} />
           </div>
-          <h3 className="text-xl font-bold mb-4 text-black">Identificación de riesgos</h3>
+          <h3 className="text-xl font-bold mb-4 text-black">
+            Identificación de riesgos
+          </h3>
           <p className="text-black/90">
-            Nuestras evaluaciones te ayudan a identificar los riesgos de seguridad específicos de tu empresa,
-            permitiéndote priorizar tus esfuerzos de protección.
+            Nuestras evaluaciones te ayudan a identificar los riesgos de
+            seguridad específicos de tu empresa, permitiéndote priorizar tus
+            esfuerzos de protección.
           </p>
         </motion.div>
 
@@ -49,10 +55,12 @@ export default function Benefits() {
           <div className="mb-6 text-black">
             <Shield size={48} />
           </div>
-          <h3 className="text-xl font-bold mb-4 text-black">Cumplimiento normativo</h3>
+          <h3 className="text-xl font-bold mb-4 text-black">
+            Cumplimiento normativo
+          </h3>
           <p className="text-black/90">
-            Evalúa tu nivel de cumplimiento con estándares como ISO 27001, NIST y otras regulaciones relevantes para tu
-            industria.
+            Evalúa tu nivel de cumplimiento con estándares como ISO 27001, NIST
+            y otras regulaciones relevantes para tu industria.
           </p>
         </motion.div>
 
@@ -67,10 +75,12 @@ export default function Benefits() {
           <div className="mb-6 text-black">
             <FileText size={48} />
           </div>
-          <h3 className="text-xl font-bold mb-4 text-black">Plan de acción claro</h3>
+          <h3 className="text-xl font-bold mb-4 text-black">
+            Plan de acción claro
+          </h3>
           <p className="text-black/90">
-            Recibe recomendaciones personalizadas y un plan de acción claro para mejorar tu postura de seguridad de
-            manera efectiva y eficiente.
+            Recibe recomendaciones personalizadas y un plan de acción claro para
+            mejorar tu postura de seguridad de manera efectiva y eficiente.
           </p>
         </motion.div>
       </div>
@@ -86,19 +96,25 @@ export default function Benefits() {
         <div className="grid md:grid-cols-3 gap-8 text-center">
           <div>
             <h3 className="text-4xl font-bold mb-2 text-white">85%</h3>
-            <p className="text-lg text-white/90">de las empresas mejoran su seguridad tras la evaluación</p>
+            <p className="text-lg text-white/90">
+              de las empresas mejoran su seguridad tras la evaluación
+            </p>
           </div>
           <div>
             <h3 className="text-4xl font-bold mb-2 text-white">60%</h3>
-            <p className="text-lg text-white/90">reducción en incidentes de seguridad</p>
+            <p className="text-lg text-white/90">
+              reducción en incidentes de seguridad
+            </p>
           </div>
           <div>
             <h3 className="text-4xl font-bold mb-2 text-white">90%</h3>
-            <p className="text-lg text-white/90">de satisfacción con nuestras recomendaciones</p>
+            <p className="text-lg text-white/90">
+              de satisfacción con nuestras recomendaciones
+            </p>
           </div>
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
 

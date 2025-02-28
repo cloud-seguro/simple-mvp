@@ -2,22 +2,22 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { TypingAnimation } from "@/components/magicui/typing-animation"
 
 export default function DiscoverSection() {
   return (
     <div className="relative overflow-hidden animate-color-transition">
       <div className="relative max-w-6xl mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between py-24">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mb-12 md:mb-0 md:w-1/2"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-              Descubre tus vulnerabilidades de seguridad
-            </h2>
+          <div className="mb-12 md:mb-0 md:w-1/2">
+            <div className="h-[180px] md:h-[144px]">
+              <TypingAnimation
+                className="text-4xl md:text-5xl font-bold mb-8 text-white"
+                startOnView={true}
+              >
+                Descubre tus vulnerabilidades de seguridad
+              </TypingAnimation>
+            </div>
             <p className="text-xl mb-12 text-white/90 leading-relaxed">
               Las amenazas cibernéticas afectan la forma en que manejas el trabajo y los desafíos empresariales. Protege
               lo que más importa.
@@ -32,7 +32,7 @@ export default function DiscoverSection() {
                 Descubre tus vulnerabilidades
               </Button>
             </motion.div>
-          </motion.div>
+          </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             whileInView={{ opacity: 1, scale: 1 }}

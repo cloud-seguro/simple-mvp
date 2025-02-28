@@ -6,7 +6,6 @@ import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TypingAnimation } from "@/components/magicui/typing-animation";
 
 const testimonials = [
   {
@@ -51,12 +50,15 @@ export default function Testimonial() {
   return (
     <section className="py-20 px-4 bg-white" id="testimonios">
       <div className="max-w-4xl mx-auto">
-        <TypingAnimation
+        <motion.h2
           className="text-3xl md:text-4xl font-bold mb-12 text-center"
-          startOnView={true}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
         >
           Lo que dicen nuestros clientes
-        </TypingAnimation>
+        </motion.h2>
 
         <div className="relative">
           <Button
@@ -80,15 +82,24 @@ export default function Testimonial() {
                 <div className="flex flex-col items-center text-center">
                   <Quote className="h-12 w-12 text-yellow-500 mb-6" />
                   <p className="text-2xl md:text-3xl font-medium mb-8 text-gray-800 leading-relaxed">
-                    "{testimonials[currentTestimonial].quote}"
+                    &quot;{testimonials[currentTestimonial].quote}&quot;
                   </p>
                   <Avatar className="h-16 w-16 mb-4">
-                    <AvatarImage src={testimonials[currentTestimonial].avatar} alt={testimonials[currentTestimonial].name} />
-                    <AvatarFallback>{testimonials[currentTestimonial].initials}</AvatarFallback>
+                    <AvatarImage
+                      src={testimonials[currentTestimonial].avatar}
+                      alt={testimonials[currentTestimonial].name}
+                    />
+                    <AvatarFallback>
+                      {testimonials[currentTestimonial].initials}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
-                    <h3 className="font-semibold text-lg">{testimonials[currentTestimonial].name}</h3>
-                    <p className="text-gray-600">{testimonials[currentTestimonial].title}</p>
+                    <h3 className="font-semibold text-lg">
+                      {testimonials[currentTestimonial].name}
+                    </h3>
+                    <p className="text-gray-600">
+                      {testimonials[currentTestimonial].title}
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -105,17 +116,21 @@ export default function Testimonial() {
           </Button>
 
           <div className="flex justify-center mt-8 gap-2">
-            {testimonials.map((_, index) => (
+            {testimonials.map((testimonial) => (
               <Button
-                key={`dot-${index}`}
+                key={`dot-${testimonial.name.toLowerCase().replace(/\s+/g, "-")}`}
                 variant="ghost"
                 size="icon"
                 className={`h-3 w-3 rounded-full p-0 ${
-                  index === currentTestimonial
+                  testimonials[currentTestimonial].name === testimonial.name
                     ? "bg-yellow-500"
                     : "bg-gray-300 hover:bg-gray-400"
                 }`}
-                onClick={() => setCurrentTestimonial(index)}
+                onClick={() =>
+                  setCurrentTestimonial(
+                    testimonials.findIndex((t) => t.name === testimonial.name)
+                  )
+                }
               />
             ))}
           </div>

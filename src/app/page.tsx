@@ -21,18 +21,18 @@ export default function Home() {
     <main className="flex min-h-screen flex-col">
       <Navbar />
       <Hero />
-      <motion.section id="evaluacion" className="py-24" {...fadeInUp}>
+      <section id="evaluacion" className="py-24">
         <EvaluationOptions />
-      </motion.section>
-      <motion.section id="beneficios" className="py-24 bg-gray-50" {...fadeInUp}>
+      </section>
+      <section id="beneficios" className="py-24 bg-white">
         <Benefits />
-      </motion.section>
-      <motion.section id="testimonios" className="py-24" {...fadeInUp}>
+      </section>
+      <section id="testimonios" className="py-24">
         <Testimonial />
-      </motion.section>
-      <motion.section id="descubre" {...fadeInUp}>
+      </section>
+      <section id="descubre">
         <DiscoverSection />
-      </motion.section>
+      </section>
       <Footer />
     </main>
   )

@@ -29,7 +29,9 @@ export default function EvaluationOptions() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">Evalúa tu nivel de madurez en ciberseguridad</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Evalúa tu nivel de madurez en ciberseguridad
+        </h2>
         <p className="text-lg max-w-3xl mx-auto">
           Selecciona la evaluación que mejor se adapte a tus necesidades y descubre cómo mejorar la seguridad de tu
           empresa
