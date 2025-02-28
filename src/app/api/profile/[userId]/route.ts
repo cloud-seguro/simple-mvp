@@ -9,7 +9,7 @@ export async function GET(
     const { userId } = await params;
     const profile = await prisma.profile.findUnique({
       where: {
-        userId,
+        user_id: userId,
       },
     });
 
@@ -37,12 +37,13 @@ export async function PATCH(
 
     const profile = await prisma.profile.update({
       where: {
-        userId,
+        user_id: userId,
       },
       data: {
-        username: json.username,
-        fullName: json.fullName,
-        bio: json.bio,
+        firstName: json.first_name,
+        lastName: json.last_name,
+        avatar_url: json.avatar_url,
+        birth_date: json.birth_date ? new Date(json.birth_date) : undefined,
       },
     });
 
