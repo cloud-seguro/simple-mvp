@@ -14,7 +14,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { profileFormSchema } from "@/lib/validations/profile";
 import type { ProfileFormValues } from "@/lib/validations/profile";
@@ -27,7 +26,6 @@ export function ProfileForm() {
     defaultValues: {
       firstName: profile?.firstName || "",
       lastName: profile?.lastName || "",
-      bio: profile?.bio || "",
     },
   });
 
@@ -45,7 +43,7 @@ export function ProfileForm() {
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -59,12 +57,12 @@ export function ProfileForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="username"
+          name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="shadcn" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormDescription>
                 This is your public display name. It can be your real name or a pseudonym.
@@ -76,39 +74,17 @@ export function ProfileForm() {
 
         <FormField
           control={form.control}
-          name="fullName"
+          name="lastName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="John Doe" {...field} value={field.value ?? ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Tell us a little bit about yourself"
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                You can @mention other users and organizations.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <div className="flex items-center gap-4">
           <Button type="submit">Update profile</Button>
           <Button type="button" variant="outline" onClick={() => form.reset()}>

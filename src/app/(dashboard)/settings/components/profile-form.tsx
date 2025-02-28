@@ -3,47 +3,37 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { cn } from "@/lib/utils";
+import { AvatarUpload } from "@/components/settings/avatar-upload";
 import { profileFormSchema } from "@/lib/validations/profile";
 import type { ProfileFormValues } from "@/lib/validations/profile";
 
 export function ProfileForm() {
-  const { profile, user } = useAuth();
+  const { profile } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingChanges, setPendingChanges] = useState<ProfileFormValues | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [pendingChanges, setPendingChanges] =
+    useState<ProfileFormValues | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [newAvatarUrl, setNewAvatarUrl] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       firstName: profile?.firstName || "",
       lastName: profile?.lastName || "",
-      bio: profile?.bio || "",
-      birthDate: profile?.birthDate ? new Date(profile.birthDate) : null,
-      avatarUrl: null,
     },
   });
 
@@ -56,32 +46,14 @@ export function ProfileForm() {
     if (!pendingChanges || !profile?.userId) return;
 
     try {
-      setIsUploading(true);
-      let avatarUrl = profile.avatarUrl;
+      setIsUpdating(true);
 
-      // Handle avatar upload if there's a new file
-      if (pendingChanges.avatarUrl?.[0]) {
-        const formData = new FormData();
-        formData.append("file", pendingChanges.avatarUrl[0]);
-        
-        const uploadResponse = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) throw new Error("Failed to upload avatar");
-        
-        const { url } = await uploadResponse.json();
-        avatarUrl = url;
-      }
-
-      // Update profile with all fields including new avatar URL if uploaded
       const response = await fetch(`/api/profile/${profile.userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...pendingChanges,
-          avatarUrl,
+          avatarUrl: newAvatarUrl || profile.avatarUrl,
         }),
       });
 
@@ -92,19 +64,15 @@ export function ProfileForm() {
         description: "Your profile has been updated successfully.",
       });
 
-      // Reset form with new values
-      form.reset({
-        ...pendingChanges,
-        avatarUrl: null,
-      });
-    } catch (error) {
+      form.reset(pendingChanges);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsUploading(false);
+      setIsUpdating(false);
       setShowConfirmDialog(false);
       setPendingChanges(null);
     }
@@ -114,134 +82,69 @@ export function ProfileForm() {
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="avatarUrl"
-            render={({ field: { onChange, value, ...field } }) => (
-              <FormItem>
-                <FormLabel>Profile Picture</FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => onChange(e.target.files)}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Choose a profile picture. Max size 5MB.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {profile && (
+            <AvatarUpload
+              userId={profile.userId}
+              currentAvatarUrl={profile.avatarUrl}
+              onUploadComplete={(url) => setNewAvatarUrl(url)}
+              onUploadError={(error) => {
+                toast({
+                  title: "Error",
+                  description: error.message,
+                  variant: "destructive",
+                });
+              }}
+            />
+          )}
 
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="johndoe" {...field} />
-                </FormControl>
-                <FormDescription>
-                  This is your public display name. It can be your real name or a pseudonym.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="John Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="birthDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date of birth</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="John"
+                      {...field}
+                      value={field.value ?? ""}
                     />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="bio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bio</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Tell us a little bit about yourself"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  You can @mention other users and organizations.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Doe"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex items-center gap-4">
-            <Button type="submit" disabled={isUploading}>
-              {isUploading && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Update profile
             </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => form.reset()}
-              disabled={isUploading}
+              disabled={isUpdating}
             >
               Reset
             </Button>

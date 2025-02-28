@@ -1,29 +1,16 @@
 import * as z from "zod";
 
-const MAX_FILE_SIZE = 5000000; // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-
 export const profileFormSchema = z.object({
-  firstName: z
-    .string()
-    .min(3, { message: "First name must be at least 3 characters" })
-    .max(20, { message: "First name must not be longer than 20 characters" }),
-  lastName: z
-    .string()
-    .min(2, { message: "Last name must be at least 2 characters" })
-    .max(50, { message: "Last name must not be longer than 50 characters" }),
+  firstName: z.string().min(2, "First name must be at least 2 characters").max(30).optional().nullable(),
+  lastName: z.string().min(2, "Last name must be at least 2 characters").max(30).optional().nullable(),
   avatarUrl: z
-    .any()
-    .refine((files) => !files || files?.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, 
-      "Max file size is 5MB.")
-    .refine(
-      (files) => !files || files?.length === 0 || ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      "Only .jpg, .jpeg, .png and .webp formats are supported."
-    )
+    .custom<FileList>()
     .optional()
-    .nullable(),
-  birthDate: z.date().optional().nullable(),
-  role: z.enum(["USER", "ADMIN"]).default("USER"),
+    .nullable()
+    .refine(
+      (files) => !files || files.length === 0 || files[0].size <= 2 * 1024 * 1024,
+      "Image must be less than 2MB"
+    ),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>; 

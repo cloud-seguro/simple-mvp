@@ -5,7 +5,7 @@ import type { UserRole, Prisma } from "@prisma/client";
 export async function POST(req: Request) {
   try {
     const json = await req.json();
-    const { userId, firstName, lastName, birthDate, avatarUrl } = json;
+    const { userId, firstName, lastName, avatarUrl } = json;
 
     if (!userId) {
       return new Response(JSON.stringify({ error: "User ID is required" }), {
@@ -45,7 +45,6 @@ export async function POST(req: Request) {
         data: {
           firstName: firstName || null,
           lastName: lastName || null,
-          birthDate: birthDate ? new Date(birthDate) : null,
           avatarUrl: avatarUrl || null,
         },
       });
