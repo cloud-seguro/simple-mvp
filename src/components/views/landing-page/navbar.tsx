@@ -25,11 +25,19 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    // Prevent body scroll when menu is open
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
     document.body.style.paddingTop = scrolled ? "76px" : "110px";
     return () => {
       document.body.style.paddingTop = "0px";
+      document.body.style.overflow = "unset";
     };
-  }, [scrolled]);
+  }, [scrolled, isMenuOpen]);
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLButtonElement>,
@@ -48,48 +56,17 @@ export default function Navbar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50">
+      {/* Announcement Bar */}
       {!scrolled && (
-        <div className="w-full bg-yellow-400 text-black py-3 px-4">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <p className="text-sm md:text-base font-semibold">
+        <div className="w-full bg-yellow-400 text-black py-2 md:py-3 px-4">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
+            <p className="text-sm md:text-base font-semibold text-center md:text-left">
               Evalúa tu nivel de seguridad ahora. ¡Realiza nuestra evaluación
               gratuita hoy!
             </p>
             <Button
               variant="outline"
-              className="ml-4 border-black text-black hover:bg-black hover:text-yellow-400 transition-colors"
-              onClick={(e) => handleNavClick(e as React.MouseEvent<HTMLButtonElement>, "#evaluacion")}
-            >
-              Comenzar
-            </Button>
-          </div>
-        </div>
-      )}
-      <nav
-        className={`py-4 px-4 md:px-8 flex items-center justify-between bg-white transition-all duration-300 ${
-          scrolled ? "shadow-md" : ""
-        }`}
-      >
-        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold flex items-center">
-              <span className="text-black">SIMPLE</span>
-            </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <Button
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </Button>
-
-          {/* Desktop navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Button
-              variant="ghost"
-              className="hover:text-yellow-500 transition-colors"
+              className="w-full md:w-auto border-black text-black hover:bg-black hover:text-yellow-400 transition-colors"
               onClick={(e) =>
                 handleNavClick(
                   e as React.MouseEvent<HTMLButtonElement>,
@@ -97,44 +74,55 @@ export default function Navbar() {
                 )
               }
             >
-              Evaluación
+              Comenzar
             </Button>
-            <Button
-              variant="ghost"
-              className="hover:text-yellow-500 transition-colors"
-              onClick={(e) =>
-                handleNavClick(
-                  e as React.MouseEvent<HTMLButtonElement>,
-                  "#beneficios"
-                )
-              }
-            >
-              Beneficios
-            </Button>
-            <Button
-              variant="ghost"
-              className="hover:text-yellow-500 transition-colors"
-              onClick={(e) =>
-                handleNavClick(
-                  e as React.MouseEvent<HTMLButtonElement>,
-                  "#testimonios"
-                )
-              }
-            >
-              Testimonios
-            </Button>
-            <Button
-              variant="ghost"
-              className="hover:text-yellow-500 transition-colors"
-              onClick={(e) =>
-                handleNavClick(
-                  e as React.MouseEvent<HTMLButtonElement>,
-                  "#contacto"
-                )
-              }
-            >
-              Contacto
-            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Navigation */}
+      <nav
+        className={`py-4 px-4 md:px-8 bg-white transition-all duration-300 ${
+          scrolled ? "shadow-md" : ""
+        }`}
+      >
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="text-2xl font-bold z-50 relative">
+            <span className="text-black">SIMPLE</span>
+          </Link>
+
+          {/* Mobile menu button */}
+          <Button
+            className="md:hidden z-50"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </Button>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {[
+              { href: "#evaluacion", label: "Evaluación" },
+              { href: "#beneficios", label: "Beneficios" },
+              { href: "#testimonios", label: "Testimonios" },
+              { href: "#contacto", label: "Contacto" },
+            ].map((item) => (
+              <Button
+                key={item.href}
+                variant="ghost"
+                className="hover:text-yellow-500 transition-colors"
+                onClick={(e) =>
+                  handleNavClick(
+                    e as React.MouseEvent<HTMLButtonElement>,
+                    item.href
+                  )
+                }
+              >
+                {item.label}
+              </Button>
+            ))}
             <Button
               className="bg-black text-white hover:bg-gray-800 transition-all transform hover:-translate-y-1"
               onClick={(e) =>
@@ -149,66 +137,61 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)}>
-            <div className="absolute top-[76px] left-0 right-0 bg-white z-50 p-6 shadow-lg md:hidden max-h-[calc(100vh-76px)] overflow-y-auto"
-                 onClick={e => e.stopPropagation()}
-            >
-              <div className="flex flex-col space-y-4">
+        {/* Mobile Menu Overlay */}
+        <div
+          className={`fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity md:hidden ${
+            isMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          onClick={() => setIsMenuOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setIsMenuOpen(false);
+          }}
+          role="button"
+          tabIndex={0}
+        />
+
+        {/* Mobile Menu Panel */}
+        <div
+          className={`fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl transition-transform duration-300 ease-in-out transform md:hidden ${
+            isMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex flex-col h-full pt-20 pb-6 px-6">
+            <div className="flex-1 flex flex-col space-y-2">
+              {[
+                { href: "#evaluacion", label: "Evaluación" },
+                { href: "#beneficios", label: "Beneficios" },
+                { href: "#testimonios", label: "Testimonios" },
+                { href: "#contacto", label: "Contacto" },
+              ].map((item) => (
                 <Button
+                  key={item.href}
                   variant="ghost"
-                  className="w-full text-left px-4 py-3 hover:bg-yellow-50 hover:text-yellow-500 transition-colors rounded-lg"
-                  onClick={(e) => handleNavClick(e as React.MouseEvent<HTMLButtonElement>, "#evaluacion")}
-                >
-                  Evaluación
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="hover:text-yellow-500 transition-colors py-2 justify-start"
+                  className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
                   onClick={(e) =>
                     handleNavClick(
                       e as React.MouseEvent<HTMLButtonElement>,
-                      "#beneficios"
+                      item.href
                     )
                   }
                 >
-                  Beneficios
+                  {item.label}
                 </Button>
-                <Button
-                  variant="ghost"
-                  className="hover:text-yellow-500 transition-colors py-2 justify-start"
-                  onClick={(e) =>
-                    handleNavClick(
-                      e as React.MouseEvent<HTMLButtonElement>,
-                      "#testimonios"
-                    )
-                  }
-                >
-                  Testimonios
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="hover:text-yellow-500 transition-colors py-2 justify-start"
-                  onClick={(e) =>
-                    handleNavClick(
-                      e as React.MouseEvent<HTMLButtonElement>,
-                      "#contacto"
-                    )
-                  }
-                >
-                  Contacto
-                </Button>
-                <Button
-                  className="w-full bg-black text-white hover:bg-gray-800 py-4"
-                  onClick={(e) => handleNavClick(e as React.MouseEvent<HTMLButtonElement>, "#evaluacion")}
-                >
-                  Evaluar Ahora
-                </Button>
-              </div>
+              ))}
             </div>
+            <Button
+              className="w-full bg-black text-white hover:bg-gray-800 py-6 text-lg mt-4"
+              onClick={(e) =>
+                handleNavClick(
+                  e as React.MouseEvent<HTMLButtonElement>,
+                  "#evaluacion"
+                )
+              }
+            >
+              Evaluar Ahora
+            </Button>
           </div>
-        )}
+        </div>
       </nav>
     </div>
   );
