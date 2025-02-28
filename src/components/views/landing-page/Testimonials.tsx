@@ -2,35 +2,37 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { ChevronLeft, ChevronRight, Quote, Star, Building2, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TextAnimate } from "@/components/magicui/text-animate";
 
 const testimonials = [
   {
     quote:
-      "Lo que buscábamos era un enfoque de ciberseguridad que fuera efectivo y simple de implementar. SIMPLESEC fue la solución perfecta para nosotros. Se alineó perfectamente con nuestros valores fundamentales.",
+      "Lo que buscábamos era un enfoque de ciberseguridad que fuera efectivo y simple de implementar. SIMPLE fue la solución perfecta para nosotros. Se alineó perfectamente con nuestros valores fundamentales.",
     name: "María Rodríguez",
     title: "CTO, Empresa Innovadora",
-    avatar: "/avatars/maria.jpg", // Add these images to your public folder
-    initials: "MR",
+    rating: 5,
+    company: "Empresa Innovadora S.L.",
+    industry: "Tecnología",
   },
   {
     quote:
       "La evaluación de SIMPLE nos ayudó a identificar vulnerabilidades que no sabíamos que teníamos. El proceso fue sencillo y las recomendaciones fueron claras y accionables.",
     name: "Carlos Méndez",
     title: "Director de IT, Grupo Empresarial",
-    avatar: "/avatars/carlos.jpg",
-    initials: "CM",
+    rating: 5,
+    company: "Grupo Empresarial XYZ",
+    industry: "Finanzas",
   },
   {
     quote:
-      "Gracias a la evaluación avanzada, pudimos implementar medidas de seguridad que nos ayudaron a cumplir con la normativa ISO 27001. El equipo de SIMPLESEC fue fundamental en este proceso.",
+      "Gracias a la evaluación avanzada, pudimos implementar medidas de seguridad que nos ayudaron a cumplir con la normativa ISO 27001. El equipo de SIMPLE fue fundamental en este proceso.",
     name: "Laura Sánchez",
     title: "CISO, Multinacional",
-    avatar: "/avatars/laura.jpg",
-    initials: "LS",
+    rating: 5,
+    company: "Global Solutions Corp",
+    industry: "Consultoría",
   },
 ];
 
@@ -48,14 +50,13 @@ export default function Testimonial() {
   };
 
   return (
-    <section className="py-20 px-4 bg-white" id="testimonios">
-      <div className="max-w-4xl mx-auto">
+    <section className="py-20 bg-white" id="testimonios">
+      <div className="max-w-6xl mx-auto px-4">
         <motion.h2
-          className="text-3xl md:text-4xl font-bold mb-12 text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          className="text-3xl md:text-4xl font-bold text-center mb-16"
         >
           Lo que dicen nuestros clientes
         </motion.h2>
@@ -64,73 +65,76 @@ export default function Testimonial() {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hover:bg-white/80 transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black hover:bg-black/90 transition-colors rounded-full p-3 md:p-6"
             onClick={prevTestimonial}
           >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-6 w-6 md:h-8 md:w-8 text-white" />
           </Button>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentTestimonial}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            >
-              <Card className="p-8 bg-white border-none shadow-lg">
-                <div className="flex flex-col items-center text-center">
-                  <Quote className="h-12 w-12 text-yellow-500 mb-6" />
-                  <p className="text-2xl md:text-3xl font-medium mb-8 text-gray-800 leading-relaxed">
-                    &quot;{testimonials[currentTestimonial].quote}&quot;
-                  </p>
-                  <Avatar className="h-16 w-16 mb-4">
-                    <AvatarImage
-                      src={testimonials[currentTestimonial].avatar}
-                      alt={testimonials[currentTestimonial].name}
-                    />
-                    <AvatarFallback>
-                      {testimonials[currentTestimonial].initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-lg">
-                      {testimonials[currentTestimonial].name}
-                    </h3>
-                    <p className="text-gray-600">
-                      {testimonials[currentTestimonial].title}
-                    </p>
-                  </div>
+          <div className="relative overflow-hidden px-12 md:px-20">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentTestimonial}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center text-center"
+              >
+                <Quote className="h-12 w-12 md:h-16 md:w-16 mb-6 text-yellow-500" />
+                
+                <TextAnimate
+                  className="text-xl md:text-2xl mb-8 text-gray-700 max-w-3xl mx-auto"
+                  animation="fadeIn"
+                  by="word"
+                >
+                  {testimonials[currentTestimonial].quote}
+                </TextAnimate>
+
+                <div className="flex items-center justify-center gap-1 mb-4">
+                  {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
-              </Card>
-            </motion.div>
-          </AnimatePresence>
+
+                <div className="flex flex-col items-center gap-2">
+                  <h3 className="text-xl font-semibold">
+                    {testimonials[currentTestimonial].name}
+                  </h3>
+                  <p className="text-gray-600 flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    {testimonials[currentTestimonial].title}
+                  </p>
+                  <p className="text-gray-600 flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    {testimonials[currentTestimonial].company} • {testimonials[currentTestimonial].industry}
+                  </p>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hover:bg-white/80 transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black hover:bg-black/90 transition-colors rounded-full p-3 md:p-6"
             onClick={nextTestimonial}
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-6 w-6 md:h-8 md:w-8 text-white" />
           </Button>
 
           <div className="flex justify-center mt-8 gap-2">
-            {testimonials.map((testimonial) => (
+            {testimonials.map((_, index) => (
               <Button
-                key={`dot-${testimonial.name.toLowerCase().replace(/\s+/g, "-")}`}
+                key={index}
                 variant="ghost"
                 size="icon"
-                className={`h-3 w-3 rounded-full p-0 ${
-                  testimonials[currentTestimonial].name === testimonial.name
+                className={`h-3 w-3 rounded-full p-0 transition-colors ${
+                  currentTestimonial === index
                     ? "bg-yellow-500"
                     : "bg-gray-300 hover:bg-gray-400"
                 }`}
-                onClick={() =>
-                  setCurrentTestimonial(
-                    testimonials.findIndex((t) => t.name === testimonial.name)
-                  )
-                }
+                onClick={() => setCurrentTestimonial(index)}
               />
             ))}
           </div>
