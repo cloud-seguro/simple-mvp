@@ -1,59 +1,102 @@
-import { Star } from "lucide-react";
+"use client";
 
-const testimonials = [
-  {
-    id: "t1",
-    quote:
-      "POSITIVE-Next has completely transformed my mindset. I'm more productive and happier than ever!",
-    author: "Sarah J., Entrepreneur",
-    rating: 5,
-  },
-  {
-    id: "t2",
-    quote:
-      "As a CEO, mental fitness is crucial. This app has been a game-changer for my leadership skills.",
-    author: "Michael R., CEO",
-    rating: 5,
-  },
-  {
-    id: "t3",
-    quote:
-      "I've tried many self-improvement apps, but POSITIVE-Next stands out with its practical approach.",
-    author: "Emily L., Life Coach",
-    rating: 5,
-  },
-];
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default function Testimonials() {
+export default function Testimonial() {
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  const testimonials = [
+    {
+      quote:
+        "Lo que buscábamos era un enfoque de ciberseguridad que fuera efectivo y simple de implementar. SIMPLESEC fue la solución perfecta para nosotros. Se alineó perfectamente con nuestros valores fundamentales.",
+      name: "María Rodríguez",
+      title: "CTO, Empresa Innovadora",
+    },
+    {
+      quote:
+        "La evaluación de SIMPLE nos ayudó a identificar vulnerabilidades que no sabíamos que teníamos. El proceso fue sencillo y las recomendaciones fueron claras y accionables.",
+      name: "Carlos Méndez",
+      title: "Director de IT, Grupo Empresarial",
+    },
+    {
+      quote:
+        "Gracias a la evaluación avanzada, pudimos implementar medidas de seguridad que nos ayudaron a cumplir con la normativa ISO 27001. El equipo de SIMPLESEC fue fundamental en este proceso.",
+      name: "Laura Sánchez",
+      title: "CISO, Multinacional",
+    },
+  ];
+
+  const nextTestimonial = () => {
+    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonial(
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
+    );
+  };
+
   return (
-    <section id="testimonials" className="py-20 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
-          What Our Users Say
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial) => (
-            <div
-              key={testimonial.id}
-              className="bg-card rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 animate-in fade-in slide-in-from-bottom-4 duration-700"
-              style={{
-                animationDelay: `${Number(testimonial.id.slice(1)) * 100}ms`,
-              }}
-            >
-              <div className="flex mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star
-                    key={`${testimonial.id}-star-${i}`}
-                    className="h-5 w-5 text-primary fill-current"
-                  />
-                ))}
+    <section className="py-20 px-4 bg-white" id="testimonios">
+      <div className="max-w-4xl mx-auto">
+        <motion.h2
+          className="text-3xl md:text-4xl font-bold mb-12 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          Lo que dicen nuestros clientes
+        </motion.h2>
+
+        <div className="relative">
+          <Button
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 z-10 hover:bg-gray-100 transition-colors"
+            onClick={prevTestimonial}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+
+          <motion.div
+            className="py-12 px-8 bg-gray-50 rounded-2xl shadow-md"
+            key={currentTestimonial}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.5 }}
+          >
+            <blockquote className="text-2xl md:text-3xl font-medium mb-8 text-center">
+              &quot;{testimonials[currentTestimonial].quote}&quot;
+            </blockquote>
+            <div className="text-center">
+              <div className="font-semibold text-lg">
+                {testimonials[currentTestimonial].name}
               </div>
-              <p className="text-foreground mb-4">
-                &quot;{testimonial.quote}&quot;
-              </p>
-              <p className="text-primary font-semibold">{testimonial.author}</p>
+              <div className="text-gray-600">
+                {testimonials[currentTestimonial].title}
+              </div>
             </div>
-          ))}
+          </motion.div>
+
+          <Button
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 z-10 hover:bg-gray-100 transition-colors"
+            onClick={nextTestimonial}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+
+          <div className="flex justify-center mt-8">
+            {testimonials.map((testimonial, index) => (
+              <Button
+                key={testimonial.name}
+                className={`h-3 w-3 rounded-full mx-1 ${index === currentTestimonial ? "bg-black" : "bg-gray-300"}`}
+                onClick={() => setCurrentTestimonial(index)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

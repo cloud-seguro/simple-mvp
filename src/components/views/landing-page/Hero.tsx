@@ -1,94 +1,92 @@
-import Link from "next/link"
-import { ArrowRight, Sparkles } from "lucide-react"
-import { SparklesText } from "@/components/magicui/sparkles-text";
-import { BoxReveal } from "@/components/magicui/box-reveal";
-import { ShineBorder } from "@/components/magicui/shine-border";
-import { BlurFade } from "@/components/magicui/blur-fade";
-import { ShimmerButton } from "@/components/magicui/shimmer-button";
+"use client"
+
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
 
 export default function Hero() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-radial from-primary/20 via-transparent to-transparent" />
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-4xl mx-auto text-center">
-          <ShineBorder className="p-8 rounded-2xl">
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              {/* Floating badge */}
-              <BlurFade>
-                <div className="inline-flex items-center rounded-full border border-primary/20 bg-background/50 px-6 py-2 mb-8 shadow-glow backdrop-blur-sm">
-                  <Sparkles className="h-4 w-4 text-primary mr-2" />
-                  <SparklesText text="AI-Powered Mental Fitness" />
-                </div>
-              </BlurFade>
-
-              <BoxReveal>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-tight tracking-tight">
-                  Your mind is your best friend—
-                  <br />
-                  <span className="text-primary">
-                    But it can also be your worst enemy.
-                  </span>
-                </h1>
-              </BoxReveal>
-
-              <BlurFade delay={0.2}>
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-                  Learn to harness the power of your mind with
-                  POSITIVE-Next&apos;s science-backed mental fitness platform.
-                </p>
-
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-                  <ShimmerButton>
-                    <Link
-                      href="/sign-up"
-                      className="inline-flex items-center px-8 py-3 text-lg font-medium"
-                    >
-                      Get Started Free
-                      <ArrowRight
-                        className="ml-2 group-hover:translate-x-1 transition-transform"
-                        size={20}
-                      />
-                    </Link>
-                  </ShimmerButton>
-                  
-                  <Link
-                    href="/#features"
-                    className="inline-flex items-center text-foreground hover:text-primary transition-colors px-8 py-3"
-                  >
-                    Learn More
-                  </Link>
-                </div>
-              </BlurFade>
-            </div>
-
-            {/* Stats section with enhanced styling */}
-            <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
-              {[
-                { label: "Active Users", value: "10,000+" },
-                { label: "Mental Fitness Score", value: "85% Improvement" },
-                { label: "User Satisfaction", value: "4.9/5" },
-              ].map((stat, i) => (
-                <BlurFade
-                  key={stat.label}
-                  delay={i * 0.1}
-                  className="flex flex-col items-center p-4 rounded-lg bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300"
+    <section className="py-32 px-4 md:py-40 mt-16">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-black">
+              Hacemos lo complejo de la Ciberseguridad Simple
+            </h1>
+            <p className="text-lg md:text-xl mb-8 text-black">
+              La ciberseguridad no tiene que ser difícil ni costosa. Con nuestro enfoque, te ayudamos a entender tu
+              nivel actual de seguridad a través de evaluaciones personalizadas.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button className="bg-black text-white px-6 py-6 rounded-md hover:bg-gray-800 transition-all text-lg">
+                  Comenzar Evaluación
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  className="bg-transparent border-2 border-black text-black px-6 py-6 rounded-md hover:bg-black hover:text-white transition-all text-lg"
                 >
-                  <div className="text-2xl font-bold text-foreground">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </BlurFade>
-              ))}
+                  Saber Más
+                </Button>
+              </motion.div>
             </div>
-          </ShineBorder>
+          </motion.div>
+          <motion.div className="flex justify-center">
+            <div className="relative w-full max-w-md aspect-square">
+              <motion.svg
+                viewBox="0 0 200 200"
+                className="w-full h-full"
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 50, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                aria-label="Círculo animado"
+                role="img"
+              >
+                <g fill="none" stroke="black" strokeWidth="2">
+                  <motion.circle
+                    cx="100"
+                    cy="100"
+                    r="70"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                  />
+                  <motion.path
+                    d="M100,30 L100,170 M30,100 L170,100"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, delay: 0.5, repeat: Number.POSITIVE_INFINITY }}
+                  />
+                  <motion.path
+                    d="M65,65 L135,135 M65,135 L135,65"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, delay: 1, repeat: Number.POSITIVE_INFINITY }}
+                  />
+                </g>
+                <circle cx="100" cy="100" r="30" fill="black">
+                  <animate attributeName="r" values="30;35;30" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </motion.svg>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
-  );
+  )
 }
 
