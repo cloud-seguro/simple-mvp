@@ -1,40 +1,40 @@
-import Head from "next/head";
-import Header from "@/components/views/landing-page/Header";
-import Hero from "@/components/views/landing-page/Hero";
-import SocialProof from "@/components/views/landing-page/SocialProof";
-import Features from "@/components/views/landing-page/Features";
-import About from "@/components/views/landing-page/About";
-import Testimonials from "@/components/views/landing-page/Testimonials";
-import CTA from "@/components/views/landing-page/CTA";
-import Footer from "@/components/views/landing-page/Footer";
+"use client"
+
+import { motion } from "framer-motion"
+import Navbar from "@/components/views/landing-page/navbar"
+import Hero from "@/components/views/landing-page/Hero"
+import EvaluationOptions from "@/components/views/landing-page/evaluation-options"
+import Testimonial from "@/components/views/landing-page/Testimonials"
+import DiscoverSection from "@/components/views/landing-page/discover-section"
+import Footer from "@/components/views/landing-page/Footer"
+import Benefits from "@/components/views/landing-page/benefits"
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.5 },
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background to-secondary/20">
-      <Head>
-        <title>POSITIVE-Next: Your Mind&apos;s Best Friend</title>
-        <meta
-          name="description"
-          content="Transform your mindset with POSITIVE-Next - the AI-powered mental fitness companion that helps you overcome mental saboteurs."
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Header />
-
-      <main className="flex-grow relative">
-        <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-transparent -z-10" />
-
-        <Hero />
-        <SocialProof />
-        <Features />
-        <About />
-        <Testimonials />
-        <CTA />
-      </main>
-
+    <main className="flex min-h-screen flex-col">
+      <Navbar />
+      <Hero />
+      <motion.section id="evaluacion" className="py-24" {...fadeInUp}>
+        <EvaluationOptions />
+      </motion.section>
+      <motion.section id="beneficios" className="py-24 bg-gray-50" {...fadeInUp}>
+        <Benefits />
+      </motion.section>
+      <motion.section id="testimonios" className="py-24" {...fadeInUp}>
+        <Testimonial />
+      </motion.section>
+      <motion.section id="descubre" {...fadeInUp}>
+        <DiscoverSection />
+      </motion.section>
       <Footer />
-    </div>
-  );
+    </main>
+  )
 }
+
