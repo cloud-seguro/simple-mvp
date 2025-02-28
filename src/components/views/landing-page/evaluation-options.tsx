@@ -33,8 +33,8 @@ export default function EvaluationOptions() {
           Evalúa tu nivel de madurez en ciberseguridad
         </h2>
         <p className="text-lg max-w-3xl mx-auto">
-          Selecciona la evaluación que mejor se adapte a tus necesidades y descubre cómo mejorar la seguridad de tu
-          empresa
+          Selecciona la evaluación que mejor se adapte a tus necesidades y
+          descubre cómo mejorar la seguridad de tu empresa
         </p>
       </motion.div>
 
@@ -52,20 +52,19 @@ export default function EvaluationOptions() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <motion.div
-            className="mb-6 flex justify-center"
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-          >
+          <div className="mb-6 flex justify-center">
             <div className="bg-black rounded-full p-4 inline-block">
               <Shield size={48} className="text-orange-400" />
             </div>
-          </motion.div>
-          <h3 className="text-2xl font-bold mb-4 text-center">Evaluación Inicial</h3>
+          </div>
+          <h3 className="text-2xl font-bold mb-4 text-center">
+            Evaluación Inicial
+          </h3>
           <div className="flex-grow">
             <p className="mb-6 text-center">
-              Ideal para empresas que están comenzando su camino en ciberseguridad o necesitan una evaluación básica de
-              su postura de seguridad.
+              Ideal para empresas que están comenzando su camino en
+              ciberseguridad o necesitan una evaluación básica de su postura de
+              seguridad.
             </p>
             <ul className="mb-6 space-y-3">
               <li className="flex items-start">
@@ -104,20 +103,19 @@ export default function EvaluationOptions() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <motion.div
-            className="mb-6 flex justify-center"
-            animate={{ rotate: [0, -360] }}
-            transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-          >
+          <div className="mb-6 flex justify-center">
             <div className="bg-black rounded-full p-4 inline-block">
               <Lock size={48} className="text-yellow-400" />
             </div>
-          </motion.div>
-          <h3 className="text-2xl font-bold mb-4 text-center">Evaluación Avanzada</h3>
+          </div>
+          <h3 className="text-2xl font-bold mb-4 text-center">
+            Evaluación Avanzada
+          </h3>
           <div className="flex-grow">
             <p className="mb-6 text-center">
-              Para empresas que ya tienen medidas de seguridad implementadas y buscan una evaluación más profunda basada
-              en estándares como ISO 27001 o NIST.
+              Para empresas que ya tienen medidas de seguridad implementadas y
+              buscan una evaluación más profunda basada en estándares como ISO
+              27001 o NIST.
             </p>
             <ul className="mb-6 space-y-3">
               <li className="flex items-start">
@@ -150,6 +148,6 @@ export default function EvaluationOptions() {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }
 

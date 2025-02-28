@@ -1,18 +1,28 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { HyperText } from "@/components/magicui/hyper-text";
+import { Button } from "@/components/ui/button";
 
 export default function Hero() {
-  const [mounted, setMounted] = useState(false)
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  if (!mounted) return null
+  const handleNavClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const element = document.querySelector("#evaluacion");
+    if (element) {
+      const yOffset = -100;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  if (!mounted) return null;
 
   return (
     <section className=" py-32 px-4 md:py-40 mt-16">
@@ -35,14 +45,11 @@ export default function Hero() {
               través de evaluaciones personalizadas.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-black text-white px-6 py-6 rounded-md hover:bg-gray-800 transition-all transform hover:-translate-y-1 text-lg">
-                Comenzar Evaluación
-              </Button>
               <Button
-                variant="outline"
-                className="bg-transparent border-2 border-black text-black px-6 py-6 rounded-md hover:bg-black hover:text-white transition-all transform hover:-translate-y-1 text-lg"
+                className="bg-black text-white px-6 py-6 rounded-md hover:bg-gray-800 transition-all transform hover:-translate-y-1 text-lg"
+                onClick={handleNavClick}
               >
-                Saber Más
+                Comenzar Evaluación
               </Button>
             </div>
           </motion.div>
