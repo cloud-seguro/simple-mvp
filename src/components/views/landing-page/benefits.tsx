@@ -1,13 +1,11 @@
 "use client"
 
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { CheckCircle, Shield, FileText } from "lucide-react";
-import { useState } from "react";
 
 interface BenefitCard {
   id: number;
-  icon: JSX.Element;
+  icon: React.ReactNode;
   title: string;
   description: string;
   bgColor: string;

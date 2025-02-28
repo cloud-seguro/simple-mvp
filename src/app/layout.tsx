@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
 
-const APP_NAME = "POSITIVE-NEXT";
+const APP_NAME = "SIMPLE";
 const APP_DESCRIPTION = "Your Mind's Best Friend";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
