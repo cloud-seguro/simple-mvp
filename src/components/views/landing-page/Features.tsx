@@ -53,11 +53,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="relative py-20 overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 bg-grid-black/[0.02] -z-10" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background to-secondary/20 -z-10" />
-
+    <section id="features" className="relative py-20 overflow-hidden bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <BlurFade className="text-center mb-16">
           <AnimatedShinyText>

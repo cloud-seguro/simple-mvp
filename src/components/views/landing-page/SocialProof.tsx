@@ -40,7 +40,7 @@ export default function SocialProof() {
   }, [controls])
 
   return (
-    <section className="py-16 bg-secondary overflow-hidden">
+    <section className="py-16 bg-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8">
           Trusted by Leading Organizations

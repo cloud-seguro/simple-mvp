@@ -5,7 +5,7 @@ import { SparklesText } from "@/components/magicui/sparkles-text";
 
 export default function About() {
   return (
-    <section id="about" className="py-20 bg-secondary">
+    <section id="about" className="py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <BlurFade className="max-w-3xl mx-auto text-center">
           <SparklesText text="About POSITIVE-Next">
