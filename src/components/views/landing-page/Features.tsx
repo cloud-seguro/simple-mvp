@@ -2,6 +2,7 @@ import { Brain, Heart, Zap, Target, Smile, TrendingUp } from "lucide-react";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { AnimatedShinyText } from "@/components/magicui/animated-shiny-text";
 import { BlurFade } from "@/components/magicui/blur-fade";
+import { TypingAnimation } from "@/components/magicui/typing-animation";
 
 const features = [
   {
@@ -56,11 +57,12 @@ export default function Features() {
     <section id="features" className="relative py-20 overflow-hidden bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <BlurFade className="text-center mb-16">
-          <AnimatedShinyText>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Empower Your Mind
-            </h2>
-          </AnimatedShinyText>
+          <TypingAnimation
+            className="text-3xl md:text-4xl font-bold text-foreground mb-4"
+            startOnView={true}
+          >
+            Empower Your Mind
+          </TypingAnimation>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Discover powerful tools and techniques to enhance your mental
             fitness and emotional intelligence.

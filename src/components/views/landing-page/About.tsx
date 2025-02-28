@@ -2,15 +2,19 @@ import { CheckCircle } from "lucide-react";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { SparklesText } from "@/components/magicui/sparkles-text";
+import { TypingAnimation } from "@/components/magicui/typing-animation";
 
 export default function About() {
   return (
     <section id="about" className="py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <BlurFade className="max-w-3xl mx-auto text-center">
-          <SparklesText text="About POSITIVE-Next">
-
-          </SparklesText>
+          <TypingAnimation
+            className="text-3xl md:text-4xl font-bold mb-4"
+            startOnView={true}
+          >
+            About POSITIVE-Next
+          </TypingAnimation>
           <p className="text-lg text-muted-foreground mb-12">
             POSITIVE-Next is a revolutionary app designed to help you harness
             the power of your mind. Our mission is to empower individuals to

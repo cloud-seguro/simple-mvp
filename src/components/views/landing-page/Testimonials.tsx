@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TypingAnimation } from "@/components/magicui/typing-animation";
 
 const testimonials = [
   {
@@ -50,15 +51,12 @@ export default function Testimonial() {
   return (
     <section className="py-20 px-4 bg-white" id="testimonios">
       <div className="max-w-4xl mx-auto">
-        <motion.h2
+        <TypingAnimation
           className="text-3xl md:text-4xl font-bold mb-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          startOnView={true}
         >
           Lo que dicen nuestros clientes
-        </motion.h2>
+        </TypingAnimation>
 
         <div className="relative">
           <Button

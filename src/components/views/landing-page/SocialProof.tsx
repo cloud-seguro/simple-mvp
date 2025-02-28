@@ -5,6 +5,7 @@ import React from "react"
 import { useEffect, useState } from "react"
 import { motion, useAnimation } from "framer-motion"
 import { Building, Briefcase, Globe, Laptop, Lightbulb, Rocket, Target, Zap, Brain, Heart } from "lucide-react"
+import { TypingAnimation } from "@/components/magicui/typing-animation"
 
 const companies = [
   { name: "TechCorp", icon: Building },
@@ -42,9 +43,12 @@ export default function SocialProof() {
   return (
     <section className="py-16 bg-white overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8">
+        <TypingAnimation
+          className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8"
+          startOnView={true}
+        >
           Trusted by Leading Organizations
-        </h2>
+        </TypingAnimation>
         <div className="flex justify-center items-center h-24">
           <motion.div key={currentIndex} animate={controls} className="flex flex-col items-center">
             {React.createElement(companies[currentIndex].icon, {
