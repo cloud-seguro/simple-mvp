@@ -88,11 +88,11 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            user_id: user.id,
-            first_name: data.firstName,
-            last_name: data.lastName,
-            avatar_url: avatarUrl,
-            birth_date: data.birthDate,
+            userId: user.id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            birthDate: data.birthDate,
+            avatarUrl,
           }),
         });
 

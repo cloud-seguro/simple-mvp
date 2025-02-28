@@ -4,10 +4,10 @@ import { prisma } from "@/lib/prisma";
 export async function POST(req: Request) {
   try {
     const json = await req.json();
-    const { user_id, first_name, last_name, birth_date, avatar_url } = json;
+    const { userId, firstName, lastName, birthDate, avatarUrl } = json;
 
-    if (!user_id) {
-      console.error("No user_id provided");
+    if (!userId) {
+      console.error("No userId provided");
       return NextResponse.json(
         { error: "User ID is required" },
         { status: 400 }
@@ -16,11 +16,11 @@ export async function POST(req: Request) {
 
     const profile = await prisma.profile.create({
       data: {
-        user_id,
-        firstName: first_name,
-        lastName: last_name,
-        birth_date: birth_date ? new Date(birth_date) : null,
-        avatar_url,
+        userId,
+        firstName,
+        lastName,
+        birthDate: birthDate ? new Date(birthDate) : null,
+        avatarUrl,
         role: "USER",
       },
     });

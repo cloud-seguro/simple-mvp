@@ -5,11 +5,11 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  try { 
+  try {
     const { userId } = await params;
     const profile = await prisma.profile.findUnique({
       where: {
-        user_id: userId,
+        userId: userId,
       },
     });
 
@@ -37,13 +37,13 @@ export async function PATCH(
 
     const profile = await prisma.profile.update({
       where: {
-        user_id: userId,
+        userId: userId,
       },
       data: {
-        firstName: json.first_name,
-        lastName: json.last_name,
-        avatar_url: json.avatar_url,
-        birth_date: json.birth_date ? new Date(json.birth_date) : undefined,
+        firstName: json.firstName,
+        lastName: json.lastName,
+        avatarUrl: json.avatarUrl,
+        birthDate: json.birthDate ? new Date(json.birthDate) : null,
       },
     });
 
