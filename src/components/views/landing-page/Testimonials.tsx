@@ -82,7 +82,7 @@ export default function Testimonial() {
                 className="flex flex-col items-center text-center"
               >
                 <Quote className="h-12 w-12 md:h-16 md:w-16 mb-6 text-yellow-500" />
-                
+
                 <TextAnimate
                   className="text-xl md:text-2xl mb-8 text-gray-700 max-w-3xl mx-auto"
                   animation="fadeIn"
@@ -92,9 +92,14 @@ export default function Testimonial() {
                 </TextAnimate>
 
                 <div className="flex items-center justify-center gap-1 mb-4">
-                  {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  ))}
+                  {[...Array(testimonials[currentTestimonial].rating)].map(
+                    () => (
+                      <Star
+                        key={`star-${currentTestimonial}`}
+                        className="h-5 w-5 fill-yellow-400 text-yellow-400"
+                      />
+                    )
+                  )}
                 </div>
 
                 <div className="flex flex-col items-center gap-2">
@@ -107,7 +112,8 @@ export default function Testimonial() {
                   </p>
                   <p className="text-gray-600 flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
-                    {testimonials[currentTestimonial].company} • {testimonials[currentTestimonial].industry}
+                    {testimonials[currentTestimonial].company} •{" "}
+                    {testimonials[currentTestimonial].industry}
                   </p>
                 </div>
               </motion.div>
@@ -126,7 +132,7 @@ export default function Testimonial() {
           <div className="flex justify-center mt-8 gap-2">
             {testimonials.map((_, index) => (
               <Button
-                key={index}
+                key={`dot-${index}-${currentTestimonial}`}
                 variant="ghost"
                 size="icon"
                 className={`h-3 w-3 rounded-full p-0 transition-colors ${
