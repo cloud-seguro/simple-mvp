@@ -1,8 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion, MotionProps, Variants } from "motion/react";
-import { ElementType } from "react";
+import {
+  AnimatePresence,
+  motion,
+  type MotionProps,
+  type Variants,
+} from "motion/react";
+import type { ElementType } from "react";
 
 type AnimationType = "text" | "word" | "character" | "line";
 type AnimationVariant =
@@ -295,6 +300,15 @@ const defaultItemAnimationVariants: Record<
   },
 };
 
+const hashString = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36);
+};
+
 export function TextAnimate({
   children,
   className,
@@ -342,7 +356,6 @@ export function TextAnimate({
     case "line":
       segments = children.split("\n");
       break;
-    case "text":
     default:
       segments = [children];
       break;
@@ -362,12 +375,12 @@ export function TextAnimate({
       >
         {segments.map((segment, i) => (
           <motion.span
-            key={`${by}-${segment}-${i}`}
+            key={`${by}-${hashString(segment)}-${i}`}
             variants={finalVariants.item}
             custom={i * staggerTimings[by]}
             className={cn(
               by === "line" ? "block" : "inline-block whitespace-pre",
-              segmentClassName,
+              segmentClassName
             )}
           >
             {segment}
