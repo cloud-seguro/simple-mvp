@@ -37,16 +37,21 @@ export function ProfileForm() {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error("Failed to update profile");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update profile");
+      }
+
+      await response.json(); // Wait for response to be fully read
 
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
       });
-    } catch {
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update profile. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     }
