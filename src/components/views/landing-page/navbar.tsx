@@ -151,67 +151,61 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white z-50 p-4 shadow-lg md:hidden">
-            <div className="flex flex-col space-y-4">
-              <Button
-                variant="ghost"
-                className="hover:text-yellow-500 transition-colors py-2 justify-start"
-                onClick={(e) =>
-                  handleNavClick(
-                    e as React.MouseEvent<HTMLButtonElement>,
-                    "#evaluacion"
-                  )
-                }
-              >
-                Evaluación
-              </Button>
-              <Button
-                variant="ghost"
-                className="hover:text-yellow-500 transition-colors py-2 justify-start"
-                onClick={(e) =>
-                  handleNavClick(
-                    e as React.MouseEvent<HTMLButtonElement>,
-                    "#beneficios"
-                  )
-                }
-              >
-                Beneficios
-              </Button>
-              <Button
-                variant="ghost"
-                className="hover:text-yellow-500 transition-colors py-2 justify-start"
-                onClick={(e) =>
-                  handleNavClick(
-                    e as React.MouseEvent<HTMLButtonElement>,
-                    "#testimonios"
-                  )
-                }
-              >
-                Testimonios
-              </Button>
-              <Button
-                variant="ghost"
-                className="hover:text-yellow-500 transition-colors py-2 justify-start"
-                onClick={(e) =>
-                  handleNavClick(
-                    e as React.MouseEvent<HTMLButtonElement>,
-                    "#contacto"
-                  )
-                }
-              >
-                Contacto
-              </Button>
-              <Button
-                className="bg-black text-white hover:bg-gray-800 w-full"
-                onClick={(e) =>
-                  handleNavClick(
-                    e as React.MouseEvent<HTMLButtonElement>,
-                    "#evaluacion"
-                  )
-                }
-              >
-                Evaluar Ahora
-              </Button>
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={() => setIsMenuOpen(false)}>
+            <div className="absolute top-[76px] left-0 right-0 bg-white z-50 p-6 shadow-lg md:hidden max-h-[calc(100vh-76px)] overflow-y-auto"
+                 onClick={e => e.stopPropagation()}
+            >
+              <div className="flex flex-col space-y-4">
+                <Button
+                  variant="ghost"
+                  className="w-full text-left px-4 py-3 hover:bg-yellow-50 hover:text-yellow-500 transition-colors rounded-lg"
+                  onClick={(e) => handleNavClick(e as React.MouseEvent<HTMLButtonElement>, "#evaluacion")}
+                >
+                  Evaluación
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="hover:text-yellow-500 transition-colors py-2 justify-start"
+                  onClick={(e) =>
+                    handleNavClick(
+                      e as React.MouseEvent<HTMLButtonElement>,
+                      "#beneficios"
+                    )
+                  }
+                >
+                  Beneficios
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="hover:text-yellow-500 transition-colors py-2 justify-start"
+                  onClick={(e) =>
+                    handleNavClick(
+                      e as React.MouseEvent<HTMLButtonElement>,
+                      "#testimonios"
+                    )
+                  }
+                >
+                  Testimonios
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="hover:text-yellow-500 transition-colors py-2 justify-start"
+                  onClick={(e) =>
+                    handleNavClick(
+                      e as React.MouseEvent<HTMLButtonElement>,
+                      "#contacto"
+                    )
+                  }
+                >
+                  Contacto
+                </Button>
+                <Button
+                  className="w-full bg-black text-white hover:bg-gray-800 py-4"
+                  onClick={(e) => handleNavClick(e as React.MouseEvent<HTMLButtonElement>, "#evaluacion")}
+                >
+                  Evaluar Ahora
+                </Button>
+              </div>
             </div>
           </div>
         )}

@@ -25,36 +25,25 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className=" py-32 px-4 md:py-40 mt-16">
+    <section className="py-32 px-4 md:py-40 mt-16">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8 md:mb-12"
+        >
+          <HyperText
+            className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-black"
+            startOnView={true}
           >
-            <HyperText
-              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-black"
-              startOnView={true}
-            >
-              Hacemos lo complejo de la Ciberseguridad Simple
-            </HyperText>
-            <p className="text-lg md:text-xl mb-8 text-black">
-              La ciberseguridad no tiene que ser difícil ni costosa. Con nuestro
-              enfoque, te ayudamos a entender tu nivel actual de seguridad a
-              través de evaluaciones personalizadas.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                className="bg-black text-white px-6 py-6 rounded-md hover:bg-gray-800 transition-all transform hover:-translate-y-1 text-lg"
-                onClick={handleNavClick}
-              >
-                Comenzar Evaluación
-              </Button>
-            </div>
-          </motion.div>
-          <motion.div className="flex justify-center">
-            <div className="relative w-full max-w-md aspect-square">
+            Hacemos lo complejo de la Ciberseguridad Simple
+          </HyperText>
+        </motion.div>
+
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-12 items-center">
+          <motion.div className="flex justify-center w-full md:col-span-2 mb-8 md:mb-12">
+            <div className="relative w-full max-w-[250px] md:max-w-md aspect-square">
               <motion.svg
                 viewBox="0 0 200 200"
                 className="w-full h-full"
@@ -110,6 +99,27 @@ export default function Hero() {
                   />
                 </circle>
               </motion.svg>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-center md:text-left md:col-span-2 max-w-2xl mx-auto"
+          >
+            <p className="text-lg md:text-xl mb-8 text-black">
+              La ciberseguridad no tiene que ser difícil ni costosa. Con nuestro
+              enfoque, te ayudamos a entender tu nivel actual de seguridad a
+              través de evaluaciones personalizadas.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                className="bg-black text-white px-6 py-6 rounded-md hover:bg-gray-800 transition-all transform hover:-translate-y-1 text-lg w-full sm:w-auto"
+                onClick={handleNavClick}
+              >
+                Comenzar Evaluación
+              </Button>
             </div>
           </motion.div>
         </div>
