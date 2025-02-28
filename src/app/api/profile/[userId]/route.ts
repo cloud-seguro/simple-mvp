@@ -48,7 +48,6 @@ export async function PATCH(
         firstName: json.firstName || undefined,
         lastName: json.lastName || undefined,
         avatarUrl: json.avatarUrl || undefined,
-        birthDate: json.birthDate ? new Date(json.birthDate) : undefined,
       },
     });
 

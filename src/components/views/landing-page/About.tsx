@@ -1,7 +1,6 @@
 import { CheckCircle } from "lucide-react";
 import { ShineBorder } from "@/components/magicui/shine-border";
 import { BlurFade } from "@/components/magicui/blur-fade";
-import { SparklesText } from "@/components/magicui/sparkles-text";
 import { TypingAnimation } from "@/components/magicui/typing-animation";
 
 export default function About() {
