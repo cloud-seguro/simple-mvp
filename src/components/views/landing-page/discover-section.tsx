@@ -1,9 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { TypingAnimation } from "@/components/magicui/typing-animation"
 import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+
 export default function DiscoverSection() {
+  const router = useRouter();
+
+  const handleEvaluation = () => {
+    router.push("/evaluation/initial");
+  };
+
   return (
     <div className="relative overflow-hidden animate-color-transition">
       <div className="relative max-w-6xl mx-auto px-4">
@@ -61,6 +69,7 @@ export default function DiscoverSection() {
               whileHover={{ scale: 1.05 }} 
               whileTap={{ scale: 0.95 }}
               className="w-full"
+              onClick={handleEvaluation}
             >
               <InteractiveHoverButton className="w-full text-base">
                 Descubre tus vulnerabilidades
@@ -84,7 +93,11 @@ export default function DiscoverSection() {
               Las amenazas cibernéticas afectan la forma en que manejas el
               trabajo y los desafíos empresariales. Protege lo que más importa.
             </p>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div 
+              whileHover={{ scale: 1.05 }} 
+              whileTap={{ scale: 0.95 }}
+              onClick={handleEvaluation}
+            >
               <InteractiveHoverButton className="text-lg">
                 Descubre tus vulnerabilidades
               </InteractiveHoverButton>

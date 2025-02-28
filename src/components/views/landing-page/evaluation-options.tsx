@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { Shield, Lock } from "lucide-react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
