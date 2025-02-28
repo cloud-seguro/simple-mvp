@@ -2,11 +2,11 @@ import type { UserRole } from "@prisma/client";
 
 export interface Profile {
   id: string;
-  userId: string;
+  user_id: string;
   username: string;
-  fullName: string;
-  avatarUrl: string | null;
-  role: UserRole;
-  bio: string | null;
-  birthDate: Date;
+  full_name?: string;
+  avatar_url?: string;
+  birth_date?: Date;
+  created_at: Date;
+  updated_at: Date;
 } 
