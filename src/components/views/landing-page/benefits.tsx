@@ -57,6 +57,33 @@ export default function Benefits() {
     },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 50,
+      scale: 0.95
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        duration: 0.8,
+      }
+    },
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4">
       <motion.div
@@ -75,15 +102,18 @@ export default function Benefits() {
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <motion.div 
+        className="grid md:grid-cols-3 gap-8"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
         {benefits.map((benefit) => (
           <motion.div
             key={benefit.id}
             className={`${benefit.bgColor} rounded-xl p-8 overflow-hidden transition-shadow`}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            variants={cardVariants}
             whileHover={{
               scale: 1.02,
               boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
@@ -99,20 +129,15 @@ export default function Benefits() {
             </div>
 
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
               className="mt-6 pt-6 border-t border-black/20"
             >
               <div className="grid grid-cols-2 gap-4">
                 {benefit.stats.map((stat, index) => (
                   <motion.div
                     key={`${benefit.id}-${index}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
                     className="text-center"
                   >
                     <div className="text-2xl font-bold text-black">
@@ -127,7 +152,7 @@ export default function Benefits() {
             </motion.div>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
