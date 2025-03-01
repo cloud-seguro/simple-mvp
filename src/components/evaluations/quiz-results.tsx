@@ -41,17 +41,17 @@ export function QuizResults({ quizData, results, onRestart }: QuizResultsProps) 
 
       <main className="flex-grow p-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">{quizData.title} Results</h1>
+          <h1 className="text-3xl font-bold mb-6">Resultados de {quizData.title}</h1>
 
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-2">
-              Overall Score: {overallScore}/{maxPossibleScore} ({overallPercentage}%)
+              Puntuación Total: {overallScore}/{maxPossibleScore} ({overallPercentage}%)
             </h2>
             <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
               <div className="bg-[#FF8548] h-4 rounded-full" style={{ width: `${overallPercentage}%` }} />
             </div>
 
-            <h3 className="text-lg font-medium mb-4">Category Breakdown:</h3>
+            <h3 className="text-lg font-medium mb-4">Desglose por Categoría:</h3>
             <div className="space-y-4">
               {Object.entries(categoryScores).map(([category, { total, max }]) => {
                 const percentage = Math.round((total / max) * 100)
@@ -73,7 +73,7 @@ export function QuizResults({ quizData, results, onRestart }: QuizResultsProps) 
           </div>
 
           <Button onClick={onRestart} className="bg-black text-white hover:bg-gray-800 rounded-full px-8 py-2">
-            Take Another Assessment
+            Realizar otra evaluación
           </Button>
         </div>
       </main>

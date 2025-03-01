@@ -6,7 +6,7 @@ import { QuizQuestion } from "./quiz-question"
 import { UserInfoForm, type UserInfo } from "./user-info-form"
 import { ResultsReady } from "./results-ready"
 import { CybersecurityResults } from "./cybersecurity-results"
-import type { QuizData, QuizResults } from "../types"
+import type { QuizData, QuizResults } from "./types"
 
 interface QuizContainerProps {
   quizData: QuizData

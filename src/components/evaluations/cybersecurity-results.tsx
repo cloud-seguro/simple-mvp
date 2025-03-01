@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import type { QuizData, QuizResults } from "../types"
+import type { QuizData, QuizResults } from "./types"
 import type { UserInfo } from "./user-info-form"
+import { SimpleHeader } from "@/components/ui/simple-header"
 
 interface CybersecurityResultsProps {
   quizData: QuizData
@@ -16,7 +17,7 @@ export function CybersecurityResults({ quizData, results, userInfo, onRestart }:
   // Calculate scores by category
   const categoryScores: Record<string, { total: number; max: number }> = {}
 
-  quizData.questions.forEach((question) => {
+  for (const question of quizData.questions) {
     const category = question.category || "General"
     const score = results[question.id] || 0
     const maxScore = Math.max(...question.options.map((o) => o.value))
@@ -27,7 +28,7 @@ export function CybersecurityResults({ quizData, results, userInfo, onRestart }:
 
     categoryScores[category].total += score
     categoryScores[category].max += maxScore
-  })
+  }
 
   // Calculate overall score
   const overallScore = Object.values(categoryScores).reduce((sum, { total }) => sum + total, 0)
@@ -45,7 +46,7 @@ export function CybersecurityResults({ quizData, results, userInfo, onRestart }:
   return (
     <div className="min-h-screen flex flex-col">
       <header className="p-8 bg-background border-b">
-        <h1 className="text-2xl font-bold text-primary">SIMPLE</h1>
+        <SimpleHeader className="text-primary" />
       </header>
 
       <main className="flex-grow p-8">

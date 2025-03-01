@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { Copy, Mail } from "lucide-react"
 import type { UserInfo } from "./user-info-form"
+import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg"
+import { SimpleHeader } from "@/components/ui/simple-header"
 
 interface ResultsReadyProps {
   userInfo: UserInfo
@@ -26,26 +28,33 @@ export function ResultsReady({ userInfo, onViewResults, shareUrl }: ResultsReady
 
   return (
     <div className="flex flex-col min-h-screen md:flex-row">
-      <div className="bg-background w-full md:w-2/5 p-8 flex flex-col border-r">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-primary">SIMPLE</h1>
+      <div className="bg-[#FFD700] w-full md:w-2/5 p-4 md:p-8 flex flex-col">
+        <div className="mb-4 md:mb-8">
+          <SimpleHeader className="text-primary" />
         </div>
-        <div className="flex-grow flex items-center justify-center">
-          <img src="/security-illustration.svg" alt="" className="max-w-[250px] w-full h-auto" />
+        <div className="flex-grow flex items-center justify-center py-8 md:py-0">
+          <AnimatedSecuritySVG />
         </div>
       </div>
 
-      <div className="w-full md:w-3/5 p-8 md:p-16 flex flex-col justify-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
-          <h1 className="text-3xl font-bold mb-4">{userInfo.firstName}, ¡Sus resultados están listos!</h1>
-          <p className="mb-8">
-            Hemos evaluado el nivel de madurez en ciberseguridad de su organización. Descubra las áreas de fortaleza y
-            oportunidades de mejora.
+      <div className="w-full md:w-3/5 p-4 md:p-16 flex flex-col justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md mx-auto space-y-6"
+        >
+          <h1 className="text-2xl md:text-3xl font-bold">
+            {userInfo.firstName}, ¡Sus resultados están listos!
+          </h1>
+          <p className="text-base md:text-lg">
+            Hemos evaluado el nivel de madurez en ciberseguridad de su
+            organización. Descubra las áreas de fortaleza y oportunidades de
+            mejora.
           </p>
 
           <Button
             onClick={onViewResults}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-full mb-8"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
           >
             Ver Resultados
           </Button>
@@ -53,22 +62,22 @@ export function ResultsReady({ userInfo, onViewResults, shareUrl }: ResultsReady
           {shareUrl && (
             <div className="space-y-4">
               <p className="font-medium">Compartir resultados</p>
-              <div className="flex gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
                 <Button
                   onClick={handleCopyLink}
                   variant="outline"
-                  className="flex items-center gap-2 border-primary text-primary"
+                  className="flex items-center justify-center gap-2 border-primary text-primary w-full md:w-auto"
                 >
                   <Copy size={16} />
-                  Copiar enlace
+                  <span>Copiar enlace</span>
                 </Button>
                 <Button
                   onClick={handleSendEmail}
                   variant="outline"
-                  className="flex items-center gap-2 border-primary text-primary"
+                  className="flex items-center justify-center gap-2 border-primary text-primary w-full md:w-auto"
                 >
                   <Mail size={16} />
-                  Enviar por correo
+                  <span>Enviar por correo</span>
                 </Button>
               </div>
             </div>
@@ -76,6 +85,6 @@ export function ResultsReady({ userInfo, onViewResults, shareUrl }: ResultsReady
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
 

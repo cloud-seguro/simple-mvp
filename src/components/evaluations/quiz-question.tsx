@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import type { Question } from "./types"
-// import { ChevronUp, ChevronDown } from 'lucide-react' // Removed unused imports
+import type { Question } from "./types";
+import { useRef } from "react"
+import { SimpleHeader } from "@/components/ui/simple-header"
+import { Button } from "@/components/ui/button"
 
 interface QuizQuestionProps {
   question: Question
@@ -24,20 +25,14 @@ export function QuizQuestion({
   onNext,
   onPrev,
 }: QuizQuestionProps) {
-  const [isVisible, setIsVisible] = useState(false)
   const questionRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setIsVisible(true)
-    return () => setIsVisible(false)
-  }, [])
 
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header with logo */}
       <header className="p-4 md:p-8 bg-background border-b">
         <div className="h-8">
-          <h1 className="text-2xl font-bold text-primary">SIMPLE</h1>
+          <SimpleHeader className="text-primary" />
         </div>
       </header>
 
@@ -52,39 +47,41 @@ export function QuizQuestion({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5 }}
-              className="w-full"
+              className="w-full px-4 md:px-0"
             >
-              <div className="mb-4 text-sm">
+              <div className="mb-4 text-sm md:text-base">
                 {currentIndex + 1} / {totalQuestions}
               </div>
 
-              <h2 className="text-2xl font-medium mb-8">{question.text}</h2>
+              <h2 className="text-xl md:text-2xl font-medium mb-8">{question.text}</h2>
 
               <div className="mb-8">
-                <div className="flex justify-between items-center relative mb-2">
+                <div className="flex justify-between items-center relative mb-4">
                   <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gray-300" />
-                  {question.options.map((option, index) => (
-                    <div key={index} className="flex flex-col items-center z-10">
+                  {question.options.map((option) => (
+                    <div key={option.value} className="flex flex-col items-center z-10">
                       <button
                         type="button"
                         onClick={() => {
                           onSelect(option.value)
                           setTimeout(() => onNext(), 300)
                         }}
-                        className={`w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center ${
+                        className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-gray-300 flex items-center justify-center ${
                           selectedValue === option.value ? "bg-black border-black" : "bg-white"
                         }`}
                         aria-label={option.label}
                       >
-                        {selectedValue === option.value && <div className="w-2 h-2 rounded-full bg-white" />}
+                        {selectedValue === option.value && (
+                          <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-white" />
+                        )}
                       </button>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex justify-between items-center">
-                  {question.options.map((option, index) => (
-                    <div key={index} className="w-1/5 text-center text-xs">
+                  {question.options.map((option) => (
+                    <div key={option.value} className="w-1/5 text-center text-xs md:text-sm">
                       {option.label}
                     </div>
                   ))}
@@ -95,8 +92,8 @@ export function QuizQuestion({
         </div>
       </main>
 
-      {/* Navigation buttons */}
-      <div className="fixed right-8 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4">
+      {/* Navigation buttons - Hidden on mobile, shown on desktop */}
+      <div className="hidden md:flex fixed right-8 top-1/2 transform -translate-y-1/2 flex-col space-y-4">
         <button
           type="button"
           onClick={onPrev}
@@ -121,10 +118,30 @@ export function QuizQuestion({
         </button>
       </div>
 
+      {/* Mobile navigation buttons */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 flex justify-between p-4 bg-white border-t">
+        <Button
+          onClick={onPrev}
+          disabled={currentIndex === 0}
+          variant="outline"
+          className="w-[45%]"
+        >
+          Anterior
+        </Button>
+        <Button
+          onClick={onNext}
+          disabled={selectedValue === null}
+          variant="outline"
+          className="w-[45%]"
+        >
+          Siguiente
+        </Button>
+      </div>
+
       {/* Progress bar */}
-      <footer className="p-4">
+      <footer className="p-4 mb-16 md:mb-0">
         <div className="flex items-center justify-center">
-          <div className="w-1/3 bg-gray-200 h-2 rounded-full overflow-hidden">
+          <div className="w-full md:w-1/3 bg-gray-200 h-2 rounded-full overflow-hidden">
             <div
               className="bg-gray-400 h-full rounded-full"
               style={{ width: `${(currentIndex / totalQuestions) * 100}%` }}
