@@ -28,6 +28,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
   const { signUp } = useAuth();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
   const router = useRouter();
 
   const form = useForm<SignUpFormData>({
@@ -59,6 +60,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
   async function onSubmit(data: SignUpFormData) {
     try {
       setIsLoading(true);
+      setLoadingMessage("Creando cuenta...");
 
       const { success, user, session, error } = await signUp(
         data.email,
@@ -70,6 +72,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       }
 
       if (user) {
+        setLoadingMessage("Subiendo avatar...");
         let avatarUrl = null;
         if (avatarFile) {
           try {
@@ -86,6 +89,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
         }
 
         try {
+          setLoadingMessage("Creando perfil...");
           // Create user profile
           const profileResponse = await fetch("/api/profile", {
             method: "POST",
@@ -112,12 +116,52 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             );
           }
 
+          // Wait for profile to be fully created by checking it exists
+          let profileExists = false;
+          let retryCount = 0;
+          const maxRetries = 5;
+
+          setLoadingMessage("Verificando perfil...");
+          while (!profileExists && retryCount < maxRetries) {
+            try {
+              // Small delay before checking
+              await new Promise((resolve) => setTimeout(resolve, 500));
+
+              // Check if profile exists
+              const checkResponse = await fetch(`/api/profile/${user.id}`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
+
+              if (checkResponse.ok) {
+                profileExists = true;
+              } else {
+                retryCount++;
+              }
+            } catch (e) {
+              console.error("Error checking profile:", e);
+              retryCount++;
+            }
+          }
+
+          if (!profileExists) {
+            console.warn(
+              "Profile may not be fully created yet, but proceeding"
+            );
+          }
+
           toast({
             title: "Éxito",
             description: "Tu cuenta ha sido creada correctamente.",
           });
 
-          router.push("/dashboard");
+          // Add a small delay before redirecting to ensure profile is available
+          setLoadingMessage("Redirigiendo al dashboard...");
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 1000);
         } catch (profileError) {
           console.error("Profile creation error:", profileError);
 
@@ -145,6 +189,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
         variant: "destructive",
       });
     } finally {
+      setLoadingMessage("");
       setIsLoading(false);
     }
   }
@@ -275,8 +320,15 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             )}
           />
 
-          <Button className="w-full" disabled={isLoading}>
-            Crear Cuenta
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                {loadingMessage || "Cargando..."}
+              </div>
+            ) : (
+              "Crear Cuenta"
+            )}
           </Button>
         </form>
       </Form>

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import type { UserRole } from "@prisma/client";
 
 export default async function DashboardPage() {
   const cookieStore = cookies();
@@ -18,12 +19,32 @@ export default async function DashboardPage() {
   }
 
   // Get the user's profile to check their role
-  const profile = await prisma.profile.findUnique({
-    where: { userId: user.id },
-    select: { id: true, role: true, firstName: true, lastName: true },
-  });
+  // Add retry logic for profile fetching
+  let profile = null;
+  let retryCount = 0;
+  const maxRetries = 3;
 
-  // If no profile or not a PREMIUM/SUPERADMIN user, redirect to upgrade page
+  while (!profile && retryCount < maxRetries) {
+    try {
+      profile = await prisma.profile.findUnique({
+        where: { userId: user.id },
+        select: { id: true, role: true, firstName: true, lastName: true },
+      });
+
+      if (!profile) {
+        // Wait a bit before retrying
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        retryCount++;
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      retryCount++;
+      // Wait before retrying
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
+
+  // If no profile after retries or not a PREMIUM/SUPERADMIN user, redirect to upgrade page
   if (
     !profile ||
     (profile.role !== "PREMIUM" && profile.role !== "SUPERADMIN")
