@@ -5,7 +5,7 @@ import type React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn } from "lucide-react";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -102,7 +102,7 @@ export default function Navbar() {
           </Button>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4">
             {[
               { href: "#evaluacion", label: "Evaluación" },
               { href: "#beneficios", label: "Beneficios" },
@@ -123,17 +123,25 @@ export default function Navbar() {
                 {item.label}
               </Button>
             ))}
-            <Button
-              className="bg-black text-white hover:bg-gray-800 transition-all transform hover:-translate-y-1"
-              onClick={(e) =>
-                handleNavClick(
-                  e as React.MouseEvent<HTMLButtonElement>,
-                  "#evaluacion"
-                )
-              }
-            >
-              Evaluar Ahora
-            </Button>
+            <div className="flex items-center space-x-2 ml-2">
+              <Link href="/sign-in">
+                <Button variant="outline" className="flex items-center gap-1">
+                  <LogIn size={16} />
+                  Iniciar Sesión
+                </Button>
+              </Link>
+              <Button
+                className="bg-black text-white hover:bg-gray-800 transition-all transform hover:-translate-y-1"
+                onClick={(e) =>
+                  handleNavClick(
+                    e as React.MouseEvent<HTMLButtonElement>,
+                    "#evaluacion"
+                  )
+                }
+              >
+                Evaluar Ahora
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -179,17 +187,28 @@ export default function Navbar() {
                 </Button>
               ))}
             </div>
-            <Button
-              className="w-full bg-black text-white hover:bg-gray-800 py-6 text-lg mt-4"
-              onClick={(e) =>
-                handleNavClick(
-                  e as React.MouseEvent<HTMLButtonElement>,
-                  "#evaluacion"
-                )
-              }
-            >
-              Evaluar Ahora
-            </Button>
+            <div className="flex flex-col space-y-3 mt-4">
+              <Link href="/sign-in" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-1 py-6 text-lg"
+                >
+                  <LogIn size={18} />
+                  Iniciar Sesión
+                </Button>
+              </Link>
+              <Button
+                className="w-full bg-black text-white hover:bg-gray-800 py-6 text-lg"
+                onClick={(e) =>
+                  handleNavClick(
+                    e as React.MouseEvent<HTMLButtonElement>,
+                    "#evaluacion"
+                  )
+                }
+              >
+                Evaluar Ahora
+              </Button>
+            </div>
           </div>
         </div>
       </nav>

@@ -1,0 +1,48 @@
+// Database schema for Cybersecurity Assessment Platform
+
+// User management
+Table profiles {
+  id String [pk]
+  userId String [unique, note: 'External auth provider user ID']
+  avatarUrl String [null]
+  firstName String [null, note: 'First name of the user']
+  lastName String [null, note: 'Last name of the user']
+  email String [null, unique, note: 'User email address']
+  company String [null, note: 'Company or organization name']
+  role UserRole [default: 'FREE', note: 'User role for authorization and access level']
+  active Boolean [default: true, note: 'Whether the user account is active']
+  createdAt DateTime [default: `now()`, note: 'When the profile was created']
+  updatedAt DateTime [note: 'When the profile was last updated']
+
+  indexes {
+    userId
+  }
+}
+
+// Evaluation storage
+Table evaluations {
+  id String [pk]
+  type EvaluationType [note: 'Type of evaluation (INITIAL or ADVANCED)']
+  title String [note: 'Title of the evaluation']
+  score Float [null, note: 'Overall security score (0-100)']
+  profileId String [ref: > profiles.id, note: 'Profile ID of the user who took the evaluation']
+  answers JSON [note: 'JSON object storing all question answers']
+  createdAt DateTime [default: `now()`, note: 'When the evaluation was created']
+  completedAt DateTime [null, note: 'When the evaluation was completed']
+  
+  indexes {
+    profileId
+  }
+}
+
+// Enums
+Enum UserRole {
+  FREE
+  PREMIUM
+  SUPERADMIN
+}
+
+Enum EvaluationType {
+  INITIAL
+  ADVANCED
+} 

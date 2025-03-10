@@ -36,6 +36,8 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       email: "",
       firstName: "",
       lastName: "",
+      company: "",
+      company_role: "",
       password: "",
       confirmPassword: "",
     },
@@ -76,56 +78,59 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             console.error("Avatar upload failed:", error);
             toast({
               title: "Warning",
-              description: "Failed to upload avatar, you can add it later from your profile.",
+              description:
+                "Failed to upload avatar, you can add it later from your profile.",
               variant: "default",
             });
           }
         }
 
-        const response = await fetch("/api/profile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            birthDate: data.birthDate,
-            avatarUrl,
-          }),
-        });
-
-        let result: Record<string, unknown>;
-        let text = ""; // Define text outside the try block
-
         try {
-          text = await response.text(); // Assign value inside try
-          result = text ? JSON.parse(text) : {};
+          // Create user profile
+          const profileResponse = await fetch("/api/profile", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: user.id,
+              firstName: data.firstName,
+              lastName: data.lastName,
+              email: data.email,
+              company: data.company,
+              company_role: data.company_role,
+              avatarUrl,
+            }),
+          });
 
-          if (!response.ok) {
+          const profileData = await profileResponse.json();
+
+          if (!profileResponse.ok) {
             throw new Error(
-              typeof result.error === "string"
-                ? result.error
-                : `Server responded with status ${response.status}`
+              profileData.error ||
+                `Failed to create profile: ${profileResponse.status}`
             );
           }
-        } catch (parseError) {
-          console.error(
-            "Response parsing error:",
-            parseError,
-            "Response text:",
-            text
-          );
-          throw new Error("Invalid server response");
+
+          toast({
+            title: "Success",
+            description: "Your account has been created successfully!",
+          });
+
+          router.push("/dashboard");
+        } catch (profileError) {
+          console.error("Profile creation error:", profileError);
+
+          // If profile creation fails, we should still show a toast
+          toast({
+            title: "Error",
+            description:
+              profileError instanceof Error
+                ? profileError.message
+                : "Failed to create profile. Please try again.",
+            variant: "destructive",
+          });
         }
-
-        toast({
-          title: "Success",
-          description: "Your account has been created successfully!",
-        });
-
-        router.push("/dashboard");
       }
     } catch (error) {
       console.error("Sign up error:", error);
@@ -203,7 +208,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
               control={form.control}
               name="lastName"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Last Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Doe" {...field} />
@@ -213,6 +218,34 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="company"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>Company (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your Company" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="company_role"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>Role in Company (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your Role" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -247,36 +280,6 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           </Button>
         </form>
       </Form>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          className="w-full"
-          type="button"
-          disabled={isLoading}
-        >
-          <GithubIcon className="h-4 w-4" /> GitHub
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full"
-          type="button"
-          disabled={isLoading}
-        >
-          <FacebookIcon className="h-4 w-4" /> Facebook
-        </Button>
-      </div>
     </div>
   );
 }

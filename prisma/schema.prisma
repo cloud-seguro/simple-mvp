@@ -14,22 +14,54 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// Enums
 enum UserRole {
-  USER
+  FREE      // Basic users who can only access initial evaluations
+  PREMIUM   // Premium users who can access advanced evaluations and dashboard
   SUPERADMIN
 }
 
+enum EvaluationType {
+  INITIAL
+  ADVANCED
+}
+
+// User management
 model Profile {
-  id            String               @id @default(cuid())
-  userId        String               @unique
+  id            String        @id @default(cuid())
+  userId        String        @unique
   avatarUrl     String?
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  active        Boolean              @default(true)
-  firstName     String?              @map("first_name")
-  lastName      String?              @map("last_name")
-  role          UserRole             @default(USER)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  active        Boolean       @default(true)
+  firstName     String?       @map("first_name")
+  lastName      String?       @map("last_name")
+  email         String?       @unique
+  company       String?
+  company_role  String?
+  role          UserRole      @default(FREE)
+  
+  // Relations
+  evaluations   Evaluation[]
 
   @@index([userId])
   @@map("profiles")
+}
+
+// Simplified evaluation model
+model Evaluation {
+  id            String          @id @default(cuid())
+  type          EvaluationType
+  title         String
+  score         Float?
+  profileId     String
+  answers       Json            // Stores the entire answers object as JSON
+  createdAt     DateTime        @default(now())
+  completedAt   DateTime?
+  
+  // Relations
+  profile       Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("evaluations")
 }

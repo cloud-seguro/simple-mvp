@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { UserRole, Prisma } from "@prisma/client";
+import { UserRole, type Prisma } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
     const json = await req.json();
-    const { userId, firstName, lastName, avatarUrl } = json;
+    const {
+      userId,
+      firstName,
+      lastName,
+      avatarUrl,
+      email,
+      company,
+      company_role,
+    } = json;
 
     if (!userId) {
       return new Response(JSON.stringify({ error: "User ID is required" }), {
@@ -29,11 +37,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create minimal profile first
+    // Create minimal profile first with enum value
     const profile = await prisma.profile.create({
       data: {
-        userId,
-        role: "USER",
+        userId: userId,
+        role: UserRole.FREE,
         active: true,
       },
     });
@@ -45,6 +53,9 @@ export async function POST(req: Request) {
         data: {
           firstName: firstName || null,
           lastName: lastName || null,
+          email: email || null,
+          company: company || null,
+          company_role: company_role || null,
           avatarUrl: avatarUrl || null,
         },
       });
@@ -60,6 +71,10 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error(
+      "Profile API error:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     return new Response(
@@ -92,7 +107,10 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ profiles });
   } catch (error) {
-    console.error("Error fetching profiles:", error);
+    console.error(
+      "Error fetching profiles:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

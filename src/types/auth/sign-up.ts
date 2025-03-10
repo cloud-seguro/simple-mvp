@@ -5,7 +5,8 @@ export const signUpFormSchema = z
     email: z.string().email(),
     firstName: z.string().min(2).max(30).optional(),
     lastName: z.string().min(2).max(30).optional(),
-    birthDate: z.date().optional(),
+    company: z.string().max(50).optional(),
+    company_role: z.string().max(50).optional(),
     password: z.string().min(8),
     confirmPassword: z.string(),
   })

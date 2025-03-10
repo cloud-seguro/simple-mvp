@@ -14,7 +14,7 @@ export function SignOutButton() {
       className="flex items-center gap-2"
     >
       <LogOut className="h-4 w-4" />
-      Sign Out
+      Cerrar Sesión
     </Button>
   );
 } 
