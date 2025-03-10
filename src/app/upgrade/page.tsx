@@ -30,8 +30,6 @@ export default async function UpgradePage() {
     redirect("/dashboard");
   }
 
-  const firstName = profile?.firstName || "Usuario";
-
   return (
     <div className="container max-w-4xl mx-auto py-12">
       <UpgradeHeader />

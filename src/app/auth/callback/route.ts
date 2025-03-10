@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { prisma } from "@/lib/prisma";
-
+import { UserRole } from "@prisma/client";
 export async function GET(request: NextRequest) {
   try {
     const requestUrl = new URL(request.url);
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
               userId: session.user.id,
               firstName: "",
               lastName: "",
-              role: "USER",
+              role: UserRole.FREE,
             },
           });
         } catch (error) {

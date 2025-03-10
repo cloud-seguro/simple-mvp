@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FacebookIcon, GithubIcon, UploadCloud } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -77,9 +77,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           } catch (error) {
             console.error("Avatar upload failed:", error);
             toast({
-              title: "Warning",
+              title: "Advertencia",
               description:
-                "Failed to upload avatar, you can add it later from your profile.",
+                "No se pudo subir el avatar, puedes agregarlo más tarde desde tu perfil.",
               variant: "default",
             });
           }
@@ -108,13 +108,13 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           if (!profileResponse.ok) {
             throw new Error(
               profileData.error ||
-                `Failed to create profile: ${profileResponse.status}`
+                `Error al crear perfil: ${profileResponse.status}`
             );
           }
 
           toast({
-            title: "Success",
-            description: "Your account has been created successfully!",
+            title: "Éxito",
+            description: "Tu cuenta ha sido creada correctamente.",
           });
 
           router.push("/dashboard");
@@ -127,7 +127,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             description:
               profileError instanceof Error
                 ? profileError.message
-                : "Failed to create profile. Please try again.",
+                : "Error al crear perfil. Por favor, inténtalo de nuevo.",
             variant: "destructive",
           });
         }
@@ -137,7 +137,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Something went wrong. Please try again.";
+          : "Algo salió mal. Por favor, inténtalo de nuevo.";
 
       toast({
         title: "Error",
@@ -181,9 +181,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Correo Electrónico</FormLabel>
                 <FormControl>
-                  <Input placeholder="name@example.com" {...field} />
+                  <Input placeholder="nombre@ejemplo.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -196,9 +196,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First Name</FormLabel>
+                  <FormLabel>Nombre</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} />
+                    <Input placeholder="Juan" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -209,9 +209,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
               name="lastName"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel>Last Name</FormLabel>
+                  <FormLabel>Apellido</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} />
+                    <Input placeholder="Pérez" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -224,9 +224,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             name="company"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel>Company (Optional)</FormLabel>
+                <FormLabel>Empresa (Opcional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your Company" {...field} />
+                  <Input placeholder="Tu Empresa" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -238,9 +238,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             name="company_role"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <FormLabel>Role in Company (Optional)</FormLabel>
+                <FormLabel>Cargo en la Empresa (Opcional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your Role" {...field} />
+                  <Input placeholder="Tu Cargo" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -252,7 +252,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>Contraseña</FormLabel>
                 <FormControl>
                   <PasswordInput placeholder="********" {...field} />
                 </FormControl>
@@ -266,7 +266,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel>Confirmar Contraseña</FormLabel>
                 <FormControl>
                   <PasswordInput placeholder="********" {...field} />
                 </FormControl>
@@ -276,7 +276,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           />
 
           <Button className="w-full" disabled={isLoading}>
-            Create Account
+            Crear Cuenta
           </Button>
         </form>
       </Form>

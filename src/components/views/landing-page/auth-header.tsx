@@ -23,13 +23,13 @@ export function AuthHeader() {
         href="/sign-in"
         className="text-primary hover:text-primary-foreground hover:bg-primary px-4 py-2 rounded-md transition-colors"
       >
-        Sign In
+        Iniciar Sesión
       </Link>
       <Link
         href="/sign-up"
         className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
       >
-        Sign Up
+        Registrarse
       </Link>
     </div>
   );

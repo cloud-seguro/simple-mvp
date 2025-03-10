@@ -57,12 +57,12 @@ export const sidebarData: SidebarData = {
           icon: LayoutDashboard,
         },
         {
-          title: "Tasks",
+          title: "Tareas",
           url: "/tasks",
           icon: CheckSquare,
         },
         {
-          title: "Apps",
+          title: "Aplicaciones",
           url: "/apps",
           icon: AppWindow,
         },
@@ -73,33 +73,33 @@ export const sidebarData: SidebarData = {
           icon: MessageSquare,
         },
         {
-          title: "Users",
+          title: "Usuarios",
           url: "/users",
           icon: Users,
         },
       ],
     },
     {
-      title: "Pages",
+      title: "Páginas",
       items: [
         {
-          title: "Auth",
+          title: "Autenticación",
           icon: Lock,
           items: [
             {
-              title: "Sign In",
+              title: "Iniciar Sesión",
               url: "/sign-in",
             },
             {
-              title: "Sign In (2 Col)",
+              title: "Iniciar Sesión (2 Col)",
               url: "/sign-in-2",
             },
             {
-              title: "Sign Up",
+              title: "Registrarse",
               url: "/sign-up",
             },
             {
-              title: "Forgot Password",
+              title: "Olvidé mi Contraseña",
               url: "/forgot-password",
             },
             {
@@ -109,31 +109,31 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
-          title: "Errors",
+          title: "Errores",
           icon: Bug,
           items: [
             {
-              title: "Unauthorized",
+              title: "No Autorizado",
               url: "/401",
               icon: LockKeyhole,
             },
             {
-              title: "Forbidden",
+              title: "Prohibido",
               url: "/403",
               icon: UserX,
             },
             {
-              title: "Not Found",
+              title: "No Encontrado",
               url: "/404",
               icon: AlertCircle,
             },
             {
-              title: "Internal Server Error",
+              title: "Error Interno del Servidor",
               url: "/500",
               icon: ServerCrash,
             },
             {
-              title: "Maintenance Error",
+              title: "Error de Mantenimiento",
               url: "/503",
               icon: Ban,
             },
@@ -142,41 +142,41 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: "Other",
+      title: "Otros",
       items: [
         {
-          title: "Settings",
+          title: "Configuración",
           icon: Settings,
           items: [
             {
-              title: "Profile",
+              title: "Perfil",
               url: "/settings",
               icon: UserCog,
             },
             {
-              title: "Account",
+              title: "Cuenta",
               url: "/settings/account",
               icon: Wrench,
             },
             {
-              title: "Appearance",
+              title: "Apariencia",
               url: "/settings/appearance",
               icon: Palette,
             },
             {
-              title: "Notifications",
+              title: "Notificaciones",
               url: "/settings/notifications",
               icon: BellRing,
             },
             {
-              title: "Display",
+              title: "Pantalla",
               url: "/settings/display",
               icon: Monitor,
             },
           ],
         },
         {
-          title: "Help Center",
+          title: "Centro de Ayuda",
           url: "/help-center",
           icon: HelpCircle,
         },

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import {
   createEvaluation,
   canAccessAdvancedEvaluation,
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // This endpoint requires authentication
     const supabase = createRouteHandlerClient({ cookies });
