@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User, Session } from "@supabase/supabase-js";
 
 export function useAuth() {
@@ -8,6 +8,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
     // Check current session
@@ -29,7 +30,7 @@ export function useAuth() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase.auth]);
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -42,7 +43,7 @@ export function useAuth() {
     if (data?.session) {
       setSession(data.session);
       setUser(data.session.user);
-      await supabase.auth.setSession(data.session);
+      router.refresh(); // Refresh to update server components
       return data.session;
     }
   };
@@ -54,7 +55,7 @@ export function useAuth() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
-        }
+        },
       });
 
       if (error) {
@@ -64,17 +65,14 @@ export function useAuth() {
       if (data?.session) {
         setSession(data.session);
         setUser(data.session.user);
-        await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-        });
+        router.refresh(); // Refresh to update server components
       }
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         user: data.user,
         session: data.session,
-        error: null 
+        error: null,
       };
     } catch (error) {
       console.error("Sign up error:", error);
@@ -82,17 +80,23 @@ export function useAuth() {
         success: false,
         user: null,
         session: null,
-        error
+        error,
       };
     }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setUser(null);
-    setSession(null);
-    router.push("/");
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+
+      // Force a hard refresh to clear all state and cookies
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
   };
 
   return {

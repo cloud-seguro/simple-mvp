@@ -5,18 +5,21 @@ import { prisma } from "@/lib/prisma";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
 export default async function DashboardPage() {
-  const supabase = createServerComponentClient({ cookies });
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
-  if (!session) {
+  // Get authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     redirect("/sign-in");
   }
 
   // Get the user's profile to check their role
   const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
+    where: { userId: user.id },
     select: { id: true, role: true, firstName: true, lastName: true },
   });
 

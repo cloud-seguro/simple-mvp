@@ -7,13 +7,15 @@ export async function GET() {
   try {
     // This would normally integrate with a payment processor like Stripe
     // For now, we'll just upgrade the user directly
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
-    const supabase = createRouteHandlerClient({ cookies });
+    // Get authenticated user
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.redirect(
         new URL(
           "/sign-in",
@@ -24,7 +26,7 @@ export async function GET() {
 
     // Get the user's profile
     const profile = await prisma.profile.findUnique({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
     });
 
     if (!profile) {
