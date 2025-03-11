@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SignUpForm } from "@/components/auth/sign-up/components/sign-up-form";
+import { SignInForm } from "@/components/auth/sign-in/components/sign-in-form";
 import { motion } from "framer-motion";
 import type { QuizResults } from "./types";
 import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface EvaluationSignUpProps {
   results: QuizResults;
@@ -13,22 +15,30 @@ interface EvaluationSignUpProps {
   onComplete: () => void;
 }
 
+type AuthMode = "signup" | "signin";
+
 export function EvaluationSignUp({
   results,
   quizId,
   onComplete,
 }: EvaluationSignUpProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const router = useRouter();
 
-  // This function will be called after successful sign-up
-  const handleSignUpComplete = async (userId: string) => {
+  // This function will be called after successful sign-up or sign-in
+  const handleAuthComplete = async (userId: string) => {
+    if (isSubmitting) return;
+
     try {
       setIsSubmitting(true);
 
       // Determine evaluation type based on quiz ID
       const evaluationType =
         quizId === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
+
+      // Add a small delay to ensure the user session is properly set
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Store evaluation results in the database
       const response = await fetch("/api/evaluations", {
@@ -43,19 +53,31 @@ export function EvaluationSignUp({
               ? "Evaluación Inicial"
               : "Evaluación Avanzada",
           answers: results,
-          // We don't calculate the score here, it will be calculated on the server
+          userId, // Include userId in the request
         }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const errorData = await response.json();
         throw new Error(
-          error.message || "Error al guardar los resultados de la evaluación"
+          errorData.message ||
+            "Error al guardar los resultados de la evaluación"
         );
       }
 
+      // Wait for the response data
+      const data = await response.json();
+
+      // Add a small delay before proceeding
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // Proceed to the next step
       onComplete();
+
+      toast({
+        title: "Éxito",
+        description: "Los resultados se han guardado correctamente.",
+      });
     } catch (error) {
       console.error("Error saving evaluation:", error);
       toast({
@@ -66,6 +88,8 @@ export function EvaluationSignUp({
             : "Error al guardar los resultados de la evaluación",
         variant: "destructive",
       });
+      // Re-throw the error so the form component can handle it
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
@@ -83,15 +107,45 @@ export function EvaluationSignUp({
         inicie sesión.
       </p>
 
+      <div className="flex justify-center gap-4 mb-6">
+        <Button
+          variant={authMode === "signup" ? "default" : "outline"}
+          onClick={() => setAuthMode("signup")}
+          className="flex-1"
+          disabled={isSubmitting}
+        >
+          Crear Cuenta
+        </Button>
+        <Button
+          variant={authMode === "signin" ? "default" : "outline"}
+          onClick={() => setAuthMode("signin")}
+          className="flex-1"
+          disabled={isSubmitting}
+        >
+          Iniciar Sesión
+        </Button>
+      </div>
+
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <SignUpForm
-          className="w-full"
-          onSignUpComplete={handleSignUpComplete}
-          evaluationResults={{
-            quizId,
-            results,
-          }}
-        />
+        {authMode === "signup" ? (
+          <SignUpForm
+            className="w-full"
+            onSignUpComplete={handleAuthComplete}
+            evaluationResults={{
+              quizId,
+              results,
+            }}
+          />
+        ) : (
+          <SignInForm
+            className="w-full"
+            onSignInComplete={handleAuthComplete}
+            evaluationResults={{
+              quizId,
+              results,
+            }}
+          />
+        )}
       </div>
     </motion.div>
   );
