@@ -5,6 +5,6 @@ import { evaluacionAvanzada } from "@/components/evaluations/data/advanced-evalu
 
 export default function AdvancedEvaluation() {
   return (
-        <QuizContainer quizData={evaluacionAvanzada} />
+    <QuizContainer quizData={evaluacionAvanzada} />
   );
 } 
