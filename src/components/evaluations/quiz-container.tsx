@@ -1,15 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { QuizIntro } from "./quiz-intro"
+import { useState } from "react";
+import { useAuth } from "@/providers/auth-provider";
+import { QuizIntro } from "./quiz-intro";
 import { QuizQuestion } from "./quiz-question";
-import { ResultsReady } from "./results-ready"
-import { CybersecurityResults } from "./cybersecurity-results"
+import { ResultsReady } from "./results-ready";
+import { CybersecurityResults } from "./cybersecurity-results";
 import { EvaluationSignUp } from "./evaluation-sign-up";
-import type { QuizData, QuizResults } from "./types"
+import type { QuizData, QuizResults } from "./types";
+import { toast } from "@/components/ui/use-toast";
 
 interface QuizContainerProps {
-  quizData: QuizData
+  quizData: QuizData;
 }
 
 type QuizStage =
@@ -20,47 +22,104 @@ type QuizStage =
   | "results";
 
 export function QuizContainer({ quizData }: QuizContainerProps) {
-  const [stage, setStage] = useState<QuizStage>("intro")
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [stage, setStage] = useState<QuizStage>("intro");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [results, setResults] = useState<QuizResults>({});
+  const { user, isLoading, profile } = useAuth();
 
   const handleStart = () => {
-    setStage("questions")
-  }
+    setStage("questions");
+  };
 
   const handleSelect = (value: number) => {
     setResults((prev) => ({
       ...prev,
       [quizData.questions[currentQuestionIndex].id]: value,
-    }))
-  }
+    }));
+  };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentQuestionIndex < quizData.questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1)
+      setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      setStage("sign-up");
+      // If user is already authenticated, skip sign-up and save results directly
+      if (user?.id) {
+        try {
+          const evaluationType =
+            quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
+
+          const response = await fetch("/api/evaluations", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: evaluationType,
+              title:
+                evaluationType === "INITIAL"
+                  ? "Evaluación Inicial"
+                  : "Evaluación Avanzada",
+              answers: results,
+              userId: user.id,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.message ||
+                "Error al guardar los resultados de la evaluación"
+            );
+          }
+
+          setStage("results-ready");
+        } catch (error) {
+          console.error("Error saving evaluation:", error);
+          // Still proceed to results-ready, but show an error toast
+          toast({
+            title: "Error",
+            description:
+              "Hubo un problema al guardar tus resultados. Por favor, inténtalo de nuevo más tarde.",
+            variant: "destructive",
+          });
+          setStage("results-ready");
+        }
+      } else {
+        setStage("sign-up");
+      }
     }
-  }
+  };
 
   const handlePrev = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1)
+      setCurrentQuestionIndex((prev) => prev - 1);
     }
-  }
+  };
 
   const handleSignUpComplete = () => {
     setStage("results-ready");
   };
 
   const handleViewResults = () => {
-    setStage("results")
-  }
+    setStage("results");
+  };
 
   const handleRestart = () => {
-    setResults({})
+    setResults({});
     setCurrentQuestionIndex(0);
-    setStage("intro")
+    setStage("intro");
+  };
+
+  // Get user info for display
+  const userInfo = {
+    firstName: profile?.firstName || "Usuario",
+    lastName: profile?.lastName || "",
+    email: user?.email || "",
+  };
+
+  // If auth is still loading, show a loading state
+  if (isLoading) {
+    return <div>Cargando...</div>;
   }
 
   return (
@@ -83,7 +142,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         />
       )}
 
-      {stage === "sign-up" && (
+      {stage === "sign-up" && !user?.id && (
         <EvaluationSignUp
           results={results}
           quizId={quizData.id}
@@ -93,11 +152,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
 
       {stage === "results-ready" && (
         <ResultsReady
-          userInfo={{
-            firstName: "Usuario",
-            lastName: "",
-            email: "",
-          }}
+          userInfo={userInfo}
           onViewResults={handleViewResults}
           shareUrl={window.location.href}
         />
@@ -107,11 +162,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         <CybersecurityResults
           quizData={quizData}
           results={results}
-          userInfo={{
-            firstName: "Usuario",
-            lastName: "",
-            email: "",
-          }}
+          userInfo={userInfo}
           onRestart={handleRestart}
         />
       )}
