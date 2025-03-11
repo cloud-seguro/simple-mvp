@@ -33,7 +33,9 @@ export function ResultsReady({ userInfo, onViewResults, shareUrl }: ResultsReady
           <SimpleHeader className="text-primary" />
         </div>
         <div className="flex-grow flex items-center justify-center py-8 md:py-0">
-          <AnimatedSecuritySVG />
+          <div className="w-32">
+            <AnimatedSecuritySVG />
+          </div>
         </div>
       </div>
 
