@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import type { QuizResults } from "./types";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
 interface EvaluationSignUpProps {
   results: QuizResults;
@@ -31,23 +32,51 @@ export function EvaluationSignUp({
 
     try {
       setIsSubmitting(true);
+      setLoadingMessage("Preparando para guardar resultados...");
+
+      // Try to fetch the profile directly to ensure it's available
+      try {
+        setLoadingMessage("Verificando perfil...");
+        // Add a delay to ensure the profile has been created
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Try to fetch the profile
+        const profileResponse = await fetch(`/api/profile/${userId}`);
+        if (!profileResponse.ok) {
+          console.log(
+            `Profile not found for user ${userId}, might still be creating...`
+          );
+        } else {
+          console.log(`Profile successfully fetched for user ${userId}`);
+        }
+      } catch (profileError) {
+        console.error("Error checking profile:", profileError);
+        // Continue anyway, as this is just a verification step
+      }
+
+      // Add a longer delay to ensure the user session and profile are properly set
+      // This is especially important after sign-up
+      setLoadingMessage("Preparando datos de evaluación...");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       setLoadingMessage("Guardando resultados de evaluación...");
 
       // Determine evaluation type based on quiz ID
       const evaluationType =
         quizId === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
 
-      // Add a longer delay to ensure the user session and profile are properly set
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
       // Retry logic for saving evaluation results
       let success = false;
       let retryCount = 0;
-      const maxRetries = 3;
+      const maxRetries = 5;
       let lastError = null;
 
       while (!success && retryCount < maxRetries) {
         try {
+          setLoadingMessage(
+            `Guardando resultados (intento ${retryCount + 1}/${maxRetries})...`
+          );
+
           // Store evaluation results in the database
           const response = await fetch("/api/evaluations", {
             method: "POST",
@@ -84,8 +113,9 @@ export function EvaluationSignUp({
             setLoadingMessage(
               `Reintentando guardar resultados (${retryCount}/${maxRetries})...`
             );
+            // Exponential backoff for retries
             await new Promise((resolve) =>
-              setTimeout(resolve, 1000 * retryCount)
+              setTimeout(resolve, 1000 * 1.5 ** retryCount)
             );
           }
         }
@@ -98,11 +128,11 @@ export function EvaluationSignUp({
         );
       }
 
-      // Add a small delay before proceeding
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
+      // Set as completed
       setLoadingMessage("¡Listo! Preparando resultados...");
-      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Add a small delay before proceeding
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Proceed to the next step
       onComplete();
@@ -121,12 +151,28 @@ export function EvaluationSignUp({
             : "Error al guardar los resultados de la evaluación",
         variant: "destructive",
       });
-      // Re-throw the error so the form component can handle it
-      throw error;
+
+      // Still try to proceed to avoid getting stuck
+      setLoadingMessage("Continuando a pesar del error...");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      onComplete();
     } finally {
-      setLoadingMessage("");
       setIsSubmitting(false);
+      setLoadingMessage("");
     }
+  };
+
+  // Custom handlers for sign-up and sign-in forms to track process state
+  const handleSignUpStart = () => {
+    setLoadingMessage("Creando cuenta...");
+  };
+
+  const handleSignInStart = () => {
+    setLoadingMessage("Iniciando sesión...");
+  };
+
+  const handleProfileCreationStart = () => {
+    setLoadingMessage("Creando perfil...");
   };
 
   return (
@@ -136,16 +182,10 @@ export function EvaluationSignUp({
       className="max-w-md mx-auto p-6"
     >
       {isSubmitting && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin" />
-              <p className="text-lg font-medium">
-                {loadingMessage || "Procesando..."}
-              </p>
-            </div>
-          </div>
-        </div>
+        <SecurityLoadingScreen
+          variant="overlay"
+          message={loadingMessage || "Procesando..."}
+        />
       )}
 
       <h1 className="text-3xl font-bold mb-4">¡Felicitaciones!</h1>
@@ -178,6 +218,8 @@ export function EvaluationSignUp({
           <SignUpForm
             className="w-full"
             onSignUpComplete={handleAuthComplete}
+            onSignUpStart={handleSignUpStart}
+            onProfileCreationStart={handleProfileCreationStart}
             evaluationResults={{
               quizId,
               results,
@@ -187,6 +229,7 @@ export function EvaluationSignUp({
           <SignInForm
             className="w-full"
             onSignInComplete={handleAuthComplete}
+            onSignInStart={handleSignInStart}
             evaluationResults={{
               quizId,
               results,

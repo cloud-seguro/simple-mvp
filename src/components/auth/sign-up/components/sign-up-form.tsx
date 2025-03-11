@@ -22,21 +22,26 @@ import { toast } from "@/components/ui/use-toast";
 import Image from "next/image";
 import { uploadAvatar } from "@/lib/supabase/upload-avatar";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 
 // Extended props to include evaluation results
 interface ExtendedSignUpFormProps extends SignUpFormProps {
   onSignUpComplete?: (userId: string) => Promise<void>;
+  onSignUpStart?: () => void;
+  onProfileCreationStart?: () => void;
   evaluationResults?: {
     quizId: string;
     results: Record<string, number>;
   };
 }
 
-export function SignUpForm({ 
-  className, 
+export function SignUpForm({
+  className,
   onSignUpComplete,
+  onSignUpStart,
+  onProfileCreationStart,
   evaluationResults,
-  ...props 
+  ...props
 }: ExtendedSignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
@@ -76,21 +81,48 @@ export function SignUpForm({
       setIsLoading(true);
       setLoadingMessage("Creando cuenta...");
 
-      const { success, user, session, error } = await signUp(
-        data.email,
-        data.password
-      );
-
-      if (!success || error || !session) {
-        throw error || new Error("Failed to sign up");
+      // Notify parent component that sign-up has started
+      if (onSignUpStart) {
+        onSignUpStart();
       }
 
-      if (user) {
+      // Set a flag in localStorage to indicate we're in the process of creating a profile
+      // This will be used by the AuthProvider to avoid premature profile fetching
+      localStorage.setItem("creating_profile", "true");
+
+      try {
+        // Sign up the user
+        await signUp(data.email, data.password);
+
+        // Add a delay to allow the auth state to update
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Try to sign in with the credentials to get a valid user and session
+        const { data: signInData, error: signInError } =
+          await supabase.auth.signInWithPassword({
+            email: data.email,
+            password: data.password,
+          });
+
+        if (signInError) {
+          console.error("Sign in error after sign-up:", signInError);
+          throw new Error("Failed to sign in after sign-up");
+        }
+
+        if (!signInData.user) {
+          throw new Error("Failed to get user after sign-in");
+        }
+
+        // Use the user from the sign-in response
+        const userId = signInData.user.id;
+
+        console.log("Successfully signed in after sign-up, user ID:", userId);
+
         setLoadingMessage("Subiendo avatar...");
         let avatarUrl = null;
         if (avatarFile) {
           try {
-            avatarUrl = await uploadAvatar(avatarFile, user.id);
+            avatarUrl = await uploadAvatar(avatarFile, userId);
           } catch (error) {
             console.error("Avatar upload failed:", error);
             toast({
@@ -103,7 +135,13 @@ export function SignUpForm({
         }
 
         try {
+          // Notify parent component that profile creation has started
+          if (onProfileCreationStart) {
+            onProfileCreationStart();
+          }
+
           setLoadingMessage("Creando perfil...");
+
           // Create user profile
           const profileResponse = await fetch("/api/profile", {
             method: "POST",
@@ -111,7 +149,7 @@ export function SignUpForm({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              userId: user.id,
+              userId: userId,
               firstName: data.firstName,
               lastName: data.lastName,
               email: data.email,
@@ -130,71 +168,92 @@ export function SignUpForm({
             );
           }
 
-          // If we're in the evaluation flow, skip profile verification
-          if (evaluationResults && onSignUpComplete) {
-            setLoadingMessage("Guardando resultados de evaluación...");
-            await onSignUpComplete(user.id);
-          } else {
-            // Only verify profile if we're not in the evaluation flow
-            let profileExists = false;
-            let retryCount = 0;
-            const maxRetries = 5;
+          // Add a delay after profile creation to ensure it's available
+          await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            setLoadingMessage("Verificando perfil...");
-            while (!profileExists && retryCount < maxRetries) {
-              try {
-                // Increased delay before checking (1 second)
-                await new Promise((resolve) => setTimeout(resolve, 1000));
+          // Verify that the profile was created successfully
+          setLoadingMessage("Verificando perfil...");
+          let profileExists = false;
+          let retryCount = 0;
+          const maxRetries = 5;
 
-                // Check if profile exists
-                const checkResponse = await fetch(`/api/profile/${user.id}`, {
-                  method: "GET",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                });
+          while (!profileExists && retryCount < maxRetries) {
+            try {
+              const checkResponse = await fetch(`/api/profile/${userId}`);
 
-                if (checkResponse.ok) {
+              if (checkResponse.ok) {
+                const profileData = await checkResponse.json();
+                if (profileData.profile) {
                   profileExists = true;
-                } else if (checkResponse.status === 404) {
-                  // Silently continue if 404, this is expected
-                  retryCount++;
-                } else {
-                  // Only log error for non-404 responses
-                  const errorData = await checkResponse.json();
-                  console.error("Error checking profile:", errorData);
-                  retryCount++;
+                  console.log(
+                    "Profile verified successfully:",
+                    profileData.profile
+                  );
                 }
-              } catch (e) {
-                // Only log error if it's not a 404
-                if (e instanceof Error && !e.message.includes("404")) {
-                  console.error("Error checking profile:", e);
-                }
-                retryCount++;
+              } else {
+                console.log(
+                  `Profile check attempt ${retryCount + 1} failed with status ${checkResponse.status}`
+                );
               }
+            } catch (error) {
+              console.error(
+                `Profile check attempt ${retryCount + 1} failed:`,
+                error
+              );
             }
 
             if (!profileExists) {
-              // Changed to debug level since this is expected sometimes
-              console.debug("Profile verification timeout, but continuing");
+              retryCount++;
+              if (retryCount < maxRetries) {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+              }
             }
           }
 
-          toast({
-            title: "Éxito",
-            description: "Tu cuenta ha sido creada correctamente.",
-          });
+          // Clear the creating_profile flag now that profile creation is complete
+          localStorage.removeItem("creating_profile");
 
-          // If we're coming from an evaluation, don't redirect automatically
-          if (!evaluationResults) {
-            // Add a small delay before redirecting to ensure profile is available
-            setLoadingMessage("Redirigiendo al dashboard...");
-            setTimeout(() => {
-              router.push("/dashboard");
-            }, 1000);
+          // Add another delay to ensure the profile is fully available
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          // If we're in the evaluation flow, call onSignUpComplete with the user ID
+          if (evaluationResults && onSignUpComplete) {
+            setLoadingMessage(
+              "Preparando para guardar resultados de evaluación..."
+            );
+            try {
+              await onSignUpComplete(userId);
+            } catch (error) {
+              console.error("Error in onSignUpComplete:", error);
+              // Don't throw here, just log the error and continue
+              toast({
+                title: "Advertencia",
+                description:
+                  "Hubo un problema al guardar los resultados, pero puede continuar.",
+                variant: "default",
+              });
+            }
+          } else {
+            // Only verify profile if we're not in the evaluation flow
+            toast({
+              title: "Éxito",
+              description: "Tu cuenta ha sido creada correctamente.",
+            });
+
+            // If we're coming from an evaluation, don't redirect automatically
+            if (!evaluationResults) {
+              // Add a small delay before redirecting to ensure profile is available
+              setLoadingMessage("Redirigiendo al dashboard...");
+              setTimeout(() => {
+                router.push("/dashboard");
+              }, 1000);
+            }
           }
         } catch (profileError) {
           console.error("Profile creation error:", profileError);
+
+          // Clear the creating_profile flag in case of error
+          localStorage.removeItem("creating_profile");
 
           // If profile creation fails, we should still show a toast
           toast({
@@ -205,10 +264,30 @@ export function SignUpForm({
                 : "Error al crear perfil. Por favor, inténtalo de nuevo.",
             variant: "destructive",
           });
+
+          // If we're in the evaluation flow, still try to proceed
+          if (evaluationResults && onSignUpComplete) {
+            try {
+              await onSignUpComplete(userId);
+            } catch (error) {
+              console.error(
+                "Error in onSignUpComplete after profile creation failure:",
+                error
+              );
+            }
+          }
         }
+      } catch (error) {
+        // Clear the creating_profile flag in case of error
+        localStorage.removeItem("creating_profile");
+        throw error;
       }
     } catch (error) {
       console.error("Sign up error:", error);
+
+      // Clear the creating_profile flag in case of error
+      localStorage.removeItem("creating_profile");
+
       const errorMessage =
         error instanceof Error
           ? error.message

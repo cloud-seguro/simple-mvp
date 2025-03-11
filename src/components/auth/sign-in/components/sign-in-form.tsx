@@ -28,6 +28,7 @@ interface SignInFormProps {
 // Extended props to include evaluation results
 interface ExtendedSignInFormProps extends SignInFormProps {
   onSignInComplete?: (userId: string) => Promise<void>;
+  onSignInStart?: () => void;
   evaluationResults?: {
     quizId: string;
     results: Record<string, number>;
@@ -37,6 +38,7 @@ interface ExtendedSignInFormProps extends SignInFormProps {
 export function SignInForm({
   className,
   onSignInComplete,
+  onSignInStart,
   evaluationResults,
   ...props
 }: ExtendedSignInFormProps) {
@@ -60,25 +62,32 @@ export function SignInForm({
       setIsLoading(true);
       setLoadingMessage("Iniciando sesión...");
 
+      // Notify parent component that sign-in has started
+      if (onSignInStart) {
+        onSignInStart();
+      }
+
       // Sign in and wait for it to complete
       await signIn(data.email, data.password, !!evaluationResults);
 
-      // Wait a moment to ensure session is properly set
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait longer to ensure session and profile are properly set
+      setLoadingMessage("Cargando perfil...");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // If we have evaluation results and onSignInComplete, call it
       if (evaluationResults && onSignInComplete) {
-        setLoadingMessage("Guardando resultados de evaluación...");
+        setLoadingMessage("Preparando para guardar resultados...");
         try {
           // Get the current user ID from a fresh call to useAuth
           const currentUser = await fetch("/api/auth/me").then((res) =>
             res.json()
           );
 
-          if (!currentUser || !currentUser.id) {
+          if (!currentUser?.id) {
             throw new Error("No se pudo obtener la información del usuario");
           }
 
+          setLoadingMessage("Guardando resultados de evaluación...");
           await onSignInComplete(currentUser.id);
 
           toast({
@@ -88,7 +97,26 @@ export function SignInForm({
           });
         } catch (evalError) {
           console.error("Error saving evaluation:", evalError);
-          throw new Error("Error al guardar los resultados de la evaluación");
+          toast({
+            title: "Advertencia",
+            description:
+              "Hubo un problema al guardar los resultados, pero puede continuar.",
+            variant: "default",
+          });
+
+          // Still proceed even if there was an error
+          if (onSignInComplete) {
+            try {
+              const currentUser = await fetch("/api/auth/me").then((res) =>
+                res.json()
+              );
+              if (currentUser?.id) {
+                await onSignInComplete(currentUser.id);
+              }
+            } catch (retryError) {
+              console.error("Error in retry attempt:", retryError);
+            }
+          }
         }
       } else {
         toast({
@@ -100,7 +128,7 @@ export function SignInForm({
         if (!evaluationResults) {
           setLoadingMessage("Redirigiendo al dashboard...");
           // Add a small delay before redirecting
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           router.push("/dashboard");
         }
       }

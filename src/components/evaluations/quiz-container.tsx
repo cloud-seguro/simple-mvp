@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { QuizIntro } from "./quiz-intro";
 import { QuizQuestion } from "./quiz-question";
 import { ResultsReady } from "./results-ready";
 import { CybersecurityResults } from "./cybersecurity-results";
 import { EvaluationSignUp } from "./evaluation-sign-up";
-import type { QuizData, QuizResults } from "./types";
+import type { QuizData, QuizResults, UserInfo } from "./types";
 import { toast } from "@/components/ui/use-toast";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
@@ -28,6 +28,19 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   const [results, setResults] = useState<QuizResults>({});
   const { user, isLoading, profile } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    firstName: "Usuario",
+    lastName: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    setUserInfo({
+      firstName: profile?.firstName || "Usuario",
+      lastName: profile?.lastName || "",
+      email: user?.email || "",
+    });
+  }, [profile, user]);
 
   const handleStart = () => {
     setStage("questions");
@@ -104,8 +117,42 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   const handleSignUpComplete = () => {
     // Clear any potential loading states
     setIsSubmitting(false);
-    // Move to the results-ready stage
-    setStage("results-ready");
+
+    // Add a longer delay before moving to the results-ready stage
+    // This ensures that all auth processes are completed
+    setTimeout(async () => {
+      // If we have a user ID but no profile, try to fetch it directly
+      if (user?.id && !profile) {
+        try {
+          setIsSubmitting(true); // Show loading screen while fetching profile
+
+          // Try to fetch the profile directly
+          const response = await fetch(`/api/profile/${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            // Update the userInfo state with the fetched profile data
+            if (data.profile) {
+              setUserInfo({
+                firstName: data.profile.firstName || "Usuario",
+                lastName: data.profile.lastName || "",
+                email: user.email || "",
+                // Additional fields if needed
+              });
+            }
+          }
+        } catch (error) {
+          console.error(
+            "Error fetching profile before showing results:",
+            error
+          );
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+
+      // Move to the results-ready stage
+      setStage("results-ready");
+    }, 2000); // Increased from 1000ms to 2000ms
   };
 
   const handleViewResults = () => {
@@ -116,13 +163,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     setResults({});
     setCurrentQuestionIndex(0);
     setStage("intro");
-  };
-
-  // Get user info for display
-  const userInfo = {
-    firstName: profile?.firstName || "Usuario",
-    lastName: profile?.lastName || "",
-    email: user?.email || "",
   };
 
   // If auth is still loading, show the security loading screen
