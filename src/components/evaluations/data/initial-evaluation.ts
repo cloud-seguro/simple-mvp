@@ -139,6 +139,39 @@ export const evaluacionInicial: QuizData = {
         { label: "Bien informada y formada regularmente", value: 3 },
       ],
     },
+    {
+      id: "indicadores-1",
+      text: "¿La organización cuenta con indicadores de gestión en ciberseguridad para evaluar el desempeño de los controles?",
+      category: "Indicadores, Continuidad e Incidentes",
+      options: [
+        { label: "No", value: 0 },
+        { label: "En proceso de definición", value: 1 },
+        { label: "Sí, pero sin seguimiento formal", value: 2 },
+        { label: "Sí, con monitoreo y revisión periódica", value: 3 },
+      ],
+    },
+    {
+      id: "indicadores-2",
+      text: "¿Existe un proceso formal y documentado de gestión de incidentes de ciberseguridad?",
+      category: "Indicadores, Continuidad e Incidentes",
+      options: [
+        { label: "No", value: 0 },
+        { label: "Parcialmente", value: 1 },
+        { label: "Sí, pero no actualizado o probado", value: 2 },
+        { label: "Sí, actualizado y probado regularmente", value: 3 },
+      ],
+    },
+    {
+      id: "indicadores-3",
+      text: "¿La empresa tiene un plan de continuidad de negocio que contemple la ciberseguridad?",
+      category: "Indicadores, Continuidad e Incidentes",
+      options: [
+        { label: "No", value: 0 },
+        { label: "Parcialmente desarrollado", value: 1 },
+        { label: "Sí, pero no probado", value: 2 },
+        { label: "Sí, probado y actualizado regularmente", value: 3 },
+      ],
+    },
   ],
-}
+};
 
