@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import type { UserRole } from "@prisma/client";
 
 export default async function DashboardPage() {
   const cookieStore = cookies();
