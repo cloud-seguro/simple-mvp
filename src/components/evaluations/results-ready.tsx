@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { Copy, Mail } from "lucide-react"
-import type { UserInfo } from "./user-info-form"
+import type { UserInfo } from "./types";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg"
 import { SimpleHeader } from "@/components/ui/simple-header"
 

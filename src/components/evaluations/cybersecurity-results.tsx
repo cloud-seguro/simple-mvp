@@ -2,8 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import type { QuizData, QuizResults } from "./types"
-import type { UserInfo } from "./user-info-form"
+import type { QuizData, QuizResults, UserInfo } from "./types";
 import { SimpleHeader } from "@/components/ui/simple-header"
 
 interface CybersecurityResultsProps {

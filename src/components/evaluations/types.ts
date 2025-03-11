@@ -22,4 +22,12 @@ export type QuizOption = {
     [questionId: string]: number
   }
   
+  export type UserInfo = {
+    firstName: string;
+    lastName?: string;
+    email: string;
+    company?: string;
+    company_role?: string;
+  };
+  
   
