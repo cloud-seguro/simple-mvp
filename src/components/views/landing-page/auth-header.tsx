@@ -2,15 +2,15 @@
 
 import { useAuth } from "@/providers/auth-provider";
 import DashboardButton from "@/components/dashboard/dashboard-button";
+import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 import Link from "next/link";
 
 export function AuthHeader() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="h-9 w-[100px] animate-pulse rounded-md bg-muted" />
-    );
+    return <div className="h-9 w-[100px] animate-pulse rounded-md bg-muted" />;
   }
 
   if (user) {
@@ -18,18 +18,12 @@ export function AuthHeader() {
   }
 
   return (
-    <div className="flex items-center space-x-4">
-      <Link
-        href="/sign-in"
-        className="text-primary hover:text-primary-foreground hover:bg-primary px-4 py-2 rounded-md transition-colors"
-      >
-        Iniciar Sesión
-      </Link>
-      <Link
-        href="/sign-up"
-        className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-      >
-        Registrarse
+    <div className="flex items-center space-x-2">
+      <Link href="/sign-in">
+        <Button variant="outline" className="flex items-center gap-1">
+          <LogIn size={16} />
+          Iniciar Sesión
+        </Button>
       </Link>
     </div>
   );

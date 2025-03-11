@@ -18,10 +18,11 @@ export default function DashboardButton({ className }: DashboardButtonProps = {}
   return (
     <Button
       onClick={() => router.push("/dashboard")}
-      className={`flex items-center gap-2 shadow-lg ${className}`}
+      variant="outline"
+      className={`w-full md:w-auto border-black text-black hover:bg-black hover:text-yellow-400 transition-colors ${className}`}
     >
       <LayoutDashboard className="h-4 w-4" />
-      Go to Dashboard
+      Dashboard
     </Button>
   );
 } 
