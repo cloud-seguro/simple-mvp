@@ -2,23 +2,27 @@
 
 import { useState } from "react"
 import { QuizIntro } from "./quiz-intro"
-import { QuizQuestion } from "./quiz-question"
-import { UserInfoForm, type UserInfo } from "./user-info-form"
+import { QuizQuestion } from "./quiz-question";
 import { ResultsReady } from "./results-ready"
 import { CybersecurityResults } from "./cybersecurity-results"
+import { EvaluationSignUp } from "./evaluation-sign-up";
 import type { QuizData, QuizResults } from "./types"
 
 interface QuizContainerProps {
   quizData: QuizData
 }
 
-type QuizStage = "intro" | "questions" | "user-info" | "results-ready" | "results"
+type QuizStage =
+  | "intro"
+  | "questions"
+  | "sign-up"
+  | "results-ready"
+  | "results";
 
 export function QuizContainer({ quizData }: QuizContainerProps) {
   const [stage, setStage] = useState<QuizStage>("intro")
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [results, setResults] = useState<QuizResults>({})
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  const [results, setResults] = useState<QuizResults>({});
 
   const handleStart = () => {
     setStage("questions")
@@ -35,7 +39,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     if (currentQuestionIndex < quizData.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1)
     } else {
-      setStage("user-info")
+      setStage("sign-up");
     }
   }
 
@@ -45,10 +49,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     }
   }
 
-  const handleUserInfoSubmit = (info: UserInfo) => {
-    setUserInfo(info)
-    setStage("results-ready")
-  }
+  const handleSignUpComplete = () => {
+    setStage("results-ready");
+  };
 
   const handleViewResults = () => {
     setStage("results")
@@ -56,37 +59,63 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
 
   const handleRestart = () => {
     setResults({})
-    setCurrentQuestionIndex(0)
-    setUserInfo(null)
+    setCurrentQuestionIndex(0);
     setStage("intro")
   }
 
   return (
     <>
-      {stage === "intro" && <QuizIntro quizData={quizData} onStart={handleStart} />}
+      {stage === "intro" && (
+        <QuizIntro quizData={quizData} onStart={handleStart} />
+      )}
 
       {stage === "questions" && (
         <QuizQuestion
           question={quizData.questions[currentQuestionIndex]}
           currentIndex={currentQuestionIndex}
           totalQuestions={quizData.questions.length}
-          selectedValue={results[quizData.questions[currentQuestionIndex].id] || null}
+          selectedValue={
+            results[quizData.questions[currentQuestionIndex].id] || null
+          }
           onSelect={handleSelect}
           onNext={handleNext}
           onPrev={handlePrev}
         />
       )}
 
-      {stage === "user-info" && <UserInfoForm results={results} onSubmit={handleUserInfoSubmit} />}
-
-      {stage === "results-ready" && userInfo && (
-        <ResultsReady userInfo={userInfo} onViewResults={handleViewResults} shareUrl={window.location.href} />
+      {stage === "sign-up" && (
+        <EvaluationSignUp
+          results={results}
+          quizId={quizData.id}
+          onComplete={handleSignUpComplete}
+        />
       )}
 
-      {stage === "results" && userInfo && (
-        <CybersecurityResults quizData={quizData} results={results} userInfo={userInfo} onRestart={handleRestart} />
+      {stage === "results-ready" && (
+        <ResultsReady
+          userInfo={{
+            firstName: "Usuario",
+            lastName: "",
+            email: "",
+          }}
+          onViewResults={handleViewResults}
+          shareUrl={window.location.href}
+        />
+      )}
+
+      {stage === "results" && (
+        <CybersecurityResults
+          quizData={quizData}
+          results={results}
+          userInfo={{
+            firstName: "Usuario",
+            lastName: "",
+            email: "",
+          }}
+          onRestart={handleRestart}
+        />
       )}
     </>
-  )
+  );
 }
 

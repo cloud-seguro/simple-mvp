@@ -23,7 +23,21 @@ import Image from "next/image";
 import { uploadAvatar } from "@/lib/supabase/upload-avatar";
 import { useRouter } from "next/navigation";
 
-export function SignUpForm({ className, ...props }: SignUpFormProps) {
+// Extended props to include evaluation results
+interface ExtendedSignUpFormProps extends SignUpFormProps {
+  onSignUpComplete?: (userId: string) => Promise<void>;
+  evaluationResults?: {
+    quizId: string;
+    results: Record<string, number>;
+  };
+}
+
+export function SignUpForm({ 
+  className, 
+  onSignUpComplete,
+  evaluationResults,
+  ...props 
+}: ExtendedSignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -124,8 +138,8 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           setLoadingMessage("Verificando perfil...");
           while (!profileExists && retryCount < maxRetries) {
             try {
-              // Small delay before checking
-              await new Promise((resolve) => setTimeout(resolve, 500));
+              // Increased delay before checking (1 second)
+              await new Promise((resolve) => setTimeout(resolve, 1000));
 
               // Check if profile exists
               const checkResponse = await fetch(`/api/profile/${user.id}`, {
@@ -137,19 +151,33 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
 
               if (checkResponse.ok) {
                 profileExists = true;
+              } else if (checkResponse.status === 404) {
+                // Silently continue if 404, this is expected
+                retryCount++;
               } else {
+                // Only log error for non-404 responses
+                const errorData = await checkResponse.json();
+                console.error("Error checking profile:", errorData);
                 retryCount++;
               }
             } catch (e) {
-              console.error("Error checking profile:", e);
+              // Only log error if it's not a 404
+              if (e instanceof Error && !e.message.includes("404")) {
+                console.error("Error checking profile:", e);
+              }
               retryCount++;
             }
           }
 
           if (!profileExists) {
-            console.warn(
-              "Profile may not be fully created yet, but proceeding"
-            );
+            // Changed to debug level since this is expected sometimes
+            console.debug("Profile verification timeout, but continuing");
+          }
+
+          // If we have evaluation results, save them
+          if (evaluationResults && onSignUpComplete) {
+            setLoadingMessage("Guardando resultados de evaluación...");
+            await onSignUpComplete(user.id);
           }
 
           toast({
@@ -157,11 +185,14 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             description: "Tu cuenta ha sido creada correctamente.",
           });
 
-          // Add a small delay before redirecting to ensure profile is available
-          setLoadingMessage("Redirigiendo al dashboard...");
-          setTimeout(() => {
-            router.push("/dashboard");
-          }, 1000);
+          // If we're coming from an evaluation, don't redirect automatically
+          if (!evaluationResults) {
+            // Add a small delay before redirecting to ensure profile is available
+            setLoadingMessage("Redirigiendo al dashboard...");
+            setTimeout(() => {
+              router.push("/dashboard");
+            }, 1000);
+          }
         } catch (profileError) {
           console.error("Profile creation error:", profileError);
 
@@ -253,7 +284,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
               control={form.control}
               name="lastName"
               render={({ field }) => (
-                <FormItem className="space-y-1">
+                <FormItem>
                   <FormLabel>Apellido</FormLabel>
                   <FormControl>
                     <Input placeholder="Pérez" {...field} />
@@ -268,10 +299,10 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             control={form.control}
             name="company"
             render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel>Empresa (Opcional)</FormLabel>
+              <FormItem>
+                <FormLabel>Empresa</FormLabel>
                 <FormControl>
-                  <Input placeholder="Tu Empresa" {...field} />
+                  <Input placeholder="Nombre de la empresa" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -282,10 +313,10 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
             control={form.control}
             name="company_role"
             render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel>Cargo en la Empresa (Opcional)</FormLabel>
+              <FormItem>
+                <FormLabel>Cargo</FormLabel>
                 <FormControl>
-                  <Input placeholder="Tu Cargo" {...field} />
+                  <Input placeholder="Tu cargo en la empresa" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -321,14 +352,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                {loadingMessage || "Cargando..."}
-              </div>
-            ) : (
-              "Crear Cuenta"
-            )}
+            {isLoading ? loadingMessage || "Procesando..." : "Crear Cuenta"}
           </Button>
         </form>
       </Form>
