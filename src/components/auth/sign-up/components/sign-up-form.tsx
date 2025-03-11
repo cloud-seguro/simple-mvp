@@ -130,54 +130,54 @@ export function SignUpForm({
             );
           }
 
-          // Wait for profile to be fully created by checking it exists
-          let profileExists = false;
-          let retryCount = 0;
-          const maxRetries = 5;
-
-          setLoadingMessage("Verificando perfil...");
-          while (!profileExists && retryCount < maxRetries) {
-            try {
-              // Increased delay before checking (1 second)
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-
-              // Check if profile exists
-              const checkResponse = await fetch(`/api/profile/${user.id}`, {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              });
-
-              if (checkResponse.ok) {
-                profileExists = true;
-              } else if (checkResponse.status === 404) {
-                // Silently continue if 404, this is expected
-                retryCount++;
-              } else {
-                // Only log error for non-404 responses
-                const errorData = await checkResponse.json();
-                console.error("Error checking profile:", errorData);
-                retryCount++;
-              }
-            } catch (e) {
-              // Only log error if it's not a 404
-              if (e instanceof Error && !e.message.includes("404")) {
-                console.error("Error checking profile:", e);
-              }
-              retryCount++;
-            }
-          }
-
-          if (!profileExists) {
-            // Changed to debug level since this is expected sometimes
-            console.debug("Profile verification timeout, but continuing");
-          }
-
-          // If we have evaluation results, save them
+          // If we're in the evaluation flow, skip profile verification
           if (evaluationResults && onSignUpComplete) {
             setLoadingMessage("Guardando resultados de evaluación...");
             await onSignUpComplete(user.id);
+          } else {
+            // Only verify profile if we're not in the evaluation flow
+            let profileExists = false;
+            let retryCount = 0;
+            const maxRetries = 5;
+
+            setLoadingMessage("Verificando perfil...");
+            while (!profileExists && retryCount < maxRetries) {
+              try {
+                // Increased delay before checking (1 second)
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+
+                // Check if profile exists
+                const checkResponse = await fetch(`/api/profile/${user.id}`, {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                });
+
+                if (checkResponse.ok) {
+                  profileExists = true;
+                } else if (checkResponse.status === 404) {
+                  // Silently continue if 404, this is expected
+                  retryCount++;
+                } else {
+                  // Only log error for non-404 responses
+                  const errorData = await checkResponse.json();
+                  console.error("Error checking profile:", errorData);
+                  retryCount++;
+                }
+              } catch (e) {
+                // Only log error if it's not a 404
+                if (e instanceof Error && !e.message.includes("404")) {
+                  console.error("Error checking profile:", e);
+                }
+                retryCount++;
+              }
+            }
+
+            if (!profileExists) {
+              // Changed to debug level since this is expected sometimes
+              console.debug("Profile verification timeout, but continuing");
+            }
           }
 
           toast({

@@ -39,36 +39,68 @@ export function EvaluationSignUp({
       const evaluationType =
         quizId === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
 
-      // Add a small delay to ensure the user session is properly set
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Add a longer delay to ensure the user session and profile are properly set
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Store evaluation results in the database
-      const response = await fetch("/api/evaluations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: evaluationType,
-          title:
-            evaluationType === "INITIAL"
-              ? "Evaluación Inicial"
-              : "Evaluación Avanzada",
-          answers: results,
-          userId, // Include userId in the request
-        }),
-      });
+      // Retry logic for saving evaluation results
+      let success = false;
+      let retryCount = 0;
+      const maxRetries = 3;
+      let lastError = null;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message ||
-            "Error al guardar los resultados de la evaluación"
-        );
+      while (!success && retryCount < maxRetries) {
+        try {
+          // Store evaluation results in the database
+          const response = await fetch("/api/evaluations", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: evaluationType,
+              title:
+                evaluationType === "INITIAL"
+                  ? "Evaluación Inicial"
+                  : "Evaluación Avanzada",
+              answers: results,
+              userId, // Include userId in the request
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.message ||
+                "Error al guardar los resultados de la evaluación"
+            );
+          }
+
+          // Wait for the response data
+          const data = await response.json();
+          success = true;
+        } catch (error) {
+          console.error(`Attempt ${retryCount + 1} failed:`, error);
+          lastError = error;
+          retryCount++;
+
+          if (retryCount < maxRetries) {
+            // Wait before retrying (increasing delay with each retry)
+            setLoadingMessage(
+              `Reintentando guardar resultados (${retryCount}/${maxRetries})...`
+            );
+            await new Promise((resolve) =>
+              setTimeout(resolve, 1000 * retryCount)
+            );
+          }
+        }
       }
 
-      // Wait for the response data
-      const data = await response.json();
+      if (!success) {
+        throw (
+          lastError ||
+          new Error("Failed to save evaluation results after multiple attempts")
+        );
+      }
 
       // Add a small delay before proceeding
       await new Promise((resolve) => setTimeout(resolve, 500));

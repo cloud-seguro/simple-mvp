@@ -4,6 +4,17 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
+// Define a simple type for evaluations
+type SimpleEvaluation = {
+  id: string;
+  type: string;
+  title: string;
+  score: number | null;
+  profileId: string;
+  createdAt: Date;
+  completedAt: Date | null;
+};
+
 export default async function DashboardPage() {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
@@ -17,49 +28,25 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-  // Get the user's profile to check their role
-  // Add retry logic for profile fetching
-  let profile = null;
-  let retryCount = 0;
-  const maxRetries = 3;
+  // Get the user's profile for name and evaluations
+  // We don't need to check role here as it's already checked in the layout
+  const profile = await prisma.profile.findUnique({
+    where: { userId: user.id },
+    select: { id: true, firstName: true, lastName: true },
+  });
 
-  while (!profile && retryCount < maxRetries) {
-    try {
-      profile = await prisma.profile.findUnique({
-        where: { userId: user.id },
-        select: { id: true, role: true, firstName: true, lastName: true },
-      });
-
-      if (!profile) {
-        // Wait a bit before retrying
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        retryCount++;
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      retryCount++;
-      // Wait before retrying
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-  }
-
-  // If no profile after retries or not a PREMIUM/SUPERADMIN user, redirect to upgrade page
-  if (
-    !profile ||
-    (profile.role !== "PREMIUM" && profile.role !== "SUPERADMIN")
-  ) {
+  if (!profile) {
+    // This shouldn't happen since we check in the layout, but just in case
     redirect("/upgrade");
   }
 
-  // Get the user's evaluations
-  const evaluations = await prisma.evaluation.findMany({
-    where: {
-      profileId: profile.id,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  // Get the user's evaluations with a type assertion
+  const evaluations = (await prisma.$queryRaw`
+    SELECT id, type, title, score, "profileId", "createdAt", "completedAt"
+    FROM evaluations
+    WHERE "profileId" = ${profile.id}
+    ORDER BY "createdAt" DESC
+  `) as SimpleEvaluation[];
 
   const userName = profile.firstName
     ? `${profile.firstName} ${profile.lastName || ""}`
