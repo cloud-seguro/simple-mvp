@@ -41,7 +41,7 @@ export function SignInForm({
   ...props
 }: ExtendedSignInFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const { signIn } = useAuth();
   const router = useRouter();
   const [loadingMessage, setLoadingMessage] = useState<string>("");
 
@@ -61,33 +61,48 @@ export function SignInForm({
       setLoadingMessage("Iniciando sesión...");
 
       // Sign in and wait for it to complete
-      await signIn(data.email, data.password);
+      await signIn(data.email, data.password, !!evaluationResults);
 
       // Wait a moment to ensure session is properly set
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // If we have evaluation results and the user is set, save them
-      if (evaluationResults && onSignInComplete && user?.id) {
+      // If we have evaluation results and onSignInComplete, call it
+      if (evaluationResults && onSignInComplete) {
         setLoadingMessage("Guardando resultados de evaluación...");
         try {
-          await onSignInComplete(user.id);
+          // Get the current user ID from a fresh call to useAuth
+          const currentUser = await fetch("/api/auth/me").then((res) =>
+            res.json()
+          );
+
+          if (!currentUser || !currentUser.id) {
+            throw new Error("No se pudo obtener la información del usuario");
+          }
+
+          await onSignInComplete(currentUser.id);
+
+          toast({
+            title: "Éxito",
+            description:
+              "Has iniciado sesión correctamente y tus resultados han sido guardados.",
+          });
         } catch (evalError) {
           console.error("Error saving evaluation:", evalError);
           throw new Error("Error al guardar los resultados de la evaluación");
         }
-      }
+      } else {
+        toast({
+          title: "Éxito",
+          description: "Has iniciado sesión correctamente.",
+        });
 
-      toast({
-        title: "Éxito",
-        description: "Has iniciado sesión correctamente.",
-      });
-
-      // If we're coming from an evaluation, don't redirect automatically
-      if (!evaluationResults) {
-        setLoadingMessage("Redirigiendo al dashboard...");
-        // Add a small delay before redirecting
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        router.push("/dashboard");
+        // If we're coming from an evaluation, don't redirect automatically
+        if (!evaluationResults) {
+          setLoadingMessage("Redirigiendo al dashboard...");
+          // Add a small delay before redirecting
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
       console.error("Sign in error:", error);
@@ -109,6 +124,19 @@ export function SignInForm({
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin" />
+              <p className="text-lg font-medium">
+                {loadingMessage || "Procesando..."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

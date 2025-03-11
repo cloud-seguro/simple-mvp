@@ -26,6 +26,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [results, setResults] = useState<QuizResults>({});
   const { user, isLoading, profile } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleStart = () => {
     setStage("questions");
@@ -45,6 +46,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       // If user is already authenticated, skip sign-up and save results directly
       if (user?.id) {
         try {
+          setIsSubmitting(true);
           const evaluationType =
             quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
 
@@ -83,6 +85,8 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             variant: "destructive",
           });
           setStage("results-ready");
+        } finally {
+          setIsSubmitting(false);
         }
       } else {
         setStage("sign-up");
@@ -97,6 +101,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   };
 
   const handleSignUpComplete = () => {
+    // Clear any potential loading states
+    setIsSubmitting(false);
+    // Move to the results-ready stage
     setStage("results-ready");
   };
 
@@ -124,6 +131,17 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
 
   return (
     <>
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin" />
+              <p className="text-lg font-medium">Guardando resultados...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {stage === "intro" && (
         <QuizIntro quizData={quizData} onStart={handleStart} />
       )}

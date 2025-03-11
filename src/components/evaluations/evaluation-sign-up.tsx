@@ -24,6 +24,7 @@ export function EvaluationSignUp({
 }: EvaluationSignUpProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
   const router = useRouter();
 
   // This function will be called after successful sign-up or sign-in
@@ -32,6 +33,7 @@ export function EvaluationSignUp({
 
     try {
       setIsSubmitting(true);
+      setLoadingMessage("Guardando resultados de evaluación...");
 
       // Determine evaluation type based on quiz ID
       const evaluationType =
@@ -71,6 +73,9 @@ export function EvaluationSignUp({
       // Add a small delay before proceeding
       await new Promise((resolve) => setTimeout(resolve, 500));
 
+      setLoadingMessage("¡Listo! Preparando resultados...");
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // Proceed to the next step
       onComplete();
 
@@ -91,6 +96,7 @@ export function EvaluationSignUp({
       // Re-throw the error so the form component can handle it
       throw error;
     } finally {
+      setLoadingMessage("");
       setIsSubmitting(false);
     }
   };
@@ -101,6 +107,19 @@ export function EvaluationSignUp({
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md mx-auto p-6"
     >
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin" />
+              <p className="text-lg font-medium">
+                {loadingMessage || "Procesando..."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-4">¡Felicitaciones!</h1>
       <p className="mb-6">
         Ha completado la evaluación. Para ver sus resultados, cree una cuenta o

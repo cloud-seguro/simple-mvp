@@ -11,7 +11,11 @@ type AuthContextType = {
   session: Session | null;
   profile: Profile | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (
+    email: string,
+    password: string,
+    noRedirect?: boolean
+  ) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -82,7 +86,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [router, supabase]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (
+    email: string,
+    password: string,
+    noRedirect?: boolean
+  ) => {
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -91,7 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data.user) {
       await fetchProfile(data.user.id);
     }
-    router.push("/dashboard");
+    if (!noRedirect) {
+      router.push("/dashboard");
+    }
   };
 
   const signUp = async (email: string, password: string) => {
