@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { SignUpForm } from "@/components/auth/sign-up/components/sign-up-form";
 import { SignInForm } from "@/components/auth/sign-in/components/sign-in-form";
 import { motion } from "framer-motion";
@@ -25,7 +24,6 @@ export function EvaluationSignUp({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [loadingMessage, setLoadingMessage] = useState<string>("");
-  const router = useRouter();
 
   // This function will be called after successful sign-up or sign-in
   const handleAuthComplete = async (userId: string) => {
@@ -75,8 +73,6 @@ export function EvaluationSignUp({
             );
           }
 
-          // Wait for the response data
-          const data = await response.json();
           success = true;
         } catch (error) {
           console.error(`Attempt ${retryCount + 1} failed:`, error);

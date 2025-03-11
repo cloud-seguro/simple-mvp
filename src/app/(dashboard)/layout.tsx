@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-client";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
+import { LoadingScreen } from "@/components/ui/loading-screen";
+import { Suspense } from "react";
 
-export default async function DashboardLayout({
+async function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -34,4 +36,16 @@ export default async function DashboardLayout({
   }
 
   return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense fallback={<LoadingScreen message="Verificando acceso..." />}>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </Suspense>
+  );
 }
