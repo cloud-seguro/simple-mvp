@@ -21,6 +21,7 @@ import {
   UserCog,
   UserX,
   Users,
+  FileBarChart,
 } from "lucide-react";
 import type { SidebarData } from "../types";
 
@@ -55,6 +56,11 @@ export const sidebarData: SidebarData = {
           title: "Dashboard",
           url: "/",
           icon: LayoutDashboard,
+        },
+        {
+          title: "Evaluaciones",
+          url: "/evaluations",
+          icon: FileBarChart,
         },
         {
           title: "Tareas",
