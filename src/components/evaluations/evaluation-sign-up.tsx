@@ -12,7 +12,7 @@ import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 interface EvaluationSignUpProps {
   results: QuizResults;
   quizId: string;
-  onComplete: () => void;
+  onComplete: (evaluationId?: string) => void;
 }
 
 type AuthMode = "signup" | "signin";
@@ -70,6 +70,7 @@ export function EvaluationSignUp({
       let retryCount = 0;
       const maxRetries = 5;
       let lastError = null;
+      let savedEvaluationId = null;
 
       while (!success && retryCount < maxRetries) {
         try {
@@ -102,6 +103,8 @@ export function EvaluationSignUp({
             );
           }
 
+          const data = await response.json();
+          savedEvaluationId = data.evaluation.id;
           success = true;
         } catch (error) {
           console.error(`Attempt ${retryCount + 1} failed:`, error);
@@ -134,8 +137,8 @@ export function EvaluationSignUp({
       // Add a small delay before proceeding
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Proceed to the next step
-      onComplete();
+      // Proceed to the next step with the evaluation ID
+      onComplete(savedEvaluationId);
 
       toast({
         title: "Éxito",

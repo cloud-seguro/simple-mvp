@@ -101,3 +101,51 @@ export async function getUserEvaluations(profileId: string) {
 
   return evaluations;
 }
+
+/**
+ * Retrieves a specific evaluation by ID
+ * @param id - The ID of the evaluation
+ * @returns The evaluation or null if not found
+ */
+export async function getEvaluationById(id: string) {
+  if (!id) {
+    throw new Error("Evaluation ID is required");
+  }
+
+  try {
+    const evaluation = await prisma.evaluation.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        profile: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            company: true,
+            company_role: true,
+          },
+        },
+      },
+    });
+
+    if (evaluation) {
+      console.log(`Found evaluation with ID ${id}:`, {
+        type: evaluation.type,
+        title: evaluation.title,
+        score: evaluation.score,
+        answersType: typeof evaluation.answers,
+        answersIsArray: Array.isArray(evaluation.answers),
+        answersKeys: evaluation.answers ? Object.keys(evaluation.answers as object) : [],
+      });
+    } else {
+      console.log(`No evaluation found with ID ${id}`);
+    }
+
+    return evaluation;
+  } catch (error) {
+    console.error(`Error fetching evaluation with ID ${id}:`, error);
+    throw error;
+  }
+}

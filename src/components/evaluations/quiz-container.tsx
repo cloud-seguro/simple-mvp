@@ -41,6 +41,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   });
   const router = useRouter();
   const loadedStoredResults = useRef(false);
+  const [evaluationId, setEvaluationId] = useState<string | null>(null);
 
   useEffect(() => {
     setUserInfo({
@@ -139,6 +140,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           let retryCount = 0;
           const maxRetries = 3;
           let lastError = null;
+          let savedEvaluationId = null;
 
           while (!success && retryCount < maxRetries) {
             try {
@@ -169,6 +171,8 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
                 );
               }
 
+              const data = await response.json();
+              savedEvaluationId = data.evaluation.id;
               success = true;
             } catch (error) {
               console.error(`Attempt ${retryCount + 1} failed:`, error);
@@ -201,7 +205,12 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           setLoadingMessage("¡Listo! Preparando resultados...");
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
-          // Only move to the next stage after successful API call
+          // Store the evaluation ID for the results page
+          if (savedEvaluationId) {
+            setEvaluationId(savedEvaluationId);
+          }
+
+          // Move to the results-ready stage
           setStage("results-ready");
         } catch (error) {
           console.error("Error saving evaluation:", error);
@@ -238,9 +247,14 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     }
   };
 
-  const handleSignUpComplete = () => {
+  const handleSignUpComplete = (savedEvaluationId?: string) => {
     // Clear any potential loading states
     setIsSubmitting(false);
+
+    // Store the evaluation ID if provided
+    if (savedEvaluationId) {
+      setEvaluationId(savedEvaluationId);
+    }
 
     // Show loading screen while we wait for profile to be available
     setIsSubmitting(true);
@@ -285,7 +299,14 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   };
 
   const handleViewResults = () => {
-    setStage("results");
+    if (evaluationId) {
+      // Redirect to the results page
+      router.push(`/results/${evaluationId}`);
+    } else {
+      // If we don't have an evaluation ID (e.g., when using localStorage results),
+      // fall back to the old behavior
+      setStage("results");
+    }
   };
 
   const handleRestart = () => {
@@ -420,6 +441,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           userInfo={userInfo}
           onViewResults={handleViewResults}
           shareUrl={window.location.href}
+          evaluationId={evaluationId || undefined}
         />
       )}
 

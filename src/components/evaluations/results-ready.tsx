@@ -6,25 +6,46 @@ import { Copy, Mail } from "lucide-react"
 import type { UserInfo } from "./types";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg"
 import { SimpleHeader } from "@/components/ui/simple-header"
+import { toast } from "@/components/ui/use-toast";
 
 interface ResultsReadyProps {
-  userInfo: UserInfo
-  onViewResults: () => void
-  shareUrl?: string
+  userInfo: UserInfo;
+  onViewResults: () => void;
+  shareUrl?: string;
+  evaluationId?: string;
 }
 
-export function ResultsReady({ userInfo, onViewResults, shareUrl }: ResultsReadyProps) {
+export function ResultsReady({
+  userInfo,
+  onViewResults,
+  shareUrl,
+  evaluationId,
+}: ResultsReadyProps) {
   const handleCopyLink = () => {
-    if (shareUrl) {
-      navigator.clipboard.writeText(shareUrl)
+    // If we have an evaluation ID, use that for the share URL
+    const linkToShare = evaluationId
+      ? `${window.location.origin}/results/${evaluationId}`
+      : shareUrl || window.location.href;
+
+    if (linkToShare) {
+      navigator.clipboard.writeText(linkToShare);
+      toast({
+        title: "Enlace copiado",
+        description: "El enlace ha sido copiado al portapapeles.",
+      });
     }
-  }
+  };
 
   const handleSendEmail = () => {
-    if (shareUrl) {
-      window.location.href = `mailto:?subject=Resultados de Evaluación de Ciberseguridad&body=Vea mis resultados aquí: ${shareUrl}`
+    // If we have an evaluation ID, use that for the share URL
+    const linkToShare = evaluationId
+      ? `${window.location.origin}/results/${evaluationId}`
+      : shareUrl || window.location.href;
+
+    if (linkToShare) {
+      window.location.href = `mailto:?subject=Resultados de Evaluación de Ciberseguridad&body=Vea mis resultados aquí: ${linkToShare}`;
     }
-  }
+  };
 
   return (
     <div className="flex flex-col min-h-screen md:flex-row">
@@ -61,7 +82,7 @@ export function ResultsReady({ userInfo, onViewResults, shareUrl }: ResultsReady
             Ver Resultados
           </Button>
 
-          {shareUrl && (
+          {(shareUrl || evaluationId) && (
             <div className="space-y-4">
               <p className="font-medium">Compartir resultados</p>
               <div className="flex flex-col md:flex-row gap-4">
