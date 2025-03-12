@@ -223,22 +223,33 @@ const SidebarMenuCollapsedDropdown = ({
             <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-gray-400" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" align="start" sideOffset={4}>
-          <DropdownMenuLabel>
+        <DropdownMenuContent
+          side="right"
+          align="start"
+          sideOffset={4}
+          className="bg-gray-900 text-white border-gray-800"
+        >
+          <DropdownMenuLabel className="text-gray-300">
             {item.title} {item.badge ? `(${item.badge})` : ""}
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-gray-800" />
           {item.items.map((sub: NavItem) => {
             if (isNavLink(sub)) {
               const isSubActive = checkIsActive(pathname, sub);
               return (
-                <DropdownMenuItem key={`${sub.title}-${sub.url}`} asChild>
+                <DropdownMenuItem
+                  key={`${sub.title}-${sub.url}`}
+                  asChild
+                  className="text-gray-300 hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white"
+                >
                   <Link
                     href={sub.url}
-                    className={`${isSubActive ? "bg-secondary" : ""}`}
+                    className={`${isSubActive ? "bg-gray-800" : ""}`}
                   >
                     {sub.icon && (
-                      <sub.icon className={isSubActive ? "text-primary" : ""} />
+                      <sub.icon
+                        className={isSubActive ? "text-white" : "text-gray-400"}
+                      />
                     )}
                     <span className="max-w-52 text-wrap">{sub.title}</span>
                     {sub.badge && (

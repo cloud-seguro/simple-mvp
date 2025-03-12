@@ -3,10 +3,10 @@
 import Link from "next/link";
 import {
   BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
+  LogOut,
+  Settings,
   User,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const { profile, user } = useAuth();
+  const { profile, user, signOut } = useAuth();
 
   if (!profile || !user) return null;
 
@@ -114,14 +114,8 @@ export function NavUser() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Facturación
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings/notifications">
-                  <Bell className="mr-2 h-4 w-4" />
-                  Notificaciones
+                  <Settings className="mr-2 h-4 w-4" />
+                  Configuración
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -129,6 +123,11 @@ export function NavUser() {
                   <User className="mr-2 h-4 w-4" />
                   Mis Evaluaciones
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => signOut?.()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Cerrar Sesión
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
