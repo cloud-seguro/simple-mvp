@@ -84,7 +84,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
     // Ensure answers is a valid Record<string, number>
     const answers: Record<string, number> = {};
-    
+
     if (evaluation.answers) {
       // Check if answers is a string (JSON)
       if (typeof evaluation.answers === "string") {
@@ -207,6 +207,16 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
     // Log the matched answers for debugging
     console.log("Matched answers:", JSON.stringify(matchedAnswers));
+
+    // Ensure all questions have answers
+    for (const question of quizData.questions) {
+      if (matchedAnswers[question.id] === undefined) {
+        console.log(
+          `Question ${question.id} has no answer in results, setting default value 0`
+        );
+        matchedAnswers[question.id] = 0;
+      }
+    }
 
     return (
       <Suspense

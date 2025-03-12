@@ -82,16 +82,45 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   };
 
   const handleSelect = (value: number) => {
-    setResults((prev) => ({
-      ...prev,
-      [quizData.questions[currentQuestionIndex].id]: value,
-    }));
+    const questionId = quizData.questions[currentQuestionIndex].id;
+    console.log(`Setting answer for question ${questionId} to value ${value}`);
+
+    setResults((prev) => {
+      const newResults = {
+        ...prev,
+        [questionId]: value,
+      };
+
+      // Log the updated results for debugging
+      console.log("Updated results:", JSON.stringify(newResults));
+      return newResults;
+    });
   };
 
   const handleNext = async () => {
     if (currentQuestionIndex < quizData.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
+      // Ensure all questions have answers before submitting
+      const updatedResults = { ...results };
+      let missingAnswers = false;
+
+      // Check for any missing answers and set default value of 0
+      for (const question of quizData.questions) {
+        if (updatedResults[question.id] === undefined) {
+          console.log(
+            `Question ${question.id} has no answer, setting default value 0`
+          );
+          updatedResults[question.id] = 0;
+          missingAnswers = true;
+        }
+      }
+
+      // Update results if any were missing
+      if (missingAnswers) {
+        setResults(updatedResults);
+      }
+
       // If user is already authenticated, skip sign-up and save results directly
       if (user?.id) {
         try {
@@ -141,6 +170,18 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             quizId: quizData.id,
             profileId: profile?.id,
             answersCount: Object.keys(results).length,
+          });
+
+          // Log the answers being sent to the API
+          console.log("Sending answers to API:", {
+            totalAnswers: Object.keys(results).length,
+            expectedQuestions: quizData.questions.length,
+            answers: JSON.stringify(results),
+            lastQuestionId:
+              quizData.questions[quizData.questions.length - 1].id,
+            hasLastQuestion:
+              results[quizData.questions[quizData.questions.length - 1].id] !==
+              undefined,
           });
 
           // Implement retry logic for saving evaluation results

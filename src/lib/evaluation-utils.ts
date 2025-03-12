@@ -67,8 +67,10 @@ export async function createEvaluation(data: {
   }
 
   // Validate that advanced evaluations require PREMIUM or SUPERADMIN role
-  if (data.type === "ADVANCED" && !canAccessAdvancedEvaluation(data.userRole)) {
-    throw new Error("Advanced evaluations require a premium subscription");
+  // Temporarily disabled premium requirement for advanced evaluations
+  if (data.type === "ADVANCED") {
+    // Always allow advanced evaluations for now
+    console.log("Premium check for advanced evaluations temporarily disabled");
   }
 
   try {

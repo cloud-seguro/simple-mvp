@@ -185,16 +185,27 @@ export function CybersecurityResults({
   );
   console.log("CybersecurityResults - results:", JSON.stringify(results));
 
+  // Ensure all questions have answers
+  const processedResults = { ...results };
+  for (const question of quizData.questions) {
+    if (processedResults[question.id] === undefined) {
+      console.log(
+        `Question ${question.id} has no answer in CybersecurityResults, setting default value 0`
+      );
+      processedResults[question.id] = 0;
+    }
+  }
+
   // Calculate scores by category and collect recommendations
   const categoryScores: Record<string, { total: number; max: number }> = {};
   const recommendations: QuestionRecommendation[] = [];
 
   for (const question of quizData.questions) {
     const category = question.category || "General";
-    const score = results[question.id] || 0;
+    const score = processedResults[question.id] || 0;
 
     // Log if the question ID is not found in results
-    if (results[question.id] === undefined) {
+    if (processedResults[question.id] === undefined) {
       console.warn(`Question ID ${question.id} not found in results`);
     }
 

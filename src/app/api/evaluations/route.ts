@@ -1,8 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  createEvaluation,
-  canAccessAdvancedEvaluation,
-} from "@/lib/evaluation-utils";
+import { createEvaluation } from "@/lib/evaluation-utils";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
@@ -78,11 +75,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user can access advanced evaluations
-    if (type === "ADVANCED" && !canAccessAdvancedEvaluation(userProfile.role)) {
-      return NextResponse.json(
-        { error: "Premium subscription required for advanced evaluations" },
-        { status: 403 }
+    // Temporarily disabled premium requirement for advanced evaluations
+    if (type === "ADVANCED") {
+      // Always allow advanced evaluations for now
+      console.log(
+        "Premium check for advanced evaluations temporarily disabled"
       );
+      // Original code:
+      // if (!canAccessAdvancedEvaluation(userProfile.role)) {
+      //   return NextResponse.json(
+      //     { error: "Premium subscription required for advanced evaluations" },
+      //     { status: 403 }
+      //   );
+      // }
     }
 
     // Create the evaluation
