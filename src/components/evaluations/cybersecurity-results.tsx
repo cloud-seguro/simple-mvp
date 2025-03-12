@@ -2,8 +2,19 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress";
 import type { QuizData, QuizResults, UserInfo } from "./types";
-import { SimpleHeader } from "@/components/ui/simple-header"
+import { SimpleHeader } from "@/components/ui/simple-header";
+import { cn } from "@/lib/utils";
+
+interface MaturityLevel {
+  level: string;
+  emoji: string;
+  color: string;
+  bgColor: string;
+  description: string;
+  advice?: string;
+}
 
 interface CybersecurityResultsProps {
   quizData: QuizData;
@@ -11,6 +22,152 @@ interface CybersecurityResultsProps {
   userInfo: UserInfo;
   onRestart?: () => void;
   isSharedView?: boolean;
+}
+
+interface QuestionRecommendation {
+  score: number;
+  maxScore: number;
+  text: string;
+  selectedOption: string;
+  category: string;
+  recommendation: string;
+}
+
+// Determine maturity level based on quiz type and score
+function getMaturityLevel(quizId: string, score: number): MaturityLevel {
+  if (quizId === "evaluacion-inicial") {
+    // Initial evaluation tiers
+    if (score <= 9) {
+      return {
+        level: "Nivel 1 – Inicial / Ad-hoc",
+        emoji: "🔴",
+        color: "text-red-600",
+        bgColor: "bg-red-100",
+        description:
+          "No hay un enfoque estructurado de ciberseguridad. Los controles son inexistentes o informales. Se requiere establecer procesos y medidas de seguridad básicas.",
+      };
+    }
+    if (score <= 19) {
+      return {
+        level: "Nivel 2 – Repetible pero intuitivo",
+        emoji: "🟠",
+        color: "text-orange-600",
+        bgColor: "bg-orange-100",
+        description:
+          "Existen algunos controles de ciberseguridad, pero no están formalizados ni aplicados de manera consistente. Aún se depende de acciones individuales y no hay gestión centralizada.",
+      };
+    }
+    if (score <= 29) {
+      return {
+        level: "Nivel 3 – Definido",
+        emoji: "🟡",
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-100",
+        description:
+          "La organización cuenta con políticas y procesos documentados de ciberseguridad. Hay roles definidos, pero aún falta optimizar la aplicación y supervisión de estos controles.",
+      };
+    }
+    if (score <= 39) {
+      return {
+        level: "Nivel 4 – Gestionado y Medido",
+        emoji: "🟢",
+        color: "text-green-600",
+        bgColor: "bg-green-100",
+        description:
+          "La ciberseguridad se gestiona activamente con métricas, auditorías y monitoreo continuo. Se aplican mejoras constantes, pero hay oportunidades de optimización en procesos críticos.",
+      };
+    }
+    if (score <= 44) {
+      return {
+        level: "Nivel 5 – Optimizado",
+        emoji: "🔵",
+        color: "text-blue-600",
+        bgColor: "bg-blue-100",
+        description:
+          "La ciberseguridad está en un nivel avanzado con controles implementados y revisados periódicamente. Se han adoptado procesos de mejora continua, aunque aún pueden fortalecerse ciertos aspectos estratégicos.",
+      };
+    }
+    return {
+      level: "Nivel 5 – Óptimo",
+      emoji: "🔵",
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+      description:
+        "La ciberseguridad es robusta y completamente integrada en la organización. Se han automatizado procesos, gestionado proactivamente los riesgos y optimizado los controles. Sin embargo, siempre hay margen de evolución ante nuevas amenazas.",
+    };
+  }
+
+  // Advanced evaluation tiers
+  if (score <= 15) {
+    return {
+      level: "Nivel 1 – Inicial / Ad-hoc",
+      emoji: "🔴",
+      color: "text-red-600",
+      bgColor: "bg-red-100",
+      description:
+        "La seguridad se maneja de forma reactiva. No hay procesos documentados ni una estructura clara para gestionar riesgos y proteger la información.",
+      advice:
+        "Trabaja en establecer una estrategia inicial de seguridad, enfocada en definir políticas, roles y procesos básicos para proteger la información. ISO 27001 y NIST recomiendan empezar con la identificación de activos y riesgos.",
+    };
+  }
+  if (score <= 34) {
+    return {
+      level: "Nivel 2 – Repetible pero intuitivo",
+      emoji: "🟠",
+      color: "text-orange-600",
+      bgColor: "bg-orange-100",
+      description:
+        "Existen controles básicos, pero su aplicación no es uniforme. La seguridad depende de esfuerzos individuales y acciones aisladas en lugar de procesos bien definidos.",
+      advice:
+        "Estandariza y documenta las políticas de seguridad, asegurando que sean aplicadas en toda la organización. Trabaja en la gestión de riesgos y en el uso de controles técnicos recomendados por CIS Controls y NIST CSF.",
+    };
+  }
+  if (score <= 51) {
+    return {
+      level: "Nivel 3 – Definido",
+      emoji: "🟡",
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100",
+      description:
+        "Los procesos de ciberseguridad están estructurados y alineados con estándares como ISO 27001, NIST y CIS. Se han implementado controles en la nube, gestión de vulnerabilidades y auditorías.",
+      advice:
+        "Profundiza en la medición y optimización de los controles, con el uso de monitoreo continuo y métricas de seguridad. Explora herramientas de Zero Trust, segmentación de red y pruebas de seguridad en aplicaciones (DevSecOps, OWASP ASVS).",
+    };
+  }
+  if (score <= 66) {
+    return {
+      level: "Nivel 4 – Gestionado y Medido",
+      emoji: "🟢",
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+      description:
+        "La ciberseguridad es gestionada con métricas, auditorías y monitoreo activo. Se han implementado SOC, SIEM, análisis de amenazas y simulaciones de incidentes (Red Team, Blue Team).",
+      advice:
+        "Asegura la mejora continua en la gestión de incidentes y la resiliencia organizacional. Refuerza el uso de inteligencia de amenazas (OSINT, Dark Web Monitoring) y la automatización de respuestas a incidentes (SOAR, XDR).",
+    };
+  }
+  if (score <= 74) {
+    return {
+      level: "Nivel 5 – Optimizado",
+      emoji: "🔵",
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+      description:
+        "Ciberseguridad avanzada con procesos automatizados y monitoreo en tiempo real. Se han adoptado estrategias como Zero Trust, detección de amenazas con IA y seguridad en la nube con cumplimiento de marcos como AWS Well-Architected, Google Cloud Security y Azure Security Center.",
+      advice:
+        "Sigue fortaleciendo la estrategia de seguridad con ciberinteligencia y automatización. Evalúa constantemente nuevas tecnologías, mejora la gestión de crisis y resiliencia y optimiza los procesos de respuesta a incidentes con IA.",
+    };
+  }
+  return {
+    level: "Nivel 5 – Óptimo",
+    emoji: "🔵",
+    color: "text-blue-600",
+    bgColor: "bg-blue-100",
+    description:
+      "Ciberseguridad completamente integrada en la cultura organizacional. Se han implementado detección de amenazas con IA, automatización total de respuesta a incidentes, monitoreo continuo de la Dark Web y cumplimiento avanzado de seguridad en entornos híbridos y en la nube.",
+    advice:
+      "Se nota que has trabajado en ciberseguridad y dominas los estándares. Mantén un enfoque en innovación y evolución, asegurando que el equipo y la organización estén preparados para amenazas emergentes. Continúa reforzando la estrategia con simulaciones avanzadas y escenarios de crisis en entornos reales.",
+  };
 }
 
 export function CybersecurityResults({
@@ -28,16 +185,12 @@ export function CybersecurityResults({
   );
   console.log("CybersecurityResults - results:", JSON.stringify(results));
 
-  // Calculate scores by category
+  // Calculate scores by category and collect recommendations
   const categoryScores: Record<string, { total: number; max: number }> = {};
-
-  // Create a map of question ID to selected option for displaying details
-  const selectedOptions: Record<string, { text: string; value: number }> = {};
+  const recommendations: QuestionRecommendation[] = [];
 
   for (const question of quizData.questions) {
     const category = question.category || "General";
-
-    // Check if the question ID exists in the results
     const score = results[question.id] || 0;
 
     // Log if the question ID is not found in results
@@ -45,11 +198,8 @@ export function CybersecurityResults({
       console.warn(`Question ID ${question.id} not found in results`);
     }
 
-    // Handle both text and label properties for backward compatibility
-    // Make sure we're getting the maximum value correctly from the options
     const maxScore = Math.max(
       ...question.options.map((o) => {
-        // Log the option structure for debugging
         if (!("value" in o)) {
           console.warn(
             `Option in question ${question.id} does not have a value property:`,
@@ -62,15 +212,6 @@ export function CybersecurityResults({
 
     // Store the selected option for this question
     const selectedOption = question.options.find((o) => o.value === score);
-    if (selectedOption) {
-      selectedOptions[question.id] = {
-        text:
-          selectedOption.text ||
-          selectedOption.label ||
-          `Option with value ${score}`,
-        value: score,
-      };
-    }
 
     if (!categoryScores[category]) {
       categoryScores[category] = { total: 0, max: 0 };
@@ -78,6 +219,58 @@ export function CybersecurityResults({
 
     categoryScores[category].total += score;
     categoryScores[category].max += maxScore;
+
+    // Add recommendation based on score
+    if (selectedOption) {
+      const percentage = (score / maxScore) * 100;
+      let recommendation = "";
+
+      if (quizData.id === "evaluacion-inicial") {
+        if (percentage <= 20) {
+          recommendation =
+            "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
+        } else if (percentage <= 40) {
+          recommendation =
+            "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
+        } else if (percentage <= 60) {
+          recommendation =
+            "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
+        } else if (percentage <= 80) {
+          recommendation =
+            "Bien establecido. Continue monitoreando y mejorando los procesos.";
+        } else {
+          recommendation =
+            "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
+        }
+      } else {
+        if (percentage <= 20) {
+          recommendation =
+            "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
+        } else if (percentage <= 40) {
+          recommendation =
+            "Importante: Estandarice procesos y documente políticas de seguridad.";
+        } else if (percentage <= 60) {
+          recommendation =
+            "Moderado: Mejore la medición y optimización de controles existentes.";
+        } else if (percentage <= 80) {
+          recommendation =
+            "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
+        } else {
+          recommendation =
+            "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
+        }
+      }
+
+      recommendations.push({
+        score,
+        maxScore,
+        text: question.text,
+        selectedOption:
+          selectedOption.text || selectedOption.label || `Opción ${score}`,
+        category,
+        recommendation,
+      });
+    }
 
     // Log each question's score for debugging
     console.log(
@@ -95,34 +288,37 @@ export function CybersecurityResults({
     0
   );
 
-  // Log the calculated scores for debugging
-  console.log("Category scores:", JSON.stringify(categoryScores));
-  console.log(`Overall score: ${overallScore}/${maxPossibleScore}`);
+  // Get maturity level based on quiz type and score
+  const maturity = getMaturityLevel(quizData.id, overallScore);
 
-  // Determine maturity level
-  const getMaturityLevel = (score: number) => {
-    if (score <= 24) return { level: "Bajo", color: "text-red-600" };
-    if (score <= 48) return { level: "Medio", color: "text-yellow-600" };
-    return { level: "Alto", color: "text-green-600" };
-  };
-
-  const maturity = getMaturityLevel(overallScore);
+  // Get category-specific maturity levels
+  const categoryMaturityLevels = Object.entries(categoryScores).map(
+    ([category, { total, max }]) => {
+      const categoryScore = total;
+      return {
+        category,
+        maturityLevel: getMaturityLevel(quizData.id, categoryScore),
+        total,
+        max,
+      };
+    }
+  );
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="p-8 bg-background border-b">
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <header className="p-8 bg-white border-b shadow-sm">
         <SimpleHeader className="text-primary" />
       </header>
 
-      <main className="flex-grow p-8">
-        <div className="max-w-2xl mx-auto">
+      <main className="flex-grow p-4 md:p-8">
+        <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-8"
+            className="space-y-6"
           >
-            <div>
-              <h1 className="text-3xl font-bold mb-2">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-800">
                 {userInfo.firstName}, aquí están sus resultados
               </h1>
               <p className="text-lg text-gray-600">
@@ -130,98 +326,224 @@ export function CybersecurityResults({
               </p>
             </div>
 
-            <div className="bg-secondary p-6 rounded-md">
-              <h2 className="text-xl font-semibold mb-4">Resumen General</h2>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm text-gray-600">Puntuación Total</p>
-                  <p className="text-3xl font-bold">
+            <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
+              <h2 className="text-xl font-semibold mb-6 text-gray-800">
+                Resumen General
+              </h2>
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <div className="bg-white p-4 rounded-lg flex-1 shadow-sm border">
+                  <p className="text-sm text-gray-600 mb-1">Puntuación Total</p>
+                  <p className={`text-3xl font-bold ${maturity.color}`}>
                     {overallScore}/{maxPossibleScore}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Nivel de Madurez</p>
-                  <p className={`text-3xl font-bold ${maturity.color}`}>
-                    {maturity.level}
+                <div className="bg-white p-4 rounded-lg flex-1 shadow-sm border">
+                  <p className="text-sm text-gray-600 mb-1">Nivel de Madurez</p>
+                  <p
+                    className={`text-3xl font-bold ${maturity.color} flex items-center gap-2`}
+                  >
+                    <span>{maturity.emoji}</span>
+                    <span>{maturity.level}</span>
                   </p>
                 </div>
               </div>
-              <div className="w-full bg-muted rounded-full h-4">
-                <div
-                  className="bg-primary h-4 rounded-full transition-all duration-1000"
-                  style={{
-                    width: `${(overallScore / maxPossibleScore) * 100}%`,
-                  }}
+              <div className="relative pt-1">
+                <div className="flex mb-2 items-center justify-between">
+                  <div>
+                    <span
+                      className={`${maturity.color} font-semibold inline-block py-1 px-2 uppercase rounded-full text-xs`}
+                    >
+                      PROGRESO
+                    </span>
+                  </div>
+                  <div className={`${maturity.color} text-right`}>
+                    <span className="text-xs font-semibold inline-block">
+                      {Math.round((overallScore / maxPossibleScore) * 100)}%
+                    </span>
+                  </div>
+                </div>
+                <Progress
+                  value={Math.round((overallScore / maxPossibleScore) * 100)}
+                  className={cn(
+                    "h-2.5",
+                    maturity.color === "text-red-600" &&
+                      "bg-red-100 [&>div]:bg-red-600",
+                    maturity.color === "text-orange-600" &&
+                      "bg-orange-100 [&>div]:bg-orange-600",
+                    maturity.color === "text-yellow-600" &&
+                      "bg-yellow-100 [&>div]:bg-yellow-600",
+                    maturity.color === "text-green-600" &&
+                      "bg-green-100 [&>div]:bg-green-600",
+                    maturity.color === "text-blue-600" &&
+                      "bg-blue-100 [&>div]:bg-blue-600"
+                  )}
                 />
               </div>
             </div>
 
-            <div className="bg-secondary p-6 rounded-md">
-              <h2 className="text-xl font-semibold mb-4">
-                Desglose por Categoría
+            <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                Nivel de Madurez Actual
               </h2>
-              <div className="space-y-6">
-                {Object.entries(categoryScores).map(
-                  ([category, { total, max }]) => {
-                    const percentage = (total / max) * 100;
-                    return (
-                      <div key={category}>
-                        <div className="flex justify-between mb-2">
-                          <span className="font-medium">{category}</span>
-                          <span>
-                            {total}/{max} ({Math.round(percentage)}%)
-                          </span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all duration-1000"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  }
+              <div
+                className={cn(
+                  "p-5 rounded-lg border",
+                  maturity.color.replace("text", "border")
+                )}
+              >
+                <p className={`${maturity.color} font-medium mb-4`}>
+                  {maturity.description}
+                </p>
+                {maturity.advice && (
+                  <>
+                    <h3 className={`font-semibold mt-4 mb-2 ${maturity.color}`}>
+                      Recomendación General
+                    </h3>
+                    <p className={`${maturity.color}`}>{maturity.advice}</p>
+                  </>
                 )}
               </div>
             </div>
 
-            <div className="bg-secondary p-6 rounded-md">
-              <h2 className="text-xl font-semibold mb-4">Recomendaciones</h2>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h2 className="text-xl font-semibold mb-6 text-gray-800">
+                Desglose por Categoría
+              </h2>
               <div className="space-y-4">
-                {Object.entries(categoryScores).map(
-                  ([category, { total, max }]) => {
-                    const percentage = (total / max) * 100;
-                    let recommendation = "";
-
-                    if (percentage < 33) {
-                      recommendation =
-                        "Necesita atención inmediata. Considere implementar controles básicos y establecer políticas fundamentales.";
-                    } else if (percentage < 66) {
-                      recommendation =
-                        "Hay margen de mejora. Refuerce las políticas existentes y considere implementar controles más avanzados.";
-                    } else {
-                      recommendation =
-                        "Buen nivel de madurez. Mantenga las prácticas actuales y considere mejoras continuas.";
-                    }
-
-                    return (
-                      <div key={category}>
-                        <h3 className="font-medium">{category}</h3>
-                        <p className="text-gray-600">{recommendation}</p>
+                {categoryMaturityLevels.map(({ category, total, max }) => {
+                  const percentage = Math.round((total / max) * 100);
+                  return (
+                    <div
+                      key={category}
+                      className={cn(
+                        "border rounded-lg overflow-hidden",
+                        maturity.color.replace("text", "border")
+                      )}
+                    >
+                      <div className="bg-white p-4">
+                        <div className="flex justify-between mb-2">
+                          <span className={`font-medium ${maturity.color}`}>
+                            {category}
+                          </span>
+                          <span className={`${maturity.color} font-medium`}>
+                            {total}/{max} ({percentage}%)
+                          </span>
+                        </div>
+                        <Progress
+                          value={percentage}
+                          className={cn(
+                            "h-2.5",
+                            maturity.color === "text-red-600" &&
+                              "bg-red-100 [&>div]:bg-red-600",
+                            maturity.color === "text-orange-600" &&
+                              "bg-orange-100 [&>div]:bg-orange-600",
+                            maturity.color === "text-yellow-600" &&
+                              "bg-yellow-100 [&>div]:bg-yellow-600",
+                            maturity.color === "text-green-600" &&
+                              "bg-green-100 [&>div]:bg-green-600",
+                            maturity.color === "text-blue-600" &&
+                              "bg-blue-100 [&>div]:bg-blue-600"
+                          )}
+                        />
                       </div>
-                    );
-                  }
-                )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h2 className="text-xl font-semibold mb-6 text-gray-800">
+                Recomendaciones Específicas
+              </h2>
+              <div className="space-y-4">
+                {recommendations.map((rec) => {
+                  const percentage = Math.round(
+                    (rec.score / rec.maxScore) * 100
+                  );
+                  return (
+                    <div
+                      key={rec.text}
+                      className={cn(
+                        "border rounded-lg overflow-hidden",
+                        maturity.color.replace("text", "border")
+                      )}
+                    >
+                      <div className="bg-white p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <h3
+                            className={`font-medium flex-grow ${maturity.color}`}
+                          >
+                            {rec.text}
+                          </h3>
+                          <span
+                            className={`${maturity.color} font-medium ml-4 whitespace-nowrap`}
+                          >
+                            {rec.score}/{rec.maxScore}
+                          </span>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded mb-3">
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">
+                              Respuesta seleccionada:
+                            </span>{" "}
+                            {rec.selectedOption}
+                          </p>
+                        </div>
+                        <div className="mb-3">
+                          <div className="flex mb-2 items-center justify-between">
+                            <div>
+                              <span
+                                className={`${maturity.color} text-xs font-semibold`}
+                              >
+                                Puntuación
+                              </span>
+                            </div>
+                            <div className={`${maturity.color} text-right`}>
+                              <span className="text-xs font-semibold">
+                                {percentage}%
+                              </span>
+                            </div>
+                          </div>
+                          <Progress
+                            value={percentage}
+                            className={cn(
+                              "h-2.5",
+                              maturity.color === "text-red-600" &&
+                                "bg-red-100 [&>div]:bg-red-600",
+                              maturity.color === "text-orange-600" &&
+                                "bg-orange-100 [&>div]:bg-orange-600",
+                              maturity.color === "text-yellow-600" &&
+                                "bg-yellow-100 [&>div]:bg-yellow-600",
+                              maturity.color === "text-green-600" &&
+                                "bg-green-100 [&>div]:bg-green-600",
+                              maturity.color === "text-blue-600" &&
+                                "bg-blue-100 [&>div]:bg-blue-600"
+                            )}
+                          />
+                        </div>
+                        <p
+                          className={`text-sm font-medium ${maturity.color} mt-2`}
+                        >
+                          <span className="font-bold">Recomendación:</span>{" "}
+                          {rec.recommendation}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
             {!isSharedView && onRestart && (
-              <Button
-                onClick={onRestart}
-                className="bg-black text-white hover:bg-gray-800 rounded-full px-8 py-2"
-              >
-                Realizar otra evaluación
-              </Button>
+              <div className="flex justify-center mt-8">
+                <Button
+                  onClick={onRestart}
+                  className={`${maturity.color.replace("text", "bg")} text-white hover:opacity-90 rounded-full px-8 py-6`}
+                >
+                  Realizar otra evaluación
+                </Button>
+              </div>
             )}
           </motion.div>
         </div>

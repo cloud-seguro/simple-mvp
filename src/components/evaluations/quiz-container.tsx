@@ -135,6 +135,14 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           const evaluationType =
             quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
 
+          // Log information about the evaluation being saved
+          console.log("Preparing to save evaluation:", {
+            type: evaluationType,
+            quizId: quizData.id,
+            profileId: profile?.id,
+            answersCount: Object.keys(results).length,
+          });
+
           // Implement retry logic for saving evaluation results
           let success = false;
           let retryCount = 0;
@@ -147,6 +155,14 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
               setLoadingMessage(
                 `Guardando resultados (intento ${retryCount + 1}/${maxRetries})...`
               );
+
+              // Check if we have the profile ID
+              if (!profile?.id) {
+                throw new Error(
+                  "No se encontró el perfil del usuario. Por favor, complete su perfil primero."
+                );
+              }
+
               const response = await fetch("/api/evaluations", {
                 method: "POST",
                 headers: {
@@ -159,14 +175,23 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
                       ? "Evaluación Inicial"
                       : "Evaluación Avanzada",
                   answers: results,
-                  userId: user.id,
+                  profileId: profile.id, // Use profileId instead of userId
                 }),
               });
 
               if (!response.ok) {
                 const errorData = await response.json();
+                console.error("API error response:", errorData);
+
+                // Check for specific error conditions
+                if (response.status === 403 && evaluationType === "ADVANCED") {
+                  throw new Error(
+                    "Se requiere una suscripción premium para realizar evaluaciones avanzadas."
+                  );
+                }
+
                 throw new Error(
-                  errorData.message ||
+                  errorData.error ||
                     "Error al guardar los resultados de la evaluación"
                 );
               }
@@ -193,12 +218,56 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           }
 
           if (!success) {
-            throw (
-              lastError ||
-              new Error(
-                "Failed to save evaluation results after multiple attempts"
-              )
-            );
+            const errorMessage =
+              lastError instanceof Error
+                ? lastError.message
+                : "Error al guardar los resultados de la evaluación";
+
+            // Check for specific error messages to provide better user feedback
+            if (
+              errorMessage.includes("premium") ||
+              errorMessage.includes("Premium")
+            ) {
+              setSaveError(
+                new Error(
+                  "Se requiere una suscripción premium para realizar evaluaciones avanzadas."
+                )
+              );
+              toast({
+                title: "Suscripción requerida",
+                description:
+                  "Se requiere una suscripción premium para realizar evaluaciones avanzadas.",
+                variant: "destructive",
+              });
+            } else if (
+              errorMessage.includes("perfil") ||
+              errorMessage.includes("Profile")
+            ) {
+              setSaveError(
+                new Error(
+                  "No se encontró un perfil para este usuario. Por favor, complete su perfil primero."
+                )
+              );
+              setNeedsProfile(true);
+              toast({
+                title: "Perfil incompleto",
+                description:
+                  "Necesita completar su perfil antes de guardar los resultados de la evaluación.",
+                variant: "destructive",
+              });
+            } else {
+              setSaveError(
+                lastError instanceof Error ? lastError : new Error(errorMessage)
+              );
+              toast({
+                title: "Error",
+                description: errorMessage,
+                variant: "destructive",
+              });
+            }
+
+            setIsSubmitting(false);
+            return;
           }
 
           // Add a small delay before proceeding to ensure everything is properly saved

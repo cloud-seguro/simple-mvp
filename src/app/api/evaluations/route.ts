@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, title, answers } = body;
+    const { type, title, answers, profileId } = body;
 
     // Validate required fields
     if (!type || !title || !answers) {
@@ -32,22 +32,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the user's profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id, role")
-      .eq("userId", session.user.id)
-      .single();
+    // If profileId is provided directly, use it
+    let userProfile: { id: string; role: string; userId?: string };
 
-    if (!profile) {
-      return NextResponse.json(
-        { error: "User profile not found" },
-        { status: 404 }
-      );
+    if (profileId) {
+      // Verify the profile exists and belongs to the authenticated user
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, role, userId")
+        .eq("id", profileId)
+        .single();
+
+      if (!profile) {
+        return NextResponse.json(
+          { error: "Profile not found" },
+          { status: 404 }
+        );
+      }
+
+      // Verify the profile belongs to the authenticated user
+      if (profile.userId !== session.user.id) {
+        return NextResponse.json(
+          { error: "Unauthorized access to profile" },
+          { status: 403 }
+        );
+      }
+
+      userProfile = profile;
+    } else {
+      // Get the user's profile by userId
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, role")
+        .eq("userId", session.user.id)
+        .single();
+
+      if (!profile) {
+        return NextResponse.json(
+          { error: "User profile not found" },
+          { status: 404 }
+        );
+      }
+
+      userProfile = profile;
     }
 
     // Check if user can access advanced evaluations
-    if (type === "ADVANCED" && !canAccessAdvancedEvaluation(profile.role)) {
+    if (type === "ADVANCED" && !canAccessAdvancedEvaluation(userProfile.role)) {
       return NextResponse.json(
         { error: "Premium subscription required for advanced evaluations" },
         { status: 403 }
@@ -59,8 +90,8 @@ export async function POST(request: NextRequest) {
       type,
       title,
       answers,
-      profileId: profile.id,
-      userRole: profile.role,
+      profileId: userProfile.id,
+      userRole: userProfile.role,
     });
 
     return NextResponse.json({ evaluation }, { status: 201 });

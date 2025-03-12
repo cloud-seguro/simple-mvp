@@ -57,27 +57,45 @@ export async function createEvaluation(data: {
   profileId: string;
   userRole: string;
 }) {
+  // Validate input data
+  if (!data.profileId) {
+    throw new Error("Profile ID is required for creating an evaluation");
+  }
+
+  if (!data.answers || Object.keys(data.answers).length === 0) {
+    throw new Error("Evaluation answers are required and cannot be empty");
+  }
+
   // Validate that advanced evaluations require PREMIUM or SUPERADMIN role
   if (data.type === "ADVANCED" && !canAccessAdvancedEvaluation(data.userRole)) {
     throw new Error("Advanced evaluations require a premium subscription");
   }
 
-  // Calculate the security score
-  const score = calculateSecurityScore(data.answers);
+  try {
+    // Calculate the security score
+    const score = calculateSecurityScore(data.answers);
 
-  // Create the evaluation
-  const evaluation = await prisma.evaluation.create({
-    data: {
-      type: data.type,
-      title: data.title,
-      score,
-      profileId: data.profileId,
-      answers: data.answers,
-      completedAt: new Date(),
-    },
-  });
+    // Create the evaluation
+    const evaluation = await prisma.evaluation.create({
+      data: {
+        type: data.type,
+        title: data.title,
+        score,
+        profileId: data.profileId,
+        answers: data.answers,
+        completedAt: new Date(),
+      },
+    });
 
-  return evaluation;
+    return evaluation;
+  } catch (error) {
+    console.error("Error creating evaluation:", error);
+    if (error instanceof Error) {
+      // Rethrow with more context
+      throw new Error(`Failed to create evaluation: ${error.message}`);
+    }
+    throw new Error("Unknown error occurred while creating evaluation");
+  }
 }
 
 /**
