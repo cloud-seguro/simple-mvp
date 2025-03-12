@@ -31,13 +31,46 @@ export function CybersecurityResults({
   // Calculate scores by category
   const categoryScores: Record<string, { total: number; max: number }> = {};
 
+  // Create a map of question ID to selected option for displaying details
+  const selectedOptions: Record<string, { text: string; value: number }> = {};
+
   for (const question of quizData.questions) {
     const category = question.category || "General";
+
+    // Check if the question ID exists in the results
     const score = results[question.id] || 0;
+
+    // Log if the question ID is not found in results
+    if (results[question.id] === undefined) {
+      console.warn(`Question ID ${question.id} not found in results`);
+    }
 
     // Handle both text and label properties for backward compatibility
     // Make sure we're getting the maximum value correctly from the options
-    const maxScore = Math.max(...question.options.map((o) => o.value));
+    const maxScore = Math.max(
+      ...question.options.map((o) => {
+        // Log the option structure for debugging
+        if (!("value" in o)) {
+          console.warn(
+            `Option in question ${question.id} does not have a value property:`,
+            o
+          );
+        }
+        return o.value;
+      })
+    );
+
+    // Store the selected option for this question
+    const selectedOption = question.options.find((o) => o.value === score);
+    if (selectedOption) {
+      selectedOptions[question.id] = {
+        text:
+          selectedOption.text ||
+          selectedOption.label ||
+          `Option with value ${score}`,
+        value: score,
+      };
+    }
 
     if (!categoryScores[category]) {
       categoryScores[category] = { total: 0, max: 0 };

@@ -7,7 +7,8 @@ export interface UserInfo {
 }
 
 export interface QuizOption {
-  text: string;
+  text?: string;
+  label?: string;
   value: number;
 }
 

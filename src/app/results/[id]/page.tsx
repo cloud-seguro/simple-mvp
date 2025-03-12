@@ -9,6 +9,9 @@ import type { UserInfo } from "@/components/evaluations/types";
 // Fallback quiz data in case the actual data is not found
 import { initialEvaluationData } from "@/data/initial-evaluation";
 import { advancedEvaluationData } from "@/data/advanced-evaluation";
+// Import the quiz data from components/evaluations/data
+import { evaluacionInicial } from "@/components/evaluations/data/initial-evaluation";
+import { evaluacionAvanzada } from "@/components/evaluations/data/advanced-evaluation";
 
 interface ResultsPageProps {
   params: {
@@ -81,7 +84,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
     // Ensure answers is a valid Record<string, number>
     const answers: Record<string, number> = {};
-
+    
     if (evaluation.answers) {
       // Check if answers is a string (JSON)
       if (typeof evaluation.answers === "string") {
@@ -135,13 +138,83 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     // Log the processed answers for debugging
     console.log("Processed answers:", JSON.stringify(answers));
 
+    // Try to match question IDs from both data sources
+    // This is needed because the question IDs in the evaluation answers might not match the question IDs in the quiz data
+    const matchedAnswers: Record<string, number> = { ...answers };
+
+    // If we're using the data from components/evaluations/data, we need to try to match the question IDs
+    if (quizData === evaluacionInicial || quizData === evaluacionAvanzada) {
+      // Check if we have any answers with simple IDs like q1, q2, etc.
+      const hasSimpleIds = Object.keys(answers).some((key) =>
+        /^q\d+$/.test(key)
+      );
+
+      if (hasSimpleIds) {
+        console.log(
+          "Found simple question IDs, attempting to match with descriptive IDs"
+        );
+
+        // Try to match simple IDs (q1, q2) with descriptive IDs (politicas-1, etc.)
+        for (const [index, question] of quizData.questions.entries()) {
+          const simpleId = `q${index + 1}`;
+          if (
+            answers[simpleId] !== undefined &&
+            answers[question.id] === undefined
+          ) {
+            console.log(
+              `Matching simple ID ${simpleId} to descriptive ID ${question.id}`
+            );
+            matchedAnswers[question.id] = answers[simpleId];
+          }
+        }
+      }
+    }
+
+    // If we're using the data from src/data, we need to try to match the question IDs
+    if (
+      quizData === initialEvaluationData ||
+      quizData === advancedEvaluationData
+    ) {
+      // Check if we have any answers with descriptive IDs like politicas-1, etc.
+      const hasDescriptiveIds = Object.keys(answers).some((key) =>
+        key.includes("-")
+      );
+
+      if (hasDescriptiveIds) {
+        console.log(
+          "Found descriptive question IDs, attempting to match with simple IDs"
+        );
+
+        // Try to match descriptive IDs (politicas-1, etc.) with simple IDs (q1, q2)
+        for (const question of quizData.questions) {
+          // Find a descriptive ID that might match this question
+          const descriptiveId = Object.keys(answers).find(
+            (key) =>
+              key.includes("-") &&
+              answers[key] !== undefined &&
+              answers[question.id] === undefined
+          );
+
+          if (descriptiveId) {
+            console.log(
+              `Matching descriptive ID ${descriptiveId} to simple ID ${question.id}`
+            );
+            matchedAnswers[question.id] = answers[descriptiveId];
+          }
+        }
+      }
+    }
+
+    // Log the matched answers for debugging
+    console.log("Matched answers:", JSON.stringify(matchedAnswers));
+
     return (
       <Suspense
         fallback={<SecurityLoadingScreen message="Cargando resultados..." />}
       >
         <CybersecurityResults
           quizData={quizData}
-          results={answers}
+          results={matchedAnswers}
           userInfo={userInfo}
           isSharedView={true}
         />
