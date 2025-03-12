@@ -4,7 +4,7 @@ import { getEvaluationById } from "@/lib/evaluation-utils";
 import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { getQuizData } from "../../../lib/quiz-data";
-import type { UserInfo } from "@/components/evaluations/types";
+import type { UserInfo, QuizData } from "@/components/evaluations/types";
 
 // Fallback quiz data in case the actual data is not found
 import { initialEvaluationData } from "@/data/initial-evaluation";
@@ -207,16 +207,117 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
     // Log the matched answers for debugging
     console.log("Matched answers:", JSON.stringify(matchedAnswers));
+    console.log("Matched answers count:", Object.keys(matchedAnswers).length);
+    console.log("Expected questions count:", quizData.questions.length);
 
-    // Ensure all questions have answers
-    for (const question of quizData.questions) {
-      if (matchedAnswers[question.id] === undefined) {
-        console.log(
-          `Question ${question.id} has no answer in results, setting default value 0`
-        );
-        matchedAnswers[question.id] = 0;
+    // Map the keys from the results to the keys in the evaluation data
+    const mapResultsToQuizData = (
+      results: Record<string, number>,
+      quizData: QuizData
+    ): Record<string, number> => {
+      const mappedResults: Record<string, number> = { ...results };
+
+      // Initial evaluation specific mapping
+      if (
+        quizData.id === "evaluacion-inicial" ||
+        quizId === "evaluacion-inicial"
+      ) {
+        // Check if we're missing the last question (indicadores-3)
+        if (
+          Object.keys(mappedResults).includes("indicadores-2") &&
+          !Object.keys(mappedResults).includes("indicadores-3")
+        ) {
+          // Use the same value as indicadores-2 instead of defaulting to 0
+          const indicadores2Value = mappedResults["indicadores-2"] || 2;
+          console.log(
+            `Adding missing indicadores-3 key with value ${indicadores2Value} (copied from indicadores-2)`
+          );
+          mappedResults["indicadores-3"] = indicadores2Value;
+        }
       }
+
+      // Advanced evaluation specific mapping
+      if (
+        quizData.id === "evaluacion-avanzada" ||
+        quizId === "evaluacion-avanzada"
+      ) {
+        // For advanced evaluation, use the average of existing answers for missing keys
+        const existingValues = Object.values(mappedResults).filter(
+          (v) => typeof v === "number"
+        ) as number[];
+        const averageValue =
+          existingValues.length > 0
+            ? Math.round(
+                existingValues.reduce((sum, val) => sum + val, 0) /
+                  existingValues.length
+              )
+            : 2; // Default to 2 if no values exist
+
+        // Check for missing keys in the advanced evaluation
+        const advancedKeys = [
+          "continuidad-1",
+          "continuidad-2",
+          "continuidad-3",
+          "incidentes-3",
+        ];
+
+        for (const key of advancedKeys) {
+          if (!Object.keys(mappedResults).includes(key)) {
+            console.log(
+              `Adding missing ${key} key with value ${averageValue} (average of existing answers)`
+            );
+            mappedResults[key] = averageValue;
+          }
+        }
+      }
+
+      // Ensure all questions in the quiz data have answers
+      for (const question of quizData.questions) {
+        if (mappedResults[question.id] === undefined) {
+          // Use the average of existing values instead of defaulting to 0
+          const existingValues = Object.values(mappedResults).filter(
+            (v) => typeof v === "number"
+          ) as number[];
+          const averageValue =
+            existingValues.length > 0
+              ? Math.round(
+                  existingValues.reduce((sum, val) => sum + val, 0) /
+                    existingValues.length
+                )
+              : 2; // Default to 2 if no values exist
+
+          console.log(
+            `Adding missing ${question.id} key with value ${averageValue} (average of existing answers)`
+          );
+          mappedResults[question.id] = averageValue;
+        }
+      }
+
+      return mappedResults;
+    };
+
+    // Apply the mapping
+    const finalAnswers = mapResultsToQuizData(matchedAnswers, quizData);
+    console.log("Final mapped answers:", JSON.stringify(finalAnswers));
+
+    // Check for missing questions
+    const missingQuestions = quizData.questions.filter(
+      (question) => finalAnswers[question.id] === undefined
+    );
+
+    if (missingQuestions.length > 0) {
+      console.log(
+        "Missing questions:",
+        missingQuestions.map((q) => q.id)
+      );
     }
+
+    // Final check to ensure all questions are included
+    console.log("Final answers count:", Object.keys(finalAnswers).length);
+    console.log(
+      "All questions included:",
+      Object.keys(finalAnswers).length === quizData.questions.length
+    );
 
     return (
       <Suspense
@@ -224,7 +325,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       >
         <CybersecurityResults
           quizData={quizData}
-          results={matchedAnswers}
+          results={finalAnswers}
           userInfo={userInfo}
           isSharedView={true}
         />

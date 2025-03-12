@@ -151,13 +151,28 @@ export async function getEvaluationById(id: string) {
     });
 
     if (evaluation) {
+      // Get the expected questions based on evaluation type
+      const expectedQuestions =
+        evaluation.type === "INITIAL"
+          ? 15 // Initial evaluation has 15 questions
+          : 25; // Advanced evaluation has 25 questions
+
       console.log(`Found evaluation with ID ${id}:`, {
         type: evaluation.type,
         title: evaluation.title,
         score: evaluation.score,
         answersType: typeof evaluation.answers,
         answersIsArray: Array.isArray(evaluation.answers),
-        answersKeys: evaluation.answers ? Object.keys(evaluation.answers as object) : [],
+        answersKeys: evaluation.answers
+          ? Object.keys(evaluation.answers as object)
+          : [],
+        answersCount: evaluation.answers
+          ? Object.keys(evaluation.answers as object).length
+          : 0,
+        expectedQuestions,
+        missingKeys: evaluation.answers
+          ? expectedQuestions - Object.keys(evaluation.answers as object).length
+          : expectedQuestions,
       });
     } else {
       console.log(`No evaluation found with ID ${id}`);
