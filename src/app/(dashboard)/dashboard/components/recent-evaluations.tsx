@@ -56,14 +56,14 @@ export function RecentEvaluations({ evaluations }: RecentEvaluationsProps) {
   };
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Evaluaciones Recientes</CardTitle>
         <CardDescription>
           Tus últimas evaluaciones de ciberseguridad
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         {evaluations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8">
             <p className="text-muted-foreground text-center">

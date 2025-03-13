@@ -1,14 +1,11 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardCharts } from "./components/dashboard-charts";
 import { RecentEvaluations } from "./components/recent-evaluations";
 import { RecommendationsList } from "./components/recommendations-list";
-import { Button } from "@/components/ui/button";
-import { GitCompareIcon, PlusCircle } from "lucide-react";
 
 // Define a simple type for evaluations
 type SimpleEvaluation = {
@@ -112,9 +109,15 @@ export default async function DashboardPage() {
     ? `${profile.firstName} ${profile.lastName || ""}`
     : "Usuario";
 
+  // Check if user has multiple evaluations for comparison
+  const hasMultipleEvaluations = evaluations.length >= 2;
+
   return (
     <div className="space-y-8">
-      <DashboardHeader userName={userName} />
+      <DashboardHeader
+        userName={userName}
+        hasMultipleEvaluations={hasMultipleEvaluations}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="col-span-1">
@@ -136,29 +139,12 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 h-full">
           <RecentEvaluations evaluations={recentEvaluations} />
         </div>
-        <div>
+        <div className="h-full">
           <RecommendationsList recommendations={recommendations} />
         </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <Link href="/evaluations/new">
-          <Button className="w-full sm:w-auto gap-2">
-            <PlusCircle className="h-4 w-4" />
-            Nueva Evaluación
-          </Button>
-        </Link>
-        {evaluations.length >= 2 && (
-          <Link href="/evaluations">
-            <Button variant="outline" className="w-full sm:w-auto gap-2">
-              <GitCompareIcon className="h-4 w-4" />
-              Comparar Evaluaciones
-            </Button>
-          </Link>
-        )}
       </div>
     </div>
   );
