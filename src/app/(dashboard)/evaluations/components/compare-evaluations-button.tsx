@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Evaluation } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,9 +32,18 @@ export function CompareEvaluationsButton({
   evaluations,
 }: CompareEvaluationsButtonProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [firstEvaluationId, setFirstEvaluationId] = useState<string>("");
   const [secondEvaluationId, setSecondEvaluationId] = useState<string>("");
   const [open, setOpen] = useState(false);
+
+  // Check if the compare query parameter is present
+  useEffect(() => {
+    const shouldOpenCompare = searchParams.get("compare") === "true";
+    if (shouldOpenCompare && evaluations.length >= 2) {
+      setOpen(true);
+    }
+  }, [searchParams, evaluations.length]);
 
   // Filter out evaluations already selected
   const availableFirstEvaluations = evaluations;
