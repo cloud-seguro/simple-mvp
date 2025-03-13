@@ -9,8 +9,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-} from '@/components/ui/command'
+} from "@/components/ui/command";
 import { sidebarData } from '@/components/sidebar/data/sidebar-data'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DialogTitle } from '@/components/ui/dialog'

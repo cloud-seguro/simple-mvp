@@ -12,6 +12,7 @@ import { EvaluationComparison } from "../components/evaluation-comparison";
 import type { UserInfo } from "@/components/evaluations/types";
 
 interface ComparePageProps {
+  params: Record<string, never>;
   searchParams: {
     first?: string;
     second?: string;

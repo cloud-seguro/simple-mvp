@@ -83,25 +83,25 @@ export default async function DashboardPage() {
       id: "rec1",
       category: "Seguridad",
       title: "Implementar autenticación de dos factores",
-      priority: "Alta",
+      priority: "Alta" as const,
     },
     {
       id: "rec2",
       category: "Políticas",
       title: "Actualizar política de contraseñas",
-      priority: "Media",
+      priority: "Media" as const,
     },
     {
       id: "rec3",
       category: "Acceso",
       title: "Revisar permisos de usuarios",
-      priority: "Alta",
+      priority: "Alta" as const,
     },
     {
       id: "rec4",
       category: "Respuesta",
       title: "Crear plan de respuesta a incidentes",
-      priority: "Media",
+      priority: "Media" as const,
     },
   ];
 

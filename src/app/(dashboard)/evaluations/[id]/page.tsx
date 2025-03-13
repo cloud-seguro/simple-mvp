@@ -11,10 +11,10 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { UserInfo } from "@/components/evaluations/types";
 
+// Update the interface to match Next.js expected types for dynamic routes
 interface EvaluationPageProps {
-  params: {
-    id: string;
-  };
+  params: { id: string };
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
 export async function generateMetadata({ params }: EvaluationPageProps) {

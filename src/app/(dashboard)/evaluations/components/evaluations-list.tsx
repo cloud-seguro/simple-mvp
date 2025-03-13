@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { Evaluation } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Eye, BarChart3 } from "lucide-react";
+import { Calendar, Eye } from "lucide-react";
 import { DataTable } from "@/components/table/data-table";
 import type { Column } from "@/components/table/types";
 
