@@ -55,14 +55,6 @@ async function EvaluationsContent() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Historial de Evaluaciones
-          </h2>
-          <p className="text-muted-foreground">
-            Visualiza y compara tus evaluaciones de ciberseguridad anteriores
-          </p>
-        </div>
         <CompareEvaluationsButton evaluations={evaluations} />
       </div>
       <EvaluationsList evaluations={evaluations} />

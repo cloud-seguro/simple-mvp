@@ -53,14 +53,14 @@ export function RecommendationsList({
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
+    <Card className="h-full flex flex-col p-4">
+      <CardHeader className="px-0 pt-0">
         <CardTitle>Recomendaciones</CardTitle>
         <CardDescription>
           Acciones sugeridas para mejorar tu seguridad
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className="flex-1 px-0 pb-0">
         {recommendations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8">
             <p className="text-muted-foreground text-center">
