@@ -12,11 +12,11 @@ import { EvaluationComparison } from "../components/evaluation-comparison";
 import type { UserInfo } from "@/components/evaluations/types";
 
 interface ComparePageProps {
-  params: Record<string, never>;
-  searchParams: {
+  params: Promise<Record<string, never>>;
+  searchParams: Promise<{
     first?: string;
     second?: string;
-  };
+  }>;
 }
 
 export const metadata = {

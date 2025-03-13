@@ -1,19 +1,19 @@
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
-import type { Question } from "./types";
-import { useRef } from "react"
-import { SimpleHeader } from "@/components/ui/simple-header"
-import { Button } from "@/components/ui/button"
+import type { QuizQuestion as QuizQuestionType } from "./types";
+import { useRef } from "react";
+import { SimpleHeader } from "@/components/ui/simple-header";
+import { Button } from "@/components/ui/button";
 
 interface QuizQuestionProps {
-  question: Question
-  currentIndex: number
-  totalQuestions: number
-  selectedValue: number | null
-  onSelect: (value: number) => void
-  onNext: () => void
-  onPrev: () => void
+  question: QuizQuestionType;
+  currentIndex: number;
+  totalQuestions: number;
+  selectedValue: number | null;
+  onSelect: (value: number) => void;
+  onNext: () => void;
+  onPrev: () => void;
 }
 
 export function QuizQuestion({
@@ -25,7 +25,7 @@ export function QuizQuestion({
   onNext,
   onPrev,
 }: QuizQuestionProps) {
-  const questionRef = useRef<HTMLDivElement>(null)
+  const questionRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -53,21 +53,28 @@ export function QuizQuestion({
                 {currentIndex + 1} / {totalQuestions}
               </div>
 
-              <h2 className="text-xl md:text-2xl font-medium mb-8">{question.text}</h2>
+              <h2 className="text-xl md:text-2xl font-medium mb-8">
+                {question.text}
+              </h2>
 
               <div className="mb-8">
                 <div className="flex justify-between items-center relative mb-4">
                   <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gray-300" />
                   {question.options.map((option) => (
-                    <div key={option.value} className="flex flex-col items-center z-10">
+                    <div
+                      key={option.value}
+                      className="flex flex-col items-center z-10"
+                    >
                       <button
                         type="button"
                         onClick={() => {
-                          onSelect(option.value)
-                          setTimeout(() => onNext(), 300)
+                          onSelect(option.value);
+                          setTimeout(() => onNext(), 300);
                         }}
                         className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-gray-300 flex items-center justify-center ${
-                          selectedValue === option.value ? "bg-black border-black" : "bg-white"
+                          selectedValue === option.value
+                            ? "bg-black border-black"
+                            : "bg-white"
                         }`}
                         aria-label={option.label}
                       >
@@ -81,7 +88,10 @@ export function QuizQuestion({
 
                 <div className="flex justify-between items-center">
                   {question.options.map((option) => (
-                    <div key={option.value} className="w-1/5 text-center text-xs md:text-sm">
+                    <div
+                      key={option.value}
+                      className="w-1/5 text-center text-xs md:text-sm"
+                    >
                       {option.label}
                     </div>
                   ))}
@@ -99,7 +109,9 @@ export function QuizQuestion({
           onClick={onPrev}
           disabled={currentIndex === 0}
           className={`p-2 rounded-full border-2 ${
-            currentIndex === 0 ? "border-muted text-muted" : "border-primary text-primary hover:bg-secondary"
+            currentIndex === 0
+              ? "border-muted text-muted"
+              : "border-primary text-primary hover:bg-secondary"
           }`}
           aria-label="Previous question"
         >
@@ -110,7 +122,9 @@ export function QuizQuestion({
           onClick={onNext}
           disabled={selectedValue === null}
           className={`p-2 rounded-full border-2 ${
-            selectedValue === null ? "border-muted text-muted" : "border-primary text-primary hover:bg-secondary"
+            selectedValue === null
+              ? "border-muted text-muted"
+              : "border-primary text-primary hover:bg-secondary"
           }`}
           aria-label="Next question"
         >
@@ -150,6 +164,6 @@ export function QuizQuestion({
         </div>
       </footer>
     </div>
-  )
+  );
 }
 

@@ -14,9 +14,7 @@ import { evaluacionInicial } from "@/components/evaluations/data/initial-evaluat
 import { evaluacionAvanzada } from "@/components/evaluations/data/advanced-evaluation";
 
 interface ResultsPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: ResultsPageProps) {
