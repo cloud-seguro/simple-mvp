@@ -42,7 +42,7 @@ export function NavGroup({ title, items }: NavGroupType) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-gray-400 uppercase text-xs font-semibold">
+      <SidebarGroupLabel className="text-yellow-500 uppercase text-xs font-semibold">
         {title}
       </SidebarGroupLabel>
       <SidebarMenu>
@@ -73,7 +73,7 @@ export function NavGroup({ title, items }: NavGroupType) {
 }
 
 const NavBadge = ({ children }: { children: ReactNode }) => (
-  <Badge className="rounded-full px-1 py-0 text-xs bg-gray-700 text-white">
+  <Badge className="rounded-full px-1 py-0 text-xs bg-yellow-500 text-black">
     {children}
   </Badge>
 );
@@ -100,13 +100,13 @@ const SidebarMenuLink = ({
         tooltip={item.title}
         className={
           isActive
-            ? "bg-gray-800 text-white"
-            : "text-gray-300 hover:bg-gray-800 hover:text-white"
+            ? "bg-yellow-500 text-black hover:bg-yellow-500 hover:text-black"
+            : "text-white hover:bg-yellow-500 hover:text-black"
         }
       >
         <Link href={item.url} onClick={() => setOpenMobile(false)}>
           {item.icon && (
-            <item.icon className={isActive ? "text-white" : "text-gray-400"} />
+            <item.icon className={isActive ? "text-black" : "text-white"} />
           )}
           <span>{item.title}</span>
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
@@ -134,18 +134,16 @@ const SidebarMenuCollapsible = ({
             tooltip={item.title}
             className={
               isActive
-                ? "bg-gray-800 text-white"
-                : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                ? "bg-yellow-500 text-black hover:bg-yellow-500 hover:text-black"
+                : "text-white hover:bg-yellow-500 hover:text-black"
             }
           >
             {item.icon && (
-              <item.icon
-                className={isActive ? "text-white" : "text-gray-400"}
-              />
+              <item.icon className={isActive ? "text-black" : "text-white"} />
             )}
             <span>{item.title}</span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-gray-400" />
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-black" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent className="CollapsibleContent">
@@ -160,8 +158,8 @@ const SidebarMenuCollapsible = ({
                       isActive={isSubActive}
                       className={
                         isSubActive
-                          ? "text-white"
-                          : "text-gray-300 hover:text-white"
+                          ? "bg-yellow-500 text-black hover:bg-yellow-500 hover:text-black"
+                          : "text-white hover:bg-yellow-500 hover:text-black"
                       }
                     >
                       <Link
@@ -171,7 +169,7 @@ const SidebarMenuCollapsible = ({
                         {subItem.icon && (
                           <subItem.icon
                             className={
-                              isSubActive ? "text-white" : "text-gray-400"
+                              isSubActive ? "text-black" : "text-white"
                             }
                           />
                         )}
@@ -209,30 +207,28 @@ const SidebarMenuCollapsedDropdown = ({
             isActive={isActive}
             className={
               isActive
-                ? "bg-gray-800 text-white"
-                : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                ? "bg-yellow-500 text-black hover:bg-yellow-500 hover:text-black"
+                : "text-white hover:bg-yellow-500 hover:text-black"
             }
           >
             {item.icon && (
-              <item.icon
-                className={isActive ? "text-white" : "text-gray-400"}
-              />
+              <item.icon className={isActive ? "text-black" : "text-white"} />
             )}
             <span>{item.title}</span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-gray-400" />
+            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-black" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           side="right"
           align="start"
           sideOffset={4}
-          className="bg-gray-900 text-white border-gray-800"
+          className="bg-black text-white border-yellow-500"
         >
-          <DropdownMenuLabel className="text-gray-300">
+          <DropdownMenuLabel className="text-yellow-500">
             {item.title} {item.badge ? `(${item.badge})` : ""}
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-gray-800" />
+          <DropdownMenuSeparator className="bg-yellow-500" />
           {item.items.map((sub: NavItem) => {
             if (isNavLink(sub)) {
               const isSubActive = checkIsActive(pathname, sub);
@@ -240,15 +236,19 @@ const SidebarMenuCollapsedDropdown = ({
                 <DropdownMenuItem
                   key={`${sub.title}-${sub.url}`}
                   asChild
-                  className="text-gray-300 hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white"
+                  className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
                 >
                   <Link
                     href={sub.url}
-                    className={`${isSubActive ? "bg-gray-800" : ""}`}
+                    className={
+                      isSubActive
+                        ? "bg-yellow-500 text-black w-full hover:bg-yellow-500 hover:text-black"
+                        : "w-full hover:bg-yellow-500 hover:text-black"
+                    }
                   >
                     {sub.icon && (
                       <sub.icon
-                        className={isSubActive ? "text-white" : "text-gray-400"}
+                        className={isSubActive ? "text-black" : "text-white"}
                       />
                     )}
                     <span className="max-w-52 text-wrap">{sub.title}</span>

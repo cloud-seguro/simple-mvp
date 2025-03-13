@@ -23,16 +23,18 @@ export function TeamSwitcher({
         <Link href="/dashboard">
           <SidebarMenuButton
             size="lg"
-            className={cn("hover:bg-gray-800 transition-colors")}
+            className={cn(
+              "hover:bg-yellow-500 hover:text-black transition-colors"
+            )}
           >
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gray-700 text-white">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-yellow-500 text-black">
               <activeTeam.logo className="size-4" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-bold text-white text-lg">
                 SIMPLE
               </span>
-              <span className="truncate text-xs text-gray-300">
+              <span className="truncate text-xs text-white">
                 Cybersecurity Platform
               </span>
             </div>

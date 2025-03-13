@@ -55,8 +55,8 @@ export function NavUser() {
             <SidebarMenuButton
               size="lg"
               className={cn(
-                "data-[state=open]:bg-gray-800",
-                "hover:bg-gray-800 transition-colors"
+                "data-[state=open]:bg-yellow-500 data-[state=open]:text-black",
+                "hover:bg-yellow-500 hover:text-black transition-colors"
               )}
             >
               <Avatar className="h-8 w-8 rounded-lg ring-2 ring-white/20">
@@ -64,7 +64,7 @@ export function NavUser() {
                   src={profile.avatarUrl || ""}
                   alt={displayName || user.email || "User"}
                 />
-                <AvatarFallback className="rounded-lg bg-gray-700 text-white">
+                <AvatarFallback className="rounded-lg bg-yellow-500 text-black">
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
@@ -72,60 +72,74 @@ export function NavUser() {
                 <span className="truncate font-semibold text-white">
                   {displayName || user.email}
                 </span>
-                <span className="truncate text-xs text-gray-300">
+                <span className="truncate text-xs text-white">
                   {user.email}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4 text-gray-300" />
+              <ChevronsUpDown className="ml-auto size-4 text-white" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg bg-black border-yellow-500"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg ring-2 ring-primary/10">
+                <Avatar className="h-8 w-8 rounded-lg ring-2 ring-yellow-500/50">
                   <AvatarImage
                     src={profile.avatarUrl || ""}
                     alt={displayName || user.email || "User"}
                   />
-                  <AvatarFallback className="rounded-lg bg-primary/10">
+                  <AvatarFallback className="rounded-lg bg-yellow-500 text-black">
                     {getInitials()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
+                  <span className="truncate font-semibold text-white">
                     {displayName || user.email}
                   </span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate text-xs text-white">
+                    {user.email}
+                  </span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-yellow-500" />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem
+                asChild
+                className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
+              >
                 <Link href="/settings/account">
                   <BadgeCheck className="mr-2 h-4 w-4" />
                   Mi Cuenta
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem
+                asChild
+                className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
+              >
                 <Link href="/settings">
                   <Settings className="mr-2 h-4 w-4" />
                   Configuración
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem
+                asChild
+                className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
+              >
                 <Link href="/evaluations">
                   <User className="mr-2 h-4 w-4" />
                   Mis Evaluaciones
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut?.()}>
+              <DropdownMenuSeparator className="bg-yellow-500" />
+              <DropdownMenuItem
+                onClick={() => signOut?.()}
+                className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 Cerrar Sesión
               </DropdownMenuItem>

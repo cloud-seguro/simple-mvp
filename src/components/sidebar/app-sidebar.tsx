@@ -19,22 +19,22 @@ export function AppSidebar({
   return (
     <Sidebar
       collapsible="icon"
-      variant="floating"
-      className={cn("bg-black text-white", className)}
+      
+      className={cn("text-white", className)}
       {...props}
     >
-      <SidebarHeader>
+      <SidebarHeader className="bg-black">
         <TeamSwitcher teams={sidebarData.teams} />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-black">
         {sidebarData.navGroups.map((props: NavGroupProps) => (
           <NavGroup key={props.title} {...props} />
         ))}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="bg-black">
         <NavUser />
       </SidebarFooter>
-      <SidebarRail className="bg-gray-900" />
+      <SidebarRail />
     </Sidebar>
   );
 }
