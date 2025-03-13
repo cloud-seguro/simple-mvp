@@ -13,13 +13,12 @@ import type { UserInfo } from "@/components/evaluations/types";
 
 // Update the interface to match Next.js expected types for dynamic routes
 interface EvaluationPageProps {
-  params: { id: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: EvaluationPageProps) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const evaluation = await getEvaluationById(id);
 
     if (!evaluation) {
@@ -42,7 +41,7 @@ export async function generateMetadata({ params }: EvaluationPageProps) {
 
 export default async function EvaluationPage({ params }: EvaluationPageProps) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const evaluation = await getEvaluationById(id);
 
     if (!evaluation) {
