@@ -1,26 +1,26 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ChevronRight, Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer
-      className="bg-white text-gray-800 py-16 px-4 border-t border-gray-200"
-      id="contacto"
-    >
+    <footer className="bg-black text-white py-16 px-4" id="contacto">
       <div className="max-w-6xl mx-auto space-y-12">
         <div className="grid md:grid-cols-4 gap-12">
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold">SIMPLE</h3>
-            <p className="text-gray-600">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              SIMPLE
+            </h3>
+            <p className="text-gray-300">
               Hacemos lo complejo de la Ciberseguridad Simple
             </p>
-            <Separator className="my-6" />
+            <Separator className="my-6 bg-gray-700" />
             <div className="flex space-x-6">
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:text-yellow-500 transition-colors"
+                className="text-gray-400 hover:text-yellow-400 transition-colors"
                 onClick={() =>
                   window.open("https://facebook.com/simplesec", "_blank")
                 }
@@ -45,7 +45,7 @@ export default function Footer() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:text-yellow-500 transition-colors"
+                className="text-gray-400 hover:text-yellow-400 transition-colors"
                 onClick={() =>
                   window.open("https://instagram.com/simplesec", "_blank")
                 }
@@ -72,7 +72,7 @@ export default function Footer() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:text-yellow-500 transition-colors"
+                className="text-gray-400 hover:text-yellow-400 transition-colors"
                 onClick={() =>
                   window.open(
                     "https://linkedin.com/company/simplesec",
@@ -103,110 +103,146 @@ export default function Footer() {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Evaluaciones</h3>
-            <Separator className="my-4" />
+            <h3 className="text-xl font-semibold text-yellow-400">
+              Evaluaciones
+            </h3>
+            <Separator className="my-4 bg-gray-700" />
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/evaluacion-inicial"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Evaluación Inicial
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Evaluación Inicial</span>
                 </Link>
               </li>
               <li>
                 <Link
                   href="/evaluacion-avanzada"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Evaluación Avanzada
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Evaluación Avanzada</span>
                 </Link>
               </li>
               <li>
                 <Link
                   href="/faq"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Preguntas Frecuentes
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Preguntas Frecuentes</span>
                 </Link>
               </li>
               <li>
                 <Link
                   href="/metodologia"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Metodología
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Metodología</span>
                 </Link>
               </li>
             </ul>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Recursos</h3>
-            <Separator className="my-4" />
+            <h3 className="text-xl font-semibold text-yellow-400">Recursos</h3>
+            <Separator className="my-4 bg-gray-700" />
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/blog"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Blog
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Blog</span>
                 </Link>
               </li>
               <li>
                 <Link
                   href="/casos-de-exito"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Casos de éxito
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Casos de éxito</span>
                 </Link>
               </li>
               <li>
                 <Link
                   href="/guias"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Guías
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Guías</span>
                 </Link>
               </li>
               <li>
                 <Link
                   href="/webinars"
-                  className="text-gray-600 hover:text-yellow-500 transition-colors"
+                  className="text-gray-300 hover:text-yellow-400 transition-colors flex items-center group"
                 >
-                  Webinars
+                  <ChevronRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all text-orange-500" />
+                  <span>Webinars</span>
                 </Link>
               </li>
             </ul>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Contacto</h3>
-            <Separator className="my-4" />
-            <ul className="space-y-3 text-gray-600">
-              <li className="flex items-center space-x-2">
-                <span>📧</span>
+            <h3 className="text-xl font-semibold text-yellow-400">Contacto</h3>
+            <Separator className="my-4 bg-gray-700" />
+            <ul className="space-y-4 text-gray-300">
+              <li className="flex items-center space-x-3 group hover:text-yellow-400 transition-colors">
+                <Button className="h-8 w-8 p-0 bg-yellow-400 hover:bg-yellow-500">
+                  <Mail className="h-4 w-4 text-black" />
+                </Button>
                 <span>info@simplesec.com</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <span>📱</span>
+              <li className="flex items-center space-x-3 group hover:text-yellow-400 transition-colors">
+                <Button className="h-8 w-8 p-0 bg-yellow-400 hover:bg-yellow-500">
+                  <Phone className="h-4 w-4 text-black" />
+                </Button>
                 <span>+34 123 456 789</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <span>📍</span>
+              <li className="flex items-center space-x-3 group hover:text-yellow-400 transition-colors">
+                <Button className="h-8 w-8 p-0 bg-yellow-400 hover:bg-yellow-500">
+                  <MapPin className="h-4 w-4 text-black" />
+                </Button>
                 <span>Madrid, España</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <Separator className="my-8" />
-
-        <div className="text-center text-gray-600 text-sm">
-          <p>
-            &copy; {new Date().getFullYear()} SIMPLE. Todos los derechos
-            reservados.
-          </p>
+        <div className="pt-8 mt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+          <div className="mb-4 md:mb-0">
+            <p className="text-sm text-gray-400">
+              &copy; {new Date().getFullYear()} SIMPLE. Todos los derechos
+              reservados.
+            </p>
+          </div>
+          <div className="flex space-x-6">
+            <Link
+              href="/terminos"
+              className="text-sm text-gray-400 hover:text-yellow-400"
+            >
+              Términos y Condiciones
+            </Link>
+            <Link
+              href="/privacidad"
+              className="text-sm text-gray-400 hover:text-yellow-400"
+            >
+              Política de Privacidad
+            </Link>
+            <Link
+              href="/cookies"
+              className="text-sm text-gray-400 hover:text-yellow-400"
+            >
+              Cookies
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

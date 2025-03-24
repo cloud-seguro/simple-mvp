@@ -369,7 +369,7 @@ export default function SimplifiedPricing() {
           <Link href="/pricing">
             <Button
               variant="outline"
-              className="px-8 py-6 text-lg border-amber-500 text-amber-700 hover:bg-amber-50"
+              className="px-8 py-6 text-lg border-black"
             >
               Ver todos los planes y detalles
             </Button>

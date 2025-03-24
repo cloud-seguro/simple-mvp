@@ -90,7 +90,7 @@ export default function Pricing() {
           transition={{ duration: 0.5 }}
         >
           <motion.span
-            className="inline-block bg-yellow-100 text-black px-4 py-2 rounded-full text-sm font-medium mb-3"
+            className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-3"
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
@@ -125,20 +125,18 @@ export default function Pricing() {
         >
           {/* Free Card */}
           <motion.div
-            className="bg-white rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200"
+            className="bg-white rounded-xl p-8 flex flex-col h-full border border-gray-200"
             variants={item}
             initial={float.initial}
             animate={float.animate}
             whileHover={{
               scale: 1.03,
-              boxShadow:
-                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
             }}
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold">Plan Básico</h3>
               <motion.div
-                className="bg-yellow-100 text-black rounded-full px-4 py-1 text-sm font-medium"
+                className="bg-yellow-400 text-black rounded-full px-4 py-1 text-sm font-medium"
                 initial={pulse.initial}
                 animate={pulse.animate}
               >
@@ -167,7 +165,7 @@ export default function Pricing() {
                   custom={0}
                 >
                   <motion.div
-                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
                     <Shield className="h-5 w-5 text-black" />
@@ -190,7 +188,7 @@ export default function Pricing() {
                   custom={1}
                 >
                   <motion.div
-                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
                     <CheckCircle2 className="h-5 w-5 text-black" />
@@ -213,7 +211,7 @@ export default function Pricing() {
                   custom={2}
                 >
                   <motion.div
-                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
                     <Lock className="h-5 w-5 text-black" />
@@ -241,13 +239,12 @@ export default function Pricing() {
 
           {/* Premium Card */}
           <motion.div
-            className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden"
+            className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-8 flex flex-col h-full relative overflow-hidden"
             variants={item}
             initial={float.initial}
             animate={float.animate}
             whileHover={{
               scale: 1.03,
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
             }}
           >
             <motion.div
@@ -258,30 +255,19 @@ export default function Pricing() {
               style={{ backgroundSize: "200% 200%" }}
             />
 
-            <motion.div
-              className="absolute -right-12 -top-12 w-24 h-24 bg-yellow-300 rotate-45 transform origin-bottom-left"
-              animate={{
-                rotate: [45, 50, 45],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                repeatType: "mirror" as const,
-              }}
-            ></motion.div>
-            <div className="absolute right-0 top-5 z-10 text-xs font-bold text-black rotate-45">
-              POPULAR
-            </div>
-
-            <div className="flex justify-between items-center mb-6 relative z-10">
-              <h3 className="text-2xl font-bold text-white">
-                Suscripción Premium
-              </h3>
+            <div className="flex justify-between items-start mb-6 relative z-10">
+              <h3 className="text-2xl font-bold text-white">Plan Premium</h3>
               <motion.div
                 className="bg-white text-black rounded-full px-4 py-1 text-sm font-medium"
-                initial={pulse.initial}
-                animate={pulse.animate}
+                initial={{ scale: 1 }}
+                animate={{
+                  scale: [1, 1.05, 1],
+                  transition: {
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                  },
+                }}
               >
                 Recomendado
               </motion.div>
@@ -360,30 +346,6 @@ export default function Pricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Mail className="h-5 w-5 text-white" />
-                  </motion.div>
-                  <div>
-                    <h4 className="font-medium text-white">
-                      Soporte prioritario
-                    </h4>
-                    <p className="text-white/80">
-                      Acceso a consultas ilimitadas con nuestros especialistas
-                    </p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-start"
-                  variants={featureAnimation}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  custom={3}
-                >
-                  <motion.div
-                    className="bg-white/20 p-2 rounded-full mr-3 mt-1"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
                     <Database className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
@@ -403,9 +365,8 @@ export default function Pricing() {
               whileTap={{ scale: 0.95 }}
               className="relative z-10"
             >
-              <Button className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10 group overflow-hidden">
+              <Button className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10">
                 <span className="relative z-10">Suscríbete ahora</span>
-                <span className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               </Button>
             </motion.div>
 
@@ -415,87 +376,96 @@ export default function Pricing() {
           </motion.div>
         </motion.div>
 
-        {/* Compare Plans */}
+        {/* Features Comparison */}
         <motion.div
-          className="mt-20 bg-gray-50 p-8 rounded-xl max-w-4xl mx-auto"
+          className="max-w-5xl mx-auto bg-white border border-gray-200 rounded-xl overflow-hidden"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.7 }}
         >
-          <h3 className="text-2xl font-bold mb-6 text-center">
-            Comparación de planes
-          </h3>
-          <div className="overflow-x-auto">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-2xl font-bold">
+              Comparativa de funcionalidades
+            </h3>
+          </div>
+
+          <div className="px-4 md:px-6">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="py-3 text-left">Funcionalidad</th>
-                  <th className="py-3 text-center">Gratuito</th>
-                  <th className="py-3 text-center">Premium</th>
+                  <th className="text-left py-4 px-2 md:px-4 w-1/2">
+                    Funcionalidad
+                  </th>
+                  <th className="text-center py-4 px-2 md:px-4">Plan Básico</th>
+                  <th className="text-center py-4 px-2 md:px-4 bg-white">
+                    Plan Premium
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {[
-                  {
-                    feature: "Evaluación de seguridad",
-                    free: "Básica (15 preguntas)",
-                    premium: "Avanzada (50+ preguntas)",
-                  },
-                  {
-                    feature: "Monitoreo de filtraciones",
-                    free: <X className="mx-auto text-gray-400" />,
-                    premium: <Check className="mx-auto text-green-500" />,
-                  },
-                  {
-                    feature: "Alertas en tiempo real",
-                    free: <X className="mx-auto text-gray-400" />,
-                    premium: <Check className="mx-auto text-green-500" />,
-                  },
-                  {
-                    feature: "Dashboard personalizado",
-                    free: <X className="mx-auto text-gray-400" />,
-                    premium: <Check className="mx-auto text-green-500" />,
-                  },
-                  {
-                    feature: "Consultas con especialistas",
-                    free: "Limitadas",
-                    premium: "Ilimitadas",
-                  },
-                  {
-                    feature: "Informe de vulnerabilidades",
-                    free: "Básico",
-                    premium: "Detallado + Recomendaciones",
-                  },
-                ].map((row, index) => (
-                  <tr
-                    key={index}
-                    className={`${
-                      index !== 5 ? "border-b border-gray-200" : ""
-                    }`}
-                  >
-                    <td className="py-4">{row.feature}</td>
-                    <td className="py-4 text-center">
-                      {typeof row.free === "string" ? (
-                        row.free
-                      ) : (
-                        <div className="flex justify-center">{row.free}</div>
-                      )}
-                    </td>
-                    <td className="py-4 text-center">
-                      {typeof row.premium === "string" ? (
-                        <motion.div
-                          whileHover={{ y: -5 }}
-                          className="font-bold text-black mb-1"
-                        >
-                          {row.premium}
-                        </motion.div>
-                      ) : (
-                        <div className="flex justify-center">{row.premium}</div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">
+                    Evaluación de seguridad
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    Básica (15 preguntas)
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-white font-medium">
+                    Completa (50+ puntos)
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">
+                    Monitoreo continuo
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-white">
+                    <Check className="h-5 w-5 text-orange-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">
+                    Dashboard personalizado
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-white">
+                    <Check className="h-5 w-5 text-orange-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">
+                    Alertas en tiempo real
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-white">
+                    <Check className="h-5 w-5 text-orange-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">
+                    Detección de vulnerabilidades
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4">Limitada</td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-white font-medium">
+                    Completa
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-2 md:px-4 font-medium">
+                    Soporte técnico
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4">Email</td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-white font-medium">
+                    Email + Chat prioritario
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

@@ -14,7 +14,7 @@ export default function HourlyRates() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <span className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-3">
+        <span className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-3">
           Equipo de especialistas
         </span>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -35,7 +35,7 @@ export default function HourlyRates() {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         {/* Stats banner */}
-        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-center py-2 mb-8 font-medium text-white">
+        <div className="bg-black text-center py-2 mb-8 font-medium text-white">
           +1233 PROYECTOS ENTREGADOS PARA 142 EMPRESAS EN TODO DEL MUNDO
         </div>
 
@@ -86,7 +86,7 @@ export default function HourlyRates() {
 
               <Button
                 variant="outline"
-                className="w-full py-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 border-0"
+                className="w-full py-6 bg-yellow-400 text-black hover:bg-yellow-500 border-0"
               >
                 Comenzar prueba gratis
               </Button>
@@ -94,7 +94,7 @@ export default function HourlyRates() {
 
             {/* Standard - 24 hours */}
             <div className="p-8 border-b md:border-b-0 md:border-r border-gray-200 relative">
-              <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-xs text-white px-3 py-1 rounded-full font-medium">
+              <div className="absolute top-4 right-4 bg-yellow-400 text-xs text-black px-3 py-1 rounded-full font-medium">
                 Más popular
               </div>
               <h3 className="text-3xl font-bold mb-2">Estándar</h3>
@@ -139,7 +139,7 @@ export default function HourlyRates() {
 
               <Button
                 variant="outline"
-                className="w-full py-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 border-0"
+                className="w-full py-6 bg-gradient-to-br from-yellow-400 to-orange-500 text-black hover:from-yellow-500 hover:to-orange-600 border-0"
               >
                 Comenzar prueba gratis
               </Button>
@@ -206,9 +206,9 @@ export default function HourlyRates() {
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Shield className="h-6 w-6 text-white" />
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Shield className="h-6 w-6 text-black" />
           </div>
           <h3 className="text-xl font-bold mb-2">
             Protección de Infraestructura
@@ -219,9 +219,9 @@ export default function HourlyRates() {
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Lock className="h-6 w-6 text-white" />
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Lock className="h-6 w-6 text-black" />
           </div>
           <h3 className="text-xl font-bold mb-2">Seguridad de Aplicaciones</h3>
           <p className="text-gray-600">
@@ -230,9 +230,9 @@ export default function HourlyRates() {
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Search className="h-6 w-6 text-white" />
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Search className="h-6 w-6 text-black" />
           </div>
           <h3 className="text-xl font-bold mb-2">Monitoreo de Amenazas</h3>
           <p className="text-gray-600">
@@ -241,35 +241,59 @@ export default function HourlyRates() {
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Terminal className="h-6 w-6 text-white" />
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Terminal className="h-6 w-6 text-black" />
           </div>
           <h3 className="text-xl font-bold mb-2">Consultoría Especializada</h3>
           <p className="text-gray-600">
             Asesoramiento personalizado por expertos en seguridad informática y
-            ciberprotección.
+            cumplimiento normativo.
           </p>
         </div>
       </motion.div>
 
+      {/* Why Choose Us */}
       <motion.div
-        className="mt-16 text-center"
+        className="mt-20"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.4 }}
+        transition={{ duration: 0.5 }}
       >
-        <h3 className="text-2xl font-bold mb-4">
-          ¿Necesitas un plan personalizado?
-        </h3>
-        <p className="text-lg mb-8 max-w-3xl mx-auto">
-          Contáctanos para diseñar un plan que se ajuste exactamente a los
-          requerimientos de seguridad de tu empresa.
-        </p>
-        <Button className="bg-yellow-500 text-black hover:bg-yellow-600 px-8 py-6 text-lg">
-          Hablar con un especialista
-        </Button>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            ¿Por qué elegirnos?
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Nuestro equipo de especialistas cuentan con amplia experiencia y
+            certificaciones de seguridad
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="bg-white p-6 border border-gray-200 rounded-xl">
+            <h3 className="text-xl font-bold mb-2">Flexibilidad total</h3>
+            <p className="text-gray-600">
+              Servicios a medida para las necesidades específicas de tu empresa,
+              sin compromisos a largo plazo
+            </p>
+          </div>
+          <div className="bg-white p-6 border border-gray-200 rounded-xl">
+            <h3 className="text-xl font-bold mb-2">Experiencia comprobada</h3>
+            <p className="text-gray-600">
+              Especialistas con más de 10 años de experiencia en ciberseguridad
+              y certificaciones reconocidas
+            </p>
+          </div>
+          <div className="bg-white p-6 border border-gray-200 rounded-xl">
+            <h3 className="text-xl font-bold mb-2">Respuesta inmediata</h3>
+            <p className="text-gray-600">
+              Tiempo de respuesta garantizado según el plan contratado, con
+              soporte prioritario
+            </p>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
