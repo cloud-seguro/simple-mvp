@@ -108,22 +108,35 @@ export default function Navbar() {
               { href: "#evaluacion", label: "Evaluación" },
               { href: "#beneficios", label: "Beneficios" },
               { href: "#testimonios", label: "Testimonios" },
+              { href: "#precios", label: "Precios" },
+              { href: "/pricing", label: "Planes Detallados", isLink: true },
               { href: "#contacto", label: "Contacto" },
-            ].map((item) => (
-              <Button
-                key={item.href}
-                variant="ghost"
-                className="hover:text-yellow-500 transition-colors"
-                onClick={(e) =>
-                  handleNavClick(
-                    e as React.MouseEvent<HTMLButtonElement>,
-                    item.href
-                  )
-                }
-              >
-                {item.label}
-              </Button>
-            ))}
+            ].map((item) =>
+              item.isLink ? (
+                <Link href={item.href} key={item.href}>
+                  <Button
+                    variant="ghost"
+                    className="hover:text-yellow-500 transition-colors"
+                  >
+                    {item.label}
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  key={item.href}
+                  variant="ghost"
+                  className="hover:text-yellow-500 transition-colors"
+                  onClick={(e) =>
+                    handleNavClick(
+                      e as React.MouseEvent<HTMLButtonElement>,
+                      item.href
+                    )
+                  }
+                >
+                  {item.label}
+                </Button>
+              )
+            )}
             <div className="flex items-center space-x-2 ml-2">
               <AuthHeader />
               <Button
@@ -166,22 +179,35 @@ export default function Navbar() {
                 { href: "#evaluacion", label: "Evaluación" },
                 { href: "#beneficios", label: "Beneficios" },
                 { href: "#testimonios", label: "Testimonios" },
+                { href: "#precios", label: "Precios" },
+                { href: "/pricing", label: "Planes Detallados", isLink: true },
                 { href: "#contacto", label: "Contacto" },
-              ].map((item) => (
-                <Button
-                  key={item.href}
-                  variant="ghost"
-                  className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
-                  onClick={(e) =>
-                    handleNavClick(
-                      e as React.MouseEvent<HTMLButtonElement>,
-                      item.href
-                    )
-                  }
-                >
-                  {item.label}
-                </Button>
-              ))}
+              ].map((item) =>
+                item.isLink ? (
+                  <Link href={item.href} key={item.href} className="w-full">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
+                    >
+                      {item.label}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    key={item.href}
+                    variant="ghost"
+                    className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
+                    onClick={(e) =>
+                      handleNavClick(
+                        e as React.MouseEvent<HTMLButtonElement>,
+                        item.href
+                      )
+                    }
+                  >
+                    {item.label}
+                  </Button>
+                )
+              )}
             </div>
             <div className="flex flex-col space-y-3 mt-4">
               <AuthHeader />

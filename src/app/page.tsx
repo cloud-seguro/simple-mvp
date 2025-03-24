@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import Navbar from "@/components/views/landing-page/navbar"
-import Hero from "@/components/views/landing-page/Hero"
-import EvaluationOptions from "@/components/views/landing-page/evaluation-options"
-import Testimonial from "@/components/views/landing-page/Testimonials"
-import DiscoverSection from "@/components/views/landing-page/discover-section"
-import Footer from "@/components/views/landing-page/Footer"
-import Benefits from "@/components/views/landing-page/benefits"
+import Navbar from "@/components/views/landing-page/navbar";
+import Hero from "@/components/views/landing-page/Hero";
+import EvaluationOptions from "@/components/views/landing-page/evaluation-options";
+import Testimonial from "@/components/views/landing-page/Testimonials";
+import DiscoverSection from "@/components/views/landing-page/discover-section";
+import Footer from "@/components/views/landing-page/Footer";
+import Benefits from "@/components/views/landing-page/benefits";
+import SimplifiedPricing from "@/components/views/landing-page/simplified-pricing";
 
 export default function Home() {
   return (
@@ -22,11 +23,13 @@ export default function Home() {
       <section id="testimonios" className="py-24">
         <Testimonial />
       </section>
+      <section id="precios" className="py-24 bg-gray-50">
+        <SimplifiedPricing />
+      </section>
       <section id="descubre">
         <DiscoverSection />
       </section>
       <Footer />
     </main>
-  )
+  );
 }
-

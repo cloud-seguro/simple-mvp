@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { HyperText } from "@/components/magicui/hyper-text";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -17,7 +18,8 @@ export default function Hero() {
     const element = document.querySelector("#evaluacion");
     if (element) {
       const yOffset = -100;
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      const y =
+        element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
   };
@@ -121,6 +123,11 @@ export default function Hero() {
               >
                 Comenzar Evaluación
               </Button>
+              <Link href="/pricing" className="w-full">
+                <Button className="w-full bg-white text-black border-2 border-black px-6 py-6 rounded-md hover:bg-gray-100 transition-all transform hover:-translate-y-1 text-lg">
+                  Ver Precios
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -150,6 +157,11 @@ export default function Hero() {
               >
                 Comenzar Evaluación
               </Button>
+              <Link href="/pricing">
+                <Button className="bg-white text-black border-2 border-black px-6 py-6 rounded-md hover:bg-gray-100 transition-all transform hover:-translate-y-1 text-lg">
+                  Ver Precios
+                </Button>
+              </Link>
             </div>
           </motion.div>
 
@@ -214,7 +226,40 @@ export default function Hero() {
           </motion.div>
         </div>
       </div>
+
+      {/* Pricing CTA Card - Visible on all devices */}
+      <div className="max-w-6xl mx-auto mt-16 md:mt-24">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-xl p-8 md:p-10"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="md:max-w-xl">
+              <h2 className="text-2xl md:text-3xl font-bold text-black mb-3">
+                Planes diseñados para empresas de todos los tamaños
+              </h2>
+              <p className="text-lg text-black">
+                Descubre nuestros planes y precios transparentes para proteger
+                tu negocio con las soluciones más efectivas de ciberseguridad.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/pricing">
+                <Button className="bg-black text-white px-6 py-6 md:py-7 rounded-md hover:bg-gray-800 transition-all transform hover:-translate-y-1 text-lg">
+                  Ver Todos los Planes
+                </Button>
+              </Link>
+              <Link href="/pricing#hourly">
+                <Button className="bg-white text-black border-2 border-black px-6 py-6 md:py-7 rounded-md hover:bg-gray-100 transition-all transform hover:-translate-y-1 text-lg">
+                  Consultar Tarifas
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }
-

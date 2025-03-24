@@ -127,6 +127,26 @@
   animation: colorTransitionBounce 10s infinite;
 }
 
+@keyframes orangeYellowGradient {
+  0%,
+  100% {
+    background: linear-gradient(45deg, #f97316 0%, #facc15 100%);
+  }
+  25% {
+    background: linear-gradient(135deg, #f97316 0%, #facc15 100%);
+  }
+  50% {
+    background: linear-gradient(225deg, #f97316 0%, #facc15 100%);
+  }
+  75% {
+    background: linear-gradient(315deg, #f97316 0%, #facc15 100%);
+  }
+}
+
+.animate-orange-yellow-gradient {
+  animation: orangeYellowGradient 8s ease infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -135,4 +155,3 @@
     @apply bg-background text-foreground;
   }
 }
-

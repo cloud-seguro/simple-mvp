@@ -1,0 +1,362 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Link from "next/link";
+import {
+  Shield,
+  Database,
+  Mail,
+  Lock,
+  Check,
+  CheckCircle2,
+  X,
+  Bell,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+export default function SimplifiedPricing() {
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
+  const shimmer = {
+    hidden: { backgroundPosition: "0% 0%" },
+    animate: {
+      backgroundPosition: ["0% 0%", "100% 100%"],
+      transition: {
+        repeat: Infinity,
+        repeatType: "mirror" as const,
+        duration: 3,
+      },
+    },
+  };
+
+  const float = {
+    initial: { y: 0 },
+    animate: {
+      y: [0, -10, 0],
+      transition: {
+        repeat: Infinity,
+        repeatType: "mirror" as const,
+        duration: 4,
+      },
+    },
+  };
+
+  const featureAnimation = {
+    hidden: { opacity: 0, y: 10 },
+    show: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.1 * i,
+        duration: 0.4,
+      },
+    }),
+  };
+
+  return (
+    <section id="precios" className="py-20 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Nuestros Planes
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Elige el plan que mejor se adapte a tus necesidades y comienza a
+            proteger tu empresa hoy mismo
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+        >
+          {/* Free Card */}
+          <motion.div
+            className="bg-white rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200"
+            variants={item}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <h3 className="text-2xl font-bold mb-6 text-black">Plan Básico</h3>
+
+            <div className="mb-6">
+              <span className="text-4xl font-bold">$0</span>
+              <span className="text-gray-500 ml-2">/siempre</span>
+            </div>
+
+            <div className="mb-8 flex-grow">
+              <p className="text-gray-700 mb-4">
+                Comienza tu viaje hacia una mejor ciberseguridad con nuestro
+                plan gratuito.
+              </p>
+
+              <div className="space-y-4">
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={0}
+                >
+                  <motion.div
+                    className="bg-amber-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Shield className="h-5 w-5 text-amber-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Evaluación inicial</h4>
+                    <p className="text-gray-600">
+                      Accede a nuestra evaluación de seguridad básica con 15
+                      preguntas
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={1}
+                >
+                  <motion.div
+                    className="bg-amber-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-amber-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Resultados básicos</h4>
+                    <p className="text-gray-600">
+                      Recibe un informe con las principales vulnerabilidades
+                      identificadas
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={2}
+                >
+                  <motion.div
+                    className="bg-amber-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Lock className="h-5 w-5 text-amber-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Recomendaciones iniciales</h4>
+                    <p className="text-gray-600">
+                      Sugerencias básicas para mejorar tu postura de seguridad
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link href="/pricing">
+                <Button className="w-full py-6 bg-black text-white hover:bg-gray-800">
+                  Comenzar gratis
+                </Button>
+              </Link>
+            </motion.div>
+
+            <p className="text-center text-sm text-gray-500 mt-4">
+              No requiere tarjeta de crédito
+            </p>
+          </motion.div>
+
+          {/* Premium Card */}
+          <motion.div
+            className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden"
+            variants={item}
+            initial={float.initial}
+            animate={float.animate}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            }}
+          >
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              initial="hidden"
+              variants={shimmer}
+              animate="animate"
+              style={{ backgroundSize: "200% 200%" }}
+            />
+
+            <div className="flex justify-between items-start mb-6 relative z-10">
+              <h3 className="text-2xl font-bold text-white">Plan Premium</h3>
+              <motion.div
+                className="bg-white text-black rounded-full px-4 py-1 text-sm font-medium"
+                initial={{ scale: 1 }}
+                animate={{
+                  scale: [1, 1.05, 1],
+                  transition: {
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                  },
+                }}
+              >
+                Recomendado
+              </motion.div>
+            </div>
+
+            <div className="mb-6 relative z-10">
+              <span className="text-4xl font-bold text-white">$49.99</span>
+              <span className="text-white/80 ml-2">/mes</span>
+            </div>
+
+            <div className="mb-8 flex-grow relative z-10">
+              <p className="text-white/90 mb-4">
+                Accede a recursos exclusivos con nuestra suscripción mensual y
+                mantén tu empresa protegida contra ciberataques.
+              </p>
+
+              <div className="space-y-4">
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={0}
+                >
+                  <motion.div
+                    className="bg-white/20 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Shield className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium text-white">
+                      Evaluación completa
+                    </h4>
+                    <p className="text-white/80">
+                      Evaluación exhaustiva de seguridad con 50+ puntos de
+                      verificación
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={1}
+                >
+                  <motion.div
+                    className="bg-white/20 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Bell className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium text-white">
+                      Alertas en tiempo real
+                    </h4>
+                    <p className="text-white/80">
+                      Monitoreo continuo de datos filtrados y vulnerabilidades
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={2}
+                >
+                  <motion.div
+                    className="bg-white/20 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Database className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium text-white">
+                      Dashboard personalizado
+                    </h4>
+                    <p className="text-white/80">
+                      Visualiza tu estado de seguridad con métricas claras
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative z-10"
+            >
+              <Link href="/pricing">
+                <Button className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10">
+                  <span className="relative z-10">Suscríbete ahora</span>
+                </Button>
+              </Link>
+            </motion.div>
+
+            <p className="text-center text-sm text-white/70 mt-4 relative z-10">
+              Cancelación en cualquier momento
+            </p>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          className="flex justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Link href="/pricing">
+            <Button
+              variant="outline"
+              className="px-8 py-6 text-lg border-amber-500 text-amber-700 hover:bg-amber-50"
+            >
+              Ver todos los planes y detalles
+            </Button>
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
