@@ -9,8 +9,9 @@ import {
   Lock,
   Check,
   CheckCircle2,
-  X,
   Bell,
+  Users,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -92,113 +93,7 @@ export default function SimplifiedPricing() {
           whileInView="show"
           viewport={{ once: true }}
         >
-          {/* Free Card */}
-          <motion.div
-            className="bg-white rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200"
-            variants={item}
-            whileHover={{
-              scale: 1.03,
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <h3 className="text-2xl font-bold mb-6 text-black">Plan Básico</h3>
-
-            <div className="mb-6">
-              <span className="text-4xl font-bold">$0</span>
-              <span className="text-gray-500 ml-2">/siempre</span>
-            </div>
-
-            <div className="mb-8 flex-grow">
-              <p className="text-gray-700 mb-4">
-                Comienza tu viaje hacia una mejor ciberseguridad con nuestro
-                plan gratuito.
-              </p>
-
-              <div className="space-y-4">
-                <motion.div
-                  className="flex items-start"
-                  variants={featureAnimation}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  custom={0}
-                >
-                  <motion.div
-                    className="bg-amber-100 p-2 rounded-full mr-3 mt-1"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <Shield className="h-5 w-5 text-amber-600" />
-                  </motion.div>
-                  <div>
-                    <h4 className="font-medium">Evaluación inicial</h4>
-                    <p className="text-gray-600">
-                      Accede a nuestra evaluación de seguridad básica con 15
-                      preguntas
-                    </p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-start"
-                  variants={featureAnimation}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  custom={1}
-                >
-                  <motion.div
-                    className="bg-amber-100 p-2 rounded-full mr-3 mt-1"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <CheckCircle2 className="h-5 w-5 text-amber-600" />
-                  </motion.div>
-                  <div>
-                    <h4 className="font-medium">Resultados básicos</h4>
-                    <p className="text-gray-600">
-                      Recibe un informe con las principales vulnerabilidades
-                      identificadas
-                    </p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-start"
-                  variants={featureAnimation}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  custom={2}
-                >
-                  <motion.div
-                    className="bg-amber-100 p-2 rounded-full mr-3 mt-1"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <Lock className="h-5 w-5 text-amber-600" />
-                  </motion.div>
-                  <div>
-                    <h4 className="font-medium">Recomendaciones iniciales</h4>
-                    <p className="text-gray-600">
-                      Sugerencias básicas para mejorar tu postura de seguridad
-                    </p>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link href="/pricing">
-                <Button className="w-full py-6 bg-black text-white hover:bg-gray-800">
-                  Comenzar gratis
-                </Button>
-              </Link>
-            </motion.div>
-
-            <p className="text-center text-sm text-gray-500 mt-4">
-              No requiere tarjeta de crédito
-            </p>
-          </motion.div>
-
-          {/* Premium Card */}
+          {/* Premium Subscription Card */}
           <motion.div
             className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden"
             variants={item}
@@ -336,6 +231,130 @@ export default function SimplifiedPricing() {
 
             <p className="text-center text-sm text-white/70 mt-4 relative z-10">
               Cancelación en cualquier momento
+            </p>
+          </motion.div>
+
+          {/* Specialist Subscription Card */}
+          <motion.div
+            className="bg-white text-black rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden border-2 border-black"
+            variants={item}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            }}
+          >
+            <div className="flex justify-between items-start mb-6 relative z-10">
+              <h3 className="text-2xl font-bold">Especialistas</h3>
+              <motion.div
+                className="bg-yellow-400 text-black rounded-full px-4 py-1 text-sm font-medium"
+                initial={{ scale: 1 }}
+                animate={{
+                  scale: [1, 1.05, 1],
+                  transition: {
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                  },
+                }}
+              >
+                Personalizado
+              </motion.div>
+            </div>
+
+            <div className="mb-6 relative z-10">
+              <span className="text-4xl font-bold">Desde $490</span>
+              <span className="text-gray-500 ml-2">/mes</span>
+            </div>
+
+            <div className="mb-8 flex-grow relative z-10">
+              <p className="text-gray-700 mb-4">
+                Contrata a nuestro equipo de especialistas por hora según tus
+                necesidades específicas de ciberseguridad.
+              </p>
+
+              <div className="space-y-4">
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={0}
+                >
+                  <motion.div
+                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Clock className="h-5 w-5 text-black" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Horas flexibles</h4>
+                    <p className="text-gray-600">
+                      10, 24 o 48 horas mensuales según tus necesidades
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={1}
+                >
+                  <motion.div
+                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Users className="h-5 w-5 text-black" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Equipo dedicado</h4>
+                    <p className="text-gray-600">
+                      Especialistas y coordinador de seguridad asignados
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={2}
+                >
+                  <motion.div
+                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Shield className="h-5 w-5 text-black" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Soluciones específicas</h4>
+                    <p className="text-gray-600">
+                      Servicios a medida para los desafíos de tu empresa
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative z-10"
+            >
+              <Link href="/pricing#hourly">
+                <Button className="w-full py-6 bg-yellow-400 text-black hover:bg-yellow-500 relative z-10">
+                  <span className="relative z-10">Ver planes por hora</span>
+                </Button>
+              </Link>
+            </motion.div>
+
+            <p className="text-center text-sm text-gray-500 mt-4 relative z-10">
+              Sin compromisos a largo plazo
             </p>
           </motion.div>
         </motion.div>

@@ -14,7 +14,7 @@ export default function HourlyRates() {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <span className="inline-block bg-yellow-100 text-black px-4 py-2 rounded-full text-sm font-medium mb-3">
+        <span className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-3">
           Equipo de especialistas
         </span>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -35,7 +35,7 @@ export default function HourlyRates() {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         {/* Stats banner */}
-        <div className="bg-yellow-100 text-center py-2 mb-8 font-medium text-black">
+        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-center py-2 mb-8 font-medium text-white">
           +1233 PROYECTOS ENTREGADOS PARA 142 EMPRESAS EN TODO DEL MUNDO
         </div>
 
@@ -56,19 +56,19 @@ export default function HourlyRates() {
                 </h4>
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
-                    <span className="inline-block bg-yellow-100 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
+                    <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
                     <span>10 horas de servicio por mes</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Evaluación de vulnerabilidades</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Configuración básica de seguridad</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Soporte por correo electrónico</span>
                   </li>
                 </ul>
@@ -86,7 +86,7 @@ export default function HourlyRates() {
 
               <Button
                 variant="outline"
-                className="w-full py-6 bg-yellow-400 text-black hover:bg-yellow-500 border-0"
+                className="w-full py-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 border-0"
               >
                 Comenzar prueba gratis
               </Button>
@@ -94,7 +94,7 @@ export default function HourlyRates() {
 
             {/* Standard - 24 hours */}
             <div className="p-8 border-b md:border-b-0 md:border-r border-gray-200 relative">
-              <div className="absolute top-4 right-4 bg-yellow-400 text-xs text-black px-3 py-1 rounded-full font-medium">
+              <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-xs text-white px-3 py-1 rounded-full font-medium">
                 Más popular
               </div>
               <h3 className="text-3xl font-bold mb-2">Estándar</h3>
@@ -109,19 +109,19 @@ export default function HourlyRates() {
                 </h4>
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
-                    <span className="inline-block bg-yellow-100 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
+                    <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
                     <span>24 horas de servicio por mes</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Análisis completo de vulnerabilidades</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Implementación de soluciones</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Soporte prioritario</span>
                   </li>
                 </ul>
@@ -139,7 +139,7 @@ export default function HourlyRates() {
 
               <Button
                 variant="outline"
-                className="w-full py-6 bg-yellow-400 text-black hover:bg-yellow-500 border-0"
+                className="w-full py-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 border-0"
               >
                 Comenzar prueba gratis
               </Button>
@@ -159,19 +159,19 @@ export default function HourlyRates() {
                 </h4>
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
-                    <span className="inline-block bg-yellow-100 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
+                    <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
                     <span>48 horas de servicio por mes</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Tests de penetración completos</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Respuesta a incidentes 24/7</span>
                   </li>
                   <li className="flex items-baseline">
-                    <span className="text-yellow-500 mr-2">✓</span>
+                    <span className="text-orange-500 mr-2">✓</span>
                     <span>Consultoría personalizada</span>
                   </li>
                 </ul>
@@ -207,8 +207,8 @@ export default function HourlyRates() {
         transition={{ duration: 0.5, delay: 0.3 }}
       >
         <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-yellow-100 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Shield className="h-6 w-6 text-yellow-500" />
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Shield className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-xl font-bold mb-2">
             Protección de Infraestructura
@@ -220,8 +220,8 @@ export default function HourlyRates() {
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-yellow-100 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Lock className="h-6 w-6 text-yellow-500" />
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Lock className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-xl font-bold mb-2">Seguridad de Aplicaciones</h3>
           <p className="text-gray-600">
@@ -231,8 +231,8 @@ export default function HourlyRates() {
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-yellow-100 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Search className="h-6 w-6 text-yellow-500" />
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Search className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-xl font-bold mb-2">Monitoreo de Amenazas</h3>
           <p className="text-gray-600">
@@ -242,13 +242,13 @@ export default function HourlyRates() {
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="bg-yellow-100 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Terminal className="h-6 w-6 text-yellow-500" />
+          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+            <Terminal className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-xl font-bold mb-2">Consultoría Especializada</h3>
           <p className="text-gray-600">
             Asesoramiento personalizado por expertos en seguridad informática y
-            normativa.
+            ciberprotección.
           </p>
         </div>
       </motion.div>

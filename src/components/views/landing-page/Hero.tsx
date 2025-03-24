@@ -226,40 +226,6 @@ export default function Hero() {
           </motion.div>
         </div>
       </div>
-
-      {/* Pricing CTA Card - Visible on all devices */}
-      <div className="max-w-6xl mx-auto mt-16 md:mt-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-xl p-8 md:p-10"
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="md:max-w-xl">
-              <h2 className="text-2xl md:text-3xl font-bold text-black mb-3">
-                Planes diseñados para empresas de todos los tamaños
-              </h2>
-              <p className="text-lg text-black">
-                Descubre nuestros planes y precios transparentes para proteger
-                tu negocio con las soluciones más efectivas de ciberseguridad.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/pricing">
-                <Button className="bg-black text-white px-6 py-6 md:py-7 rounded-md hover:bg-gray-800 transition-all transform hover:-translate-y-1 text-lg">
-                  Ver Todos los Planes
-                </Button>
-              </Link>
-              <Link href="/pricing#hourly">
-                <Button className="bg-white text-black border-2 border-black px-6 py-6 md:py-7 rounded-md hover:bg-gray-100 transition-all transform hover:-translate-y-1 text-lg">
-                  Consultar Tarifas
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      </div>
     </section>
   );
 }

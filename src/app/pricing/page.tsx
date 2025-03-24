@@ -77,10 +77,10 @@ export default function PricingPage() {
       <Navbar />
 
       {/* Header */}
-      <div className="pt-32 bg-gradient-to-b from-yellow-50 to-white">
+      <div className="pt-32 bg-gradient-to-b from-yellow-400/30 to-white">
         <div className="max-w-6xl mx-auto px-4 text-center mb-12">
           <motion.span
-            className="inline-block bg-yellow-100 text-black px-4 py-2 rounded-full text-sm font-medium mb-4"
+            className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-4"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
@@ -120,7 +120,7 @@ export default function PricingPage() {
               }}
               className={`px-6 py-3 text-lg font-medium transition-colors ${
                 activeTab === "subscription"
-                  ? "text-black border-b-2 border-yellow-500"
+                  ? "text-black border-b-2 border-orange-500"
                   : "text-gray-500 hover:text-yellow-500"
               }`}
             >
@@ -136,7 +136,7 @@ export default function PricingPage() {
               }}
               className={`px-6 py-3 text-lg font-medium transition-colors ${
                 activeTab === "hourly"
-                  ? "text-black border-b-2 border-yellow-500"
+                  ? "text-black border-b-2 border-orange-500"
                   : "text-gray-500 hover:text-yellow-500"
               }`}
             >
@@ -173,7 +173,7 @@ export default function PricingPage() {
       {/* Unified FAQ Section */}
       <motion.section
         id="faq"
-        className="py-20 bg-gray-50"
+        className="py-20 bg-gradient-to-b from-white to-yellow-50"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -188,7 +188,7 @@ export default function PricingPage() {
             transition={{ duration: 0.7 }}
           >
             <motion.span
-              className="inline-block bg-yellow-100 text-black px-4 py-2 rounded-full text-sm font-medium mb-3"
+              className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-3"
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -280,13 +280,13 @@ export default function PricingPage() {
                 >
                   <div className="flex items-start">
                     <motion.div
-                      className="bg-yellow-100 p-2 rounded-full mr-3 mt-1 flex-shrink-0"
+                      className="bg-gradient-to-r from-yellow-400 to-orange-500 p-2 rounded-full mr-3 mt-1 flex-shrink-0"
                       whileHover={{
                         rotate: [0, -10, 10, -10, 0],
                         transition: { duration: 0.5 },
                       }}
                     >
-                      <HelpCircle className="h-5 w-5 text-yellow-600" />
+                      <HelpCircle className="h-5 w-5 text-white" />
                     </motion.div>
                     <div>
                       <h4 className="font-bold mb-2">{faq.question}</h4>
@@ -302,7 +302,7 @@ export default function PricingPage() {
 
       {/* CTA Section */}
       <motion.section
-        className="py-20 bg-yellow-50"
+        className="py-20 bg-gradient-to-b from-white to-yellow-50"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -329,7 +329,7 @@ export default function PricingPage() {
             el plan que mejor se adapte a tus necesidades o{" "}
             <motion.button
               onClick={scrollToFaq}
-              className="text-yellow-600 underline hover:text-yellow-700"
+              className="text-orange-500 underline hover:text-orange-600"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -351,7 +351,7 @@ export default function PricingPage() {
               >
                 <Button
                   variant="outline"
-                  className="bg-transparent border-2 border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white px-6 py-6 text-lg hover:border-yellow-500"
+                  className="bg-transparent border-2 border-orange-500 text-orange-600 hover:bg-orange-500 hover:text-white px-6 py-6 text-lg hover:border-orange-500"
                 >
                   Comenzar gratis
                 </Button>
@@ -366,7 +366,7 @@ export default function PricingPage() {
                   <span className="relative z-10">
                     Hablar con un especialista
                   </span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                 </Button>
               </motion.div>
             </Link>
@@ -391,7 +391,7 @@ export default function PricingPage() {
             transition={{ duration: 0.7 }}
           >
             <motion.span
-              className="inline-block bg-yellow-100 text-black px-4 py-2 rounded-full text-sm font-medium mb-3"
+              className="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-3"
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -480,16 +480,14 @@ export default function PricingPage() {
               >
                 <div className="flex items-center mb-4">
                   <motion.div
-                    className="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center mr-4"
+                    className="bg-gradient-to-r from-yellow-400 to-orange-500 w-12 h-12 rounded-full flex items-center justify-center mr-4 text-white"
                     whileHover={{
                       rotate: 360,
                       scale: 1.1,
                       transition: { duration: 0.5 },
                     }}
                   >
-                    <span className="text-yellow-600 font-bold">
-                      {testimonial.initials}
-                    </span>
+                    <span className="font-bold">{testimonial.initials}</span>
                   </motion.div>
                   <div>
                     <h4 className="font-bold">{testimonial.name}</h4>

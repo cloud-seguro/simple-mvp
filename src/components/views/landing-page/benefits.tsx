@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { motion } from "framer-motion";
 import { CheckCircle, Shield, FileText } from "lucide-react";
@@ -23,7 +23,7 @@ export default function Benefits() {
       title: "Identificación de riesgos",
       description:
         "Nuestras evaluaciones te ayudan a identificar los riesgos de seguridad específicos de tu empresa, permitiéndote priorizar tus esfuerzos de protección.",
-      bgColor: "bg-teal-400",
+      bgColor: "bg-white text-black border-2 border-black",
       stats: [
         { number: "95%", description: "de precisión en detección" },
         { number: "48h", description: "tiempo promedio de análisis" },
@@ -35,7 +35,7 @@ export default function Benefits() {
       title: "Cumplimiento normativo",
       description:
         "Evalúa tu nivel de cumplimiento con estándares como ISO 27001, NIST y otras regulaciones relevantes para tu industria.",
-      bgColor: "bg-blue-400",
+      bgColor: "bg-yellow-400",
       stats: [
         { number: "100%", description: "cobertura normativa" },
         { number: "+25", description: "frameworks soportados" },
@@ -47,7 +47,7 @@ export default function Benefits() {
       title: "Plan de acción claro",
       description:
         "Recibe recomendaciones personalizadas y un plan de acción claro para mejorar tu postura de seguridad de manera efectiva y eficiente.",
-      bgColor: "bg-purple-400",
+      bgColor: "bg-orange-500 text-white",
       stats: [
         { number: "30%", description: "menos tiempo de implementación" },
         { number: "85%", description: "tasa de adopción" },
@@ -66,19 +66,19 @@ export default function Benefits() {
   };
 
   const cardVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: 50,
-      scale: 0.95
+      scale: 0.95,
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
       transition: {
         type: "spring",
         duration: 0.8,
-      }
+      },
     },
   };
 
@@ -100,7 +100,7 @@ export default function Benefits() {
         </p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8"
         variants={containerVariants}
         initial="hidden"
@@ -114,23 +114,22 @@ export default function Benefits() {
             variants={cardVariants}
             whileHover={{
               scale: 1.02,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              transition: { duration: 0.2 }
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              transition: { duration: 0.2 },
             }}
           >
             <div>
-              <div className="mb-4 md:mb-6 text-black">{benefit.icon}</div>
-              <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4 text-black">
+              <div className="mb-4 md:mb-6">{benefit.icon}</div>
+              <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">
                 {benefit.title}
               </h3>
-              <p className="text-sm md:text-base text-black/90 h-auto md:h-40">
+              <p className="text-sm md:text-base h-auto md:h-40 opacity-90">
                 {benefit.description}
               </p>
             </div>
 
-            <motion.div
-              className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-black/20"
-            >
+            <motion.div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-current/20">
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 {benefit.stats.map((stat, index) => (
                   <motion.div
@@ -140,10 +139,10 @@ export default function Benefits() {
                     transition={{ delay: 0.5 + index * 0.1 }}
                     className="text-center"
                   >
-                    <div className="text-xl md:text-2xl font-bold text-black">
+                    <div className="text-xl md:text-2xl font-bold">
                       {stat.number}
                     </div>
-                    <div className="text-xs md:text-sm text-black/80">
+                    <div className="text-xs md:text-sm opacity-80">
                       {stat.description}
                     </div>
                   </motion.div>
@@ -156,4 +155,3 @@ export default function Benefits() {
     </div>
   );
 }
-

@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { AuthHeader } from "@/components/views/landing-page/auth-header";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,6 +48,13 @@ export default function Navbar() {
     href: string
   ) => {
     e.preventDefault();
+
+    // If not on home page and trying to navigate to a section, redirect to home first
+    if (!isHomePage && href.startsWith("#")) {
+      window.location.href = `/${href}`;
+      return;
+    }
+
     const element = document.querySelector(href);
     if (element) {
       const yOffset = -100;
@@ -58,7 +68,7 @@ export default function Navbar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50">
       {/* Announcement Bar */}
-      {!scrolled && (
+      {!scrolled && isHomePage && (
         <div className="w-full bg-yellow-400 text-black py-2 md:py-3 px-4">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
             <p className="text-sm md:text-base font-semibold text-center md:text-left">
@@ -104,39 +114,62 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            {[
-              { href: "#evaluacion", label: "Evaluación" },
-              { href: "#beneficios", label: "Beneficios" },
-              { href: "#testimonios", label: "Testimonios" },
-              { href: "#precios", label: "Precios" },
-              { href: "/pricing", label: "Planes Detallados", isLink: true },
-              { href: "#contacto", label: "Contacto" },
-            ].map((item) =>
-              item.isLink ? (
-                <Link href={item.href} key={item.href}>
-                  <Button
-                    variant="ghost"
-                    className="hover:text-yellow-500 transition-colors"
-                  >
-                    {item.label}
-                  </Button>
-                </Link>
-              ) : (
-                <Button
-                  key={item.href}
-                  variant="ghost"
-                  className="hover:text-yellow-500 transition-colors"
-                  onClick={(e) =>
-                    handleNavClick(
-                      e as React.MouseEvent<HTMLButtonElement>,
-                      item.href
-                    )
-                  }
-                >
-                  {item.label}
-                </Button>
-              )
-            )}
+            {isHomePage
+              ? // Navigation for home page - section links
+                [
+                  { href: "#evaluacion", label: "Evaluación" },
+                  { href: "#beneficios", label: "Beneficios" },
+                  { href: "#testimonios", label: "Testimonios" },
+                  { href: "/pricing", label: "Precios", isLink: true },
+                ].map((item) =>
+                  item.isLink ? (
+                    <Link href={item.href} key={item.href}>
+                      <Button
+                        variant="ghost"
+                        className="hover:text-yellow-500 transition-colors"
+                      >
+                        {item.label}
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button
+                      key={item.href}
+                      variant="ghost"
+                      className="hover:text-yellow-500 transition-colors"
+                      onClick={(e) =>
+                        handleNavClick(
+                          e as React.MouseEvent<HTMLButtonElement>,
+                          item.href
+                        )
+                      }
+                    >
+                      {item.label}
+                    </Button>
+                  )
+                )
+              : // Navigation for other pages - direct links
+                [
+                  { href: "/#evaluacion", label: "Evaluación", isLink: true },
+                  { href: "/#beneficios", label: "Beneficios", isLink: true },
+                  { href: "/#testimonios", label: "Testimonios", isLink: true },
+                  {
+                    href: "/pricing",
+                    label: "Precios",
+                    isLink: true,
+                    current: pathname === "/pricing",
+                  },
+                ].map((item) => (
+                  <Link href={item.href} key={item.href}>
+                    <Button
+                      variant="ghost"
+                      className={`hover:text-yellow-500 transition-colors ${
+                        item.current ? "text-yellow-500" : ""
+                      }`}
+                    >
+                      {item.label}
+                    </Button>
+                  </Link>
+                ))}
             <div className="flex items-center space-x-2 ml-2">
               <AuthHeader />
               <Button
@@ -144,7 +177,7 @@ export default function Navbar() {
                 onClick={(e) =>
                   handleNavClick(
                     e as React.MouseEvent<HTMLButtonElement>,
-                    "#evaluacion"
+                    isHomePage ? "#evaluacion" : "/#evaluacion"
                   )
                 }
               >
@@ -175,39 +208,66 @@ export default function Navbar() {
         >
           <div className="flex flex-col h-full pt-20 pb-6 px-6">
             <div className="flex-1 flex flex-col space-y-2">
-              {[
-                { href: "#evaluacion", label: "Evaluación" },
-                { href: "#beneficios", label: "Beneficios" },
-                { href: "#testimonios", label: "Testimonios" },
-                { href: "#precios", label: "Precios" },
-                { href: "/pricing", label: "Planes Detallados", isLink: true },
-                { href: "#contacto", label: "Contacto" },
-              ].map((item) =>
-                item.isLink ? (
-                  <Link href={item.href} key={item.href} className="w-full">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
-                    >
-                      {item.label}
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button
-                    key={item.href}
-                    variant="ghost"
-                    className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
-                    onClick={(e) =>
-                      handleNavClick(
-                        e as React.MouseEvent<HTMLButtonElement>,
-                        item.href
-                      )
-                    }
-                  >
-                    {item.label}
-                  </Button>
-                )
-              )}
+              {isHomePage
+                ? // Mobile navigation for home page
+                  [
+                    { href: "#evaluacion", label: "Evaluación" },
+                    { href: "#beneficios", label: "Beneficios" },
+                    { href: "#testimonios", label: "Testimonios" },
+                    { href: "/pricing", label: "Precios", isLink: true },
+                  ].map((item) =>
+                    item.isLink ? (
+                      <Link href={item.href} key={item.href} className="w-full">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
+                        >
+                          {item.label}
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button
+                        key={item.href}
+                        variant="ghost"
+                        className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
+                        onClick={(e) =>
+                          handleNavClick(
+                            e as React.MouseEvent<HTMLButtonElement>,
+                            item.href
+                          )
+                        }
+                      >
+                        {item.label}
+                      </Button>
+                    )
+                  )
+                : // Mobile navigation for other pages
+                  [
+                    { href: "/#evaluacion", label: "Evaluación", isLink: true },
+                    { href: "/#beneficios", label: "Beneficios", isLink: true },
+                    {
+                      href: "/#testimonios",
+                      label: "Testimonios",
+                      isLink: true,
+                    },
+                    {
+                      href: "/pricing",
+                      label: "Precios",
+                      isLink: true,
+                      current: pathname === "/pricing",
+                    },
+                  ].map((item) => (
+                    <Link href={item.href} key={item.href} className="w-full">
+                      <Button
+                        variant="ghost"
+                        className={`w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500 ${
+                          item.current ? "text-yellow-500" : ""
+                        }`}
+                      >
+                        {item.label}
+                      </Button>
+                    </Link>
+                  ))}
             </div>
             <div className="flex flex-col space-y-3 mt-4">
               <AuthHeader />
@@ -216,7 +276,7 @@ export default function Navbar() {
                 onClick={(e) =>
                   handleNavClick(
                     e as React.MouseEvent<HTMLButtonElement>,
-                    "#evaluacion"
+                    isHomePage ? "#evaluacion" : "/#evaluacion"
                   )
                 }
               >
