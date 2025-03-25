@@ -69,7 +69,7 @@ Mantener el software actualizado es una de las formas más efectivas de prevenir
       excerpt:
         "Descubre las mejores prácticas de seguridad informática que toda empresa debería implementar para proteger sus datos y sistemas.",
       author: "SIMPLE",
-      coverImage: "/blog/security-best-practices.jpg",
+      coverImage: "/blog/security-best-practices.webp",
       tags: ["Ciberseguridad", "Mejores Prácticas", "Empresas"],
     },
   },

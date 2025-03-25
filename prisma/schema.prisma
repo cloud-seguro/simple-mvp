@@ -26,6 +26,20 @@ enum EvaluationType {
   ADVANCED
 }
 
+// Specialist expertise areas
+enum ExpertiseArea {
+  NETWORK_SECURITY
+  APPLICATION_SECURITY
+  CLOUD_SECURITY
+  INCIDENT_RESPONSE
+  SECURITY_ASSESSMENT
+  COMPLIANCE
+  SECURITY_TRAINING
+  SECURITY_ARCHITECTURE
+  DATA_PROTECTION
+  GENERAL
+}
+
 // User management
 model Profile {
   id            String        @id @default(cuid())
@@ -43,6 +57,7 @@ model Profile {
   
   // Relations
   evaluations   Evaluation[]
+  specialists   Specialist[]  // Only for SUPERADMIN users
 
   @@index([userId])
   @@map("profiles")
@@ -64,4 +79,29 @@ model Evaluation {
 
   @@index([profileId])
   @@map("evaluations")
+}
+
+// Cybersecurity Specialists model (managed by SuperAdmin)
+model Specialist {
+  id               String          @id @default(cuid())
+  name             String
+  bio              String
+  expertiseAreas   ExpertiseArea[] // Areas of expertise
+  contactEmail     String
+  contactPhone     String?
+  website          String?
+  imageUrl         String?         // Profile image
+  minMaturityLevel Int             // Minimum maturity level for recommendation (1-5)
+  maxMaturityLevel Int             // Maximum maturity level for recommendation (1-5)
+  location         String?         // Geographic location
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  active           Boolean         @default(true)
+  
+  // Relations - which SuperAdmin created/manages this specialist
+  createdById      String
+  createdBy        Profile         @relation(fields: [createdById], references: [id])
+
+  @@index([createdById])
+  @@map("specialists")
 }

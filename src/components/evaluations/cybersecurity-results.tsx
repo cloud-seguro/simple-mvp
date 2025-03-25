@@ -1,11 +1,12 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { QuizData, QuizResults, UserInfo } from "./types";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { cn } from "@/lib/utils";
+import { SpecialistsRecommendations } from "./specialists-recommendations";
 
 interface MaturityLevel {
   level: string;
@@ -433,6 +434,27 @@ export function CybersecurityResults({
     }
   );
 
+  // Extract categories for specialist recommendations - get the lowest scoring categories
+  const categoryScoresForSpecialists = Object.entries(categoryScores).map(
+    ([category, { score, maxScore }]) => ({
+      category,
+      percentage: Math.round((score / maxScore) * 100),
+    })
+  );
+
+  // Get the two lowest scoring categories (areas that need the most help)
+  const weakestCategories = [...categoryScoresForSpecialists]
+    .sort((a, b) => a.percentage - b.percentage)
+    .slice(0, 2)
+    .map((item) => item.category);
+
+  // Inside the CybersecurityResults component
+  // Need to extract the maturity level number (1-5) from maturity.level string
+  const maturityLevelNumber = parseInt(
+    maturity.level.split("–")[0].replace("Nivel ", "").trim(),
+    10
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="p-8 bg-white border-b shadow-sm">
@@ -664,6 +686,13 @@ export function CybersecurityResults({
               </div>
             </div>
 
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <SpecialistsRecommendations
+                maturityLevel={maturityLevelNumber}
+                categories={weakestCategories}
+              />
+            </div>
+
             {!isSharedView && onRestart && (
               <div className="flex justify-center mt-8">
                 <Button
@@ -680,4 +709,3 @@ export function CybersecurityResults({
     </div>
   );
 }
-

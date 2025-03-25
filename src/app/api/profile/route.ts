@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole, type Prisma } from "@prisma/client";
+import { NextRequest } from "next/server";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -87,32 +90,31 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+  const supabase = createRouteHandlerClient({ cookies });
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const { searchParams } = new URL(req.url);
-    const role = searchParams.get("role");
-    const active = searchParams.get("active");
-
-    const whereClause: Prisma.ProfileWhereInput = {};
-
-    if (role) whereClause.role = role as UserRole;
-    if (active !== null) whereClause.active = active === "true";
-
-    const profiles = await prisma.profile.findMany({
-      where: whereClause,
-      orderBy: {
-        createdAt: "desc",
-      },
+    // Get the user's profile
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
     });
 
-    return NextResponse.json({ profiles });
+    if (!profile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(profile);
   } catch (error) {
-    console.error(
-      "Error fetching profiles:",
-      error instanceof Error ? error.message : "Unknown error"
-    );
+    console.error("Error fetching profile:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to fetch profile" },
       { status: 500 }
     );
   }

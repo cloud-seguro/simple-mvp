@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import type { QuizData, QuizResults as QuizResultsType } from "./types";
 import Link from "next/link";
+import { SpecialistsRecommendations } from "./specialists-recommendations";
 
 interface QuizResultsProps {
   quizData: QuizData;
@@ -107,6 +108,21 @@ export function QuizResults({
   );
 
   const overallPercentage = Math.round((overallScore / maxPossibleScore) * 100);
+  const maturityInfo = getMaturityLevelInfo(overallPercentage);
+
+  // Get top categories (for specialists recommendations)
+  const categoryPercentages = Object.entries(categoryScores).map(
+    ([category, { total, max }]) => ({
+      category,
+      percentage: Math.round((total / max) * 100),
+    })
+  );
+
+  // Get the two lowest scoring categories (areas that need the most help)
+  const weakestCategories = [...categoryPercentages]
+    .sort((a, b) => a.percentage - b.percentage)
+    .slice(0, 2)
+    .map((item) => item.category);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -133,36 +149,29 @@ export function QuizResults({
             </div>
 
             {/* Maturity Level Information */}
-            {(() => {
-              const maturityInfo = getMaturityLevelInfo(overallPercentage);
-              return (
-                <div className="bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200">
-                  <h3 className="text-xl font-bold mb-2 text-[#FF8548]">
-                    {maturityInfo.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    {maturityInfo.description}
-                  </p>
-                  <div className="bg-white p-4 rounded-lg border border-gray-200">
-                    <h4 className="font-semibold mb-2">Recomendación:</h4>
-                    <p className="text-gray-700 mb-4">
-                      {maturityInfo.recommendation}
-                    </p>
-                    <Link
-                      href="/contact"
-                      className="inline-block bg-[#FF8548] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#e67a41] transition-colors"
-                    >
-                      {maturityInfo.actionText}
-                    </Link>
-                  </div>
-                </div>
-              );
-            })()}
+            <div className="bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200">
+              <h3 className="text-xl font-bold mb-2 text-[#FF8548]">
+                {maturityInfo.title}
+              </h3>
+              <p className="text-gray-600 mb-4">{maturityInfo.description}</p>
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h4 className="font-semibold mb-2">Recomendación:</h4>
+                <p className="text-gray-700 mb-4">
+                  {maturityInfo.recommendation}
+                </p>
+                <Link
+                  href="/contact"
+                  className="inline-block bg-[#FF8548] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#e67a41] transition-colors"
+                >
+                  {maturityInfo.actionText}
+                </Link>
+              </div>
+            </div>
 
             <h3 className="text-lg font-medium mb-4">
               Desglose por Categoría:
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-4 mb-8">
               {Object.entries(categoryScores).map(
                 ([category, { total, max }]) => {
                   const percentage = Math.round((total / max) * 100);
@@ -185,11 +194,19 @@ export function QuizResults({
                 }
               )}
             </div>
+
+            {/* Specialists Recommendations */}
+            <div className="mt-12 bg-gray-50 p-6 rounded-lg border border-gray-200">
+              <SpecialistsRecommendations
+                maturityLevel={maturityInfo.level}
+                categories={weakestCategories}
+              />
+            </div>
           </div>
 
           <Button
             onClick={onRestart}
-            className="bg-black text-white hover:bg-gray-800 rounded-full px-8 py-2"
+            className="bg-black text-white hover:bg-gray-800 rounded-full px-8 py-2 mt-8"
           >
             Realizar otra evaluación
           </Button>
