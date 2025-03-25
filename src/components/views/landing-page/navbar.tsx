@@ -121,9 +121,14 @@ export default function Navbar() {
                   { href: "#beneficios", label: "Beneficios" },
                   { href: "#testimonios", label: "Testimonios" },
                   { href: "/pricing", label: "Precios", isLink: true },
+                  { href: "/blog", label: "Blog", isLink: true },
                 ].map((item) =>
                   item.isLink ? (
-                    <Link href={item.href} key={item.href}>
+                    <Link
+                      href={item.href}
+                      key={item.href}
+                      legacyBehavior={false}
+                    >
                       <Button
                         variant="ghost"
                         className="hover:text-yellow-500 transition-colors"
@@ -158,8 +163,15 @@ export default function Navbar() {
                     isLink: true,
                     current: pathname === "/pricing",
                   },
+                  {
+                    href: "/blog",
+                    label: "Blog",
+                    isLink: true,
+                    current:
+                      pathname === "/blog" || pathname.startsWith("/blog/"),
+                  },
                 ].map((item) => (
-                  <Link href={item.href} key={item.href}>
+                  <Link href={item.href} key={item.href} legacyBehavior={false}>
                     <Button
                       variant="ghost"
                       className={`hover:text-yellow-500 transition-colors ${
@@ -215,9 +227,15 @@ export default function Navbar() {
                     { href: "#beneficios", label: "Beneficios" },
                     { href: "#testimonios", label: "Testimonios" },
                     { href: "/pricing", label: "Precios", isLink: true },
+                    { href: "/blog", label: "Blog", isLink: true },
                   ].map((item) =>
                     item.isLink ? (
-                      <Link href={item.href} key={item.href} className="w-full">
+                      <Link
+                        href={item.href}
+                        key={item.href}
+                        className="w-full"
+                        legacyBehavior={false}
+                      >
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500"
@@ -256,8 +274,20 @@ export default function Navbar() {
                       isLink: true,
                       current: pathname === "/pricing",
                     },
+                    {
+                      href: "/blog",
+                      label: "Blog",
+                      isLink: true,
+                      current:
+                        pathname === "/blog" || pathname.startsWith("/blog/"),
+                    },
                   ].map((item) => (
-                    <Link href={item.href} key={item.href} className="w-full">
+                    <Link
+                      href={item.href}
+                      key={item.href}
+                      className="w-full"
+                      legacyBehavior={false}
+                    >
                       <Button
                         variant="ghost"
                         className={`w-full justify-start text-lg py-4 hover:bg-yellow-50 hover:text-yellow-500 ${

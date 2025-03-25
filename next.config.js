@@ -1,12 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      // Add your Supabase project domain
-      "swfgvfhpmicwptupjyko.supabase.co"
+    domains: ["localhost"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
     ],
   },
+  webpack: (config) => {
+    // This is needed for the MDXRemote component to work with async imports
+    config.experiments = { ...config.experiments, topLevelAwait: true };
+    return config;
+  },
+  // Add transpilePackages for MDX
+  transpilePackages: ["next-mdx-remote"],
   // ... other config options
-}
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig;
