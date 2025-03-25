@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: boring-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # These args allow passing build-time variables
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET: ${NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET}
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      # For development: mount prisma directory so we can run migrations
+      - ./prisma:/app/prisma
+    networks:
+      - boring-network
+
+networks:
+  boring-network:
+    driver: bridge
