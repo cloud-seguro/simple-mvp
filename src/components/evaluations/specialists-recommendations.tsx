@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Specialist, ExpertiseArea } from "@prisma/client";
-import { CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Specialist } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User, Mail, Phone, Globe, MapPin } from "lucide-react";
+import Image from "next/image";
 
 interface SpecialistsRecommendationsProps {
   maturityLevel: number;
@@ -156,10 +156,12 @@ export function SpecialistsRecommendations({
               </div>
               {specialist.imageUrl ? (
                 <div className="w-16 h-16 rounded-full overflow-hidden ml-4">
-                  <img
+                  <Image
                     src={specialist.imageUrl}
                     alt={specialist.name}
-                    className="w-full h-full object-cover"
+                    className="object-cover"
+                    width={64}
+                    height={64}
                   />
                 </div>
               ) : (

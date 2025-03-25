@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -6,10 +6,10 @@ import { UserRole } from "@prisma/client";
 
 // GET - Get a specific specialist
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   const supabase = createRouteHandlerClient({ cookies });
   const {
     data: { session },
@@ -43,10 +43,10 @@ export async function GET(
 
 // PATCH - Update a specialist (only accessible by the SUPERADMIN who created it)
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   const supabase = createRouteHandlerClient({ cookies });
   const {
     data: { session },
@@ -89,7 +89,7 @@ export async function PATCH(
       );
     }
 
-    const data = await req.json();
+    const data = await request.json();
 
     // Update the specialist
     const updatedSpecialist = await prisma.specialist.update({
@@ -130,10 +130,10 @@ export async function PATCH(
 
 // DELETE - Delete a specialist (only accessible by the SUPERADMIN who created it)
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const { id } = await params;
   const supabase = createRouteHandlerClient({ cookies });
   const {
     data: { session },

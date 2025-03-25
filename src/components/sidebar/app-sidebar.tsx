@@ -20,7 +20,7 @@ export function AppSidebar({
   className,
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const { user, profile } = useCurrentUser();
+  const { profile } = useCurrentUser();
 
   // Add specialists management link for SUPERADMIN users
   const navGroups = useMemo(() => {

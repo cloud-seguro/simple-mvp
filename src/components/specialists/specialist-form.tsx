@@ -28,7 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 type SpecialistFormProps = {
   specialist: Specialist | null;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: z.infer<typeof formSchema>) => void;
   onCancel: () => void;
 };
 
@@ -37,7 +37,7 @@ const expertiseAreaOptions = Object.values(ExpertiseArea).map((area) => ({
   label: area.replace(/_/g, " "),
 }));
 
-const formSchema = z
+export const formSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     bio: z.string().min(10, "Bio must be at least 10 characters"),
@@ -45,16 +45,12 @@ const formSchema = z
       .array(z.nativeEnum(ExpertiseArea))
       .min(1, "Select at least one expertise area"),
     contactEmail: z.string().email("Invalid email address"),
-    contactPhone: z.string().optional(),
-    website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-    imageUrl: z
-      .string()
-      .url("Must be a valid URL")
-      .optional()
-      .or(z.literal("")),
+    contactPhone: z.string().nullable().optional(),
+    website: z.string().url("Must be a valid URL").nullable().optional(),
+    imageUrl: z.string().url("Must be a valid URL").nullable().optional(),
     minMaturityLevel: z.coerce.number().int().min(1).max(5),
     maxMaturityLevel: z.coerce.number().int().min(1).max(5),
-    location: z.string().optional(),
+    location: z.string().nullable().optional(),
     active: z.boolean().default(true),
   })
   .refine((data) => data.minMaturityLevel <= data.maxMaturityLevel, {
@@ -71,19 +67,29 @@ export function SpecialistForm({
     resolver: zodResolver(formSchema),
     defaultValues: specialist
       ? {
-          ...specialist,
+          name: specialist.name,
+          bio: specialist.bio,
+          expertiseAreas: specialist.expertiseAreas,
+          contactEmail: specialist.contactEmail,
+          contactPhone: specialist.contactPhone,
+          website: specialist.website,
+          imageUrl: specialist.imageUrl,
+          minMaturityLevel: specialist.minMaturityLevel,
+          maxMaturityLevel: specialist.maxMaturityLevel,
+          location: specialist.location,
+          active: specialist.active,
         }
       : {
           name: "",
           bio: "",
           expertiseAreas: [],
           contactEmail: "",
-          contactPhone: "",
-          website: "",
-          imageUrl: "",
+          contactPhone: null,
+          website: null,
+          imageUrl: null,
           minMaturityLevel: 1,
           maxMaturityLevel: 5,
-          location: "",
+          location: null,
           active: true,
         },
   });
@@ -143,7 +149,11 @@ export function SpecialistForm({
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="+1 123 456 7890" {...field} />
+                  <Input
+                    placeholder="+1 123 456 7890"
+                    {...field}
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -157,7 +167,11 @@ export function SpecialistForm({
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input placeholder="Mexico City, Mexico" {...field} />
+                  <Input
+                    placeholder="Mexico City, Mexico"
+                    {...field}
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -173,7 +187,11 @@ export function SpecialistForm({
               <FormItem>
                 <FormLabel>Website</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://example.com" {...field} />
+                  <Input
+                    placeholder="https://example.com"
+                    {...field}
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -190,6 +208,7 @@ export function SpecialistForm({
                   <Input
                     placeholder="https://example.com/image.jpg"
                     {...field}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />

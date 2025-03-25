@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -6,7 +6,7 @@ import { ExpertiseArea, UserRole } from "@prisma/client";
 
 // GET - Creates a sample specialist for testing
 // WARNING: Only for development use
-export async function GET(req: NextRequest) {
+export async function GET() {
   // Authentication check
   const supabase = createRouteHandlerClient({ cookies });
   const {

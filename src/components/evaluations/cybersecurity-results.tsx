@@ -436,9 +436,9 @@ export function CybersecurityResults({
 
   // Extract categories for specialist recommendations - get the lowest scoring categories
   const categoryScoresForSpecialists = Object.entries(categoryScores).map(
-    ([category, { score, maxScore }]) => ({
+    ([category, { total, max }]) => ({
       category,
-      percentage: Math.round((score / maxScore) * 100),
+      percentage: Math.round((total / max) * 100),
     })
   );
 

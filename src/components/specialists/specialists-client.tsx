@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Specialist, ExpertiseArea } from "@prisma/client";
-import { SpecialistForm } from "./specialist-form";
+import { Specialist } from "@prisma/client";
+import { SpecialistForm, formSchema } from "./specialist-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,9 +21,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Edit, Plus, User } from "lucide-react";
+import Image from "next/image";
+import { z } from "zod";
 
 type SpecialistsClientProps = {
   initialSpecialists: Specialist[];
@@ -43,9 +44,7 @@ export function SpecialistsClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleCreateSpecialist = async (
-    data: Omit<Specialist, "id" | "createdAt" | "updatedAt" | "createdById">
-  ) => {
+  const handleCreateSpecialist = async (data: z.infer<typeof formSchema>) => {
     try {
       const response = await fetch("/api/specialists", {
         method: "POST",
@@ -222,10 +221,12 @@ export function SpecialistsClient({
                   </div>
                   {specialist.imageUrl && (
                     <div className="w-12 h-12 rounded-full overflow-hidden">
-                      <img
+                      <Image
                         src={specialist.imageUrl}
                         alt={specialist.name}
-                        className="w-full h-full object-cover"
+                        className="object-cover"
+                        width={48}
+                        height={48}
                       />
                     </div>
                   )}

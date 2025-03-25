@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { UserRole, type Prisma } from "@prisma/client";
-import { NextRequest } from "next/server";
+import { UserRole } from "@prisma/client";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
@@ -90,7 +89,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const supabase = createRouteHandlerClient({ cookies });
   const {
     data: { session },

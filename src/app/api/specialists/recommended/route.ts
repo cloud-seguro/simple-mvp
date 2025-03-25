@@ -11,22 +11,24 @@ export async function GET(req: NextRequest) {
   const categoriesParam = searchParams.get("categories");
 
   // Parse categories, ensuring they are valid ExpertiseArea values
-  let categories: string[] = [];
+  let expertiseCategories: ExpertiseArea[] = [];
   if (categoriesParam) {
     const rawCategories = categoriesParam.split(",").filter(Boolean);
     // Filter only valid categories that exist in ExpertiseArea enum
-    categories = rawCategories.filter(
-      (cat) =>
-        Object.values(ExpertiseArea).includes(cat as ExpertiseArea) ||
-        Object.values(ExpertiseArea).includes(
-          cat.toUpperCase() as ExpertiseArea
-        )
-    );
+    expertiseCategories = rawCategories
+      .filter(
+        (cat) =>
+          Object.values(ExpertiseArea).includes(cat as ExpertiseArea) ||
+          Object.values(ExpertiseArea).includes(
+            cat.toUpperCase() as ExpertiseArea
+          )
+      )
+      .map((cat) => cat as ExpertiseArea); // Explicit type cast
   }
 
   console.log(`API: Fetching specialists for maturity level ${maturityLevel}`);
   console.log(
-    `API: Categories filter: ${categories.length > 0 ? categories.join(", ") : "none"}`
+    `API: Categories filter: ${expertiseCategories.length > 0 ? expertiseCategories.join(", ") : "none"}`
   );
 
   const supabase = createRouteHandlerClient({ cookies });
@@ -52,10 +54,10 @@ export async function GET(req: NextRequest) {
       active: true,
       minMaturityLevel: { lte: maturityLevel },
       maxMaturityLevel: { gte: maturityLevel },
-      ...(categories.length > 0
+      ...(expertiseCategories.length > 0
         ? {
             expertiseAreas: {
-              hasSome: categories,
+              hasSome: expertiseCategories,
             },
           }
         : {}),

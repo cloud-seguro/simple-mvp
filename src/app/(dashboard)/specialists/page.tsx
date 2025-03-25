@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { Specialist } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { SpecialistsClient } from "@/components/specialists/specialists-client";
 import { UserRole } from "@prisma/client";

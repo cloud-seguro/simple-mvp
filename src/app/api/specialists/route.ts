@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 
 // GET - List specialists (only accessible by SUPERADMIN)
-export async function GET(req: NextRequest) {
+export async function GET() {
   const supabase = createRouteHandlerClient({ cookies });
   const {
     data: { session },
