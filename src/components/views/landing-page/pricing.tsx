@@ -5,7 +5,6 @@ import {
   Bell,
   Shield,
   Database,
-  Mail,
   Lock,
   Check,
   CheckCircle2,

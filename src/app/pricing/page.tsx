@@ -62,14 +62,6 @@ export default function PricingPage() {
     router.push(`${pathname}${tab === "hourly" ? "#hourly" : ""}`);
   };
 
-  const scrollToFaq = () => {
-    const faqSection = document.getElementById("faq");
-    if (faqSection) {
-      faqSection.scrollIntoView({ behavior: "smooth" });
-      router.push(`${pathname}#faq`);
-    }
-  };
-
   if (!mounted) return null;
 
   return (

@@ -2,17 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  Shield,
-  Database,
-  Mail,
-  Lock,
-  Check,
-  CheckCircle2,
-  Bell,
-  Users,
-  Clock,
-} from "lucide-react";
+import { Shield, Database, Bell, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SimplifiedPricing() {
