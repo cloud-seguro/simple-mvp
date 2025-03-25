@@ -1,15 +1,19 @@
 import { getPostBySlug, getAllPosts } from "@/lib/mdx";
 import BlogPostClient from "@/components/blog/BlogPostClient";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
 // Generate metadata for the page
 export async function generateMetadata({
   params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
+  const resolvedParams = await params;
   try {
-    const post = getPostBySlug(params.slug);
+    const post = getPostBySlug(resolvedParams.slug);
 
     return {
       title: `${post.title} | SIMPLE Blog`,
@@ -24,7 +28,7 @@ export async function generateMetadata({
         }),
       },
     };
-  } catch (error) {
+  } catch {
     return {
       title: "Post Not Found | SIMPLE Blog",
       description: "The requested blog post could not be found",
@@ -46,16 +50,15 @@ export async function generateStaticParams() {
   }
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
+// The page component with simpler error handling
+export default async function BlogPostPage({ params }: PageProps) {
+  // Try to get the post data
   try {
-    // Get the post data in the server component
-    const post = getPostBySlug(params.slug);
-
-    // Pass the post data to the client component
+    const resolvedParams = await params;
+    const post = getPostBySlug(resolvedParams.slug);
     return <BlogPostClient post={post} />;
-  } catch (error) {
-    console.error("Error loading post:", error);
-    // In case of error, we'll let the client component handle the notFound state
-    return <BlogPostClient error={true} />;
+  } catch {
+    // Use Next.js's built-in notFound() for handling missing posts
+    notFound();
   }
 }
