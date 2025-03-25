@@ -18,5 +18,5 @@ RUN npx prisma generate
 
 EXPOSE 3000
 
-# Start the application in development mode
+# Start the application in development mode with Turbopack
 CMD ["pnpm", "dev"] 

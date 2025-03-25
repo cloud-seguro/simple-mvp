@@ -16,6 +16,8 @@ const nextConfig = {
   },
   // Add transpilePackages for MDX
   transpilePackages: ["next-mdx-remote"],
+  // Enable standalone output for Docker deployment
+  output: "standalone",
   // ... other config options
 };
 
