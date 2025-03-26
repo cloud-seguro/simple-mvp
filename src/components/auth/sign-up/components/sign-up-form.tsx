@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,6 +56,7 @@ export function SignUpForm({
       email: "",
       firstName: "",
       lastName: "",
+      phoneNumber: "",
       company: "",
       company_role: "",
       password: "",
@@ -153,6 +154,7 @@ export function SignUpForm({
               firstName: data.firstName,
               lastName: data.lastName,
               email: data.email,
+              phoneNumber: data.phoneNumber,
               company: data.company,
               company_role: data.company_role,
               avatarUrl,
@@ -373,6 +375,20 @@ export function SignUpForm({
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Número de Teléfono</FormLabel>
+                <FormControl>
+                  <Input placeholder="555-555-5555" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}

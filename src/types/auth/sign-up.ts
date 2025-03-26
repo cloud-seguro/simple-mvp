@@ -15,6 +15,14 @@ export const signUpFormSchema = z
       .min(2, { message: "El apellido debe tener al menos 2 caracteres" })
       .max(30, { message: "El apellido no puede exceder 30 caracteres" })
       .optional(),
+    phoneNumber: z
+      .string()
+      .min(6, {
+        message: "El número de teléfono debe tener al menos 10 dígitos",
+      })
+      .max(15, { message: "El número de teléfono no puede exceder 15 dígitos" })
+      .regex(/^\+?[1-9]\d{1,14}$/, { message: "Número de teléfono inválido" })
+      .optional(),
     company: z
       .string()
       .max(50, {

@@ -2,14 +2,15 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createEvaluation } from "@/lib/evaluation-utils";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, title, answers, profileId } = body;
+    const { type, title, answers, userId } = body;
 
     // Validate required fields
-    if (!type || !title || !answers) {
+    if (!type || !title || !answers || !userId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -29,49 +30,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If profileId is provided directly, use it
-    let userProfile: { id: string; role: string; userId?: string };
+    // Get the user's profile using Prisma
+    const userProfile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+    });
 
-    if (profileId) {
-      // Verify the profile exists and belongs to the authenticated user
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id, role, userId")
-        .eq("id", profileId)
-        .single();
-
-      if (!profile) {
-        return NextResponse.json(
-          { error: "Profile not found" },
-          { status: 404 }
-        );
-      }
-
-      // Verify the profile belongs to the authenticated user
-      if (profile.userId !== session.user.id) {
-        return NextResponse.json(
-          { error: "Unauthorized access to profile" },
-          { status: 403 }
-        );
-      }
-
-      userProfile = profile;
-    } else {
-      // Get the user's profile by userId
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id, role")
-        .eq("userId", session.user.id)
-        .single();
-
-      if (!profile) {
-        return NextResponse.json(
-          { error: "User profile not found" },
-          { status: 404 }
-        );
-      }
-
-      userProfile = profile;
+    if (!userProfile) {
+      return NextResponse.json(
+        { error: "User profile not found" },
+        { status: 404 }
+      );
     }
 
     // Check if user can access advanced evaluations
@@ -124,14 +92,12 @@ export async function GET() {
       );
     }
 
-    // Get the user's profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id, role")
-      .eq("userId", session.user.id)
-      .single();
+    // Get the user's profile using Prisma
+    const userProfile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+    });
 
-    if (!profile) {
+    if (!userProfile) {
       return NextResponse.json(
         { error: "User profile not found" },
         { status: 404 }
@@ -139,19 +105,18 @@ export async function GET() {
     }
 
     // Only PREMIUM and SUPERADMIN users can access the dashboard
-    if (profile.role !== "PREMIUM" && profile.role !== "SUPERADMIN") {
+    if (userProfile.role !== "PREMIUM" && userProfile.role !== "SUPERADMIN") {
       return NextResponse.json(
         { error: "Premium subscription required to access evaluation history" },
         { status: 403 }
       );
     }
 
-    // Get the user's evaluations
-    const { data: evaluations } = await supabase
-      .from("evaluations")
-      .select("*")
-      .eq("profileId", profile.id)
-      .order("createdAt", { ascending: false });
+    // Get the user's evaluations using Prisma
+    const evaluations = await prisma.evaluation.findMany({
+      where: { profileId: userProfile.id },
+      orderBy: { createdAt: "desc" },
+    });
 
     return NextResponse.json({ evaluations });
   } catch (error) {

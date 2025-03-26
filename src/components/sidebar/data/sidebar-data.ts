@@ -43,12 +43,7 @@ export const sidebarData: SidebarData = {
           title: "Ajustes",
           url: "/settings",
           icon: Settings,
-        },
-        {
-          title: "Perfil",
-          url: "/settings/account",
-          icon: UserCog,
-        },
+        }
       ],
     },
   ],

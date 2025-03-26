@@ -15,15 +15,15 @@ export default function HourlyRates() {
         transition={{ duration: 0.5 }}
       >
         <span className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-3">
-          Equipo de especialistas
+          Monitoreo continuo de seguridad
         </span>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Un equipo de expertos en ciberseguridad a tu disposición
+          Accede a recursos exclusivos con nuestra suscripción mensual
         </h2>
         <p className="text-lg max-w-3xl mx-auto">
-          Selecciona la cantidad de horas mensuales según las necesidades de
-          seguridad de tu empresa. Nuestros especialistas te ayudarán a proteger
-          tus activos digitales.
+          Obtén acceso a un dashboard personalizado para visualizar tus avances
+          en ciberseguridad, realizar un análisis continuo de vulnerabilidades y
+          tomar mejores decisiones para proteger tu empresa.
         </p>
       </motion.div>
 
@@ -36,7 +36,7 @@ export default function HourlyRates() {
       >
         {/* Stats banner */}
         <div className="bg-black text-center py-2 mb-8 font-medium text-white">
-          +1233 PROYECTOS ENTREGADOS PARA 142 EMPRESAS EN TODO DEL MUNDO
+          MONITORA TU SEGURIDAD EN TIEMPO REAL
         </div>
 
         {/* Pricing Cards Table */}
@@ -57,19 +57,19 @@ export default function HourlyRates() {
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
                     <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
-                    <span>10 horas de servicio por mes</span>
+                    <span>Dashboard personalizado básico</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Evaluación de vulnerabilidades</span>
+                    <span>Monitoreo de correo empresarial</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Configuración básica de seguridad</span>
+                    <span>Evaluación básica de vulnerabilidades</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Soporte por correo electrónico</span>
+                    <span>Alertas de seguridad básicas</span>
                   </li>
                 </ul>
               </div>
@@ -110,19 +110,19 @@ export default function HourlyRates() {
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
                     <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
-                    <span>24 horas de servicio por mes</span>
+                    <span>Dashboard avanzado con métricas</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Análisis completo de vulnerabilidades</span>
+                    <span>Monitoreo completo de activos digitales</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Implementación de soluciones</span>
+                    <span>Análisis continuo de vulnerabilidades</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Soporte prioritario</span>
+                    <span>Alertas en tiempo real</span>
                   </li>
                 </ul>
               </div>
@@ -160,19 +160,19 @@ export default function HourlyRates() {
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
                     <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
-                    <span>48 horas de servicio por mes</span>
+                    <span>Dashboard empresarial completo</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Tests de penetración completos</span>
+                    <span>Monitoreo de APIs y servicios</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Respuesta a incidentes 24/7</span>
+                    <span>Análisis predictivo de amenazas</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Consultoría personalizada</span>
+                    <span>Respuesta automática a incidentes</span>
                   </li>
                 </ul>
               </div>
