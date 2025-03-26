@@ -14,7 +14,7 @@ RUN pnpm install --no-frozen-lockfile
 COPY . .
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN pnpm prisma generate
 
 EXPOSE 3000
 
