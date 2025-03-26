@@ -26,6 +26,7 @@ export function ClientSettingsPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-8">
+      <h1 className="text-2xl font-bold">Mi Perfil</h1>
       <SettingsForm />
     </div>
   );
