@@ -81,7 +81,7 @@ export default function EvaluationOptions() {
               <ul className="mb-6 space-y-3">
                 <li className="flex items-start">
                   <span className="text-black mr-2 font-bold">✓</span>
-                  <span>Evaluación de 10 preguntas clave</span>
+                  <span>Evaluación de 15 preguntas clave</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-black mr-2 font-bold">✓</span>
