@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, title, answers, userId } = body;
+    const { type, title, answers, userId, interest } = body;
 
     // Validate required fields
     if (!type || !title || !answers || !userId) {
@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
       answers,
       profileId: userProfile.id,
       userRole: userProfile.role,
+      interest,
     });
 
     return NextResponse.json({ evaluation }, { status: 201 });

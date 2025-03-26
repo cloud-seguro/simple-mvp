@@ -33,21 +33,36 @@ export async function GET(
       data: { session },
     } = await supabase.auth.getSession();
 
+    // Extract all evaluation data including metadata
+    const {
+      id: evalId,
+      type,
+      title,
+      score,
+      createdAt,
+      completedAt,
+      answers,
+      metadata,
+      profile,
+      profileId,
+    } = evaluation as any; // Use any to avoid type issues
+
     // If the user is not authenticated, only return basic information
     if (!session?.user) {
       // For public access, only return non-sensitive data
       return NextResponse.json({
         evaluation: {
-          id: evaluation.id,
-          type: evaluation.type,
-          title: evaluation.title,
-          score: evaluation.score,
-          createdAt: evaluation.createdAt,
-          completedAt: evaluation.completedAt,
-          answers: evaluation.answers,
+          id: evalId,
+          type,
+          title,
+          score,
+          createdAt,
+          completedAt,
+          answers,
+          metadata,
           profile: {
-            firstName: evaluation.profile.firstName || "Usuario",
-            company: evaluation.profile.company || "Empresa",
+            firstName: profile.firstName || "Usuario",
+            company: profile.company || "Empresa",
           },
         },
       });
@@ -64,21 +79,22 @@ export async function GET(
     // only return basic information unless they are a SUPERADMIN
     if (
       userProfile &&
-      userProfile.id !== evaluation.profileId &&
+      userProfile.id !== profileId &&
       userProfile.role !== "SUPERADMIN"
     ) {
       return NextResponse.json({
         evaluation: {
-          id: evaluation.id,
-          type: evaluation.type,
-          title: evaluation.title,
-          score: evaluation.score,
-          createdAt: evaluation.createdAt,
-          completedAt: evaluation.completedAt,
-          answers: evaluation.answers,
+          id: evalId,
+          type,
+          title,
+          score,
+          createdAt,
+          completedAt,
+          answers,
+          metadata,
           profile: {
-            firstName: evaluation.profile.firstName || "Usuario",
-            company: evaluation.profile.company || "Empresa",
+            firstName: profile.firstName || "Usuario",
+            company: profile.company || "Empresa",
           },
         },
       });

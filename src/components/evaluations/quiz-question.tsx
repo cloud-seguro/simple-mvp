@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion";
 import type { QuizQuestion as QuizQuestionType } from "./types";
 import { useRef } from "react";
 import { SimpleHeader } from "@/components/ui/simple-header";
@@ -14,6 +14,7 @@ interface QuizQuestionProps {
   onSelect: (value: number) => void;
   onNext: () => void;
   onPrev: () => void;
+  showPrev?: boolean;
 }
 
 export function QuizQuestion({
@@ -24,6 +25,7 @@ export function QuizQuestion({
   onSelect,
   onNext,
   onPrev,
+  showPrev = true,
 }: QuizQuestionProps) {
   const questionRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +138,7 @@ export function QuizQuestion({
       <div className="md:hidden fixed bottom-0 left-0 right-0 flex justify-between p-4 bg-white border-t">
         <Button
           onClick={onPrev}
-          disabled={currentIndex === 0}
+          disabled={!showPrev}
           variant="outline"
           className="w-[45%]"
         >
@@ -166,4 +168,3 @@ export function QuizQuestion({
     </div>
   );
 }
-

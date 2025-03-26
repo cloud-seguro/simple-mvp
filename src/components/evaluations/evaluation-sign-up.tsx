@@ -4,7 +4,7 @@ import { useState } from "react";
 import { SignUpForm } from "@/components/auth/sign-up/components/sign-up-form";
 import { SignInForm } from "@/components/auth/sign-in/components/sign-in-form";
 import { motion } from "framer-motion";
-import type { QuizResults } from "./types";
+import type { QuizResults, CybersecurityInterest } from "./types";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
@@ -13,6 +13,7 @@ interface EvaluationSignUpProps {
   results: QuizResults;
   quizId: string;
   onComplete: (evaluationId?: string) => void;
+  interest?: CybersecurityInterest | null;
 }
 
 type AuthMode = "signup" | "signin";
@@ -21,6 +22,7 @@ export function EvaluationSignUp({
   results,
   quizId,
   onComplete,
+  interest,
 }: EvaluationSignUpProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
@@ -91,6 +93,7 @@ export function EvaluationSignUp({
                   ? "Evaluación Inicial"
                   : "Evaluación Avanzada",
               answers: results,
+              interest,
               userId, // Include userId in the request
             }),
           });

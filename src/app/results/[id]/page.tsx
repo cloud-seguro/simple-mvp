@@ -208,6 +208,20 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     console.log("Matched answers count:", Object.keys(matchedAnswers).length);
     console.log("Expected questions count:", quizData.questions.length);
 
+    // Extract interest data from metadata if available
+    let interestData = null;
+    if (evaluation.metadata) {
+      try {
+        const metadata = evaluation.metadata as any;
+        if (metadata.interest) {
+          console.log("Interest data found in metadata:", metadata.interest);
+          interestData = metadata.interest;
+        }
+      } catch (error) {
+        console.error("Error extracting interest data from metadata:", error);
+      }
+    }
+
     // Map the keys from the results to the keys in the evaluation data
     const mapResultsToQuizData = (
       results: Record<string, number>,
@@ -326,6 +340,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           results={finalAnswers}
           userInfo={userInfo}
           isSharedView={true}
+          interest={interestData}
         />
       </Suspense>
     );

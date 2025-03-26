@@ -3,7 +3,13 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import type { QuizData, QuizResults, UserInfo } from "./types";
+import type {
+  QuizData,
+  QuizResults,
+  UserInfo,
+  CybersecurityInterest as InterestType,
+  InterestOption,
+} from "./types";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { cn } from "@/lib/utils";
 import { SpecialistsRecommendations } from "./specialists-recommendations";
@@ -23,6 +29,7 @@ interface CybersecurityResultsProps {
   userInfo: UserInfo;
   onRestart?: () => void;
   isSharedView?: boolean;
+  interest?: InterestType | null;
 }
 
 interface QuestionRecommendation {
@@ -171,12 +178,31 @@ function getMaturityLevel(quizId: string, score: number): MaturityLevel {
   };
 }
 
+// Function to translate interest reason to Spanish
+function getInterestReasonText(reason: InterestOption): string {
+  switch (reason) {
+    case "process":
+      return "Estoy en un proceso de ciberseguridad en mi empresa";
+    case "nothing":
+      return "No tengo nada en mi empresa y quiero aumentar el nivel de madurez";
+    case "curiosity":
+      return "Tengo curiosidad y quiero aprender más sobre ciberseguridad";
+    case "requirement":
+      return "Me piden evaluar la ciberseguridad en mi organización";
+    case "other":
+      return "Otro motivo";
+    default:
+      return "No especificado";
+  }
+}
+
 export function CybersecurityResults({
   quizData,
   results,
   userInfo,
   onRestart,
   isSharedView = false,
+  interest,
 }: CybersecurityResultsProps) {
   // Log the input data for debugging
   console.log(
@@ -189,6 +215,7 @@ export function CybersecurityResults({
     "CybersecurityResults - results count:",
     Object.keys(results).length
   );
+  console.log("CybersecurityResults - interest data:", interest);
 
   // Map the keys from the results to the keys in the evaluation data
   const mapResultsToQuizData = (
@@ -476,6 +503,22 @@ export function CybersecurityResults({
                 Evaluación de Madurez en Ciberseguridad
               </p>
             </div>
+
+            {interest && (
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="font-medium text-gray-800 mb-2">
+                  Tu interés en ciberseguridad:
+                </h3>
+                <p className="text-gray-700">
+                  {getInterestReasonText(interest.reason as InterestOption)}
+                  {interest.reason === "other" && interest.otherReason && (
+                    <span className="block mt-1 italic">
+                      "{interest.otherReason}"
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
 
             <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
               <h2 className="text-xl font-semibold mb-6 text-gray-800">

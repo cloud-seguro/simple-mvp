@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/providers/auth-provider";
@@ -7,7 +7,14 @@ import { QuizQuestion } from "./quiz-question";
 import { ResultsReady } from "./results-ready";
 import { CybersecurityResults } from "./cybersecurity-results";
 import { EvaluationSignUp } from "./evaluation-sign-up";
-import type { QuizData, QuizResults, UserInfo } from "./types";
+import { CybersecurityInterest } from "./cybersecurity-interest";
+import type {
+  QuizData,
+  QuizResults,
+  UserInfo,
+  InterestOption,
+  CybersecurityInterest as CybersecurityInterestType,
+} from "./types";
 import { toast } from "@/components/ui/use-toast";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { useRouter } from "next/navigation";
@@ -19,6 +26,7 @@ interface QuizContainerProps {
 type QuizStage =
   | "intro"
   | "questions"
+  | "interest"
   | "sign-up"
   | "results-ready"
   | "results";
@@ -42,6 +50,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   const router = useRouter();
   const loadedStoredResults = useRef(false);
   const [evaluationId, setEvaluationId] = useState<string | null>(null);
+  const [interest, setInterest] = useState<CybersecurityInterestType | null>(
+    null
+  );
 
   useEffect(() => {
     setUserInfo({
@@ -121,302 +132,200 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         setResults(updatedResults);
       }
 
-      // If user is already authenticated, skip sign-up and save results directly
+      // If user is authenticated, check if they've already answered the interest question
       if (user?.id) {
+        // First check if the user has already completed any evaluation before
         try {
           setIsSubmitting(true);
-          setSaveError(null);
-          setNeedsProfile(false);
-          setLoadingMessage("Verificando perfil de usuario...");
+          setLoadingMessage("Verificando datos previos...");
 
-          // Check if the user has a profile
-          if (!profile) {
-            // Try to fetch the profile directly
-            try {
-              const profileResponse = await fetch(`/api/profile/${user.id}`);
-              if (!profileResponse.ok) {
-                // If the profile doesn't exist, show an error and redirect to profile creation
-                setNeedsProfile(true);
-                throw new Error(
-                  "No se encontró un perfil para este usuario. Por favor, complete su perfil primero."
-                );
-              }
-            } catch (profileError) {
-              console.error("Profile check error:", profileError);
-              setNeedsProfile(true);
-              setSaveError(
-                profileError instanceof Error
-                  ? profileError
-                  : new Error("Error al verificar el perfil")
-              );
-              toast({
-                title: "Perfil incompleto",
-                description:
-                  "Necesita completar su perfil antes de guardar los resultados de la evaluación.",
-                variant: "destructive",
-              });
+          const response = await fetch("/api/evaluations/user-interest");
+          if (response.ok) {
+            const data = await response.json();
+
+            // If user has already answered the interest question, use their previous answer
+            if (data.hasInterestData && data.interest) {
+              setInterest(data.interest);
+              // Skip interest stage and directly save the results
+              handleSaveResults();
               setIsSubmitting(false);
               return;
             }
           }
-
-          setLoadingMessage("Preparando datos de evaluación...");
-          const evaluationType =
-            quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
-
-          // Log information about the evaluation being saved
-          console.log("Preparing to save evaluation:", {
-            type: evaluationType,
-            quizId: quizData.id,
-            profileId: profile?.id,
-            answersCount: Object.keys(results).length,
-          });
-
-          // Log the answers being sent to the API
-          console.log("Sending answers to API:", {
-            totalAnswers: Object.keys(results).length,
-            expectedQuestions: quizData.questions.length,
-            answers: JSON.stringify(results),
-            lastQuestionId:
-              quizData.questions[quizData.questions.length - 1].id,
-            hasLastQuestion:
-              results[quizData.questions[quizData.questions.length - 1].id] !==
-              undefined,
-          });
-
-          // Create a complete set of answers, ensuring all questions are included
-          const completeAnswers = { ...results };
-
-          // Calculate the average value of existing answers
-          const existingValues = Object.values(completeAnswers).filter(
-            (v) => typeof v === "number"
-          ) as number[];
-          const averageValue =
-            existingValues.length > 0
-              ? Math.round(
-                  existingValues.reduce((sum, val) => sum + val, 0) /
-                    existingValues.length
-                )
-              : 2; // Default to 2 if no values exist
-
-          // Check if any questions are missing and set default values
-          for (const question of quizData.questions) {
-            if (completeAnswers[question.id] === undefined) {
-              console.log(
-                `Adding missing answer for question ${question.id} with value ${averageValue} (average of existing answers)`
-              );
-              completeAnswers[question.id] = averageValue;
-            }
-          }
-
-          // Special handling for specific evaluations
-          if (quizData.id === "evaluacion-inicial") {
-            // Check if we're missing the last question (indicadores-3)
-            if (
-              Object.keys(completeAnswers).includes("indicadores-2") &&
-              !Object.keys(completeAnswers).includes("indicadores-3")
-            ) {
-              // Use the same value as indicadores-2 instead of defaulting to 0
-              const indicadores2Value =
-                completeAnswers["indicadores-2"] || averageValue;
-              console.log(
-                `Adding missing indicadores-3 key with value ${indicadores2Value} (copied from indicadores-2)`
-              );
-              completeAnswers["indicadores-3"] = indicadores2Value;
-            }
-          } else if (quizData.id === "evaluacion-avanzada") {
-            // Check for missing keys in the advanced evaluation
-            const advancedKeys = [
-              "continuidad-1",
-              "continuidad-2",
-              "continuidad-3",
-              "incidentes-3",
-            ];
-
-            for (const key of advancedKeys) {
-              if (!Object.keys(completeAnswers).includes(key)) {
-                console.log(
-                  `Adding missing ${key} key with value ${averageValue} (average of existing answers)`
-                );
-                completeAnswers[key] = averageValue;
-              }
-            }
-          }
-
-          // Log the complete answers
-          console.log("Complete answers being sent:", {
-            totalAnswers: Object.keys(completeAnswers).length,
-            expectedQuestions: quizData.questions.length,
-            allQuestionsIncluded:
-              Object.keys(completeAnswers).length === quizData.questions.length,
-            keys: Object.keys(completeAnswers).sort().join(", "),
-          });
-
-          // Implement retry logic for saving evaluation results
-          let success = false;
-          let retryCount = 0;
-          const maxRetries = 3;
-          let lastError = null;
-          let savedEvaluationId = null;
-
-          while (!success && retryCount < maxRetries) {
-            try {
-              setLoadingMessage(
-                `Guardando resultados (intento ${retryCount + 1}/${maxRetries})...`
-              );
-
-              // Check if we have the profile ID
-              if (!profile?.id) {
-                throw new Error(
-                  "No se encontró el perfil del usuario. Por favor, complete su perfil primero."
-                );
-              }
-
-              const response = await fetch("/api/evaluations", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  type: evaluationType,
-                  title:
-                    evaluationType === "INITIAL"
-                      ? "Evaluación Inicial"
-                      : "Evaluación Avanzada",
-                  answers: completeAnswers, // Use the complete answers
-                  profileId: profile.id,
-                }),
-              });
-
-              if (!response.ok) {
-                const errorData = await response.json();
-                console.error("API error response:", errorData);
-
-                // Check for specific error conditions
-                if (response.status === 403 && evaluationType === "ADVANCED") {
-                  throw new Error(
-                    "Se requiere una suscripción premium para realizar evaluaciones avanzadas."
-                  );
-                }
-
-                throw new Error(
-                  errorData.error ||
-                    "Error al guardar los resultados de la evaluación"
-                );
-              }
-
-              const data = await response.json();
-              savedEvaluationId = data.evaluation.id;
-              success = true;
-            } catch (error) {
-              console.error(`Attempt ${retryCount + 1} failed:`, error);
-              lastError = error;
-              retryCount++;
-
-              if (retryCount < maxRetries) {
-                // Wait before retrying (increasing delay with each retry)
-                setLoadingMessage(
-                  `Reintentando guardar resultados (${retryCount}/${maxRetries})...`
-                );
-                // Exponential backoff for retries
-                await new Promise((resolve) =>
-                  setTimeout(resolve, 1000 * 1.5 ** retryCount)
-                );
-              }
-            }
-          }
-
-          if (!success) {
-            const errorMessage =
-              lastError instanceof Error
-                ? lastError.message
-                : "Error al guardar los resultados de la evaluación";
-
-            // Check for specific error messages to provide better user feedback
-            if (
-              errorMessage.includes("premium") ||
-              errorMessage.includes("Premium")
-            ) {
-              setSaveError(
-                new Error(
-                  "Se requiere una suscripción premium para realizar evaluaciones avanzadas."
-                )
-              );
-              toast({
-                title: "Suscripción requerida",
-                description:
-                  "Se requiere una suscripción premium para realizar evaluaciones avanzadas.",
-                variant: "destructive",
-              });
-            } else if (
-              errorMessage.includes("perfil") ||
-              errorMessage.includes("Profile")
-            ) {
-              setSaveError(
-                new Error(
-                  "No se encontró un perfil para este usuario. Por favor, complete su perfil primero."
-                )
-              );
-              setNeedsProfile(true);
-              toast({
-                title: "Perfil incompleto",
-                description:
-                  "Necesita completar su perfil antes de guardar los resultados de la evaluación.",
-                variant: "destructive",
-              });
-            } else {
-              setSaveError(
-                lastError instanceof Error ? lastError : new Error(errorMessage)
-              );
-              toast({
-                title: "Error",
-                description: errorMessage,
-                variant: "destructive",
-              });
-            }
-
-            setIsSubmitting(false);
-            return;
-          }
-
-          // Add a small delay before proceeding to ensure everything is properly saved
-          setLoadingMessage("¡Listo! Preparando resultados...");
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-
-          // Store the evaluation ID for the results page
-          if (savedEvaluationId) {
-            setEvaluationId(savedEvaluationId);
-          }
-
-          // Move to the results-ready stage
-          setStage("results-ready");
+          setIsSubmitting(false);
         } catch (error) {
-          console.error("Error saving evaluation:", error);
-          setSaveError(
-            error instanceof Error ? error : new Error("Unknown error")
-          );
-          toast({
-            title: "Error",
-            description:
-              error instanceof Error
-                ? error.message
-                : "Hubo un problema al guardar tus resultados. Por favor, inténtalo de nuevo más tarde.",
-            variant: "destructive",
-          });
-          // Don't automatically move to results-ready on error
-          // Let the user try again or manually proceed
-        } finally {
+          console.error("Error checking previous interest data:", error);
           setIsSubmitting(false);
         }
-      } else {
-        setStage("sign-up");
       }
+
+      // Move to the interest stage if no previous interest data was found
+      setStage("interest");
     }
   };
 
-  // Function to retry saving the evaluation
-  const handleRetrySave = () => {
-    handleNext();
+  const handleInterestSubmit = (
+    reason: InterestOption,
+    otherReason?: string
+  ) => {
+    // Save the interest information
+    setInterest({
+      reason,
+      otherReason,
+    });
+
+    // If user is already authenticated, skip sign-up and save results directly
+    if (user?.id) {
+      handleSaveResults();
+    } else {
+      // Otherwise, go to sign-up
+      setStage("sign-up");
+    }
+  };
+
+  const handleSaveResults = async () => {
+    try {
+      setIsSubmitting(true);
+      setSaveError(null);
+      setNeedsProfile(false);
+      setLoadingMessage("Verificando perfil de usuario...");
+
+      // Check if the user has a profile
+      if (!profile) {
+        // Try to fetch the profile directly
+        try {
+          const profileResponse = await fetch(`/api/profile/${user?.id}`);
+          if (!profileResponse.ok) {
+            // If the profile doesn't exist, show an error and redirect to profile creation
+            setNeedsProfile(true);
+            throw new Error(
+              "No se encontró un perfil para este usuario. Por favor, complete su perfil primero."
+            );
+          }
+        } catch (profileError) {
+          console.error("Profile check error:", profileError);
+          setNeedsProfile(true);
+          setSaveError(
+            profileError instanceof Error
+              ? profileError
+              : new Error("Error al verificar el perfil")
+          );
+          toast({
+            title: "Perfil incompleto",
+            description:
+              "Necesita completar su perfil antes de guardar los resultados de la evaluación.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      setLoadingMessage("Preparando datos de evaluación...");
+      const evaluationType =
+        quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
+
+      // Log information about the evaluation being saved
+      console.log("Preparing to save evaluation:", {
+        type: evaluationType,
+        quizId: quizData.id,
+        profileId: profile?.id,
+        answersCount: Object.keys(results).length,
+        interest: interest,
+      });
+
+      // Create a complete set of answers, ensuring all questions are included
+      const completeAnswers = { ...results };
+
+      // Calculate the average value of existing answers
+      const existingValues = Object.values(completeAnswers).filter(
+        (v) => typeof v === "number"
+      ) as number[];
+      const averageValue =
+        existingValues.length > 0
+          ? Math.round(
+              existingValues.reduce((sum, val) => sum + val, 0) /
+                existingValues.length
+            )
+          : 2; // Default to 2 if no values exist
+
+      // Fill in any missing values with the average (should be rare, but just in case)
+      quizData.questions.forEach((question) => {
+        if (completeAnswers[question.id] === undefined) {
+          console.log(
+            `Setting missing answer for ${question.id} to average value ${averageValue}`
+          );
+          completeAnswers[question.id] = averageValue;
+        }
+      });
+
+      // Try to save locally for backup and later offline review
+      try {
+        localStorage.setItem(
+          `quiz_results_${quizData.id}`,
+          JSON.stringify({
+            results: completeAnswers,
+            timestamp: new Date().toISOString(),
+          })
+        );
+        console.log("Saved results locally for offline backup");
+      } catch (saveError) {
+        console.error("Could not save results locally:", saveError);
+      }
+
+      setLoadingMessage("Guardando resultados de evaluación...");
+
+      // Store evaluation results in the database
+      const response = await fetch("/api/evaluations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: evaluationType,
+          title:
+            evaluationType === "INITIAL"
+              ? "Evaluación Inicial"
+              : "Evaluación Avanzada",
+          answers: completeAnswers,
+          interest: interest,
+          userId: user?.id, // Include userId in the request
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message ||
+            "Error al guardar los resultados de la evaluación"
+        );
+      }
+
+      const data = await response.json();
+      setEvaluationId(data.evaluation.id);
+
+      toast({
+        title: "Éxito",
+        description: "Los resultados se han guardado correctamente.",
+      });
+
+      setStage("results-ready");
+    } catch (error) {
+      console.error("Error saving evaluation:", error);
+      setSaveError(
+        error instanceof Error ? error : new Error("Error desconocido")
+      );
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Error al guardar los resultados de la evaluación",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePrev = () => {
@@ -426,54 +335,10 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   };
 
   const handleSignUpComplete = (savedEvaluationId?: string) => {
-    // Clear any potential loading states
-    setIsSubmitting(false);
-
-    // Store the evaluation ID if provided
     if (savedEvaluationId) {
       setEvaluationId(savedEvaluationId);
     }
-
-    // Show loading screen while we wait for profile to be available
-    setIsSubmitting(true);
-    setLoadingMessage("Verificando sesión y perfil...");
-
-    // Add a longer delay before moving to the results-ready stage
-    // This ensures that all auth processes are completed
-    setTimeout(async () => {
-      // If we have a user ID but no profile, try to fetch it directly
-      if (user?.id && !profile) {
-        try {
-          setLoadingMessage("Obteniendo datos de perfil...");
-          // Try to fetch the profile directly
-          const response = await fetch(`/api/profile/${user.id}`);
-          if (response.ok) {
-            const data = await response.json();
-            // Update the userInfo state with the fetched profile data
-            if (data.profile) {
-              setUserInfo({
-                firstName: data.profile.firstName || "Usuario",
-                lastName: data.profile.lastName || "",
-                email: user.email || "",
-                // Additional fields if needed
-              });
-            }
-          }
-        } catch (error) {
-          console.error(
-            "Error fetching profile before showing results:",
-            error
-          );
-        }
-      }
-
-      // Move to the results-ready stage
-      setLoadingMessage("Preparando resultados...");
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setStage("results-ready");
-      // Clear the loading state
-      setIsSubmitting(false);
-    }, 2000); // Increased from 1000ms to 2000ms
+    setStage("results-ready");
   };
 
   const handleViewResults = () => {
@@ -530,87 +395,43 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   }
 
   return (
-    <>
+    <div className="w-full max-w-3xl mx-auto">
       {isSubmitting && (
-        <SecurityLoadingScreen variant="overlay" message={loadingMessage} />
+        <SecurityLoadingScreen
+          variant="overlay"
+          message={loadingMessage || "Procesando..."}
+        />
       )}
 
       {stage === "intro" && (
         <QuizIntro quizData={quizData} onStart={handleStart} />
       )}
 
-      {stage === "questions" &&
-        (needsProfile ? (
-          <div className="flex flex-col items-center justify-center p-8 gap-4">
-            <h2 className="text-2xl font-bold text-amber-600">
-              Perfil incompleto
-            </h2>
-            <p className="text-center mb-4">
-              Para guardar los resultados de la evaluación, necesita completar
-              su perfil primero.
-            </p>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleGoToProfile}
-                className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-              >
-                Ir a mi perfil
-              </button>
-              <button
-                type="button"
-                onClick={handleContinueWithoutSaving}
-                className="px-6 py-2 bg-secondary text-white rounded-md hover:bg-secondary/90"
-              >
-                Continuar sin guardar
-              </button>
-            </div>
-          </div>
-        ) : saveError ? (
-          <div className="flex flex-col items-center justify-center p-8 gap-4">
-            <h2 className="text-2xl font-bold text-red-600">
-              Error al guardar resultados
-            </h2>
-            <p className="text-center mb-4">
-              {saveError.message ||
-                "Hubo un problema al guardar tus resultados."}
-            </p>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleRetrySave}
-                className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-              >
-                Intentar de nuevo
-              </button>
-              <button
-                type="button"
-                onClick={handleContinueWithoutSaving}
-                className="px-6 py-2 bg-secondary text-white rounded-md hover:bg-secondary/90"
-              >
-                Continuar sin guardar
-              </button>
-            </div>
-          </div>
-        ) : (
-          <QuizQuestion
-            question={quizData.questions[currentQuestionIndex]}
-            currentIndex={currentQuestionIndex}
-            totalQuestions={quizData.questions.length}
-            selectedValue={
-              results[quizData.questions[currentQuestionIndex].id] || null
-            }
-            onSelect={handleSelect}
-            onNext={handleNext}
-            onPrev={handlePrev}
-          />
-        ))}
+      {stage === "questions" && (
+        <QuizQuestion
+          question={quizData.questions[currentQuestionIndex]}
+          totalQuestions={quizData.questions.length}
+          currentIndex={currentQuestionIndex}
+          selectedValue={
+            results[quizData.questions[currentQuestionIndex].id] ?? null
+          }
+          onSelect={handleSelect}
+          onNext={handleNext}
+          onPrev={handlePrev}
+          showPrev={currentQuestionIndex > 0}
+        />
+      )}
 
-      {stage === "sign-up" && !user?.id && (
+      {stage === "interest" && (
+        <CybersecurityInterest onSubmit={handleInterestSubmit} />
+      )}
+
+      {stage === "sign-up" && (
         <EvaluationSignUp
           results={results}
           quizId={quizData.id}
           onComplete={handleSignUpComplete}
+          interest={interest}
         />
       )}
 
@@ -629,9 +450,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           results={results}
           userInfo={userInfo}
           onRestart={handleRestart}
+          interest={interest}
         />
       )}
-    </>
+    </div>
   );
 }
-

@@ -72,6 +72,7 @@ model Evaluation {
   score         Float?
   profileId     String
   answers       Json            // Stores the entire answers object as JSON
+  metadata      Json?           // Stores additional metadata like interest information
   createdAt     DateTime        @default(now())
   completedAt   DateTime?
   

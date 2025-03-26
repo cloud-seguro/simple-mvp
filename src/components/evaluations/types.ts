@@ -28,3 +28,15 @@ export interface QuizData {
 }
 
 export type QuizResults = Record<string, number>;
+
+export interface CybersecurityInterest {
+  reason: string;
+  otherReason?: string;
+}
+
+export type InterestOption =
+  | "process"
+  | "nothing"
+  | "curiosity"
+  | "requirement"
+  | "other";

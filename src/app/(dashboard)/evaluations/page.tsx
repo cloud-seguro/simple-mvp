@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { EvaluationsList } from "./components/evaluations-list";
 import { CompareEvaluationsButton } from "./components/compare-evaluations-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const metadata = {
   title: "Historial de Evaluaciones | Dashboard",
@@ -52,12 +53,30 @@ async function EvaluationsContent() {
     orderBy: { createdAt: "desc" },
   });
 
+  // Split evaluations by type
+  const initialEvaluations = evaluations.filter((e) => e.type === "INITIAL");
+  const advancedEvaluations = evaluations.filter((e) => e.type === "ADVANCED");
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-4">
         <CompareEvaluationsButton evaluations={evaluations} />
       </div>
-      <EvaluationsList evaluations={evaluations} />
+
+      <Tabs defaultValue="initial" className="w-full">
+        <TabsList className="grid grid-cols-2 w-[400px] mb-6">
+          <TabsTrigger value="initial">Evaluaciones Iniciales</TabsTrigger>
+          <TabsTrigger value="advanced">Evaluaciones Avanzadas</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="initial">
+          <EvaluationsList evaluations={initialEvaluations} />
+        </TabsContent>
+
+        <TabsContent value="advanced">
+          <EvaluationsList evaluations={advancedEvaluations} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

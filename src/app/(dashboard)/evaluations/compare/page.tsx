@@ -5,17 +5,19 @@ import { getEvaluationById } from "@/lib/evaluation-utils";
 import { getQuizData } from "@/lib/quiz-data";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Download } from "lucide-react";
+import { ArrowLeft, Calendar, Download, FileType } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { EvaluationComparison } from "../components/evaluation-comparison";
 import type { UserInfo } from "@/components/evaluations/types";
+import { Badge } from "@/components/ui/badge";
 
 interface ComparePageProps {
   params: Promise<Record<string, never>>;
   searchParams: Promise<{
     first?: string;
     second?: string;
+    type?: string;
   }>;
 }
 
@@ -26,7 +28,7 @@ export const metadata = {
 
 export default async function ComparePage({ searchParams }: ComparePageProps) {
   try {
-    const { first, second } = await searchParams;
+    const { first, second, type } = await searchParams;
 
     if (!first || !second) {
       return (
@@ -76,9 +78,11 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
       );
     }
 
+    const evaluationType = firstEvaluation.type;
+
     // Get the quiz data based on the evaluation type
     const quizId =
-      firstEvaluation.type === "INITIAL"
+      evaluationType === "INITIAL"
         ? "evaluacion-inicial"
         : "evaluacion-avanzada";
 
@@ -86,7 +90,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
     const quizData = getQuizData(quizId);
 
     if (!quizData) {
-      throw new Error(`Quiz data not found for type: ${firstEvaluation.type}`);
+      throw new Error(`Quiz data not found for type: ${evaluationType}`);
     }
 
     // Process answers for both evaluations
@@ -140,6 +144,23 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
       { locale: es }
     );
 
+    // Determine if there was improvement between evaluations
+    const isImprovement =
+      secondEvaluation.score !== null &&
+      firstEvaluation.score !== null &&
+      secondEvaluation.score > firstEvaluation.score;
+
+    const improvementPercentage =
+      secondEvaluation.score !== null && firstEvaluation.score !== null
+        ? Math.round(
+            ((secondEvaluation.score - firstEvaluation.score) /
+              firstEvaluation.score) *
+              100
+          )
+        : null;
+
+    const typeName = evaluationType === "INITIAL" ? "Inicial" : "Avanzada";
+
     return (
       <div className="container py-8">
         <div className="mb-8">
@@ -153,17 +174,39 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
               <h1 className="text-2xl font-bold">
                 Comparación de Evaluaciones
               </h1>
+              <Badge variant="outline" className="ml-2 gap-1">
+                <FileType className="h-3 w-3 mr-1" />
+                Evaluación {typeName}
+              </Badge>
             </div>
             <Button variant="outline" className="gap-2">
               <Download className="h-4 w-4" />
               Exportar Comparación
             </Button>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>
-              Comparando evaluaciones del {firstDate} y {secondDate}
-            </span>
+          <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>
+                Comparando evaluaciones del {firstDate} y {secondDate}
+              </span>
+            </div>
+            {improvementPercentage !== null && (
+              <div className="bg-muted p-3 rounded-md mt-2">
+                <p
+                  className={`font-medium ${isImprovement ? "text-green-600" : "text-red-600"}`}
+                >
+                  {isImprovement
+                    ? `Mejora del ${improvementPercentage}% entre las evaluaciones`
+                    : `Disminución del ${Math.abs(improvementPercentage)}% entre las evaluaciones`}
+                </p>
+                <p className="text-xs mt-1">
+                  {isImprovement
+                    ? "Las medidas implementadas han mejorado el nivel de seguridad"
+                    : "Se recomienda revisar las medidas de seguridad implementadas"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -188,6 +231,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
               userInfo: secondUserInfo,
               score: secondEvaluation.score || 0,
             }}
+            evaluationType={evaluationType}
           />
         </Suspense>
       </div>

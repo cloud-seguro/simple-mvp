@@ -56,6 +56,10 @@ export async function createEvaluation(data: {
   answers: Record<string, number>;
   profileId: string;
   userRole: string;
+  interest?: {
+    reason: string;
+    otherReason?: string;
+  } | null;
 }) {
   // Validate input data
   if (!data.profileId) {
@@ -77,7 +81,7 @@ export async function createEvaluation(data: {
     // Calculate the security score
     const score = calculateSecurityScore(data.answers);
 
-    // Create the evaluation
+    // Create the evaluation with interest data if provided
     const evaluation = await prisma.evaluation.create({
       data: {
         type: data.type,
@@ -86,6 +90,14 @@ export async function createEvaluation(data: {
         profileId: data.profileId,
         answers: data.answers,
         completedAt: new Date(),
+        metadata: data.interest
+          ? {
+              interest: {
+                reason: data.interest.reason,
+                otherReason: data.interest.otherReason,
+              },
+            }
+          : undefined,
       },
     });
 
@@ -173,6 +185,13 @@ export async function getEvaluationById(id: string) {
         missingKeys: evaluation.answers
           ? expectedQuestions - Object.keys(evaluation.answers as object).length
           : expectedQuestions,
+        hasMetadata: Boolean(evaluation.metadata),
+        metadataType: evaluation.metadata
+          ? typeof evaluation.metadata
+          : "undefined",
+        hasInterestData: evaluation.metadata
+          ? Boolean((evaluation.metadata as any)?.interest)
+          : false,
       });
     } else {
       console.log(`No evaluation found with ID ${id}`);

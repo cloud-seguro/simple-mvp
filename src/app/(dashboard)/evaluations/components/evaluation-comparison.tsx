@@ -15,12 +15,18 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { ArrowUpIcon, ArrowDownIcon, MinusIcon } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon, MinusIcon, InfoIcon } from "lucide-react";
 import type {
   QuizData,
   QuizResults,
   UserInfo,
 } from "@/components/evaluations/types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 interface EvaluationData {
   id: string;
@@ -35,6 +41,7 @@ interface EvaluationComparisonProps {
   quizData: QuizData;
   firstEvaluation: EvaluationData;
   secondEvaluation: EvaluationData;
+  evaluationType: "INITIAL" | "ADVANCED";
 }
 
 interface CategoryScore {
@@ -58,10 +65,69 @@ interface QuestionComparison {
   percentageDifference: number;
 }
 
+// Add insights based on evaluation type
+const getTypeSpecificInsights = (
+  evaluationType: "INITIAL" | "ADVANCED",
+  categoryScores: Record<string, CategoryScore>
+) => {
+  if (evaluationType === "INITIAL") {
+    return {
+      title: "Insights de Evaluación Inicial",
+      description:
+        "Las evaluaciones iniciales miden los fundamentos básicos de seguridad en tu organización.",
+      insights: [
+        {
+          category: "Mejora Prioritaria",
+          text: Object.values(categoryScores)
+            .sort(
+              (a, b) =>
+                a.secondScore / a.secondMax - b.secondScore / b.secondMax
+            )
+            .slice(0, 1)
+            .map(
+              (c) =>
+                `Se recomienda priorizar mejoras en ${c.category} para fortalecer la seguridad básica.`
+            )[0],
+        },
+        {
+          category: "Próximos Pasos",
+          text: "Considera realizar una evaluación avanzada para obtener un análisis más detallado de tu postura de seguridad.",
+        },
+      ],
+    };
+  } else {
+    return {
+      title: "Insights de Evaluación Avanzada",
+      description:
+        "Las evaluaciones avanzadas proporcionan un análisis detallado de tu madurez en ciberseguridad.",
+      insights: [
+        {
+          category: "Área de Enfoque",
+          text: Object.values(categoryScores)
+            .sort(
+              (a, b) =>
+                a.secondScore / a.secondMax - b.secondScore / b.secondMax
+            )
+            .slice(0, 1)
+            .map(
+              (c) =>
+                `El área de ${c.category} requiere atención especializada para alcanzar un nivel óptimo de seguridad.`
+            )[0],
+        },
+        {
+          category: "Recomendación",
+          text: "Considera implementar auditorías periódicas o contratar especialistas en las áreas con puntuaciones más bajas.",
+        },
+      ],
+    };
+  }
+};
+
 export function EvaluationComparison({
   quizData,
   firstEvaluation,
   secondEvaluation,
+  evaluationType,
 }: EvaluationComparisonProps) {
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -140,6 +206,9 @@ export function EvaluationComparison({
     }
   );
 
+  // Get type-specific insights
+  const typeInsights = getTypeSpecificInsights(evaluationType, categoryScores);
+
   // Function to get color based on difference
   const getDifferenceColor = (difference: number) => {
     if (difference > 0) return "text-green-600";
@@ -164,11 +233,23 @@ export function EvaluationComparison({
     return <MinusIcon className="h-4 w-4 text-gray-600" />;
   };
 
+  // Function to get maturity level label
+  const getMaturityLevel = (score: number) => {
+    if (score < 20) return "Inicial (Nivel 1)";
+    if (score < 40) return "Repetible (Nivel 2)";
+    if (score < 60) return "Definido (Nivel 3)";
+    if (score < 80) return "Gestionado (Nivel 4)";
+    return "Optimizado (Nivel 5)";
+  };
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Comparación de Evaluaciones</CardTitle>
+          <CardTitle>
+            Comparación de Evaluaciones{" "}
+            {evaluationType === "INITIAL" ? "Iniciales" : "Avanzadas"}
+          </CardTitle>
           <CardDescription>
             Comparando resultados entre {firstEvaluation.title} ({firstDate}) y{" "}
             {secondEvaluation.title} ({secondDate})
@@ -189,6 +270,9 @@ export function EvaluationComparison({
                   >
                     {Math.round(firstEvaluation.score)}%
                   </Badge>
+                  <p className="text-xs mt-1 text-muted-foreground">
+                    {getMaturityLevel(firstEvaluation.score)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">
@@ -200,57 +284,52 @@ export function EvaluationComparison({
                   >
                     {Math.round(secondEvaluation.score)}%
                   </Badge>
+                  <p className="text-xs mt-1 text-muted-foreground">
+                    {getMaturityLevel(secondEvaluation.score)}
+                  </p>
                 </div>
               </div>
-              <div className="mt-4">
-                <p className="text-sm font-medium mb-1">Diferencia</p>
-                <div className="flex items-center">
-                  {getDifferenceIcon(scoreDifference)}
-                  <span
-                    className={cn(
-                      "ml-1 font-medium",
-                      getDifferenceColor(scoreDifference)
-                    )}
-                  >
-                    {scoreDifference > 0 ? "+" : ""}
-                    {Math.round(scoreDifference)}% (
-                    {Math.abs(Math.round(percentageDifference))}%)
-                  </span>
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm">Diferencia</span>
+                  <div className="flex items-center">
+                    {getDifferenceIcon(scoreDifference)}
+                    <span
+                      className={cn(
+                        "ml-1 font-medium",
+                        getDifferenceColor(scoreDifference)
+                      )}
+                    >
+                      {scoreDifference > 0 ? "+" : ""}
+                      {Math.round(scoreDifference)}% (
+                      {Math.round(percentageDifference)}%)
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="bg-white p-6 rounded-lg border">
-              <h3 className="text-lg font-medium mb-4">Progreso</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">
-                      {firstEvaluation.title} ({firstDate})
-                    </span>
-                    <span className="text-sm font-medium">
-                      {Math.round(firstEvaluation.score)}%
-                    </span>
+              <h3 className="text-lg font-medium mb-2 flex items-center">
+                {typeInsights.title}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <InfoIcon className="h-4 w-4 ml-2 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-sm">
+                      <p>{typeInsights.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h3>
+              <div className="space-y-4 mt-4">
+                {typeInsights.insights.map((insight, index) => (
+                  <div key={index} className="bg-muted p-3 rounded-md">
+                    <p className="font-medium text-sm">{insight.category}</p>
+                    <p className="text-sm mt-1">{insight.text}</p>
                   </div>
-                  <Progress
-                    value={firstEvaluation.score}
-                    className="h-2 bg-gray-100"
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">
-                      {secondEvaluation.title} ({secondDate})
-                    </span>
-                    <span className="text-sm font-medium">
-                      {Math.round(secondEvaluation.score)}%
-                    </span>
-                  </div>
-                  <Progress
-                    value={secondEvaluation.score}
-                    className="h-2 bg-gray-100"
-                  />
-                </div>
+                ))}
               </div>
             </div>
           </div>
