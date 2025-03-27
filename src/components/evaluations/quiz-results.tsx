@@ -11,67 +11,78 @@ interface QuizResultsProps {
   onRestart: () => void;
 }
 
-const getMaturityLevelInfo = (percentage: number) => {
-  if (percentage < 10) {
+interface MaturityLevelInfo {
+  level: number;
+  title: string;
+  description: string;
+  advice: string;
+  actionText: string;
+}
+
+const getMaturityLevelInfo = (percentage: number): MaturityLevelInfo => {
+  if (percentage >= 0 && percentage <= 15) {
     return {
       level: 1,
       title: "Nivel 1 - Inicial / Ad-hoc",
       description:
-        "No hay un enfoque estructurado de ciberseguridad. Los controles son inexistentes o informales. Se requiere establecer procesos y medidas de seguridad básicas.",
-      recommendation:
-        "Te podemos apoyar en subir este nivel de madurez hacerlo solo toma más tiempo.",
-      actionText: "Comenzar Evaluación",
+        "La seguridad se maneja de forma reactiva. No hay procesos documentados ni una estructura clara para gestionar riesgos y proteger la información.",
+      advice:
+        "Trabaja en establecer una estrategia inicial de seguridad, enfocada en definir políticas, roles y procesos básicos para proteger la información. ISO 27001 y NIST recomiendan empezar con la identificación de activos y riesgos.",
+      actionText: "Comenzar Estrategia",
     };
-  } else if (percentage < 20) {
+  } else if (percentage >= 16 && percentage <= 34) {
     return {
       level: 2,
       title: "Nivel 2 - Repetible pero intuitivo",
       description:
-        "Existen algunos controles de ciberseguridad, pero no están formalizados ni aplicados de manera consistente. Aún se depende de acciones individuales y no hay gestión centralizada.",
-      recommendation:
-        "Para validar tu estado de seguridad, Ciberseguridad Simple puede realizar una auditoría y verificación de documentación, controles y riesgos.",
-      actionText: "Solicitar Auditoría",
+        "Existen controles básicos, pero su aplicación no es uniforme. La seguridad depende de esfuerzos individuales y acciones aisladas en lugar de procesos bien definidos.",
+      advice:
+        "Estandariza y documenta las políticas de seguridad, asegurando que sean aplicadas en toda la organización. Trabaja en la gestión de riesgos y en el uso de controles técnicos recomendados por CIS Controls y NIST CSF.",
+      actionText: "Estandarizar Procesos",
     };
-  } else if (percentage < 30) {
+  } else if (percentage >= 35 && percentage <= 51) {
     return {
       level: 3,
       title: "Nivel 3 - Definido",
       description:
-        "La organización cuenta con políticas y procesos documentados de ciberseguridad. Hay roles definidos, pero aún falta optimizar la aplicación y supervisión de estos controles.",
-      recommendation:
-        "Se recomienda una verificación con Ciberseguridad Simple para revisar documentación, procesos y riesgos clave.",
-      actionText: "Verificar Procesos",
+        "Los procesos de ciberseguridad están estructurados y alineados con estándares como ISO 27001, NIST y CIS. Se han implementado controles en la nube, gestión de vulnerabilidades y auditorías.",
+      advice:
+        "Profundiza en la medición y optimización de los controles, con el uso de monitoreo continuo y métricas de seguridad. Explora herramientas de Zero Trust, segmentación de red y pruebas de seguridad en aplicaciones (DevSecOps, OWASP ASVS).",
+      actionText: "Optimizar Controles",
     };
-  } else if (percentage < 40) {
+  } else if (percentage >= 52 && percentage <= 66) {
     return {
       level: 4,
       title: "Nivel 4 - Gestionado y Medido",
       description:
-        "La ciberseguridad se gestiona activamente con métricas, auditorías y monitoreo continuo. Se aplican mejoras constantes, pero hay oportunidades de optimización en procesos críticos.",
-      recommendation:
-        "Se recomienda una verificación con Ciberseguridad Simple para revisar documentación, procesos y riesgos clave.",
-      actionText: "Optimizar Gestión",
+        "La ciberseguridad es gestionada con métricas, auditorías y monitoreo activo. Se han implementado SOC, SIEM, análisis de amenazas y simulaciones de incidentes (Red Team, Blue Team).",
+      advice:
+        "Asegura la mejora continua en la gestión de incidentes y la resiliencia organizacional. Refuerza el uso de inteligencia de amenazas (OSINT, Dark Web Monitoring) y la automatización de respuestas a incidentes (SOAR, XDR).",
+      actionText: "Fortalecer Resiliencia",
     };
-  } else if (percentage < 45) {
+  } else if (percentage >= 67 && percentage <= 74) {
     return {
       level: 5,
       title: "Nivel 5 - Optimizado",
       description:
-        "La ciberseguridad está en un nivel avanzado con controles implementados y revisados periódicamente. Se han adoptado procesos de mejora continua, aunque aún pueden fortalecerse ciertos aspectos estratégicos.",
-      recommendation:
-        "Se recomienda una verificación con Ciberseguridad Simple para evaluar la efectividad de los controles, revisar la documentación de seguridad y validar la gestión de riesgos.",
-      actionText: "Evaluar Efectividad",
+        "Ciberseguridad avanzada con procesos automatizados y monitoreo en tiempo real. Se han adoptado estrategias como Zero Trust, detección de amenazas con IA y seguridad en la nube con cumplimiento de marcos como AWS Well-Architected, Google Cloud Security y Azure Security Center.",
+      advice:
+        "Sigue fortaleciendo la estrategia de seguridad con ciberinteligencia y automatización. Evalúa constantemente nuevas tecnologías, mejora la gestión de crisis y resiliencia y optimiza los procesos de respuesta a incidentes con IA.",
+      actionText: "Innovar Seguridad",
     };
-  } else {
+  } else if (percentage === 75) {
     return {
       level: 5,
       title: "Nivel 5 - Óptimo",
       description:
-        "La ciberseguridad es robusta y completamente integrada en la organización. Se han automatizado procesos, gestionado proactivamente los riesgos y optimizado los controles. Sin embargo, siempre hay margen de evolución ante nuevas amenazas.",
-      recommendation:
-        "Para validar tu estado de seguridad, Ciberseguridad Simple puede realizar una auditoría y verificación de documentación, controles y riesgos.",
+        "Ciberseguridad completamente integrada en la cultura organizacional. Se han implementado detección de amenazas con IA, automatización total de respuesta a incidentes, monitoreo continuo de la Dark Web y cumplimiento avanzado de seguridad en entornos híbridos y en la nube.",
+      advice:
+        "Se nota que has trabajado en ciberseguridad y dominas los estándares. Mantén un enfoque en innovación y evolución, asegurando que el equipo y la organización estén preparados para amenazas emergentes. Continúa reforzando la estrategia con simulaciones avanzadas y escenarios de crisis en entornos reales.",
       actionText: "Mantener Excelencia",
     };
+  } else {
+    // Fallback for any unexpected values
+    return getMaturityLevelInfo(75); // Return the highest level as fallback
   }
 };
 
@@ -155,10 +166,8 @@ export function QuizResults({
               </h3>
               <p className="text-gray-600 mb-4">{maturityInfo.description}</p>
               <div className="bg-white p-4 rounded-lg border border-gray-200">
-                <h4 className="font-semibold mb-2">Recomendación:</h4>
-                <p className="text-gray-700 mb-4">
-                  {maturityInfo.recommendation}
-                </p>
+                <h4 className="font-semibold mb-2">Consejo:</h4>
+                <p className="text-gray-700 mb-4">{maturityInfo.advice}</p>
                 <Link
                   href="/contact"
                   className="inline-block bg-[#FF8548] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#e67a41] transition-colors"
