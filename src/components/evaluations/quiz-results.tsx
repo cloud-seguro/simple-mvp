@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { QuizData, QuizResults as QuizResultsType } from "./types";
 import Link from "next/link";
 import { SpecialistsRecommendations } from "./specialists-recommendations";
+import { CalendarCheck, ArrowRight } from "lucide-react";
 
 interface QuizResultsProps {
   quizData: QuizData;
@@ -143,6 +144,9 @@ export function QuizResults({
     .slice(0, 2)
     .map((item) => item.category);
 
+  // Create the URL for the scheduling page with evaluation data
+  const scheduleUrl = `/schedule?level=${maturityInfo.level}&categories=${weakestCategories.join(",")}`;
+
   return (
     <div className="min-h-screen flex flex-col">
       <header
@@ -154,6 +158,31 @@ export function QuizResults({
 
       <main className="flex-grow p-8">
         <div className="max-w-2xl mx-auto">
+          {/* New Call to Action Banner at the top */}
+          <div className="bg-gradient-to-r from-[#FF8548] to-[#FF9D6B] p-6 rounded-xl mb-8 shadow-lg">
+            <div className="flex flex-col md:flex-row items-center text-white">
+              <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                <CalendarCheck className="h-16 w-16" />
+              </div>
+              <div className="flex-grow text-center md:text-left mb-4 md:mb-0">
+                <h2 className="text-xl font-bold mb-2">
+                  ¿Necesitas ayuda profesional?
+                </h2>
+                <p>
+                  Agenda una consulta con nuestros especialistas certificados en
+                  ciberseguridad para implementar soluciones personalizadas.
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <Link href={scheduleUrl}>
+                  <Button className="bg-white text-[#FF8548] hover:bg-gray-100 font-semibold flex items-center">
+                    Agendar Consulta <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
           <h1 className="text-3xl font-bold mb-6">
             Resultados de {quizData.title}
           </h1>
@@ -185,15 +214,25 @@ export function QuizResults({
               <div className="bg-white p-4 rounded-lg border border-gray-200">
                 <h4 className="font-semibold mb-2">Consejo:</h4>
                 <p className="text-gray-700 mb-4">{maturityInfo.advice}</p>
-                <Link
-                  href="/contact"
-                  className="inline-block text-white font-semibold px-6 py-3 rounded-full transition-colors hover:opacity-90"
-                  style={{
-                    backgroundColor: getColorIntensity(100),
-                  }}
-                >
-                  {maturityInfo.actionText}
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/contact"
+                    className="inline-block text-white font-semibold px-6 py-3 rounded-full transition-colors hover:opacity-90"
+                    style={{
+                      backgroundColor: getColorIntensity(100),
+                    }}
+                  >
+                    {maturityInfo.actionText}
+                  </Link>
+                  <Link href={scheduleUrl}>
+                    <Button
+                      variant="outline"
+                      className="px-6 py-3 rounded-full"
+                    >
+                      Agendar con Especialista
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -233,6 +272,18 @@ export function QuizResults({
                 maturityLevel={maturityInfo.level}
                 categories={weakestCategories}
               />
+
+              {/* Additional CTA after recommendations */}
+              <div className="mt-6 text-center">
+                <Link href={scheduleUrl}>
+                  <Button className="bg-[#FF8548] text-white hover:bg-[#E07038]">
+                    Agendar Consultoria con Especialistas
+                  </Button>
+                </Link>
+                <p className="mt-2 text-sm text-gray-500">
+                  Primera consulta de 30 minutos sin costo
+                </p>
+              </div>
             </div>
           </div>
 
@@ -246,7 +297,10 @@ export function QuizResults({
       </main>
 
       <footer className="p-4 border-t">
-        {/* Terms and privacy links removed */}
+        <div className="max-w-7xl mx-auto text-center text-sm text-gray-500">
+          SIMPLE © {new Date().getFullYear()} - Haciendo la ciberseguridad
+          accesible
+        </div>
       </footer>
     </div>
   );

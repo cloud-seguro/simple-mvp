@@ -13,6 +13,7 @@ import type {
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { cn } from "@/lib/utils";
 import { SpecialistsRecommendations } from "./specialists-recommendations";
+import Link from "next/link";
 
 interface MaturityLevel {
   level: string;
@@ -572,6 +573,78 @@ export function CybersecurityResults({
                       "bg-blue-100 [&>div]:bg-blue-600"
                   )}
                 />
+              </div>
+
+              {/* New Call to Action Banner */}
+              <div className="mt-6 bg-gradient-to-r from-[#FF8548] to-[#FF9D6B] p-6 rounded-xl text-white shadow-lg border border-orange-300 transform hover:scale-[1.02] transition-all duration-300">
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                  <div className="flex-shrink-0 mb-4 md:mb-0">
+                    <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-grow text-center md:text-left">
+                    <h3 className="text-xl font-bold mb-2">
+                      ¡Mejora tu nivel de ciberseguridad ahora!
+                    </h3>
+                    <p className="mb-2 max-w-lg">
+                      Nuestros especialistas pueden ayudarte a implementar las
+                      medidas necesarias para proteger tu organización de
+                      amenazas cibernéticas.
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start text-sm font-medium mt-1 mb-3">
+                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                        Asesoría personalizada
+                      </span>
+                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                        Implementación de controles
+                      </span>
+                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                        Análisis de vulnerabilidades
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <Link
+                      href={`/schedule?level=${maturity.level.split(" ")[1]}&categories=${categoryMaturityLevels
+                        .sort((a, b) => a.total / a.max - b.total / b.max)
+                        .slice(0, 2)
+                        .map((item) => item.category)
+                        .join(",")}`}
+                      className="inline-block"
+                    >
+                      <Button className="bg-white text-[#FF8548] hover:bg-gray-100 px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center">
+                        Agendar Especialista
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M5 12h14"></path>
+                          <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
 
