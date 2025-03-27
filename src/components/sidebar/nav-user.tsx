@@ -112,15 +112,6 @@ export function NavUser() {
                 asChild
                 className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
               >
-                <Link href="/settings/account">
-                  <BadgeCheck className="mr-2 h-4 w-4" />
-                  Mi Cuenta
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                asChild
-                className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
-              >
                 <Link href="/settings">
                   <Settings className="mr-2 h-4 w-4" />
                   Configuración
