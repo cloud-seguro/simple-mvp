@@ -395,7 +395,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full min-h-screen bg-background">
       {isSubmitting && (
         <SecurityLoadingScreen
           variant="overlay"
@@ -423,16 +423,20 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       )}
 
       {stage === "interest" && (
-        <CybersecurityInterest onSubmit={handleInterestSubmit} />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <CybersecurityInterest onSubmit={handleInterestSubmit} />
+        </div>
       )}
 
       {stage === "sign-up" && (
-        <EvaluationSignUp
-          results={results}
-          quizId={quizData.id}
-          onComplete={handleSignUpComplete}
-          interest={interest}
-        />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <EvaluationSignUp
+            results={results}
+            quizId={quizData.id}
+            onComplete={handleSignUpComplete}
+            interest={interest}
+          />
+        </div>
       )}
 
       {stage === "results-ready" && (
@@ -445,13 +449,15 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       )}
 
       {stage === "results" && (
-        <CybersecurityResults
-          quizData={quizData}
-          results={results}
-          userInfo={userInfo}
-          onRestart={handleRestart}
-          interest={interest}
-        />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <CybersecurityResults
+            quizData={quizData}
+            results={results}
+            userInfo={userInfo}
+            onRestart={handleRestart}
+            interest={interest}
+          />
+        </div>
       )}
     </div>
   );
