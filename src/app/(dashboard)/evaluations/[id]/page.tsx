@@ -1,101 +1,29 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getEvaluationById } from "@/lib/evaluation-utils";
-import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
-import { getQuizData } from "@/lib/quiz-data";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Download } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import type { UserInfo } from "@/components/evaluations/types";
+import { EvaluationContent } from "./evaluation-content";
+import { getEvaluationData } from "./evaluation-data";
 
 // Update the interface to match Next.js expected types for dynamic routes
 interface EvaluationPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: EvaluationPageProps) {
-  try {
-    const { id } = await params;
-    const evaluation = await getEvaluationById(id);
-
-    if (!evaluation) {
-      return {
-        title: "Evaluación no encontrada",
-      };
-    }
-
-    return {
-      title: `${evaluation.title} | Dashboard`,
-      description: `Resultados de la evaluación de ciberseguridad para ${evaluation.profile.firstName || "Usuario"}`,
-    };
-  } catch (error) {
-    console.error("Error generating metadata:", error);
-    return {
-      title: "Error al cargar evaluación",
-    };
-  }
-}
-
 export default async function EvaluationPage({ params }: EvaluationPageProps) {
   try {
     const { id } = await params;
-    const evaluation = await getEvaluationById(id);
+    const data = await getEvaluationData(id);
 
-    if (!evaluation) {
+    if (!data) {
       notFound();
     }
 
-    // Get the quiz data based on the evaluation type
-    const quizId =
-      evaluation.type === "INITIAL"
-        ? "evaluacion-inicial"
-        : "evaluacion-avanzada";
-
-    // Get the quiz data
-    const quizData = getQuizData(quizId);
-
-    if (!quizData) {
-      throw new Error(`Quiz data not found for type: ${evaluation.type}`);
-    }
-
-    // Prepare user info
-    const userInfo: UserInfo = {
-      firstName: evaluation.profile.firstName || "Usuario",
-      lastName: evaluation.profile.lastName || "",
-      email: evaluation.profile.email || "",
-    };
-
-    // Ensure answers is a valid Record<string, number>
-    const answers: Record<string, number> = {};
-
-    if (evaluation.answers) {
-      // Check if answers is a string (JSON)
-      if (typeof evaluation.answers === "string") {
-        try {
-          const parsedAnswers = JSON.parse(evaluation.answers);
-          Object.assign(answers, parsedAnswers);
-        } catch (e) {
-          console.error("Failed to parse answers JSON string:", e);
-        }
-      } else if (typeof evaluation.answers === "object") {
-        // If it's already an object, ensure all values are numbers
-        for (const [key, value] of Object.entries(
-          evaluation.answers as Record<string, unknown>
-        )) {
-          answers[key] = Number(value) || 0;
-        }
-      }
-    }
-
-    // Format the date
-    const formattedDate = format(
-      new Date(evaluation.createdAt),
-      "d 'de' MMMM 'de' yyyy",
-      { locale: es }
-    );
+    const { evaluation } = data;
 
     return (
       <div className="container py-8">
@@ -112,12 +40,14 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
             <div className="flex items-center gap-4">
               <div className="flex items-center text-sm text-muted-foreground">
                 <Calendar className="mr-2 h-4 w-4" />
-                {formattedDate}
+                {format(
+                  new Date(evaluation.createdAt),
+                  "d 'de' MMMM 'de' yyyy",
+                  {
+                    locale: es,
+                  }
+                )}
               </div>
-              <Button variant="outline" className="gap-2">
-                <Download className="h-4 w-4" />
-                Exportar PDF
-              </Button>
             </div>
           </div>
         </div>
@@ -125,12 +55,7 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
         <Suspense
           fallback={<SecurityLoadingScreen message="Cargando resultados..." />}
         >
-          <CybersecurityResults
-            quizData={quizData}
-            results={answers}
-            userInfo={userInfo}
-            isSharedView={false}
-          />
+          <EvaluationContent {...data} />
         </Suspense>
       </div>
     );

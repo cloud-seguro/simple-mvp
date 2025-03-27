@@ -490,35 +490,53 @@ export function CybersecurityResults({
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="p-8 bg-white border-b shadow-sm">
-        <SimpleHeader className="text-primary" />
-      </header>
+      {isSharedView && (
+        <header className="p-6 bg-white border-b shadow-sm">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">S</span>
+              </div>
+              <span className="text-xl font-bold text-gray-800">SIMPLE</span>
+            </div>
+            <div className="text-sm text-gray-500">
+              {new Date().toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
+          </div>
+        </header>
+      )}
 
-      <main className="flex-grow p-4 md:p-8">
-        <div className="max-w-3xl mx-auto">
+      <main className={cn("flex-grow", isSharedView ? "p-4 md:p-8" : "p-0")}>
+        <div className={cn("mx-auto", isSharedView ? "max-w-3xl" : "w-full")}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-800">
-                {userInfo.firstName}, aquí están sus resultados
-              </h1>
-              <p className="text-lg text-gray-600">
-                Evaluación de Madurez en Ciberseguridad
-              </p>
-            </div>
+            {isSharedView && (
+              <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gray-800">
+                  {userInfo.firstName}, aquí están sus resultados
+                </h1>
+                <p className="text-lg text-gray-600">
+                  Evaluación de Madurez en Ciberseguridad
+                </p>
+              </div>
+            )}
 
             {interest && (
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="font-medium text-gray-800 mb-2">
-                  Tu interés en ciberseguridad:
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 className="font-semibold text-gray-800 mb-3 text-lg">
+                  Tu interés en ciberseguridad
                 </h3>
-                <p className="text-gray-700">
+                <p className="text-gray-700 leading-relaxed">
                   {getInterestReasonText(interest.reason as InterestOption)}
                   {interest.reason === "other" && interest.otherReason && (
-                    <span className="block mt-1 italic">
+                    <span className="block mt-2 italic text-gray-600">
                       &ldquo;{interest.otherReason}&rdquo;
                     </span>
                   )}
@@ -526,24 +544,35 @@ export function CybersecurityResults({
               </div>
             )}
 
-            <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
                 Resumen General
               </h2>
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-                <div className="bg-white p-4 rounded-lg flex-1 shadow-sm border">
-                  <p className="text-sm text-gray-600 mb-1">Puntuación Total</p>
-                  <p className={`text-3xl font-bold ${maturity.color}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                  <p className="text-sm font-medium text-gray-600 mb-2">
+                    Puntuación Total
+                  </p>
+                  <p className={`text-4xl font-bold ${maturity.color}`}>
                     {overallScore}/{maxPossibleScore}
                   </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {Math.round((overallScore / maxPossibleScore) * 100)}% de
+                    madurez
+                  </p>
                 </div>
-                <div className="bg-white p-4 rounded-lg flex-1 shadow-sm border">
-                  <p className="text-sm text-gray-600 mb-1">Nivel de Madurez</p>
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                  <p className="text-sm font-medium text-gray-600 mb-2">
+                    Nivel de Madurez
+                  </p>
                   <p
-                    className={`text-3xl font-bold ${maturity.color} flex items-center gap-2`}
+                    className={`text-4xl font-bold ${maturity.color} flex items-center gap-3`}
                   >
                     <span>{maturity.emoji}</span>
                     <span>{maturity.level}</span>
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {maturity.description}
                   </p>
                 </div>
               </div>
@@ -698,127 +727,80 @@ export function CybersecurityResults({
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
                 Desglose por Categoría
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {categoryMaturityLevels.map(({ category, total, max }) => {
                   const percentage = Math.round((total / max) * 100);
                   return (
-                    <div
-                      key={category}
-                      className={cn(
-                        "border rounded-lg overflow-hidden",
-                        maturity.color.replace("text", "border")
-                      )}
-                    >
-                      <div className="bg-white p-4">
-                        <div className="flex justify-between mb-2">
-                          <span className={`font-medium ${maturity.color}`}>
-                            {category}
-                          </span>
-                          <span className={`${maturity.color} font-medium`}>
-                            {total}/{max} ({percentage}%)
-                          </span>
-                        </div>
-                        <Progress
-                          value={percentage}
-                          className={cn(
-                            "h-2.5",
-                            maturity.color === "text-red-600" &&
-                              "bg-red-100 [&>div]:bg-red-600",
-                            maturity.color === "text-orange-600" &&
-                              "bg-orange-100 [&>div]:bg-orange-600",
-                            maturity.color === "text-yellow-600" &&
-                              "bg-yellow-100 [&>div]:bg-yellow-600",
-                            maturity.color === "text-green-600" &&
-                              "bg-green-100 [&>div]:bg-green-600",
-                            maturity.color === "text-blue-600" &&
-                              "bg-blue-100 [&>div]:bg-blue-600"
-                          )}
-                        />
+                    <div key={category} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-gray-800">
+                          {category}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          {total}/{max} ({percentage}%)
+                        </span>
                       </div>
+                      <Progress
+                        value={percentage}
+                        className={cn(
+                          "h-2.5",
+                          maturity.color === "text-red-600" &&
+                            "bg-red-100 [&>div]:bg-red-600",
+                          maturity.color === "text-orange-600" &&
+                            "bg-orange-100 [&>div]:bg-orange-600",
+                          maturity.color === "text-yellow-600" &&
+                            "bg-yellow-100 [&>div]:bg-yellow-600",
+                          maturity.color === "text-green-600" &&
+                            "bg-green-100 [&>div]:bg-green-600",
+                          maturity.color === "text-blue-600" &&
+                            "bg-blue-100 [&>div]:bg-blue-600"
+                        )}
+                      />
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">
-                Recomendaciones Específicas
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
+                Recomendaciones Personalizadas
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {recommendations.map((rec) => {
                   const percentage = Math.round(
                     (rec.score / rec.maxScore) * 100
                   );
                   return (
                     <div
-                      key={rec.text}
-                      className={cn(
-                        "border rounded-lg overflow-hidden",
-                        maturity.color.replace("text", "border")
-                      )}
+                      key={`${rec.category}-${rec.text}`}
+                      className="bg-gray-50 p-6 rounded-xl border border-gray-200"
                     >
-                      <div className="bg-white p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <h3
-                            className={`font-medium flex-grow ${maturity.color}`}
-                          >
-                            {rec.text}
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-medium text-gray-800 mb-1">
+                            {rec.question}
                           </h3>
-                          <span
-                            className={`${maturity.color} font-medium ml-4 whitespace-nowrap`}
-                          >
-                            {rec.score}/{rec.maxScore}
-                          </span>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded mb-3">
-                          <p className="text-sm text-gray-700">
-                            <span className="font-medium">
-                              Respuesta seleccionada:
-                            </span>{" "}
+                          <p className="text-sm text-gray-600">
                             {rec.selectedOption}
                           </p>
                         </div>
-                        <div className="mb-3">
-                          <div className="flex mb-2 items-center justify-between">
-                            <div>
-                              <span
-                                className={`${maturity.color} text-xs font-semibold`}
-                              >
-                                Puntuación
-                              </span>
-                            </div>
-                            <div className={`${maturity.color} text-right`}>
-                              <span className="text-xs font-semibold">
-                                {percentage}%
-                              </span>
-                            </div>
-                          </div>
-                          <Progress
-                            value={percentage}
-                            className={cn(
-                              "h-2.5",
-                              maturity.color === "text-red-600" &&
-                                "bg-red-100 [&>div]:bg-red-600",
-                              maturity.color === "text-orange-600" &&
-                                "bg-orange-100 [&>div]:bg-orange-600",
-                              maturity.color === "text-yellow-600" &&
-                                "bg-yellow-100 [&>div]:bg-yellow-600",
-                              maturity.color === "text-green-600" &&
-                                "bg-green-100 [&>div]:bg-green-600",
-                              maturity.color === "text-blue-600" &&
-                                "bg-blue-100 [&>div]:bg-blue-600"
-                            )}
-                          />
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-600">
+                            {rec.score}/{rec.maxScore}
+                          </p>
+                          <p className="text-sm text-gray-500">{percentage}%</p>
                         </div>
-                        <p
-                          className={`text-sm font-medium ${maturity.color} mt-2`}
-                        >
-                          <span className="font-bold">Recomendación:</span>{" "}
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-700">
+                          Recomendación:
+                        </p>
+                        <p className="text-sm text-gray-600 leading-relaxed">
                           {rec.recommendation}
                         </p>
                       </div>
@@ -828,7 +810,7 @@ export function CybersecurityResults({
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
               <SpecialistsRecommendations
                 maturityLevel={maturityLevelNumber}
                 categories={weakestCategories}
