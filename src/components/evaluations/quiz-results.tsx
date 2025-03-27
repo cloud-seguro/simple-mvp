@@ -10,6 +10,7 @@ interface QuizResultsProps {
   quizData: QuizData;
   results: QuizResultsType;
   onRestart: () => void;
+  evaluationId: string;
 }
 
 interface MaturityLevelInfo {
@@ -97,6 +98,7 @@ export function QuizResults({
   quizData,
   results,
   onRestart,
+  evaluationId,
 }: QuizResultsProps) {
   // Calculate scores by category
   const categoryScores: Record<string, { total: number; max: number }> = {};
@@ -143,7 +145,7 @@ export function QuizResults({
     .map((item) => item.category);
 
   // Create the URL for the scheduling page with evaluation data
-  const scheduleUrl = `/schedule?level=${maturityInfo.level}&categories=${weakestCategories.join(",")}`;
+  const scheduleUrl = `/schedule?level=${maturityInfo.level}&categories=${weakestCategories.join(",")}&evaluationId=${evaluationId}`;
 
   return (
     <div className="min-h-screen flex flex-col">

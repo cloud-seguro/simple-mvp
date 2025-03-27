@@ -356,6 +356,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           userInfo={userInfo}
           isSharedView={true}
           interest={interestData}
+          evaluationId={id}
         />
       </Suspense>
     );

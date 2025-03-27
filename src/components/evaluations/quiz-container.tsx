@@ -361,6 +361,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             userInfo={userInfo}
             onRestart={handleRestart}
             interest={interest}
+            evaluationId={evaluationId || undefined}
           />
         </div>
       )}

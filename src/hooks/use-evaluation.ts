@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { QuizResults } from "@/components/evaluations/types";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 interface UseEvaluationProps {
   type: "INITIAL" | "ADVANCED";
@@ -29,12 +30,22 @@ export function useEvaluation({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   const submitEvaluation = async (answers: QuizResults) => {
     setIsSubmitting(true);
     setError(null);
 
     try {
+      // Get the current session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        throw new Error("User must be authenticated to submit an evaluation");
+      }
+
       const response = await fetch("/api/evaluations", {
         method: "POST",
         headers: {
@@ -44,6 +55,7 @@ export function useEvaluation({
           type,
           title,
           answers,
+          userId: session.user.id,
         }),
       });
 
@@ -58,7 +70,7 @@ export function useEvaluation({
         onSuccess(data.evaluation.id);
       } else {
         // Default behavior: redirect to results page
-        router.push(`/evaluation/results/${data.evaluation.id}`);
+        router.push(`/results/${data.evaluation.id}`);
       }
 
       return data.evaluation;

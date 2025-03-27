@@ -31,6 +31,7 @@ interface CybersecurityResultsProps {
   onRestart?: () => void;
   isSharedView?: boolean;
   interest?: InterestType | null;
+  evaluationId?: string;
 }
 
 interface QuestionRecommendation {
@@ -204,6 +205,7 @@ export function CybersecurityResults({
   onRestart,
   isSharedView = false,
   interest,
+  evaluationId,
 }: CybersecurityResultsProps) {
   // Log the input data for debugging
   console.log(
@@ -483,6 +485,9 @@ export function CybersecurityResults({
     10
   );
 
+  // Create the URL for the scheduling page with evaluation data
+  const scheduleUrl = `/schedule?level=${maturityLevelNumber}&categories=${weakestCategories.join(",")}${evaluationId ? `&evaluationId=${evaluationId}` : ""}`;
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="p-8 bg-white border-b shadow-sm">
@@ -574,9 +579,47 @@ export function CybersecurityResults({
                   )}
                 />
               </div>
+            </div>
 
-              {/* New Call to Action Banner */}
-              <div className="mt-6 bg-gradient-to-r from-[#FF8548] to-[#FF9D6B] p-6 rounded-xl text-white shadow-lg border border-orange-300 transform hover:scale-[1.02] transition-all duration-300">
+            <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                Nivel de Madurez Actual
+              </h2>
+              <div
+                className={cn(
+                  "p-5 rounded-lg border",
+                  maturity.color.replace("text", "border")
+                )}
+              >
+                <p className={`${maturity.color} font-medium mb-4`}>
+                  {maturity.description}
+                </p>
+                {maturity.advice && (
+                  <>
+                    <h3 className={`font-semibold mt-4 mb-2 ${maturity.color}`}>
+                      Recomendación General
+                    </h3>
+                    <p className={`${maturity.color}`}>{maturity.advice}</p>
+                  </>
+                )}
+              </div>
+
+              {/* Call to Action Banner */}
+              <div
+                className={cn(
+                  "mt-6 p-6 rounded-xl text-white shadow-lg border transform hover:scale-[1.02] transition-all duration-300",
+                  maturity.color === "text-red-600" &&
+                    "bg-gradient-to-r from-red-500 to-red-600 border-red-300",
+                  maturity.color === "text-orange-600" &&
+                    "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-300",
+                  maturity.color === "text-yellow-600" &&
+                    "bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-300",
+                  maturity.color === "text-green-600" &&
+                    "bg-gradient-to-r from-green-500 to-green-600 border-green-300",
+                  maturity.color === "text-blue-600" &&
+                    "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-300"
+                )}
+              >
                 <div className="flex flex-col md:flex-row items-center gap-4">
                   <div className="flex-shrink-0 mb-4 md:mb-0">
                     <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
@@ -617,15 +660,22 @@ export function CybersecurityResults({
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <Link
-                      href={`/schedule?level=${maturity.level.split(" ")[1]}&categories=${categoryMaturityLevels
-                        .sort((a, b) => a.total / a.max - b.total / b.max)
-                        .slice(0, 2)
-                        .map((item) => item.category)
-                        .join(",")}`}
-                      className="inline-block"
-                    >
-                      <Button className="bg-white text-[#FF8548] hover:bg-gray-100 px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center">
+                    <Link href={scheduleUrl} className="inline-block">
+                      <Button
+                        className={cn(
+                          "bg-white px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center",
+                          maturity.color === "text-red-600" &&
+                            "text-red-600 hover:bg-red-50",
+                          maturity.color === "text-orange-600" &&
+                            "text-orange-600 hover:bg-orange-50",
+                          maturity.color === "text-yellow-600" &&
+                            "text-yellow-600 hover:bg-yellow-50",
+                          maturity.color === "text-green-600" &&
+                            "text-green-600 hover:bg-green-50",
+                          maturity.color === "text-blue-600" &&
+                            "text-blue-600 hover:bg-blue-50"
+                        )}
+                      >
                         Agendar Especialista
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -645,30 +695,6 @@ export function CybersecurityResults({
                     </Link>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">
-                Nivel de Madurez Actual
-              </h2>
-              <div
-                className={cn(
-                  "p-5 rounded-lg border",
-                  maturity.color.replace("text", "border")
-                )}
-              >
-                <p className={`${maturity.color} font-medium mb-4`}>
-                  {maturity.description}
-                </p>
-                {maturity.advice && (
-                  <>
-                    <h3 className={`font-semibold mt-4 mb-2 ${maturity.color}`}>
-                      Recomendación General
-                    </h3>
-                    <p className={`${maturity.color}`}>{maturity.advice}</p>
-                  </>
-                )}
               </div>
             </div>
 
