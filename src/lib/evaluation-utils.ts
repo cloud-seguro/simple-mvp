@@ -2,6 +2,15 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+interface EvaluationMetadata {
+  interest?: {
+    reason: string;
+    otherReason?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 /**
  * Checks if a user can access advanced evaluations based on their role
  * @param userRole - The role of the user
@@ -202,7 +211,7 @@ export async function getEvaluationById(id: string) {
           ? typeof evaluation.metadata
           : "undefined",
         hasInterestData: evaluation.metadata
-          ? Boolean((evaluation.metadata as any)?.interest)
+          ? Boolean((evaluation.metadata as EvaluationMetadata)?.interest)
           : false,
       });
     } else {

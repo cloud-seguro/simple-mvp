@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { QuizIntro } from "./quiz-intro";
 import { QuizQuestion } from "./quiz-question";
@@ -37,8 +37,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   const [results, setResults] = useState<QuizResults>({});
   const { user, isLoading, profile } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [saveError, setSaveError] = useState<Error | null>(null);
-  const [needsProfile, setNeedsProfile] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(
     "Guardando resultados..."
   );
@@ -48,7 +46,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     email: "",
   });
   const router = useRouter();
-  const loadedStoredResults = useRef(false);
   const [evaluationId, setEvaluationId] = useState<string | null>(null);
   const [interest, setInterest] = useState<CybersecurityInterestType | null>(
     null
@@ -137,8 +134,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     try {
       // Keep or set submitting state
       setIsSubmitting(true);
-      setSaveError(null);
-      setNeedsProfile(false);
       setLoadingMessage("Verificando perfil de usuario...");
 
       // Check if the user has a profile
@@ -146,19 +141,12 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         try {
           const profileResponse = await fetch(`/api/profile/${user?.id}`);
           if (!profileResponse.ok) {
-            setNeedsProfile(true);
             throw new Error(
               "No se encontró un perfil para este usuario. Por favor, complete su perfil primero."
             );
           }
         } catch (profileError) {
           console.error("Profile check error:", profileError);
-          setNeedsProfile(true);
-          setSaveError(
-            profileError instanceof Error
-              ? profileError
-              : new Error("Error al verificar el perfil")
-          );
           toast({
             title: "Perfil incompleto",
             description:
@@ -253,9 +241,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       }, 500);
     } catch (error) {
       console.error("Error saving evaluation:", error);
-      setSaveError(
-        error instanceof Error ? error : new Error("Error desconocido")
-      );
       toast({
         title: "Error",
         description:
@@ -300,8 +285,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     setInterest(null);
     setEvaluationId(null);
     setIsSubmitting(false);
-    setSaveError(null);
-    setNeedsProfile(false);
     setLoadingMessage("Guardando resultados...");
     // Clear local storage for this quiz
     try {
@@ -309,37 +292,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     } catch (error) {
       console.error("Error clearing local storage:", error);
     }
-  };
-
-  // Function to redirect to profile page
-  const handleGoToProfile = () => {
-    router.push("/profile");
-  };
-
-  // Function to continue without saving
-  const handleContinueWithoutSaving = () => {
-    // Store results in localStorage so they can be viewed
-    try {
-      localStorage.setItem(
-        `quiz_results_${quizData.id}`,
-        JSON.stringify({
-          results,
-          timestamp: new Date().toISOString(),
-          quizId: quizData.id,
-        })
-      );
-
-      toast({
-        title: "Resultados guardados localmente",
-        description:
-          "Los resultados se han guardado en su navegador, pero no en su cuenta.",
-      });
-    } catch (error) {
-      console.error("Error saving results to localStorage:", error);
-    }
-
-    // Move to the results-ready stage
-    setStage("results-ready");
   };
 
   // If auth is still loading, show the security loading screen

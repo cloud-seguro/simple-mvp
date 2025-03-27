@@ -3,6 +3,15 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
+interface EvaluationMetadata {
+  interest?: {
+    areas: string[];
+    level: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 export async function GET() {
   try {
     // This endpoint requires authentication
@@ -52,7 +61,7 @@ export async function GET() {
     }
 
     // Extract the interest data from the evaluation metadata
-    const metadata = evaluationWithInterest.metadata as any;
+    const metadata = evaluationWithInterest.metadata as EvaluationMetadata;
     const interest = metadata.interest;
 
     // Return the interest data

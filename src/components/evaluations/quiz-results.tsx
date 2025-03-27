@@ -88,9 +88,7 @@ const getMaturityLevelInfo = (percentage: number): MaturityLevelInfo => {
 };
 
 const getColorIntensity = (percentage: number): string => {
-  // Base color is #FF8548
   // We'll keep the same hue but adjust opacity based on percentage
-  const baseColor = "#FF8548";
   const opacity = percentage / 100;
   return `rgba(255, 133, 72, ${opacity})`;
 };

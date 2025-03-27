@@ -514,7 +514,7 @@ export function CybersecurityResults({
                   {getInterestReasonText(interest.reason as InterestOption)}
                   {interest.reason === "other" && interest.otherReason && (
                     <span className="block mt-1 italic">
-                      "{interest.otherReason}"
+                      &ldquo;{interest.otherReason}&rdquo;
                     </span>
                   )}
                 </p>

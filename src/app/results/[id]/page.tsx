@@ -17,6 +17,15 @@ interface ResultsPageProps {
   params: Promise<{ id: string }>;
 }
 
+interface EvaluationMetadata {
+  interest?: {
+    areas: string[];
+    level: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 export async function generateMetadata({ params }: ResultsPageProps) {
   try {
     // Use Promise.resolve to ensure params is awaited
@@ -212,7 +221,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     let interestData = null;
     if (evaluation.metadata) {
       try {
-        const metadata = evaluation.metadata as any;
+        const metadata = evaluation.metadata as EvaluationMetadata;
         if (metadata.interest) {
           console.log("Interest data found in metadata:", metadata.interest);
           interestData = metadata.interest;

@@ -1,10 +1,4 @@
-import {
-  LayoutDashboard,
-  FileBarChart,
-  Settings,
-  UserCog,
-  Command,
-} from "lucide-react";
+import { LayoutDashboard, FileBarChart, Settings, Command } from "lucide-react";
 import type { SidebarData } from "../types";
 
 export const sidebarData: SidebarData = {
@@ -43,7 +37,7 @@ export const sidebarData: SidebarData = {
           title: "Ajustes",
           url: "/settings",
           icon: Settings,
-        }
+        },
       ],
     },
   ],

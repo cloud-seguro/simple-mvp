@@ -17,7 +17,6 @@ interface ComparePageProps {
   searchParams: Promise<{
     first?: string;
     second?: string;
-    type?: string;
   }>;
 }
 
@@ -28,7 +27,7 @@ export const metadata = {
 
 export default async function ComparePage({ searchParams }: ComparePageProps) {
   try {
-    const { first, second, type } = await searchParams;
+    const { first, second } = await searchParams;
 
     if (!first || !second) {
       return (

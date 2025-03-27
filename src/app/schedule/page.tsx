@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Specialist } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { CalendarDays, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SpecialistsRecommendations } from "@/components/evaluations/specialists-recommendations";

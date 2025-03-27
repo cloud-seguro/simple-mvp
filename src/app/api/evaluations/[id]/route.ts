@@ -3,6 +3,23 @@ import { getEvaluationById } from "@/lib/evaluation-utils";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
+interface EvaluationData {
+  id: string;
+  type: string;
+  title: string;
+  score: number | null;
+  createdAt: Date;
+  completedAt: Date | null;
+  answers: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  profile: {
+    firstName: string | null;
+    company: string | null;
+    [key: string]: unknown;
+  };
+  profileId: string;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -45,7 +62,7 @@ export async function GET(
       metadata,
       profile,
       profileId,
-    } = evaluation as any; // Use any to avoid type issues
+    } = evaluation as EvaluationData;
 
     // If the user is not authenticated, only return basic information
     if (!session?.user) {
