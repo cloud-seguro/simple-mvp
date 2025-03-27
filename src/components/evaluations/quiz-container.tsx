@@ -54,6 +54,15 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     null
   );
 
+  // Clear any stored results when the component mounts
+  useEffect(() => {
+    try {
+      localStorage.removeItem(`quiz_results_${quizData.id}`);
+    } catch (error) {
+      console.error("Error clearing local storage:", error);
+    }
+  }, [quizData.id]);
+
   useEffect(() => {
     setUserInfo({
       firstName: profile?.firstName || "Usuario",
@@ -62,129 +71,86 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     });
   }, [profile, user]);
 
-  // Check for locally stored results when the component mounts
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !loadedStoredResults.current &&
-      Object.keys(results).length === 0
-    ) {
-      try {
-        const storedResults = localStorage.getItem(
-          `quiz_results_${quizData.id}`
-        );
-        if (storedResults) {
-          const parsedResults = JSON.parse(storedResults);
-          // Only use stored results if we don't have any results yet
-          if (parsedResults.results) {
-            console.log("Found locally stored results:", parsedResults);
-            setResults(parsedResults.results);
-            loadedStoredResults.current = true;
-          }
-        }
-      } catch (error) {
-        console.error("Error reading stored results:", error);
-      }
-    }
-  }, [quizData.id, results]);
-
   const handleStart = () => {
+    // Clear any existing results when starting
+    setResults({});
+    setCurrentQuestionIndex(0);
     setStage("questions");
   };
 
   const handleSelect = (value: number) => {
     const questionId = quizData.questions[currentQuestionIndex].id;
-    console.log(`Setting answer for question ${questionId} to value ${value}`);
-
-    setResults((prev) => {
-      const newResults = {
-        ...prev,
-        [questionId]: value,
-      };
-
-      // Log the updated results for debugging
-      console.log("Updated results:", JSON.stringify(newResults));
-      return newResults;
-    });
+    setResults((prev) => ({
+      ...prev,
+      [questionId]: value,
+    }));
   };
 
   const handleNext = async () => {
     if (currentQuestionIndex < quizData.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // Ensure all questions have answers before submitting
-      const updatedResults = { ...results };
-      let missingAnswers = false;
+      // Set submitting state before checking interest
+      setIsSubmitting(true);
+      setLoadingMessage("Verificando datos previos...");
 
-      // Check for any missing answers and set default value of 0
-      for (const question of quizData.questions) {
-        if (updatedResults[question.id] === undefined) {
-          console.log(
-            `Question ${question.id} has no answer, setting default value 0`
-          );
-          updatedResults[question.id] = 0;
-          missingAnswers = true;
-        }
-      }
-
-      // Update results if any were missing
-      if (missingAnswers) {
-        setResults(updatedResults);
-      }
-
-      // If user is authenticated, check if they've already answered the interest question
-      if (user?.id) {
-        // First check if the user has already completed any evaluation before
-        try {
-          setIsSubmitting(true);
-          setLoadingMessage("Verificando datos previos...");
-
+      try {
+        // If user is authenticated, check if they've already answered the interest question
+        if (user?.id) {
           const response = await fetch("/api/evaluations/user-interest");
           if (response.ok) {
             const data = await response.json();
-
-            // If user has already answered the interest question, use their previous answer
             if (data.hasInterestData && data.interest) {
               setInterest(data.interest);
               // Skip interest stage and directly save the results
-              handleSaveResults();
-              setIsSubmitting(false);
+              await handleSaveResults();
               return;
             }
           }
-          setIsSubmitting(false);
-        } catch (error) {
-          console.error("Error checking previous interest data:", error);
-          setIsSubmitting(false);
         }
-      }
 
-      // Move to the interest stage if no previous interest data was found
-      setStage("interest");
+        // If no previous interest data was found or user is not authenticated
+        setIsSubmitting(false);
+        setStage("interest");
+      } catch (error) {
+        console.error("Error checking previous interest data:", error);
+        setIsSubmitting(false);
+        setStage("interest");
+      }
     }
   };
 
-  const handleInterestSubmit = (
+  const handleInterestSubmit = async (
     reason: InterestOption,
     otherReason?: string
   ) => {
+    setIsSubmitting(true);
+    setLoadingMessage("Guardando información...");
+
     // Save the interest information
     setInterest({
       reason,
       otherReason,
     });
 
-    // If user is already authenticated, skip sign-up and save results directly
-    if (user?.id) {
-      handleSaveResults();
-    } else {
-      // Otherwise, go to sign-up
-      setStage("sign-up");
+    try {
+      // If user is already authenticated, immediately save results
+      if (user?.id) {
+        await handleSaveResults();
+      } else {
+        // Otherwise, go to sign-up
+        setIsSubmitting(false);
+        setStage("sign-up");
+      }
+    } catch (error) {
+      console.error("Error in handleInterestSubmit:", error);
+      setIsSubmitting(false);
     }
   };
 
   const handleSaveResults = async () => {
     try {
+      // Keep or set submitting state
       setIsSubmitting(true);
       setSaveError(null);
       setNeedsProfile(false);
@@ -192,11 +158,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
 
       // Check if the user has a profile
       if (!profile) {
-        // Try to fetch the profile directly
         try {
           const profileResponse = await fetch(`/api/profile/${user?.id}`);
           if (!profileResponse.ok) {
-            // If the profile doesn't exist, show an error and redirect to profile creation
             setNeedsProfile(true);
             throw new Error(
               "No se encontró un perfil para este usuario. Por favor, complete su perfil primero."
@@ -225,19 +189,8 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       const evaluationType =
         quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
 
-      // Log information about the evaluation being saved
-      console.log("Preparing to save evaluation:", {
-        type: evaluationType,
-        quizId: quizData.id,
-        profileId: profile?.id,
-        answersCount: Object.keys(results).length,
-        interest: interest,
-      });
-
-      // Create a complete set of answers, ensuring all questions are included
+      // Create a complete set of answers with default values for any missing answers
       const completeAnswers = { ...results };
-
-      // Calculate the average value of existing answers
       const existingValues = Object.values(completeAnswers).filter(
         (v) => typeof v === "number"
       ) as number[];
@@ -247,35 +200,16 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
               existingValues.reduce((sum, val) => sum + val, 0) /
                 existingValues.length
             )
-          : 2; // Default to 2 if no values exist
+          : 2;
 
-      // Fill in any missing values with the average (should be rare, but just in case)
       quizData.questions.forEach((question) => {
         if (completeAnswers[question.id] === undefined) {
-          console.log(
-            `Setting missing answer for ${question.id} to average value ${averageValue}`
-          );
           completeAnswers[question.id] = averageValue;
         }
       });
 
-      // Try to save locally for backup and later offline review
-      try {
-        localStorage.setItem(
-          `quiz_results_${quizData.id}`,
-          JSON.stringify({
-            results: completeAnswers,
-            timestamp: new Date().toISOString(),
-          })
-        );
-        console.log("Saved results locally for offline backup");
-      } catch (saveError) {
-        console.error("Could not save results locally:", saveError);
-      }
-
       setLoadingMessage("Guardando resultados de evaluación...");
 
-      // Store evaluation results in the database
       const response = await fetch("/api/evaluations", {
         method: "POST",
         headers: {
@@ -289,7 +223,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
               : "Evaluación Avanzada",
           answers: completeAnswers,
           interest: interest,
-          userId: user?.id, // Include userId in the request
+          userId: user?.id,
         }),
       });
 
@@ -304,12 +238,24 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       const data = await response.json();
       setEvaluationId(data.evaluation.id);
 
+      // Clear local storage after successful save
+      try {
+        localStorage.removeItem(`quiz_results_${quizData.id}`);
+      } catch (error) {
+        console.error("Error clearing local storage:", error);
+      }
+
       toast({
         title: "Éxito",
         description: "Los resultados se han guardado correctamente.",
       });
 
+      // Keep loading state until we transition to results-ready
       setStage("results-ready");
+      // Only remove loading state after a short delay to ensure smooth transition
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 500);
     } catch (error) {
       console.error("Error saving evaluation:", error);
       setSaveError(
@@ -323,7 +269,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             : "Error al guardar los resultados de la evaluación",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -353,9 +298,22 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   };
 
   const handleRestart = () => {
+    // Reset all states to their initial values
     setResults({});
     setCurrentQuestionIndex(0);
     setStage("intro");
+    setInterest(null);
+    setEvaluationId(null);
+    setIsSubmitting(false);
+    setSaveError(null);
+    setNeedsProfile(false);
+    setLoadingMessage("Guardando resultados...");
+    // Clear local storage for this quiz
+    try {
+      localStorage.removeItem(`quiz_results_${quizData.id}`);
+    } catch (error) {
+      console.error("Error clearing local storage:", error);
+    }
   };
 
   // Function to redirect to profile page
