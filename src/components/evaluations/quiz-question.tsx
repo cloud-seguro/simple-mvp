@@ -115,7 +115,7 @@ export function QuizQuestion({
               ? "border-muted text-muted"
               : "border-primary text-primary hover:bg-secondary"
           }`}
-          aria-label="Previous question"
+          aria-label="Pregunta anterior"
         >
           ↑
         </button>
@@ -128,7 +128,7 @@ export function QuizQuestion({
               ? "border-muted text-muted"
               : "border-primary text-primary hover:bg-secondary"
           }`}
-          aria-label="Next question"
+          aria-label="Siguiente pregunta"
         >
           ↓
         </button>

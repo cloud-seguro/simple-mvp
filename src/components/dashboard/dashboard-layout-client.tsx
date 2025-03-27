@@ -7,7 +7,6 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import SkipToMain from "@/components/skip-to-main";
 import { Header } from "@/components/sidebar/header";
 import { Search } from "@/components/sidebar/search";
-import { ProfileDropdown } from "@/components/sidebar/profile-dropdown";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -34,7 +33,6 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
           <Header>
             <div className="ml-auto flex items-center space-x-4">
               <Search />
-              <ProfileDropdown />
             </div>
           </Header>
           <div className="flex-1 p-6">{children}</div>
@@ -42,4 +40,4 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       </SidebarProvider>
     </SearchProvider>
   );
-} 
+}

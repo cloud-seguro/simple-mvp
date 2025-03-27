@@ -6,8 +6,9 @@ import { SpecialistsClient } from "@/components/specialists/specialists-client";
 import { UserRole } from "@prisma/client";
 
 export const metadata = {
-  title: "Specialists Management | SIMPLE",
-  description: "Manage cybersecurity specialists for recommendations",
+  title: "Gestión de Especialistas | SIMPLE",
+  description:
+    "Gestiona los especialistas en ciberseguridad para recomendaciones",
 };
 
 export default async function SpecialistsPage() {

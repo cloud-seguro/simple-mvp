@@ -43,7 +43,7 @@ export function ResultsReady({
       : shareUrl || window.location.href;
 
     if (linkToShare) {
-      window.location.href = `mailto:?subject=Resultados de Evaluación de Ciberseguridad&body=Vea mis resultados aquí: ${linkToShare}`;
+      window.location.href = `mailto:?subject=Resultados de Evaluación de Ciberseguridad&body=Consulte mis resultados aquí: ${linkToShare}`;
     }
   };
 
@@ -67,7 +67,7 @@ export function ResultsReady({
           className="max-w-lg mx-auto space-y-8"
         >
           <h1 className="text-2xl md:text-4xl font-bold">
-            {userInfo.firstName}ooo, ¡Sus resultados están listos!
+            {userInfo.firstName}, ¡Sus resultados están listos!
           </h1>
           <p className="text-base md:text-lg text-gray-700">
             Hemos evaluado el nivel de madurez en ciberseguridad de su
