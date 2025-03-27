@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { prisma } from "@/lib/prisma";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
+import { Loader } from "@/components/ui/loader";
 import { EvaluationsList } from "./components/evaluations-list";
 import { CompareEvaluationsButton } from "./components/compare-evaluations-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -85,7 +86,12 @@ export default function EvaluationsPage() {
   return (
     <div className="container py-8">
       <Suspense
-        fallback={<SecurityLoadingScreen message="Cargando evaluaciones..." />}
+        fallback={
+          <div className="flex flex-col items-center justify-center gap-4">
+            <Loader size="lg" variant="primary" />
+            <SecurityLoadingScreen message="Cargando evaluaciones..." />
+          </div>
+        }
       >
         <EvaluationsContent />
       </Suspense>

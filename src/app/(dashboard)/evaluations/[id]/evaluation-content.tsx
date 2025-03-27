@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
 import { PDFExport } from "@/components/evaluations/pdf-export";
+import { Loader } from "@/components/ui/loader";
 import type { QuizData, UserInfo } from "@/components/evaluations/types";
 
 interface EvaluationData {
@@ -56,7 +57,12 @@ export function EvaluationContent({
   }, [id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader size="lg" variant="primary" />
+        <p className="text-muted-foreground">Cargando evaluación...</p>
+      </div>
+    );
   }
 
   if (error) {
