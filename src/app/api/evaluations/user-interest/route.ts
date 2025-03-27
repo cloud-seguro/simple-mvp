@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import type { InterestOption } from "@/components/evaluations/types";
 
 interface EvaluationMetadata {
   interest?: {
+    reason: InterestOption;
+    otherReason?: string;
     areas: string[];
     level: string;
     [key: string]: unknown;
@@ -45,7 +48,9 @@ export async function GET() {
         profileId: userProfile.id,
         metadata: {
           path: ["interest"],
-          not: null,
+          not: {
+            equals: null,
+          },
         },
       },
       orderBy: {

@@ -13,7 +13,7 @@ import type { UserInfo } from "@/components/evaluations/types";
 import { Badge } from "@/components/ui/badge";
 
 interface ComparePageProps {
-  params: Promise<Record<string, never>>;
+  params: Promise<{ id: string }>;
   searchParams: Promise<{
     first?: string;
     second?: string;

@@ -4,7 +4,11 @@ import { getEvaluationById } from "@/lib/evaluation-utils";
 import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { getQuizData } from "../../../lib/quiz-data";
-import type { UserInfo, QuizData } from "@/components/evaluations/types";
+import type {
+  UserInfo,
+  QuizData,
+  InterestOption,
+} from "@/components/evaluations/types";
 
 // Fallback quiz data in case the actual data is not found
 import { initialEvaluationData } from "@/data/initial-evaluation";
@@ -19,6 +23,8 @@ interface ResultsPageProps {
 
 interface EvaluationMetadata {
   interest?: {
+    reason: InterestOption;
+    otherReason?: string;
     areas: string[];
     level: string;
     [key: string]: unknown;

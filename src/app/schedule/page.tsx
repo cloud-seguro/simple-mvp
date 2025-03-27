@@ -1,12 +1,14 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SpecialistsRecommendations } from "@/components/evaluations/specialists-recommendations";
+import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
-export default function ScheduleSpecialist() {
+function ScheduleContent() {
   const searchParams = useSearchParams();
   const maturityLevel = parseInt(searchParams.get("level") || "1");
   const categories = searchParams.get("categories")?.split(",") || [];
@@ -99,5 +101,13 @@ export default function ScheduleSpecialist() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function SchedulePage() {
+  return (
+    <Suspense fallback={<SecurityLoadingScreen message="Cargando..." />}>
+      <ScheduleContent />
+    </Suspense>
   );
 }
