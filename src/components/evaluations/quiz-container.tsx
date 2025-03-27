@@ -5,7 +5,10 @@ import { useAuth } from "@/providers/auth-provider";
 import { QuizIntro } from "./quiz-intro";
 import { QuizQuestion } from "./quiz-question";
 import { ResultsReady } from "./results-ready";
-import { CybersecurityResults } from "./cybersecurity-results";
+import {
+  CybersecurityResults,
+  getMaturityLevel,
+} from "./cybersecurity-results";
 import { EvaluationSignUp } from "./evaluation-sign-up";
 import { CybersecurityInterest } from "./cybersecurity-interest";
 import type {
@@ -358,10 +361,48 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           <CybersecurityResults
             quizData={quizData}
             results={results}
-            userInfo={userInfo}
             onRestart={handleRestart}
-            interest={interest}
+            interest={interest?.reason as InterestOption}
             evaluationId={evaluationId || undefined}
+            isSharedView={false}
+            score={Object.values(results).reduce(
+              (sum, val) => sum + (val || 0),
+              0
+            )}
+            maxScore={quizData.questions.reduce(
+              (sum, q) => sum + Math.max(...q.options.map((o) => o.value)),
+              0
+            )}
+            maturityLevel={
+              getMaturityLevel(
+                quizData.id,
+                Object.values(results).reduce((sum, val) => sum + (val || 0), 0)
+              ).level
+            }
+            maturityDescription={
+              getMaturityLevel(
+                quizData.id,
+                Object.values(results).reduce((sum, val) => sum + (val || 0), 0)
+              ).description
+            }
+            categories={Object.entries(
+              quizData.questions.reduce(
+                (acc, q) => {
+                  const category = q.category || "General";
+                  if (!acc[category]) acc[category] = { score: 0, maxScore: 0 };
+                  acc[category].score += results[q.id] || 0;
+                  acc[category].maxScore += Math.max(
+                    ...q.options.map((o) => o.value)
+                  );
+                  return acc;
+                },
+                {} as Record<string, { score: number; maxScore: number }>
+              )
+            ).map(([name, { score, maxScore }]) => ({
+              name,
+              score,
+              maxScore,
+            }))}
           />
         </div>
       )}

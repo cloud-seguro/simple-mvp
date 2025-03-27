@@ -40,3 +40,24 @@ export type InterestOption =
   | "curiosity"
   | "requirement"
   | "other";
+
+export interface Category {
+  name: string;
+  score: number;
+  maxScore: number;
+}
+
+export interface CybersecurityResultsProps {
+  quizData: QuizData;
+  results: QuizResults;
+  userInfo: UserInfo;
+  onRestart: () => void;
+  isSharedView?: boolean;
+  interest?: InterestOption;
+  evaluationId?: string;
+  score: number;
+  maxScore: number;
+  maturityLevel: string;
+  maturityDescription: string;
+  categories: Category[];
+}

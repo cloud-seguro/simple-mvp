@@ -1,19 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type {
   QuizData,
   QuizResults,
-  UserInfo,
-  CybersecurityInterest as InterestType,
-  InterestOption,
+  Category,
+  CybersecurityResultsProps,
+  QuizQuestion,
+  QuizOption,
 } from "./types";
 import { SimpleHeader } from "@/components/ui/simple-header";
-import { cn } from "@/lib/utils";
-import { SpecialistsRecommendations } from "./specialists-recommendations";
-import Link from "next/link";
 
 interface MaturityLevel {
   level: string;
@@ -24,27 +20,8 @@ interface MaturityLevel {
   advice?: string;
 }
 
-interface CybersecurityResultsProps {
-  quizData: QuizData;
-  results: QuizResults;
-  userInfo: UserInfo;
-  onRestart?: () => void;
-  isSharedView?: boolean;
-  interest?: InterestType | null;
-  evaluationId?: string;
-}
-
-interface QuestionRecommendation {
-  score: number;
-  maxScore: number;
-  text: string;
-  selectedOption: string;
-  category: string;
-  recommendation: string;
-}
-
 // Determine maturity level based on quiz type and score
-function getMaturityLevel(quizId: string, score: number): MaturityLevel {
+export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
   if (quizId === "evaluacion-inicial") {
     // Initial evaluation tiers
     if (score <= 9) {
@@ -180,33 +157,15 @@ function getMaturityLevel(quizId: string, score: number): MaturityLevel {
   };
 }
 
-// Function to translate interest reason to Spanish
-function getInterestReasonText(reason: InterestOption): string {
-  switch (reason) {
-    case "process":
-      return "Estoy en un proceso de ciberseguridad en mi empresa";
-    case "nothing":
-      return "No tengo nada en mi empresa y quiero aumentar el nivel de madurez";
-    case "curiosity":
-      return "Tengo curiosidad y quiero aprender más sobre ciberseguridad";
-    case "requirement":
-      return "Me piden evaluar la ciberseguridad en mi organización";
-    case "other":
-      return "Otro motivo";
-    default:
-      return "No especificado";
-  }
-}
-
 export function CybersecurityResults({
   quizData,
   results,
-  userInfo,
   onRestart,
   isSharedView = false,
   interest,
-  evaluationId,
-}: CybersecurityResultsProps) {
+  maturityDescription,
+  categories,
+}: Omit<CybersecurityResultsProps, "userInfo">) {
   // Log the input data for debugging
   console.log(
     "CybersecurityResults - quizData:",
@@ -314,13 +273,13 @@ export function CybersecurityResults({
 
   // Check for missing questions
   const missingQuestions = quizData.questions.filter(
-    (question) => mappedResults[question.id] === undefined
+    (question: QuizQuestion) => mappedResults[question.id] === undefined
   );
 
   if (missingQuestions.length > 0) {
     console.log(
       "CybersecurityResults - Missing questions:",
-      missingQuestions.map((q) => q.id)
+      missingQuestions.map((q: QuizQuestion) => q.id)
     );
   }
 
@@ -347,7 +306,6 @@ export function CybersecurityResults({
 
   // Calculate scores by category and collect recommendations
   const categoryScores: Record<string, { total: number; max: number }> = {};
-  const recommendations: QuestionRecommendation[] = [];
 
   for (const question of quizData.questions) {
     const category = question.category || "General";
@@ -359,7 +317,7 @@ export function CybersecurityResults({
     }
 
     const maxScore = Math.max(
-      ...question.options.map((o) => {
+      ...question.options.map((o: QuizOption) => {
         if (!("value" in o)) {
           console.warn(
             `Option in question ${question.id} does not have a value property:`,
@@ -370,67 +328,12 @@ export function CybersecurityResults({
       })
     );
 
-    // Store the selected option for this question
-    const selectedOption = question.options.find((o) => o.value === score);
-
     if (!categoryScores[category]) {
       categoryScores[category] = { total: 0, max: 0 };
     }
 
     categoryScores[category].total += score;
     categoryScores[category].max += maxScore;
-
-    // Add recommendation based on score
-    if (selectedOption) {
-      const percentage = (score / maxScore) * 100;
-      let recommendation = "";
-
-      if (quizData.id === "evaluacion-inicial") {
-        if (percentage <= 20) {
-          recommendation =
-            "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
-        } else if (percentage <= 40) {
-          recommendation =
-            "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
-        } else if (percentage <= 60) {
-          recommendation =
-            "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
-        } else if (percentage <= 80) {
-          recommendation =
-            "Bien establecido. Continue monitoreando y mejorando los procesos.";
-        } else {
-          recommendation =
-            "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
-        }
-      } else {
-        if (percentage <= 20) {
-          recommendation =
-            "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
-        } else if (percentage <= 40) {
-          recommendation =
-            "Importante: Estandarice procesos y documente políticas de seguridad.";
-        } else if (percentage <= 60) {
-          recommendation =
-            "Moderado: Mejore la medición y optimización de controles existentes.";
-        } else if (percentage <= 80) {
-          recommendation =
-            "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
-        } else {
-          recommendation =
-            "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
-        }
-      }
-
-      recommendations.push({
-        score,
-        maxScore,
-        text: question.text,
-        selectedOption:
-          selectedOption.text || selectedOption.label || `Opción ${score}`,
-        category,
-        recommendation,
-      });
-    }
 
     // Log each question's score for debugging
     console.log(
@@ -443,393 +346,59 @@ export function CybersecurityResults({
     (sum, { total }) => sum + total,
     0
   );
-  const maxPossibleScore = Object.values(categoryScores).reduce(
-    (sum, { max }) => sum + max,
-    0
-  );
 
   // Get maturity level based on quiz type and score
   const maturity = getMaturityLevel(quizData.id, overallScore);
 
-  // Get category-specific maturity levels
-  const categoryMaturityLevels = Object.entries(categoryScores).map(
-    ([category, { total, max }]) => {
-      const categoryScore = total;
-      return {
-        category,
-        maturityLevel: getMaturityLevel(quizData.id, categoryScore),
-        total,
-        max,
-      };
-    }
-  );
-
-  // Extract categories for specialist recommendations - get the lowest scoring categories
-  const categoryScoresForSpecialists = Object.entries(categoryScores).map(
-    ([category, { total, max }]) => ({
-      category,
-      percentage: Math.round((total / max) * 100),
-    })
-  );
-
-  // Get the two lowest scoring categories (areas that need the most help)
-  const weakestCategories = [...categoryScoresForSpecialists]
-    .sort((a, b) => a.percentage - b.percentage)
-    .slice(0, 2)
-    .map((item) => item.category);
-
-  // Inside the CybersecurityResults component
-  // Need to extract the maturity level number (1-5) from maturity.level string
-  const maturityLevelNumber = parseInt(
-    maturity.level.split("–")[0].replace("Nivel ", "").trim(),
-    10
-  );
-
-  // Create the URL for the scheduling page with evaluation data
-  const scheduleUrl = `/schedule?level=${maturityLevelNumber}&categories=${weakestCategories.join(",")}${evaluationId ? `&evaluationId=${evaluationId}` : ""}`;
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {isSharedView && (
-        <header className="p-6 bg-white border-b shadow-sm">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">S</span>
+      {isSharedView && <SimpleHeader />}
+      <div className="flex-1 container mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white p-8 rounded-xl shadow-sm">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                Resultados de Evaluación
+              </h1>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-2xl">{maturity.emoji}</span>
+                <span className={`text-xl font-semibold ${maturity.color}`}>
+                  {maturity.level}
+                </span>
               </div>
-              <span className="text-xl font-bold text-gray-800">SIMPLE</span>
+              <p className="text-gray-600">{maturityDescription}</p>
+              {maturity.advice && (
+                <p className={`mt-2 ${maturity.color}`}>{maturity.advice}</p>
+              )}
             </div>
-            <div className="text-sm text-gray-500">
-              {new Date().toLocaleDateString("es-ES", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </div>
-          </div>
-        </header>
-      )}
-
-      <main className={cn("flex-grow", isSharedView ? "p-4 md:p-8" : "p-0")}>
-        <div className={cn("mx-auto", isSharedView ? "max-w-3xl" : "w-full")}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            {isSharedView && (
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-                <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gray-800">
-                  {userInfo.firstName}, aquí están sus resultados
-                </h1>
-                <p className="text-lg text-gray-600">
-                  Evaluación de Madurez en Ciberseguridad
-                </p>
-              </div>
-            )}
-
-            {interest && (
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="font-semibold text-gray-800 mb-3 text-lg">
-                  Tu interés en ciberseguridad
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {getInterestReasonText(interest.reason as InterestOption)}
-                  {interest.reason === "other" && interest.otherReason && (
-                    <span className="block mt-2 italic text-gray-600">
-                      &ldquo;{interest.otherReason}&rdquo;
-                    </span>
-                  )}
-                </p>
-              </div>
-            )}
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
-                Resumen General
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                  <p className="text-sm font-medium text-gray-600 mb-2">
-                    Puntuación Total
-                  </p>
-                  <p className={`text-4xl font-bold ${maturity.color}`}>
-                    {overallScore}/{maxPossibleScore}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {Math.round((overallScore / maxPossibleScore) * 100)}% de
-                    madurez
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                  <p className="text-sm font-medium text-gray-600 mb-2">
-                    Nivel de Madurez
-                  </p>
-                  <p
-                    className={`text-4xl font-bold ${maturity.color} flex items-center gap-3`}
-                  >
-                    <span>{maturity.emoji}</span>
-                    <span>{maturity.level}</span>
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {maturity.description}
-                  </p>
-                </div>
-              </div>
-              <div className="relative pt-1">
-                <div className="flex mb-2 items-center justify-between">
-                  <div>
-                    <span
-                      className={`${maturity.color} font-semibold inline-block py-1 px-2 uppercase rounded-full text-xs`}
-                    >
-                      PROGRESO
+            <div className="space-y-6">
+              {categories.map((category: Category) => (
+                <div key={category.name} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{category.name}</span>
+                    <span className="text-sm text-gray-500">
+                      {category.score}/{category.maxScore}
                     </span>
                   </div>
-                  <div className={`${maturity.color} text-right`}>
-                    <span className="text-xs font-semibold inline-block">
-                      {Math.round((overallScore / maxPossibleScore) * 100)}%
-                    </span>
-                  </div>
+                  <Progress
+                    value={(category.score / category.maxScore) * 100}
+                  />
                 </div>
-                <Progress
-                  value={Math.round((overallScore / maxPossibleScore) * 100)}
-                  className={cn(
-                    "h-2.5",
-                    maturity.color === "text-red-600" &&
-                      "bg-red-100 [&>div]:bg-red-600",
-                    maturity.color === "text-orange-600" &&
-                      "bg-orange-100 [&>div]:bg-orange-600",
-                    maturity.color === "text-yellow-600" &&
-                      "bg-yellow-100 [&>div]:bg-yellow-600",
-                    maturity.color === "text-green-600" &&
-                      "bg-green-100 [&>div]:bg-green-600",
-                    maturity.color === "text-blue-600" &&
-                      "bg-blue-100 [&>div]:bg-blue-600"
-                  )}
-                />
-              </div>
+              ))}
             </div>
-
-            <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">
-                Nivel de Madurez Actual
-              </h2>
-              <div
-                className={cn(
-                  "p-5 rounded-lg border",
-                  maturity.color.replace("text", "border")
-                )}
-              >
-                <p className={`${maturity.color} font-medium mb-4`}>
-                  {maturity.description}
-                </p>
-                {maturity.advice && (
-                  <>
-                    <h3 className={`font-semibold mt-4 mb-2 ${maturity.color}`}>
-                      Recomendación General
-                    </h3>
-                    <p className={`${maturity.color}`}>{maturity.advice}</p>
-                  </>
-                )}
-              </div>
-
-              {/* Call to Action Banner */}
-              <div
-                className={cn(
-                  "mt-6 p-6 rounded-xl text-white shadow-lg border transform hover:scale-[1.02] transition-all duration-300",
-                  maturity.color === "text-red-600" &&
-                    "bg-gradient-to-r from-red-500 to-red-600 border-red-300",
-                  maturity.color === "text-orange-600" &&
-                    "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-300",
-                  maturity.color === "text-yellow-600" &&
-                    "bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-300",
-                  maturity.color === "text-green-600" &&
-                    "bg-gradient-to-r from-green-500 to-green-600 border-green-300",
-                  maturity.color === "text-blue-600" &&
-                    "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-300"
-                )}
-              >
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <div className="flex-shrink-0 mb-4 md:mb-0">
-                    <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="flex-grow text-center md:text-left">
-                    <h3 className="text-xl font-bold mb-2">
-                      ¡Mejora tu nivel de ciberseguridad ahora!
-                    </h3>
-                    <p className="mb-2 max-w-lg">
-                      Nuestros especialistas pueden ayudarte a implementar las
-                      medidas necesarias para proteger tu organización de
-                      amenazas cibernéticas.
-                    </p>
-                    <div className="flex flex-wrap gap-2 justify-center md:justify-start text-sm font-medium mt-1 mb-3">
-                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                        Asesoría personalizada
-                      </span>
-                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                        Implementación de controles
-                      </span>
-                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                        Análisis de vulnerabilidades
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <Link href={scheduleUrl} className="inline-block">
-                      <Button
-                        className={cn(
-                          "bg-white px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center",
-                          maturity.color === "text-red-600" &&
-                            "text-red-600 hover:bg-red-50",
-                          maturity.color === "text-orange-600" &&
-                            "text-orange-600 hover:bg-orange-50",
-                          maturity.color === "text-yellow-600" &&
-                            "text-yellow-600 hover:bg-yellow-50",
-                          maturity.color === "text-green-600" &&
-                            "text-green-600 hover:bg-green-50",
-                          maturity.color === "text-blue-600" &&
-                            "text-blue-600 hover:bg-blue-50"
-                        )}
-                      >
-                        Agendar Especialista
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M5 12h14"></path>
-                          <path d="m12 5 7 7-7 7"></path>
-                        </svg>
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
-                Desglose por Categoría
-              </h2>
-              <div className="space-y-6">
-                {categoryMaturityLevels.map(({ category, total, max }) => {
-                  const percentage = Math.round((total / max) * 100);
-                  return (
-                    <div key={category} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-800">
-                          {category}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          {total}/{max} ({percentage}%)
-                        </span>
-                      </div>
-                      <Progress
-                        value={percentage}
-                        className={cn(
-                          "h-2.5",
-                          maturity.color === "text-red-600" &&
-                            "bg-red-100 [&>div]:bg-red-600",
-                          maturity.color === "text-orange-600" &&
-                            "bg-orange-100 [&>div]:bg-orange-600",
-                          maturity.color === "text-yellow-600" &&
-                            "bg-yellow-100 [&>div]:bg-yellow-600",
-                          maturity.color === "text-green-600" &&
-                            "bg-green-100 [&>div]:bg-green-600",
-                          maturity.color === "text-blue-600" &&
-                            "bg-blue-100 [&>div]:bg-blue-600"
-                        )}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
-                Recomendaciones Personalizadas
-              </h2>
-              <div className="space-y-6">
-                {recommendations.map((rec) => {
-                  const percentage = Math.round(
-                    (rec.score / rec.maxScore) * 100
-                  );
-                  return (
-                    <div
-                      key={`${rec.category}-${rec.text}`}
-                      className="bg-gray-50 p-6 rounded-xl border border-gray-200"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-medium text-gray-800 mb-1">
-                            {rec.question}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {rec.selectedOption}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-600">
-                            {rec.score}/{rec.maxScore}
-                          </p>
-                          <p className="text-sm text-gray-500">{percentage}%</p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-700">
-                          Recomendación:
-                        </p>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          {rec.recommendation}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <SpecialistsRecommendations
-                maturityLevel={maturityLevelNumber}
-                categories={weakestCategories}
-              />
-            </div>
-
             {!isSharedView && onRestart && (
-              <div className="flex justify-center mt-8">
-                <Button
+              <div className="mt-8 flex justify-center">
+                <button
                   onClick={onRestart}
-                  className={`${maturity.color.replace("text", "bg")} text-white hover:opacity-90 rounded-full px-8 py-6`}
+                  className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90"
                 >
                   Realizar otra evaluación
-                </Button>
+                </button>
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

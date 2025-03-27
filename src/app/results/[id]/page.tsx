@@ -1,14 +1,13 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getEvaluationById } from "@/lib/evaluation-utils";
-import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
+import {
+  CybersecurityResults,
+  getMaturityLevel,
+} from "@/components/evaluations/cybersecurity-results";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { getQuizData } from "../../../lib/quiz-data";
-import type {
-  UserInfo,
-  QuizData,
-  InterestOption,
-} from "@/components/evaluations/types";
+import type { InterestOption, QuizData } from "@/components/evaluations/types";
 
 // Fallback quiz data in case the actual data is not found
 import { initialEvaluationData } from "@/data/initial-evaluation";
@@ -87,13 +86,6 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           ? initialEvaluationData
           : advancedEvaluationData;
     }
-
-    // Prepare user info
-    const userInfo: UserInfo = {
-      firstName: evaluation.profile.firstName || "Usuario",
-      lastName: evaluation.profile.lastName || "",
-      email: evaluation.profile.email || "",
-    };
 
     // Ensure answers is a valid Record<string, number>
     const answers: Record<string, number> = {};
@@ -346,6 +338,33 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       Object.keys(finalAnswers).length === quizData.questions.length
     );
 
+    // Calculate scores
+    const totalScore = Object.values(finalAnswers).reduce(
+      (sum, val) => sum + (val || 0),
+      0
+    );
+    const maxScore = quizData.questions.reduce(
+      (sum, q) => sum + Math.max(...q.options.map((o) => o.value)),
+      0
+    );
+    const maturityInfo = getMaturityLevel(quizData.id, totalScore);
+    const categories = Object.entries(
+      quizData.questions.reduce(
+        (acc, q) => {
+          const category = q.category || "General";
+          if (!acc[category]) acc[category] = { score: 0, maxScore: 0 };
+          acc[category].score += finalAnswers[q.id] || 0;
+          acc[category].maxScore += Math.max(...q.options.map((o) => o.value));
+          return acc;
+        },
+        {} as Record<string, { score: number; maxScore: number }>
+      )
+    ).map(([name, { score, maxScore }]) => ({
+      name,
+      score,
+      maxScore,
+    }));
+
     return (
       <Suspense
         fallback={<SecurityLoadingScreen message="Cargando resultados..." />}
@@ -353,10 +372,15 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
         <CybersecurityResults
           quizData={quizData}
           results={finalAnswers}
-          userInfo={userInfo}
           isSharedView={true}
-          interest={interestData}
+          interest={interestData?.reason as InterestOption}
           evaluationId={id}
+          score={totalScore}
+          maxScore={maxScore}
+          maturityLevel={maturityInfo.level}
+          maturityDescription={maturityInfo.description}
+          categories={categories}
+          onRestart={() => {}} // Empty function since this is a shared view
         />
       </Suspense>
     );
