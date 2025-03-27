@@ -31,6 +31,7 @@ export function EvaluationContent({
   evaluation,
   quizData,
   answers,
+  userInfo,
 }: EvaluationContentProps) {
   const [data, setData] = useState<EvaluationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,6 +85,7 @@ export function EvaluationContent({
         categories={data.categories}
         quizData={quizData}
         results={answers}
+        userInfo={userInfo}
         onRestart={() => {}}
         isSharedView={false}
       />

@@ -10,7 +10,6 @@ import type {
   CybersecurityInterest as InterestType,
   InterestOption,
 } from "./types";
-import { SimpleHeader } from "@/components/ui/simple-header";
 import { cn } from "@/lib/utils";
 import { SpecialistsRecommendations } from "./specialists-recommendations";
 import Link from "next/link";
@@ -30,8 +29,17 @@ interface CybersecurityResultsProps {
   userInfo: UserInfo;
   onRestart?: () => void;
   isSharedView?: boolean;
-  interest?: InterestType | null;
+  interest?: InterestType | null | string;
   evaluationId?: string;
+  score?: number;
+  maxScore?: number;
+  maturityLevel?: string;
+  maturityDescription?: string;
+  categories?: Array<{
+    name: string;
+    score: number;
+    maxScore: number;
+  }>;
 }
 
 interface QuestionRecommendation {
@@ -44,7 +52,7 @@ interface QuestionRecommendation {
 }
 
 // Determine maturity level based on quiz type and score
-function getMaturityLevel(quizId: string, score: number): MaturityLevel {
+export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
   if (quizId === "evaluacion-inicial") {
     // Initial evaluation tiers
     if (score <= 9) {
@@ -206,6 +214,11 @@ export function CybersecurityResults({
   isSharedView = false,
   interest,
   evaluationId,
+  score,
+  maxScore,
+  maturityLevel,
+  maturityDescription,
+  categories,
 }: CybersecurityResultsProps) {
   // Log the input data for debugging
   console.log(
@@ -219,6 +232,10 @@ export function CybersecurityResults({
     Object.keys(results).length
   );
   console.log("CybersecurityResults - interest data:", interest);
+  console.log("CybersecurityResults - provided score:", score);
+  console.log("CybersecurityResults - provided maxScore:", maxScore);
+  console.log("CybersecurityResults - provided maturityLevel:", maturityLevel);
+  console.log("CybersecurityResults - provided categories:", categories);
 
   // Map the keys from the results to the keys in the evaluation data
   const mapResultsToQuizData = (
@@ -345,132 +362,187 @@ export function CybersecurityResults({
     Object.keys(processedResults).length === quizData.questions.length
   );
 
-  // Calculate scores by category and collect recommendations
-  const categoryScores: Record<string, { total: number; max: number }> = {};
-  const recommendations: QuestionRecommendation[] = [];
+  // Calculate scores by category and collect recommendations only if not provided
+  let categoryScores: Record<string, { total: number; max: number }> = {};
+  let recommendations: QuestionRecommendation[] = [];
+  let overallScore = score || 0;
+  let maxPossibleScore = maxScore || 0;
+  const maturity = maturityLevel
+    ? {
+        level: maturityLevel,
+        emoji: maturityLevel.includes("1")
+          ? "🔴"
+          : maturityLevel.includes("2")
+            ? "🟠"
+            : maturityLevel.includes("3")
+              ? "🟡"
+              : maturityLevel.includes("4")
+                ? "🟢"
+                : "🔵",
+        color: maturityLevel.includes("1")
+          ? "text-red-600"
+          : maturityLevel.includes("2")
+            ? "text-orange-600"
+            : maturityLevel.includes("3")
+              ? "text-yellow-600"
+              : maturityLevel.includes("4")
+                ? "text-green-600"
+                : "text-blue-600",
+        bgColor: maturityLevel.includes("1")
+          ? "bg-red-100"
+          : maturityLevel.includes("2")
+            ? "bg-orange-100"
+            : maturityLevel.includes("3")
+              ? "bg-yellow-100"
+              : maturityLevel.includes("4")
+                ? "bg-green-100"
+                : "bg-blue-100",
+        description: maturityDescription || "",
+      }
+    : getMaturityLevel(quizData.id, overallScore);
 
-  for (const question of quizData.questions) {
-    const category = question.category || "General";
-    const score = processedResults[question.id] || 0;
+  // If categories are not provided, calculate them from the quiz results
+  if (!categories) {
+    categoryScores = {};
+    recommendations = [];
 
-    // Log if the question ID is not found in results
-    if (processedResults[question.id] === undefined) {
-      console.warn(`Question ID ${question.id} not found in results`);
-    }
+    for (const question of quizData.questions) {
+      const category = question.category || "General";
+      const questionScore = processedResults[question.id] || 0;
 
-    const maxScore = Math.max(
-      ...question.options.map((o) => {
-        if (!("value" in o)) {
-          console.warn(
-            `Option in question ${question.id} does not have a value property:`,
-            o
-          );
-        }
-        return o.value;
-      })
-    );
-
-    // Store the selected option for this question
-    const selectedOption = question.options.find((o) => o.value === score);
-
-    if (!categoryScores[category]) {
-      categoryScores[category] = { total: 0, max: 0 };
-    }
-
-    categoryScores[category].total += score;
-    categoryScores[category].max += maxScore;
-
-    // Add recommendation based on score
-    if (selectedOption) {
-      const percentage = (score / maxScore) * 100;
-      let recommendation = "";
-
-      if (quizData.id === "evaluacion-inicial") {
-        if (percentage <= 20) {
-          recommendation =
-            "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
-        } else if (percentage <= 40) {
-          recommendation =
-            "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
-        } else if (percentage <= 60) {
-          recommendation =
-            "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
-        } else if (percentage <= 80) {
-          recommendation =
-            "Bien establecido. Continue monitoreando y mejorando los procesos.";
-        } else {
-          recommendation =
-            "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
-        }
-      } else {
-        if (percentage <= 20) {
-          recommendation =
-            "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
-        } else if (percentage <= 40) {
-          recommendation =
-            "Importante: Estandarice procesos y documente políticas de seguridad.";
-        } else if (percentage <= 60) {
-          recommendation =
-            "Moderado: Mejore la medición y optimización de controles existentes.";
-        } else if (percentage <= 80) {
-          recommendation =
-            "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
-        } else {
-          recommendation =
-            "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
-        }
+      // Log if the question ID is not found in results
+      if (processedResults[question.id] === undefined) {
+        console.warn(`Question ID ${question.id} not found in results`);
       }
 
-      recommendations.push({
-        score,
-        maxScore,
-        text: question.text,
-        selectedOption:
-          selectedOption.text || selectedOption.label || `Opción ${score}`,
-        category,
-        recommendation,
-      });
+      const maxScore = Math.max(
+        ...question.options.map((o) => {
+          if (!("value" in o)) {
+            console.warn(
+              `Option in question ${question.id} does not have a value property:`,
+              o
+            );
+          }
+          return o.value;
+        })
+      );
+
+      // Store the selected option for this question
+      const selectedOption = question.options.find(
+        (o) => o.value === questionScore
+      );
+
+      if (!categoryScores[category]) {
+        categoryScores[category] = { total: 0, max: 0 };
+      }
+
+      categoryScores[category].total += questionScore;
+      categoryScores[category].max += maxScore;
+
+      // Add recommendation based on score
+      if (selectedOption) {
+        const percentage = (questionScore / maxScore) * 100;
+        let recommendation = "";
+
+        if (quizData.id === "evaluacion-inicial") {
+          if (percentage <= 20) {
+            recommendation =
+              "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
+          } else if (percentage <= 40) {
+            recommendation =
+              "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
+          } else if (percentage <= 60) {
+            recommendation =
+              "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
+          } else if (percentage <= 80) {
+            recommendation =
+              "Bien establecido. Continue monitoreando y mejorando los procesos.";
+          } else {
+            recommendation =
+              "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
+          }
+        } else {
+          if (percentage <= 20) {
+            recommendation =
+              "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
+          } else if (percentage <= 40) {
+            recommendation =
+              "Importante: Estandarice procesos y documente políticas de seguridad.";
+          } else if (percentage <= 60) {
+            recommendation =
+              "Moderado: Mejore la medición y optimización de controles existentes.";
+          } else if (percentage <= 80) {
+            recommendation =
+              "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
+          } else {
+            recommendation =
+              "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
+          }
+        }
+
+        recommendations.push({
+          score: questionScore,
+          maxScore,
+          text: question.text,
+          selectedOption:
+            selectedOption.text ||
+            selectedOption.label ||
+            `Opción ${questionScore}`,
+          category,
+          recommendation,
+        });
+      }
+
+      // Log each question's score for debugging
+      console.log(
+        `Question ${question.id} (${category}): score=${questionScore}, maxScore=${maxScore}`
+      );
     }
 
-    // Log each question's score for debugging
-    console.log(
-      `Question ${question.id} (${category}): score=${score}, maxScore=${maxScore}`
+    // Calculate overall score
+    overallScore = Object.values(categoryScores).reduce(
+      (sum, { total }) => sum + total,
+      0
+    );
+    maxPossibleScore = Object.values(categoryScores).reduce(
+      (sum, { max }) => sum + max,
+      0
     );
   }
 
-  // Calculate overall score
-  const overallScore = Object.values(categoryScores).reduce(
-    (sum, { total }) => sum + total,
-    0
-  );
-  const maxPossibleScore = Object.values(categoryScores).reduce(
-    (sum, { max }) => sum + max,
-    0
-  );
-
-  // Get maturity level based on quiz type and score
-  const maturity = getMaturityLevel(quizData.id, overallScore);
-
   // Get category-specific maturity levels
-  const categoryMaturityLevels = Object.entries(categoryScores).map(
-    ([category, { total, max }]) => {
-      const categoryScore = total;
-      return {
-        category,
-        maturityLevel: getMaturityLevel(quizData.id, categoryScore),
-        total,
-        max,
-      };
-    }
-  );
+  let categoryMaturityLevels;
+  if (categories) {
+    categoryMaturityLevels = categories.map(({ name, score, maxScore }) => ({
+      category: name,
+      maturityLevel: getMaturityLevel(quizData.id, score),
+      total: score,
+      max: maxScore,
+    }));
+  } else {
+    categoryMaturityLevels = Object.entries(categoryScores).map(
+      ([category, { total, max }]) => {
+        const categoryScore = total;
+        return {
+          category,
+          maturityLevel: getMaturityLevel(quizData.id, categoryScore),
+          total,
+          max,
+        };
+      }
+    );
+  }
 
   // Extract categories for specialist recommendations - get the lowest scoring categories
-  const categoryScoresForSpecialists = Object.entries(categoryScores).map(
-    ([category, { total, max }]) => ({
-      category,
-      percentage: Math.round((total / max) * 100),
-    })
-  );
+  const categoryScoresForSpecialists = categories
+    ? categories.map(({ name, score, maxScore }) => ({
+        category: name,
+        percentage: Math.round((score / maxScore) * 100),
+      }))
+    : Object.entries(categoryScores).map(([category, { total, max }]) => ({
+        category,
+        percentage: Math.round((total / max) * 100),
+      }));
 
   // Get the two lowest scoring categories (areas that need the most help)
   const weakestCategories = [...categoryScoresForSpecialists]
@@ -534,12 +606,22 @@ export function CybersecurityResults({
                   Tu interés en ciberseguridad
                 </h3>
                 <p className="text-gray-700 leading-relaxed">
-                  {getInterestReasonText(interest.reason as InterestOption)}
-                  {interest.reason === "other" && interest.otherReason && (
-                    <span className="block mt-2 italic text-gray-600">
-                      &ldquo;{interest.otherReason}&rdquo;
-                    </span>
-                  )}
+                  {typeof interest === "string"
+                    ? getInterestReasonText(interest as InterestOption)
+                    : interest &&
+                        typeof interest === "object" &&
+                        "reason" in interest
+                      ? getInterestReasonText(interest.reason as InterestOption)
+                      : "No especificado"}
+                  {typeof interest === "object" &&
+                    interest !== null &&
+                    "reason" in interest &&
+                    interest.reason === "other" &&
+                    interest.otherReason && (
+                      <span className="block mt-2 italic text-gray-600">
+                        &ldquo;{interest.otherReason}&rdquo;
+                      </span>
+                    )}
                 </p>
               </div>
             )}
@@ -783,7 +865,7 @@ export function CybersecurityResults({
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="font-medium text-gray-800 mb-1">
-                            {rec.question}
+                            {rec.text}
                           </h3>
                           <p className="text-sm text-gray-600">
                             {rec.selectedOption}

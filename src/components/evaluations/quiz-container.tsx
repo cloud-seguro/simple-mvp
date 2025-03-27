@@ -361,6 +361,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           <CybersecurityResults
             quizData={quizData}
             results={results}
+            userInfo={userInfo}
             onRestart={handleRestart}
             interest={interest?.reason as InterestOption}
             evaluationId={evaluationId || undefined}

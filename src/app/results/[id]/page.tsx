@@ -229,6 +229,15 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       }
     }
 
+    // Create userInfo from the evaluation's profile
+    const userInfo = {
+      firstName: evaluation.profile?.firstName || "Usuario",
+      lastName: evaluation.profile?.lastName || "",
+      email: evaluation.profile?.email || "usuario@example.com",
+      company: evaluation.profile?.company || "",
+      company_role: evaluation.profile?.company_role || "",
+    };
+
     // Map the keys from the results to the keys in the evaluation data
     const mapResultsToQuizData = (
       results: Record<string, number>,
@@ -380,6 +389,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           maturityLevel={maturityInfo.level}
           maturityDescription={maturityInfo.description}
           categories={categories}
+          userInfo={userInfo}
           onRestart={() => {}} // Empty function since this is a shared view
         />
       </Suspense>
