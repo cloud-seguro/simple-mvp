@@ -90,30 +90,16 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     if (currentQuestionIndex < quizData.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // Set submitting state before checking interest
+      // Set submitting state before showing interest question
       setIsSubmitting(true);
-      setLoadingMessage("Verificando datos previos...");
+      setLoadingMessage("Preparando siguiente paso...");
 
       try {
-        // If user is authenticated, check if they've already answered the interest question
-        if (user?.id) {
-          const response = await fetch("/api/evaluations/user-interest");
-          if (response.ok) {
-            const data = await response.json();
-            if (data.hasInterestData && data.interest) {
-              setInterest(data.interest);
-              // Skip interest stage and directly save the results
-              await handleSaveResults();
-              return;
-            }
-          }
-        }
-
-        // If no previous interest data was found or user is not authenticated
+        // Always show the interest question
         setIsSubmitting(false);
         setStage("interest");
       } catch (error) {
-        console.error("Error checking previous interest data:", error);
+        console.error("Error preparing interest question:", error);
         setIsSubmitting(false);
         setStage("interest");
       }
@@ -127,28 +113,27 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     setIsSubmitting(true);
     setLoadingMessage("Guardando información...");
 
-    // Save the interest information
-    setInterest({
+    // Create the interest data object
+    const interestData = {
       reason,
       otherReason,
-    });
+    };
+
+    // Update the state
+    setInterest(interestData);
 
     try {
-      // If user is already authenticated, immediately save results
-      if (user?.id) {
-        await handleSaveResults();
-      } else {
-        // Otherwise, go to sign-up
-        setIsSubmitting(false);
-        setStage("sign-up");
-      }
+      // Pass the interest data directly to handleSaveResults
+      await handleSaveResults(interestData);
     } catch (error) {
       console.error("Error in handleInterestSubmit:", error);
       setIsSubmitting(false);
     }
   };
 
-  const handleSaveResults = async () => {
+  const handleSaveResults = async (
+    interestData?: CybersecurityInterestType
+  ) => {
     try {
       // Keep or set submitting state
       setIsSubmitting(true);
@@ -210,6 +195,16 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
 
       setLoadingMessage("Guardando resultados de evaluación...");
 
+      // Use the passed interest data or fall back to the state
+      const finalInterestData = interestData || interest;
+
+      // Ensure we have interest data
+      if (!finalInterestData) {
+        throw new Error(
+          "Se requiere información sobre el interés en la evaluación"
+        );
+      }
+
       const response = await fetch("/api/evaluations", {
         method: "POST",
         headers: {
@@ -222,7 +217,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
               ? "Evaluación Inicial"
               : "Evaluación Avanzada",
           answers: completeAnswers,
-          interest: interest,
+          interest: finalInterestData,
           userId: user?.id,
         }),
       });

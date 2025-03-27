@@ -70,6 +70,18 @@ export async function createEvaluation(data: {
     throw new Error("Evaluation answers are required and cannot be empty");
   }
 
+  // Validate interest data if provided
+  if (data.interest) {
+    if (!data.interest.reason) {
+      throw new Error(
+        "Interest reason is required when interest data is provided"
+      );
+    }
+    if (data.interest.reason === "other" && !data.interest.otherReason) {
+      throw new Error("Other reason is required when reason is 'other'");
+    }
+  }
+
   // Validate that advanced evaluations require PREMIUM or SUPERADMIN role
   // Temporarily disabled premium requirement for advanced evaluations
   if (data.type === "ADVANCED") {

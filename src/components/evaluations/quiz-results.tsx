@@ -86,6 +86,14 @@ const getMaturityLevelInfo = (percentage: number): MaturityLevelInfo => {
   }
 };
 
+const getColorIntensity = (percentage: number): string => {
+  // Base color is #FF8548
+  // We'll keep the same hue but adjust opacity based on percentage
+  const baseColor = "#FF8548";
+  const opacity = percentage / 100;
+  return `rgba(255, 133, 72, ${opacity})`;
+};
+
 export function QuizResults({
   quizData,
   results,
@@ -137,7 +145,10 @@ export function QuizResults({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="p-8 bg-[#FF8548]">
+      <header
+        className="p-8 transition-colors duration-300"
+        style={{ backgroundColor: getColorIntensity(100) }}
+      >
         <h1 className="text-2xl font-bold text-white">SIMPLE</h1>
       </header>
 
@@ -154,14 +165,20 @@ export function QuizResults({
             </h2>
             <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
               <div
-                className="bg-[#FF8548] h-4 rounded-full"
-                style={{ width: `${overallPercentage}%` }}
+                className="h-4 rounded-full transition-colors duration-300"
+                style={{
+                  width: `${overallPercentage}%`,
+                  backgroundColor: getColorIntensity(overallPercentage),
+                }}
               />
             </div>
 
             {/* Maturity Level Information */}
             <div className="bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200">
-              <h3 className="text-xl font-bold mb-2 text-[#FF8548]">
+              <h3
+                className="text-xl font-bold mb-2 transition-colors duration-300"
+                style={{ color: getColorIntensity(100) }}
+              >
                 {maturityInfo.title}
               </h3>
               <p className="text-gray-600 mb-4">{maturityInfo.description}</p>
@@ -170,7 +187,10 @@ export function QuizResults({
                 <p className="text-gray-700 mb-4">{maturityInfo.advice}</p>
                 <Link
                   href="/contact"
-                  className="inline-block bg-[#FF8548] text-white font-semibold px-6 py-3 rounded-full hover:bg-[#e67a41] transition-colors"
+                  className="inline-block text-white font-semibold px-6 py-3 rounded-full transition-colors hover:opacity-90"
+                  style={{
+                    backgroundColor: getColorIntensity(100),
+                  }}
                 >
                   {maturityInfo.actionText}
                 </Link>
@@ -194,8 +214,11 @@ export function QuizResults({
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-[#FF8548] h-2 rounded-full"
-                          style={{ width: `${percentage}%` }}
+                          className="h-2 rounded-full transition-colors duration-300"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: getColorIntensity(percentage),
+                          }}
                         />
                       </div>
                     </div>
