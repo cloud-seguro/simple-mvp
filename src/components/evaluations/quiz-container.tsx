@@ -386,6 +386,68 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
                 Object.values(results).reduce((sum, val) => sum + (val || 0), 0)
               ).description
             }
+            recommendations={quizData.questions.map((question) => {
+              const category = question.category || "General";
+              const questionScore = results[question.id] || 0;
+              const maxScore = Math.max(
+                ...question.options.map((o) => o.value)
+              );
+              const selectedOption = question.options.find(
+                (o) => o.value === questionScore
+              );
+
+              const percentage = (questionScore / maxScore) * 100;
+              let recommendation = "";
+
+              if (quizData.id === "evaluacion-inicial") {
+                if (percentage <= 20) {
+                  recommendation =
+                    "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
+                } else if (percentage <= 40) {
+                  recommendation =
+                    "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
+                } else if (percentage <= 60) {
+                  recommendation =
+                    "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
+                } else if (percentage <= 80) {
+                  recommendation =
+                    "Bien establecido. Continue monitoreando y mejorando los procesos.";
+                } else {
+                  recommendation =
+                    "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
+                }
+              } else {
+                if (percentage <= 20) {
+                  recommendation =
+                    "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
+                } else if (percentage <= 40) {
+                  recommendation =
+                    "Importante: Estandarice procesos y documente políticas de seguridad.";
+                } else if (percentage <= 60) {
+                  recommendation =
+                    "Moderado: Mejore la medición y optimización de controles existentes.";
+                } else if (percentage <= 80) {
+                  recommendation =
+                    "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
+                } else {
+                  recommendation =
+                    "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
+                }
+              }
+
+              return {
+                score: questionScore,
+                maxScore: maxScore,
+                text: question.text,
+                selectedOption: selectedOption
+                  ? selectedOption.text ||
+                    selectedOption.label ||
+                    `Opción ${questionScore}`
+                  : `Opción ${questionScore}`,
+                category: category,
+                recommendation: recommendation,
+              };
+            })}
             categories={Object.entries(
               quizData.questions.reduce(
                 (acc, q) => {
@@ -404,6 +466,37 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
               score,
               maxScore,
             }))}
+            weakestCategories={Object.entries(
+              quizData.questions.reduce(
+                (acc, q) => {
+                  const category = q.category || "General";
+                  if (!acc[category]) acc[category] = { score: 0, maxScore: 0 };
+                  acc[category].score += results[q.id] || 0;
+                  acc[category].maxScore += Math.max(
+                    ...q.options.map((o) => o.value)
+                  );
+                  return acc;
+                },
+                {} as Record<string, { score: number; maxScore: number }>
+              )
+            )
+              .map(([name, { score, maxScore }]) => ({
+                category: name,
+                percentage: Math.round((score / maxScore) * 100),
+              }))
+              .sort((a, b) => a.percentage - b.percentage)
+              .slice(0, 2)
+              .map((item) => item.category)}
+            maturityLevelNumber={parseInt(
+              getMaturityLevel(
+                quizData.id,
+                Object.values(results).reduce((sum, val) => sum + (val || 0), 0)
+              )
+                .level.split("–")[0]
+                .replace("Nivel ", "")
+                .trim(),
+              10
+            )}
           />
         </div>
       )}

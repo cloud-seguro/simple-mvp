@@ -35,6 +35,16 @@ interface CybersecurityResultsProps {
   maxScore?: number;
   maturityLevel?: string;
   maturityDescription?: string;
+  maturityLevelNumber?: number;
+  weakestCategories?: string[];
+  recommendations?: Array<{
+    score: number;
+    maxScore: number;
+    text: string;
+    selectedOption: string;
+    category: string;
+    recommendation: string;
+  }>;
   categories?: Array<{
     name: string;
     score: number;
@@ -218,6 +228,9 @@ export function CybersecurityResults({
   maxScore,
   maturityLevel,
   maturityDescription,
+  maturityLevelNumber,
+  weakestCategories,
+  recommendations: providedRecommendations,
   categories,
 }: CybersecurityResultsProps) {
   // Log the input data for debugging
@@ -364,7 +377,7 @@ export function CybersecurityResults({
 
   // Calculate scores by category and collect recommendations only if not provided
   let categoryScores: Record<string, { total: number; max: number }> = {};
-  let recommendations: QuestionRecommendation[] = [];
+  let recommendations: QuestionRecommendation[] = providedRecommendations || [];
   let overallScore = score || 0;
   let maxPossibleScore = maxScore || 0;
   const maturity = maturityLevel
@@ -404,7 +417,11 @@ export function CybersecurityResults({
   // If categories are not provided, calculate them from the quiz results
   if (!categories) {
     categoryScores = {};
-    recommendations = [];
+
+    // Only calculate recommendations if they weren't provided
+    if (!providedRecommendations) {
+      recommendations = [];
+    }
 
     for (const question of quizData.questions) {
       const category = question.category || "General";
@@ -427,11 +444,6 @@ export function CybersecurityResults({
         })
       );
 
-      // Store the selected option for this question
-      const selectedOption = question.options.find(
-        (o) => o.value === questionScore
-      );
-
       if (!categoryScores[category]) {
         categoryScores[category] = { total: 0, max: 0 };
       }
@@ -439,58 +451,65 @@ export function CybersecurityResults({
       categoryScores[category].total += questionScore;
       categoryScores[category].max += maxScore;
 
-      // Add recommendation based on score
-      if (selectedOption) {
-        const percentage = (questionScore / maxScore) * 100;
-        let recommendation = "";
+      // Add recommendation based on score only if recommendations weren't provided
+      if (!providedRecommendations) {
+        // Store the selected option for this question
+        const selectedOption = question.options.find(
+          (o) => o.value === questionScore
+        );
 
-        if (quizData.id === "evaluacion-inicial") {
-          if (percentage <= 20) {
-            recommendation =
-              "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
-          } else if (percentage <= 40) {
-            recommendation =
-              "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
-          } else if (percentage <= 60) {
-            recommendation =
-              "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
-          } else if (percentage <= 80) {
-            recommendation =
-              "Bien establecido. Continue monitoreando y mejorando los procesos.";
+        if (selectedOption) {
+          const percentage = (questionScore / maxScore) * 100;
+          let recommendation = "";
+
+          if (quizData.id === "evaluacion-inicial") {
+            if (percentage <= 20) {
+              recommendation =
+                "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
+            } else if (percentage <= 40) {
+              recommendation =
+                "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
+            } else if (percentage <= 60) {
+              recommendation =
+                "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
+            } else if (percentage <= 80) {
+              recommendation =
+                "Bien establecido. Continue monitoreando y mejorando los procesos.";
+            } else {
+              recommendation =
+                "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
+            }
           } else {
-            recommendation =
-              "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
+            if (percentage <= 20) {
+              recommendation =
+                "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
+            } else if (percentage <= 40) {
+              recommendation =
+                "Importante: Estandarice procesos y documente políticas de seguridad.";
+            } else if (percentage <= 60) {
+              recommendation =
+                "Moderado: Mejore la medición y optimización de controles existentes.";
+            } else if (percentage <= 80) {
+              recommendation =
+                "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
+            } else {
+              recommendation =
+                "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
+            }
           }
-        } else {
-          if (percentage <= 20) {
-            recommendation =
-              "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
-          } else if (percentage <= 40) {
-            recommendation =
-              "Importante: Estandarice procesos y documente políticas de seguridad.";
-          } else if (percentage <= 60) {
-            recommendation =
-              "Moderado: Mejore la medición y optimización de controles existentes.";
-          } else if (percentage <= 80) {
-            recommendation =
-              "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
-          } else {
-            recommendation =
-              "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
-          }
+
+          recommendations.push({
+            score: questionScore,
+            maxScore,
+            text: question.text,
+            selectedOption:
+              selectedOption.text ||
+              selectedOption.label ||
+              `Opción ${questionScore}`,
+            category,
+            recommendation,
+          });
         }
-
-        recommendations.push({
-          score: questionScore,
-          maxScore,
-          text: question.text,
-          selectedOption:
-            selectedOption.text ||
-            selectedOption.label ||
-            `Opción ${questionScore}`,
-          category,
-          recommendation,
-        });
       }
 
       // Log each question's score for debugging
@@ -545,20 +564,67 @@ export function CybersecurityResults({
       }));
 
   // Get the two lowest scoring categories (areas that need the most help)
-  const weakestCategories = [...categoryScoresForSpecialists]
+  const calculatedWeakestCategories = [...categoryScoresForSpecialists]
     .sort((a, b) => a.percentage - b.percentage)
     .slice(0, 2)
     .map((item) => item.category);
 
+  // Use the provided weakest categories if available, otherwise use the calculated ones
+  const finalWeakestCategories =
+    weakestCategories || calculatedWeakestCategories;
+
   // Inside the CybersecurityResults component
-  // Need to extract the maturity level number (1-5) from maturity.level string
-  const maturityLevelNumber = parseInt(
-    maturity.level.split("–")[0].replace("Nivel ", "").trim(),
-    10
-  );
+  // Extract the maturity level number (1-5) if it's not already provided
+  const finalMaturityLevelNumber =
+    maturityLevelNumber ||
+    parseInt(maturity.level.split("–")[0].replace("Nivel ", "").trim(), 10);
 
   // Create the URL for the scheduling page with evaluation data
-  const scheduleUrl = `/schedule?level=${maturityLevelNumber}&categories=${weakestCategories.join(",")}${evaluationId ? `&evaluationId=${evaluationId}` : ""}`;
+  const scheduleUrl = `/schedule?level=${finalMaturityLevelNumber}&categories=${finalWeakestCategories.join(",")}${evaluationId ? `&evaluationId=${evaluationId}` : ""}`;
+
+  // Calculate overall percentage early in the component
+  // After maturity is defined, add an overall percentage calculation for use with colors
+  const overallPercentage = Math.round((overallScore / maxPossibleScore) * 100);
+
+  // Define color helper function
+  const getColorByPercentage = (percentage: number) => {
+    if (percentage <= 20)
+      return {
+        color: "text-red-600",
+        bg: "bg-red-600",
+        bgLight: "bg-red-100",
+        emoji: "🔴",
+      };
+    if (percentage <= 40)
+      return {
+        color: "text-orange-600",
+        bg: "bg-orange-600",
+        bgLight: "bg-orange-100",
+        emoji: "🟠",
+      };
+    if (percentage <= 60)
+      return {
+        color: "text-yellow-600",
+        bg: "bg-yellow-600",
+        bgLight: "bg-yellow-100",
+        emoji: "🟡",
+      };
+    if (percentage <= 80)
+      return {
+        color: "text-green-600",
+        bg: "bg-green-600",
+        bgLight: "bg-green-100",
+        emoji: "🟢",
+      };
+    return {
+      color: "text-blue-600",
+      bg: "bg-blue-600",
+      bgLight: "bg-blue-100",
+      emoji: "🔵",
+    };
+  };
+
+  const scoreColor = getColorByPercentage(overallPercentage);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -635,12 +701,11 @@ export function CybersecurityResults({
                   <p className="text-sm font-medium text-gray-600 mb-2">
                     Puntuación Total
                   </p>
-                  <p className={`text-4xl font-bold ${maturity.color}`}>
+                  <p className={`text-4xl font-bold ${scoreColor.color}`}>
                     {overallScore}/{maxPossibleScore}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    {Math.round((overallScore / maxPossibleScore) * 100)}% de
-                    madurez
+                    {overallPercentage}% de madurez
                   </p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -648,9 +713,9 @@ export function CybersecurityResults({
                     Nivel de Madurez
                   </p>
                   <p
-                    className={`text-4xl font-bold ${maturity.color} flex items-center gap-3`}
+                    className={`text-4xl font-bold ${scoreColor.color} flex items-center gap-3`}
                   >
-                    <span>{maturity.emoji}</span>
+                    <span>{scoreColor.emoji}</span>
                     <span>{maturity.level}</span>
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -662,31 +727,30 @@ export function CybersecurityResults({
                 <div className="flex mb-2 items-center justify-between">
                   <div>
                     <span
-                      className={`${maturity.color} font-semibold inline-block py-1 px-2 uppercase rounded-full text-xs`}
+                      className={`${scoreColor.color} font-semibold inline-block py-1 px-2 uppercase rounded-full text-xs`}
                     >
                       PROGRESO
                     </span>
                   </div>
-                  <div className={`${maturity.color} text-right`}>
+                  <div className={`${scoreColor.color} text-right`}>
                     <span className="text-xs font-semibold inline-block">
-                      {Math.round((overallScore / maxPossibleScore) * 100)}%
+                      {overallPercentage}%
                     </span>
                   </div>
                 </div>
                 <Progress
-                  value={Math.round((overallScore / maxPossibleScore) * 100)}
+                  value={overallPercentage}
                   className={cn(
                     "h-2.5",
-                    maturity.color === "text-red-600" &&
-                      "bg-red-100 [&>div]:bg-red-600",
-                    maturity.color === "text-orange-600" &&
-                      "bg-orange-100 [&>div]:bg-orange-600",
-                    maturity.color === "text-yellow-600" &&
-                      "bg-yellow-100 [&>div]:bg-yellow-600",
-                    maturity.color === "text-green-600" &&
-                      "bg-green-100 [&>div]:bg-green-600",
-                    maturity.color === "text-blue-600" &&
-                      "bg-blue-100 [&>div]:bg-blue-600"
+                    overallPercentage <= 20 
+                      ? "bg-red-100 [&>div]:bg-red-600"
+                      : overallPercentage <= 40
+                        ? "bg-orange-100 [&>div]:bg-orange-600"
+                        : overallPercentage <= 60
+                          ? "bg-yellow-100 [&>div]:bg-yellow-600"
+                          : overallPercentage <= 80
+                            ? "bg-green-100 [&>div]:bg-green-600"
+                            : "bg-blue-100 [&>div]:bg-blue-600"
                   )}
                 />
               </div>
@@ -811,91 +875,227 @@ export function CybersecurityResults({
 
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-2xl font-semibold mb-8 text-gray-800">
-                Desglose por Categoría
+                Desglose por Categoría y Recomendaciones
               </h2>
-              <div className="space-y-6">
-                {categoryMaturityLevels.map(({ category, total, max }) => {
-                  const percentage = Math.round((total / max) * 100);
-                  return (
-                    <div key={category} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-800">
-                          {category}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          {total}/{max} ({percentage}%)
-                        </span>
-                      </div>
-                      <Progress
-                        value={percentage}
-                        className={cn(
-                          "h-2.5",
-                          maturity.color === "text-red-600" &&
-                            "bg-red-100 [&>div]:bg-red-600",
-                          maturity.color === "text-orange-600" &&
-                            "bg-orange-100 [&>div]:bg-orange-600",
-                          maturity.color === "text-yellow-600" &&
-                            "bg-yellow-100 [&>div]:bg-yellow-600",
-                          maturity.color === "text-green-600" &&
-                            "bg-green-100 [&>div]:bg-green-600",
-                          maturity.color === "text-blue-600" &&
-                            "bg-blue-100 [&>div]:bg-blue-600"
-                        )}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
-                Recomendaciones Personalizadas
-              </h2>
-              <div className="space-y-6">
-                {recommendations.map((rec) => {
-                  const percentage = Math.round(
-                    (rec.score / rec.maxScore) * 100
-                  );
-                  return (
-                    <div
-                      key={`${rec.category}-${rec.text}`}
-                      className="bg-gray-50 p-6 rounded-xl border border-gray-200"
-                    >
-                      <div className="flex justify-between items-start mb-4">
+              {/* Show categories one by one with their questions */}
+              <div className="space-y-8">
+                {categoryMaturityLevels.map(
+                  ({ category, maturityLevel, total, max }) => {
+                    const percentage = Math.round((total / max) * 100);
+                    // Get all recommendations for this category
+                    const categoryRecommendations = recommendations.filter(
+                      (rec) => rec.category === category
+                    );
+
+                    return (
+                      <div key={category} className="space-y-4">
+                        {/* Category heading and score */}
                         <div>
-                          <h3 className="font-medium text-gray-800 mb-1">
-                            {rec.text}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {rec.selectedOption}
-                          </p>
+                          <div className="flex justify-between items-center mb-2">
+                            <h3
+                              className={`text-lg font-semibold ${
+                                percentage <= 20
+                                  ? "text-red-600"
+                                  : percentage <= 40
+                                    ? "text-orange-600"
+                                    : percentage <= 60
+                                      ? "text-yellow-600"
+                                      : percentage <= 80
+                                        ? "text-green-600"
+                                        : "text-blue-600"
+                              }`}
+                            >
+                              {category}{" "}
+                              {percentage <= 20
+                                ? "🔴"
+                                : percentage <= 40
+                                  ? "🟠"
+                                  : percentage <= 60
+                                    ? "🟡"
+                                    : percentage <= 80
+                                      ? "🟢"
+                                      : "🔵"}
+                            </h3>
+                            <span className="text-sm font-medium text-gray-600">
+                              {total}/{max} ({percentage}%)
+                            </span>
+                          </div>
+                          <Progress
+                            value={percentage}
+                            className={cn(
+                              "h-2.5",
+                              percentage <= 20
+                                ? "bg-red-100 [&>div]:bg-red-600"
+                                : percentage <= 40
+                                  ? "bg-orange-100 [&>div]:bg-orange-600"
+                                  : percentage <= 60
+                                    ? "bg-yellow-100 [&>div]:bg-yellow-600"
+                                    : percentage <= 80
+                                      ? "bg-green-100 [&>div]:bg-green-600"
+                                      : "bg-blue-100 [&>div]:bg-blue-600"
+                            )}
+                          />
+                          <div className="flex justify-end mt-1">
+                            <span
+                              className={`text-xs ${
+                                percentage <= 20
+                                  ? "text-red-600"
+                                  : percentage <= 40
+                                    ? "text-orange-600"
+                                    : percentage <= 60
+                                      ? "text-yellow-600"
+                                      : percentage <= 80
+                                        ? "text-green-600"
+                                        : "text-blue-600"
+                              }`}
+                            >
+                              {percentage <= 20
+                                ? "Crítico"
+                                : percentage <= 40
+                                  ? "Básico"
+                                  : percentage <= 60
+                                    ? "Intermedio"
+                                    : percentage <= 80
+                                      ? "Bueno"
+                                      : "Excelente"}
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-600">
-                            {rec.score}/{rec.maxScore}
-                          </p>
-                          <p className="text-sm text-gray-500">{percentage}%</p>
+
+                        {/* Questions in this category */}
+                        <div className="pl-2 border-l-2 ml-2 space-y-4">
+                          {categoryRecommendations.map((rec) => {
+                            const questionPercentage = Math.round(
+                              (rec.score / rec.maxScore) * 100
+                            );
+
+                            return (
+                              <div
+                                key={`${rec.category}-${rec.text}`}
+                                className="bg-gray-50 p-4 rounded-lg border border-gray-200"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-gray-800 text-sm">
+                                      {rec.text}
+                                    </p>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                      Respuesta: {rec.selectedOption}
+                                    </p>
+                                  </div>
+                                  <div className="text-right ml-4 flex-shrink-0">
+                                    <div
+                                      className={`text-sm font-medium ${
+                                        questionPercentage <= 20
+                                          ? "text-red-600"
+                                          : questionPercentage <= 40
+                                            ? "text-orange-600"
+                                            : questionPercentage <= 60
+                                              ? "text-yellow-600"
+                                              : questionPercentage <= 80
+                                                ? "text-green-600"
+                                                : "text-blue-600"
+                                      }`}
+                                    >
+                                      {rec.score}/{rec.maxScore}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {questionPercentage}%
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Add progress bar for individual question score */}
+                                <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3">
+                                  <div
+                                    className={`h-full rounded-full ${
+                                      questionPercentage <= 20
+                                        ? "bg-red-600"
+                                        : questionPercentage <= 40
+                                          ? "bg-orange-600"
+                                          : questionPercentage <= 60
+                                            ? "bg-yellow-600"
+                                            : questionPercentage <= 80
+                                              ? "bg-green-600"
+                                              : "bg-blue-600"
+                                    }`}
+                                    style={{ width: `${questionPercentage}%` }}
+                                  ></div>
+                                </div>
+
+                                <div
+                                  className={`mt-3 pt-3 border-t border-gray-200 ${
+                                    questionPercentage <= 20
+                                      ? "bg-red-50"
+                                      : questionPercentage <= 40
+                                        ? "bg-orange-50"
+                                        : questionPercentage <= 60
+                                          ? "bg-yellow-50"
+                                          : questionPercentage <= 80
+                                            ? "bg-green-50"
+                                            : "bg-blue-50"
+                                  } rounded-b-lg -mx-4 -mb-4 px-4 pb-4`}
+                                >
+                                  <p className="text-xs font-medium text-gray-700 flex items-center">
+                                    <span
+                                      className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                                        questionPercentage <= 20
+                                          ? "bg-red-600"
+                                          : questionPercentage <= 40
+                                            ? "bg-orange-600"
+                                            : questionPercentage <= 60
+                                              ? "bg-yellow-600"
+                                              : questionPercentage <= 80
+                                                ? "bg-green-600"
+                                                : "bg-blue-600"
+                                      }`}
+                                    ></span>
+                                    <span
+                                      className={`${
+                                        questionPercentage <= 20
+                                          ? "text-red-600"
+                                          : questionPercentage <= 40
+                                            ? "text-orange-600"
+                                            : questionPercentage <= 60
+                                              ? "text-yellow-600"
+                                              : questionPercentage <= 80
+                                                ? "text-green-600"
+                                                : "text-blue-600"
+                                      }`}
+                                    >
+                                      {questionPercentage <= 40
+                                        ? "Acción prioritaria"
+                                        : questionPercentage <= 70
+                                          ? "Acción recomendada"
+                                          : "Mantener"}
+                                    </span>
+                                  </p>
+                                  <p
+                                    className={`text-xs leading-relaxed mt-1 ${
+                                      questionPercentage <= 40
+                                        ? "font-medium"
+                                        : "font-normal"
+                                    }`}
+                                  >
+                                    {rec.recommendation}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-700">
-                          Recomendación:
-                        </p>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          {rec.recommendation}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             </div>
 
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
               <SpecialistsRecommendations
-                maturityLevel={maturityLevelNumber}
-                categories={weakestCategories}
+                maturityLevel={finalMaturityLevelNumber}
+                categories={finalWeakestCategories}
               />
             </div>
 

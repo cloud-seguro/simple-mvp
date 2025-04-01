@@ -12,6 +12,16 @@ interface EvaluationData {
   maxScore: number;
   maturityLevel: string;
   maturityDescription: string;
+  maturityLevelNumber: number;
+  weakestCategories: string[];
+  recommendations: Array<{
+    score: number;
+    maxScore: number;
+    text: string;
+    selectedOption: string;
+    category: string;
+    recommendation: string;
+  }>;
   categories: Array<{
     name: string;
     score: number;
@@ -45,8 +55,9 @@ export function EvaluationContent({
         if (!response.ok) {
           throw new Error("Failed to fetch evaluation");
         }
-        const evaluationData: EvaluationData = await response.json();
-        setData(evaluationData);
+        const responseData = await response.json();
+        console.log("API response data:", responseData); // Log the response data for debugging
+        setData(responseData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -82,7 +93,10 @@ export function EvaluationContent({
         maxScore={data.maxScore}
         maturityLevel={data.maturityLevel}
         maturityDescription={data.maturityDescription}
+        maturityLevelNumber={data.maturityLevelNumber}
+        weakestCategories={data.weakestCategories}
         categories={data.categories}
+        recommendations={data.recommendations}
         quizData={quizData}
         results={answers}
         userInfo={userInfo}
