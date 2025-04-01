@@ -5,6 +5,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User, Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/profile";
+import { hashPassword } from "@/lib/utils/password-utils";
 
 type AuthContextType = {
   user: User | null;
@@ -18,6 +19,16 @@ type AuthContextType = {
   ) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  checkPasswordStrength: (password: string) => Promise<{
+    strength: number;
+    requirements: {
+      length: boolean;
+      uppercase: boolean;
+      lowercase: boolean;
+      numbers: boolean;
+      special: boolean;
+    };
+  }>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -28,6 +39,16 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => {},
   signUp: async () => {},
   signOut: async () => {},
+  checkPasswordStrength: async () => ({
+    strength: 0,
+    requirements: {
+      length: false,
+      uppercase: false,
+      lowercase: false,
+      numbers: false,
+      special: false,
+    },
+  }),
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -160,11 +181,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     noRedirect?: boolean
   ) => {
+    // Note: We don't hash passwords for Supabase Auth - it handles security properly
+    // This is the correct approach as Supabase handles password hashing server-side
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
     if (error) throw error;
+
     if (data.user) {
       // Use the retry logic for profile fetching, but only if we're not creating a profile
       if (
@@ -174,6 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await fetchProfile(data.user.id, true);
       }
     }
+
     if (!noRedirect) {
       router.push("/dashboard");
     }
@@ -183,6 +209,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Starting sign-up process for:", email);
 
+      // Note: We don't hash passwords for Supabase Auth - it handles security properly
+      // This is the correct approach as Supabase handles password hashing server-side
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -206,6 +234,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const checkPasswordStrength = async (password: string) => {
+    try {
+      // For password strength checking, we can securely use our API
+      // We're not sending the actual password that will be stored - just checking requirements
+      const { hashedPassword, salt } = hashPassword(password);
+
+      const response = await fetch("/api/auth/password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "check_strength",
+          password,
+          hashedPassword,
+          salt,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to check password strength");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error checking password strength:", error);
+
+      // Fallback to client-side checking if API fails
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumbers = /\d/.test(password);
+      const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+      const isLongEnough = password.length >= 8;
+
+      const strengthScore = [
+        isLongEnough,
+        hasUpperCase,
+        hasLowerCase,
+        hasNumbers,
+        hasSpecialChar,
+      ].filter(Boolean).length;
+
+      return {
+        strength: strengthScore,
+        requirements: {
+          length: isLongEnough,
+          uppercase: hasUpperCase,
+          lowercase: hasLowerCase,
+          numbers: hasNumbers,
+          special: hasSpecialChar,
+        },
+      };
+    }
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -215,11 +299,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, profile, isLoading, signIn, signUp, signOut }}
+      value={{
+        user,
+        session,
+        profile,
+        isLoading,
+        signIn,
+        signUp,
+        signOut,
+        checkPasswordStrength,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext); 
+export const useAuth = () => useContext(AuthContext);

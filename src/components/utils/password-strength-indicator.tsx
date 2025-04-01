@@ -11,13 +11,23 @@ interface PasswordRequirement {
 
 interface PasswordStrengthIndicatorProps {
   password: string;
+  strength?: number;
+  requirements?: {
+    length: boolean;
+    uppercase: boolean;
+    lowercase: boolean;
+    numbers: boolean;
+    special: boolean;
+  };
 }
 
 export function PasswordStrengthIndicator({
   password,
+  strength: externalStrength,
+  requirements: externalRequirements,
 }: PasswordStrengthIndicatorProps) {
-  // Define password requirements
-  const requirements: PasswordRequirement[] = [
+  // Define password requirements (only used if external requirements not provided)
+  const defaultRequirements: PasswordRequirement[] = [
     {
       label: "Al menos 8 caracteres",
       regex: /.{8,}/,
@@ -45,8 +55,31 @@ export function PasswordStrengthIndicator({
     },
   ];
 
-  // Calculate password strength
-  const metRequirementsCount = requirements.filter((req) => req.met).length;
+  // Merge external requirements with default ones if provided
+  const requirements = externalRequirements
+    ? [
+        { label: "Al menos 8 caracteres", met: externalRequirements.length },
+        {
+          label: "Al menos una letra mayúscula",
+          met: externalRequirements.uppercase,
+        },
+        {
+          label: "Al menos una letra minúscula",
+          met: externalRequirements.lowercase,
+        },
+        { label: "Al menos un número", met: externalRequirements.numbers },
+        {
+          label: "Al menos un caracter especial",
+          met: externalRequirements.special,
+        },
+      ]
+    : defaultRequirements;
+
+  // Use provided strength or calculate it
+  const metRequirementsCount =
+    externalStrength !== undefined
+      ? externalStrength
+      : requirements.filter((req) => req.met).length;
 
   let strength: PasswordStrength = "weak";
   let strengthColor = "bg-red-500";

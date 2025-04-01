@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UploadCloud } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,11 +45,19 @@ export function SignUpForm({
   ...props
 }: ExtendedSignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, checkPasswordStrength } = useAuth();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>("");
   const [passwordValue, setPasswordValue] = useState<string>("");
+  const [passwordStrength, setPasswordStrength] = useState<number>(0);
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    numbers: false,
+    special: false,
+  });
   const router = useRouter();
 
   const form = useForm<SignUpFormData>({
@@ -78,6 +86,28 @@ export function SignUpForm({
       reader.readAsDataURL(file);
     }
   };
+
+  // Check password strength when password changes
+  useEffect(() => {
+    const checkStrength = async () => {
+      if (passwordValue) {
+        const result = await checkPasswordStrength(passwordValue);
+        setPasswordStrength(result.strength);
+        setPasswordRequirements(result.requirements);
+      } else {
+        setPasswordStrength(0);
+        setPasswordRequirements({
+          length: false,
+          uppercase: false,
+          lowercase: false,
+          numbers: false,
+          special: false,
+        });
+      }
+    };
+
+    checkStrength();
+  }, [passwordValue, checkPasswordStrength]);
 
   async function onSubmit(data: SignUpFormData) {
     try {
@@ -437,7 +467,11 @@ export function SignUpForm({
                     }}
                   />
                 </FormControl>
-                <PasswordStrengthIndicator password={passwordValue} />
+                <PasswordStrengthIndicator
+                  password={passwordValue}
+                  strength={passwordStrength}
+                  requirements={passwordRequirements}
+                />
                 <FormMessage />
               </FormItem>
             )}
