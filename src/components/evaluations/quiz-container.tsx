@@ -5,10 +5,8 @@ import { useAuth } from "@/providers/auth-provider";
 import { QuizIntro } from "./quiz-intro";
 import { QuizQuestion } from "./quiz-question";
 import { ResultsReady } from "./results-ready";
-import {
-  CybersecurityResults,
-  getMaturityLevel,
-} from "./cybersecurity-results";
+import { CybersecurityResults } from "./cybersecurity-results";
+import { getMaturityLevel } from "@/lib/maturity-utils";
 import { EvaluationSignUp } from "./evaluation-sign-up";
 import { CybersecurityInterest } from "./cybersecurity-interest";
 import type {

@@ -61,3 +61,12 @@ export interface CybersecurityResultsProps {
   maturityDescription: string;
   categories: Category[];
 }
+
+export interface MaturityLevel {
+  level: string;
+  emoji: string;
+  color: string;
+  bgColor: string;
+  description: string;
+  advice?: string;
+}

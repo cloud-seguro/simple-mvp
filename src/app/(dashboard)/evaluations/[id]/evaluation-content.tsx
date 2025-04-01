@@ -100,7 +100,6 @@ export function EvaluationContent({
         quizData={quizData}
         results={answers}
         userInfo={userInfo}
-        onRestart={() => {}}
         isSharedView={false}
       />
     </PDFExport>
