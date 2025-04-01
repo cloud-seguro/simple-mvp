@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/utils/password-input";
+import { PasswordStrengthIndicator } from "@/components/utils/password-strength-indicator";
 import type { SignUpFormProps, SignUpFormData } from "@/types/auth/sign-up";
 import { signUpFormSchema } from "@/types/auth/sign-up";
 import { toast } from "@/components/ui/use-toast";
@@ -48,6 +49,7 @@ export function SignUpForm({
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>("");
+  const [passwordValue, setPasswordValue] = useState<string>("");
   const router = useRouter();
 
   const form = useForm<SignUpFormData>({
@@ -425,8 +427,17 @@ export function SignUpForm({
               <FormItem>
                 <FormLabel>Contraseña</FormLabel>
                 <FormControl>
-                  <PasswordInput placeholder="********" {...field} />
+                  <PasswordInput
+                    placeholder="********"
+                    {...field}
+                    disabled={isLoading}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setPasswordValue(e.target.value);
+                    }}
+                  />
                 </FormControl>
+                <PasswordStrengthIndicator password={passwordValue} />
                 <FormMessage />
               </FormItem>
             )}

@@ -35,7 +35,13 @@ export const signUpFormSchema = z
       .optional(),
     password: z
       .string()
-      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" }),
+      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+      .regex(/[A-Z]/, { message: "Debe incluir al menos una letra mayúscula" })
+      .regex(/[a-z]/, { message: "Debe incluir al menos una letra minúscula" })
+      .regex(/[0-9]/, { message: "Debe incluir al menos un número" })
+      .regex(/[^A-Za-z0-9]/, {
+        message: "Debe incluir al menos un caracter especial",
+      }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

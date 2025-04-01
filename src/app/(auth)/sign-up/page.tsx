@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Registrarse",
-  description: "Crea una nueva cuenta",
+  description: "Crea una nueva cuenta con contraseña segura",
 };
 
 export default async function SignUpPage() {
@@ -31,7 +31,8 @@ export default async function SignUpPage() {
             Crear una cuenta
           </h1>
           <p className="text-sm text-muted-foreground">
-            Ingresa tu correo y contraseña para crear una cuenta. <br />
+            Ingresa tu correo y una contraseña segura para crear una cuenta.{" "}
+            <br />
             ¿Ya tienes una cuenta?{" "}
             <Link
               href="/sign-in"
@@ -62,4 +63,4 @@ export default async function SignUpPage() {
       </Card>
     </AuthLayout>
   );
-} 
+}
