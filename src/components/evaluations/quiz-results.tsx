@@ -150,10 +150,14 @@ export function QuizResults({
   return (
     <div className="min-h-screen flex flex-col">
       <header
-        className="p-8 transition-colors duration-300"
+        className="p-4 transition-colors duration-300"
         style={{ backgroundColor: getColorIntensity(100) }}
       >
-        <h1 className="text-2xl font-bold text-white">SIMPLE</h1>
+        <div className="flex justify-start">
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <h1 className="text-2xl font-bold text-white">SIMPLE</h1>
+          </Link>
+        </div>
       </header>
 
       <main className="flex-grow p-8">

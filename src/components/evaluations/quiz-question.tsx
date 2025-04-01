@@ -5,6 +5,7 @@ import type { QuizQuestion as QuizQuestionType } from "./types";
 import { useRef } from "react";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface QuizQuestionProps {
   question: QuizQuestionType;
@@ -32,9 +33,11 @@ export function QuizQuestion({
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header with logo */}
-      <header className="p-4 md:p-8 bg-background border-b">
-        <div className="h-8">
-          <SimpleHeader className="text-primary" />
+      <header className="p-2 md:p-4 bg-background border-b">
+        <div className="flex justify-start">
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <SimpleHeader className="text-primary" />
+          </Link>
         </div>
       </header>
 
@@ -54,6 +57,14 @@ export function QuizQuestion({
               <div className="mb-4 text-sm md:text-base">
                 {currentIndex + 1} / {totalQuestions}
               </div>
+
+              {question.category && (
+                <div className="mb-3">
+                  <span className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm font-medium text-gray-700">
+                    {question.category}
+                  </span>
+                </div>
+              )}
 
               <h2 className="text-xl md:text-2xl font-medium mb-8">
                 {question.text}

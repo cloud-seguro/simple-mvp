@@ -7,6 +7,7 @@ import type { UserInfo } from "./types";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { toast } from "@/components/ui/use-toast";
+import Link from "next/link";
 
 interface ResultsReadyProps {
   userInfo: UserInfo;
@@ -50,9 +51,11 @@ export function ResultsReady({
   return (
     <div className="flex flex-col min-h-screen md:flex-row">
       {/* Left sidebar */}
-      <div className="bg-[#FFD700] w-full md:w-2/5 p-4 md:p-8 flex flex-col min-h-screen md:min-h-0">
-        <div className="mb-4 md:mb-8">
-          <SimpleHeader />
+      <div className="bg-[#FFD700] w-full md:w-2/5 p-2 md:p-4 flex flex-col min-h-screen md:min-h-0">
+        <div className="flex justify-start">
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <SimpleHeader />
+          </Link>
         </div>
         <div className="flex-grow flex items-center justify-center py-8 md:py-0">
           <AnimatedSecuritySVG />

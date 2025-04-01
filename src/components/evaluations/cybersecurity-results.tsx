@@ -485,21 +485,16 @@ export function CybersecurityResults({
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {isSharedView && (
-        <header className="p-6 bg-white border-b shadow-sm">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">S</span>
+        <header className="p-3 bg-white border-b">
+          <div className="max-w-3xl mx-auto flex items-center justify-start">
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold">S</span>
+                </div>
+                <span className="text-xl font-bold text-gray-800">SIMPLE</span>
               </div>
-              <span className="text-xl font-bold text-gray-800">SIMPLE</span>
-            </div>
-            <div className="text-sm text-gray-500">
-              {new Date().toLocaleDateString("es-ES", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </div>
+            </Link>
           </div>
         </header>
       )}
