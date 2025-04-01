@@ -10,7 +10,6 @@ interface EvaluationData {
   id: string;
   score: number;
   maxScore: number;
-  maturityLevel: string;
   maturityDescription: string;
   maturityLevelNumber: number;
   weakestCategories: string[];
@@ -91,7 +90,6 @@ export function EvaluationContent({
         evaluationId={id}
         score={data.score}
         maxScore={data.maxScore}
-        maturityLevel={data.maturityLevel}
         maturityDescription={data.maturityDescription}
         maturityLevelNumber={data.maturityLevelNumber}
         weakestCategories={data.weakestCategories}

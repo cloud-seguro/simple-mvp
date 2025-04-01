@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 import { verifyPassword } from "@/lib/utils/password-utils";
 
 export async function POST(request: NextRequest) {
   try {
     const { action, password, hashedPassword, salt } = await request.json();
-
-    // Create a Supabase client
-    const supabase = createRouteHandlerClient({ cookies });
 
     // Handle different password-related actions
     switch (action) {

@@ -458,7 +458,6 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           evaluationId={id}
           score={totalScore}
           maxScore={maxScore}
-          maturityLevel={maturityInfo.level}
           maturityDescription={maturityInfo.description}
           maturityLevelNumber={parseInt(
             maturityInfo.level.split("–")[0].replace("Nivel ", "").trim(),
