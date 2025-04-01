@@ -125,7 +125,7 @@ export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
     };
   }
 
-  // Advanced evaluation tiers
+  // Advanced evaluation tiers (out of 75 points)
   if (score <= 15) {
     return {
       level: "Nivel 1 – Inicial / Ad-hoc",
@@ -742,7 +742,7 @@ export function CybersecurityResults({
                   value={overallPercentage}
                   className={cn(
                     "h-2.5",
-                    overallPercentage <= 20 
+                    overallPercentage <= 20
                       ? "bg-red-100 [&>div]:bg-red-600"
                       : overallPercentage <= 40
                         ? "bg-orange-100 [&>div]:bg-orange-600"
@@ -763,18 +763,64 @@ export function CybersecurityResults({
               <div
                 className={cn(
                   "p-5 rounded-lg border",
-                  maturity.color.replace("text", "border")
+                  overallPercentage <= 20
+                    ? "border-red-600"
+                    : overallPercentage <= 40
+                      ? "border-orange-600"
+                      : overallPercentage <= 60
+                        ? "border-yellow-600"
+                        : overallPercentage <= 80
+                          ? "border-green-600"
+                          : "border-blue-600"
                 )}
               >
-                <p className={`${maturity.color} font-medium mb-4`}>
+                <p
+                  className={`${
+                    overallPercentage <= 20
+                      ? "text-red-600"
+                      : overallPercentage <= 40
+                        ? "text-orange-600"
+                        : overallPercentage <= 60
+                          ? "text-yellow-600"
+                          : overallPercentage <= 80
+                            ? "text-green-600"
+                            : "text-blue-600"
+                  } font-medium mb-4`}
+                >
                   {maturity.description}
                 </p>
                 {maturity.advice && (
                   <>
-                    <h3 className={`font-semibold mt-4 mb-2 ${maturity.color}`}>
+                    <h3
+                      className={`font-semibold mt-4 mb-2 ${
+                        overallPercentage <= 20
+                          ? "text-red-600"
+                          : overallPercentage <= 40
+                            ? "text-orange-600"
+                            : overallPercentage <= 60
+                              ? "text-yellow-600"
+                              : overallPercentage <= 80
+                                ? "text-green-600"
+                                : "text-blue-600"
+                      }`}
+                    >
                       Recomendación General
                     </h3>
-                    <p className={`${maturity.color}`}>{maturity.advice}</p>
+                    <p
+                      className={`${
+                        overallPercentage <= 20
+                          ? "text-red-600"
+                          : overallPercentage <= 40
+                            ? "text-orange-600"
+                            : overallPercentage <= 60
+                              ? "text-yellow-600"
+                              : overallPercentage <= 80
+                                ? "text-green-600"
+                                : "text-blue-600"
+                      }`}
+                    >
+                      {maturity.advice}
+                    </p>
                   </>
                 )}
               </div>
@@ -783,16 +829,15 @@ export function CybersecurityResults({
               <div
                 className={cn(
                   "mt-6 p-6 rounded-xl text-white shadow-lg border transform hover:scale-[1.02] transition-all duration-300",
-                  maturity.color === "text-red-600" &&
-                    "bg-gradient-to-r from-red-500 to-red-600 border-red-300",
-                  maturity.color === "text-orange-600" &&
-                    "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-300",
-                  maturity.color === "text-yellow-600" &&
-                    "bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-300",
-                  maturity.color === "text-green-600" &&
-                    "bg-gradient-to-r from-green-500 to-green-600 border-green-300",
-                  maturity.color === "text-blue-600" &&
-                    "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-300"
+                  overallPercentage <= 20
+                    ? "bg-gradient-to-r from-red-500 to-red-600 border-red-300"
+                    : overallPercentage <= 40
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-300"
+                      : overallPercentage <= 60
+                        ? "bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-300"
+                        : overallPercentage <= 80
+                          ? "bg-gradient-to-r from-green-500 to-green-600 border-green-300"
+                          : "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-300"
                 )}
               >
                 <div className="flex flex-col md:flex-row items-center gap-4">
@@ -839,16 +884,15 @@ export function CybersecurityResults({
                       <Button
                         className={cn(
                           "bg-white px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center",
-                          maturity.color === "text-red-600" &&
-                            "text-red-600 hover:bg-red-50",
-                          maturity.color === "text-orange-600" &&
-                            "text-orange-600 hover:bg-orange-50",
-                          maturity.color === "text-yellow-600" &&
-                            "text-yellow-600 hover:bg-yellow-50",
-                          maturity.color === "text-green-600" &&
-                            "text-green-600 hover:bg-green-50",
-                          maturity.color === "text-blue-600" &&
-                            "text-blue-600 hover:bg-blue-50"
+                          overallPercentage <= 20
+                            ? "text-red-600 hover:bg-red-50"
+                            : overallPercentage <= 40
+                              ? "text-orange-600 hover:bg-orange-50"
+                              : overallPercentage <= 60
+                                ? "text-yellow-600 hover:bg-yellow-50"
+                                : overallPercentage <= 80
+                                  ? "text-green-600 hover:bg-green-50"
+                                  : "text-blue-600 hover:bg-blue-50"
                         )}
                       >
                         Agendar Especialista
@@ -1103,7 +1147,17 @@ export function CybersecurityResults({
               <div className="flex justify-center mt-8">
                 <Button
                   onClick={onRestart}
-                  className={`${maturity.color.replace("text", "bg")} text-white hover:opacity-90 rounded-full px-8 py-6`}
+                  className={`${
+                    overallPercentage <= 20
+                      ? "bg-red-600"
+                      : overallPercentage <= 40
+                        ? "bg-orange-600"
+                        : overallPercentage <= 60
+                          ? "bg-yellow-600"
+                          : overallPercentage <= 80
+                            ? "bg-green-600"
+                            : "bg-blue-600"
+                  } text-white hover:opacity-90 rounded-full px-8 py-6`}
                 >
                   Realizar otra evaluación
                 </Button>

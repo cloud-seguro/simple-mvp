@@ -370,10 +370,11 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
               (sum, val) => sum + (val || 0),
               0
             )}
-            maxScore={quizData.questions.reduce(
-              (sum, q) => sum + Math.max(...q.options.map((o) => o.value)),
-              0
-            )}
+            maxScore={
+              quizData.id === "evaluacion-inicial"
+                ? 45 // Initial eval is out of 45
+                : 75 // Advanced eval is out of 75
+            }
             maturityLevel={
               getMaturityLevel(
                 quizData.id,

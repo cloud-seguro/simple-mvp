@@ -90,12 +90,66 @@ function getAdvancedMaturityLevel(score: number) {
       level: "Nivel 1 – Inicial / Ad-hoc",
       description:
         "La seguridad se maneja de forma reactiva. No hay procesos documentados ni una estructura clara para gestionar riesgos y proteger la información.",
+      advice:
+        "Trabaja en establecer una estrategia inicial de seguridad, enfocada en definir políticas, roles y procesos básicos para proteger la información. ISO 27001 y NIST recomiendan empezar con la identificación de activos y riesgos.",
       color: "red",
       emoji: "🔴",
     };
   }
-  // More levels for advanced evaluations can be added here
-  return getInitialMaturityLevel(score); // Fallback
+  if (score <= 34) {
+    return {
+      level: "Nivel 2 – Repetible pero intuitivo",
+      description:
+        "Existen controles básicos, pero su aplicación no es uniforme. La seguridad depende de esfuerzos individuales y acciones aisladas en lugar de procesos bien definidos.",
+      advice:
+        "Estandariza y documenta las políticas de seguridad, asegurando que sean aplicadas en toda la organización. Trabaja en la gestión de riesgos y en el uso de controles técnicos recomendados por CIS Controls y NIST CSF.",
+      color: "orange",
+      emoji: "🟠",
+    };
+  }
+  if (score <= 51) {
+    return {
+      level: "Nivel 3 – Definido",
+      description:
+        "Los procesos de ciberseguridad están estructurados y alineados con estándares como ISO 27001, NIST y CIS. Se han implementado controles en la nube, gestión de vulnerabilidades y auditorías.",
+      advice:
+        "Profundiza en la medición y optimización de los controles, con el uso de monitoreo continuo y métricas de seguridad. Explora herramientas de Zero Trust, segmentación de red y pruebas de seguridad en aplicaciones (DevSecOps, OWASP ASVS).",
+      color: "yellow",
+      emoji: "🟡",
+    };
+  }
+  if (score <= 66) {
+    return {
+      level: "Nivel 4 – Gestionado y Medido",
+      description:
+        "La ciberseguridad es gestionada con métricas, auditorías y monitoreo activo. Se han implementado SOC, SIEM, análisis de amenazas y simulaciones de incidentes (Red Team, Blue Team).",
+      advice:
+        "Asegura la mejora continua en la gestión de incidentes y la resiliencia organizacional. Refuerza el uso de inteligencia de amenazas (OSINT, Dark Web Monitoring) y la automatización de respuestas a incidentes (SOAR, XDR).",
+      color: "green",
+      emoji: "🟢",
+    };
+  }
+  if (score <= 74) {
+    return {
+      level: "Nivel 5 – Optimizado",
+      description:
+        "Ciberseguridad avanzada con procesos automatizados y monitoreo en tiempo real. Se han adoptado estrategias como Zero Trust, detección de amenazas con IA y seguridad en la nube con cumplimiento de marcos como AWS Well-Architected, Google Cloud Security y Azure Security Center.",
+      advice:
+        "Sigue fortaleciendo la estrategia de seguridad con ciberinteligencia y automatización. Evalúa constantemente nuevas tecnologías, mejora la gestión de crisis y resiliencia y optimiza los procesos de respuesta a incidentes con IA.",
+      color: "blue",
+      emoji: "🔵",
+    };
+  }
+  // score === 75
+  return {
+    level: "Nivel 5 – Óptimo",
+    description:
+      "Ciberseguridad completamente integrada en la cultura organizacional. Se han implementado detección de amenazas con IA, automatización total de respuesta a incidentes, monitoreo continuo de la Dark Web y cumplimiento avanzado de seguridad en entornos híbridos y en la nube.",
+    advice:
+      "Se nota que has trabajado en ciberseguridad y dominas los estándares. Mantén un enfoque en innovación y evolución, asegurando que el equipo y la organización estén preparados para amenazas emergentes. Continúa reforzando la estrategia con simulaciones avanzadas y escenarios de crisis en entornos reales.",
+    color: "blue",
+    emoji: "🔵",
+  };
 }
 
 export async function GET(
@@ -144,7 +198,7 @@ export async function GET(
 
     // Calculate the total score from answers if not already calculated
     let calculatedScore: number = score || 0;
-    const totalPossibleScore = 45; // Default for initial evaluations
+    const totalPossibleScore = type === "INITIAL" ? 45 : 75; // 45 for initial evaluations, 75 for advanced
 
     if (answers && typeof answers === "object") {
       // Convert answers object values to numbers and calculate total
