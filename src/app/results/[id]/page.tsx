@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getEvaluationById } from "@/lib/evaluation-utils";
 import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
 import { getMaturityLevel } from "@/lib/maturity-utils";
@@ -18,6 +18,9 @@ import { advancedEvaluationData } from "@/data/advanced-evaluation";
 // Import the quiz data from components/evaluations/data
 import { evaluacionInicial } from "@/components/evaluations/data/initial-evaluation";
 import { evaluacionAvanzada } from "@/components/evaluations/data/advanced-evaluation";
+
+// Client-side redirect component
+import ClientRedirect from "@/components/utils/client-redirect";
 
 interface ResultsPageProps {
   params: Promise<{ id: string }>;
@@ -80,9 +83,9 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       data: { session },
     } = await supabase.auth.getSession();
 
-    // If not authenticated, redirect to sign-in
+    // If not authenticated, use client-side redirect component
     if (!session) {
-      redirect("/sign-in");
+      return <ClientRedirect href="/" />;
     }
 
     // Get the user's profile to check their role
@@ -91,13 +94,13 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       select: { role: true },
     });
 
-    // If no profile or not a premium/superadmin user, redirect to upgrade page
+    // If no profile or not a premium/superadmin user, use client-side redirect
     if (
       !profile ||
       (profile.role !== UserRole.PREMIUM &&
         profile.role !== UserRole.SUPERADMIN)
     ) {
-      redirect("/upgrade");
+      return <ClientRedirect href="/upgrade" />;
     }
 
     // Use Promise.resolve to ensure params is awaited
