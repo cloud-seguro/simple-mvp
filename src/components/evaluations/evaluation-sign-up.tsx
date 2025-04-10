@@ -67,6 +67,15 @@ export function EvaluationSignUp({
       const evaluationType =
         quizId === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
 
+      // For advanced evaluations, create default interest data if none provided
+      let finalInterestData = interest;
+      if (evaluationType === "ADVANCED" && !finalInterestData) {
+        finalInterestData = {
+          reason: "advanced",
+          otherReason: "Evaluación avanzada de ciberseguridad",
+        };
+      }
+
       // Retry logic for saving evaluation results
       let success = false;
       let retryCount = 0;
@@ -93,7 +102,7 @@ export function EvaluationSignUp({
                   ? "Evaluación Inicial"
                   : "Evaluación Avanzada",
               answers: results,
-              interest,
+              interest: finalInterestData,
               userId, // Include userId in the request
             }),
           });

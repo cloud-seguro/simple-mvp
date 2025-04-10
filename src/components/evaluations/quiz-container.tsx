@@ -88,18 +88,61 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     if (currentQuestionIndex < quizData.questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // Set submitting state before showing interest question
+      // Set submitting state
       setIsSubmitting(true);
       setLoadingMessage("Preparando siguiente paso...");
 
       try {
-        // Always show the interest question
+        // Check if this is an initial or advanced evaluation
+        const isInitialEvaluation = quizData.id === "evaluacion-inicial";
+
+        // For advanced evaluations, skip the interest stage completely
+        if (!isInitialEvaluation) {
+          console.log("Advanced evaluation - skipping interest stage");
+          setIsSubmitting(false);
+
+          // If user is logged in, save results with default interest
+          if (user && profile) {
+            const defaultInterestData = {
+              reason: "advanced",
+              otherReason: "Evaluación avanzada de ciberseguridad",
+            };
+            await handleSaveResults(defaultInterestData);
+          } else {
+            // For non-logged in users, go to sign-up
+            setStage("sign-up");
+          }
+          return; // Exit early to avoid executing the code below
+        }
+
+        // Only for initial evaluations - show interest stage
         setIsSubmitting(false);
         setStage("interest");
       } catch (error) {
-        console.error("Error preparing interest question:", error);
+        console.error("Error preparing next step:", error);
         setIsSubmitting(false);
-        setStage("interest");
+
+        // Even in case of error, maintain the same flow rules
+        if (quizData.id === "evaluacion-inicial") {
+          setStage("interest");
+        } else {
+          // For advanced evaluations, go to sign-up if not logged in
+          if (!user || !profile) {
+            setStage("sign-up");
+          } else {
+            // Try to save with default interest data as a fallback
+            try {
+              const defaultInterestData = {
+                reason: "advanced",
+                otherReason: "Evaluación avanzada de ciberseguridad",
+              };
+              await handleSaveResults(defaultInterestData);
+            } catch (innerError) {
+              console.error("Error saving with default interest:", innerError);
+              setStage("sign-up");
+            }
+          }
+        }
       }
     }
   };
@@ -328,7 +371,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         />
       )}
 
-      {stage === "interest" && (
+      {stage === "interest" && quizData.id === "evaluacion-inicial" && (
         <div className="max-w-4xl mx-auto px-4 py-8">
           <CybersecurityInterest onSubmit={handleInterestSubmit} />
         </div>

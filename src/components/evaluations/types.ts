@@ -39,7 +39,8 @@ export type InterestOption =
   | "nothing"
   | "curiosity"
   | "requirement"
-  | "other";
+  | "other"
+  | "advanced";
 
 export interface Category {
   name: string;

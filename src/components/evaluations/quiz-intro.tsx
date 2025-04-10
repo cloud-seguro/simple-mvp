@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import type { QuizData } from "./types";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg";
 import { SimpleHeader } from "@/components/ui/simple-header";
-import Link from "next/link";
 
 interface QuizIntroProps {
   quizData: QuizData;
@@ -17,9 +16,7 @@ export function QuizIntro({ quizData, onStart }: QuizIntroProps) {
       {/* Left sidebar */}
       <div className="bg-[#FFD700] w-full md:w-2/5 p-2 md:p-4 flex flex-col">
         <div className="flex justify-start">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <SimpleHeader />
-          </Link>
+          <SimpleHeader className="hover:opacity-80 transition-opacity" />
         </div>
         <div className="flex-grow flex items-center justify-center py-8 md:py-0">
           <AnimatedSecuritySVG />

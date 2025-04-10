@@ -53,9 +53,7 @@ export function ResultsReady({
       {/* Left sidebar */}
       <div className="bg-[#FFD700] w-full md:w-2/5 p-2 md:p-4 flex flex-col min-h-screen md:min-h-0">
         <div className="flex justify-start">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <SimpleHeader />
-          </Link>
+          <SimpleHeader />
         </div>
         <div className="flex-grow flex items-center justify-center py-8 md:py-0">
           <AnimatedSecuritySVG />
