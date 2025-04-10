@@ -119,222 +119,51 @@ export function SignUpForm({
         onSignUpStart();
       }
 
-      // Set a flag in localStorage to indicate we're in the process of creating a profile
-      // This will be used by the AuthProvider to avoid premature profile fetching
-      localStorage.setItem("creating_profile", "true");
+      // Call the signUp function from the auth provider
+      // This will handle email verification
+      await signUp(data.email, data.password);
 
-      try {
-        // Sign up the user
-        await signUp(data.email, data.password);
+      // Show success message
+      toast({
+        title: "Cuenta creada",
+        description:
+          "Por favor, verifica tu correo electrónico para completar el registro.",
+        variant: "default",
+      });
 
-        // Add a delay to allow the auth state to update
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Store user data temporarily in localStorage to use after email verification
+      // This will be used by the profile creation process after verification
+      localStorage.setItem(
+        "pendingProfileData",
+        JSON.stringify({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phoneNumber: data.phoneNumber,
+          company: data.company,
+          company_role: data.company_role,
+          email: data.email,
+        })
+      );
 
-        // Try to sign in with the credentials to get a valid user and session
-        const { data: signInData, error: signInError } =
-          await supabase.auth.signInWithPassword({
-            email: data.email,
-            password: data.password,
-          });
-
-        if (signInError) {
-          console.error("Sign in error after sign-up:", signInError);
-          throw new Error("Failed to sign in after sign-up");
-        }
-
-        if (!signInData.user) {
-          throw new Error("Failed to get user after sign-in");
-        }
-
-        // Use the user from the sign-in response
-        const userId = signInData.user.id;
-
-        console.log("Successfully signed in after sign-up, user ID:", userId);
-
-        setLoadingMessage("Subiendo avatar...");
-        let avatarUrl = null;
-        if (avatarFile) {
-          try {
-            avatarUrl = await uploadAvatar(avatarFile, userId);
-          } catch (error) {
-            console.error("Avatar upload failed:", error);
-            toast({
-              title: "Advertencia",
-              description:
-                "No se pudo subir el avatar, puedes agregarlo más tarde desde tu perfil.",
-              variant: "default",
-            });
-          }
-        }
-
-        try {
-          // Notify parent component that profile creation has started
-          if (onProfileCreationStart) {
-            onProfileCreationStart();
-          }
-
-          setLoadingMessage("Creando perfil...");
-
-          // Create user profile
-          const profileResponse = await fetch("/api/profile", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: userId,
-              firstName: data.firstName,
-              lastName: data.lastName,
-              email: data.email,
-              phoneNumber: data.phoneNumber,
-              company: data.company,
-              company_role: data.company_role,
-              avatarUrl,
-            }),
-          });
-
-          const profileData = await profileResponse.json();
-
-          if (!profileResponse.ok) {
-            throw new Error(
-              profileData.error ||
-                `Error al crear perfil: ${profileResponse.status}`
-            );
-          }
-
-          // Add a delay after profile creation to ensure it's available
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-
-          // Verify that the profile was created successfully
-          setLoadingMessage("Verificando perfil...");
-          let profileExists = false;
-          let retryCount = 0;
-          const maxRetries = 5;
-
-          while (!profileExists && retryCount < maxRetries) {
-            try {
-              const checkResponse = await fetch(`/api/profile/${userId}`);
-
-              if (checkResponse.ok) {
-                const profileData = await checkResponse.json();
-                if (profileData.profile) {
-                  profileExists = true;
-                  console.log(
-                    "Profile verified successfully:",
-                    profileData.profile
-                  );
-                }
-              } else {
-                console.log(
-                  `Profile check attempt ${retryCount + 1} failed with status ${checkResponse.status}`
-                );
-              }
-            } catch (error) {
-              console.error(
-                `Profile check attempt ${retryCount + 1} failed:`,
-                error
-              );
-            }
-
-            if (!profileExists) {
-              retryCount++;
-              if (retryCount < maxRetries) {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-              }
-            }
-          }
-
-          // Clear the creating_profile flag now that profile creation is complete
-          localStorage.removeItem("creating_profile");
-
-          // Add another delay to ensure the profile is fully available
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-
-          // If we're in the evaluation flow, call onSignUpComplete with the user ID
-          if (evaluationResults && onSignUpComplete) {
-            setLoadingMessage(
-              "Preparando para guardar resultados de evaluación..."
-            );
-            try {
-              await onSignUpComplete(userId);
-            } catch (error) {
-              console.error("Error in onSignUpComplete:", error);
-              // Don't throw here, just log the error and continue
-              toast({
-                title: "Advertencia",
-                description:
-                  "Hubo un problema al guardar los resultados, pero puede continuar.",
-                variant: "default",
-              });
-            }
-          } else {
-            // Only verify profile if we're not in the evaluation flow
-            toast({
-              title: "Éxito",
-              description: "Tu cuenta ha sido creada correctamente.",
-            });
-
-            // If we're coming from an evaluation, don't redirect automatically
-            if (!evaluationResults) {
-              // Add a small delay before redirecting to ensure profile is available
-              setLoadingMessage("Redirigiendo al dashboard...");
-              setTimeout(() => {
-                router.push("/dashboard");
-              }, 1000);
-            }
-          }
-        } catch (profileError) {
-          console.error("Profile creation error:", profileError);
-
-          // Clear the creating_profile flag in case of error
-          localStorage.removeItem("creating_profile");
-
-          // If profile creation fails, we should still show a toast
-          toast({
-            title: "Error",
-            description:
-              profileError instanceof Error
-                ? profileError.message
-                : "Error al crear perfil. Por favor, inténtalo de nuevo.",
-            variant: "destructive",
-          });
-
-          // If we're in the evaluation flow, still try to proceed
-          if (evaluationResults && onSignUpComplete) {
-            try {
-              await onSignUpComplete(userId);
-            } catch (error) {
-              console.error(
-                "Error in onSignUpComplete after profile creation failure:",
-                error
-              );
-            }
-          }
-        }
-      } catch (error) {
-        // Clear the creating_profile flag in case of error
-        localStorage.removeItem("creating_profile");
-        throw error;
+      // If avatar file exists, store the fact that we have one
+      // (we can't store the file itself in localStorage)
+      if (avatarFile) {
+        localStorage.setItem("hasAvatarPending", "true");
       }
+
+      setIsLoading(false);
+
+      // Redirect to sign-in page or a custom page instructing them to check email
+      router.push("/auth/verify-email");
     } catch (error) {
-      console.error("Sign up error:", error);
-
-      // Clear the creating_profile flag in case of error
-      localStorage.removeItem("creating_profile");
-
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Algo salió mal. Por favor, inténtalo de nuevo.";
-
+      console.error("Error in form submission:", error);
+      setIsLoading(false);
       toast({
         title: "Error",
-        description: errorMessage,
+        description:
+          error instanceof Error ? error.message : "Ha ocurrido un error.",
         variant: "destructive",
       });
-    } finally {
-      setLoadingMessage("");
-      setIsLoading(false);
     }
   }
 

@@ -209,8 +209,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Starting sign-up process for:", email);
 
-      // Note: We don't hash passwords for Supabase Auth - it handles security properly
-      // This is the correct approach as Supabase handles password hashing server-side
+      // Set flag in localStorage to prevent premature profile fetching attempts
+      localStorage.setItem("creating_profile", "true");
+
+      // Sign up with email verification enabled
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -224,11 +226,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      console.log("Sign-up successful, user:", data?.user?.id);
+      console.log("Sign-up successful, verification email sent to:", email);
 
-      // Don't try to fetch profile here - let the auth state change handler do it
-      // with the retry logic
+      // Check if email confirmation is required
+      if (data?.user?.identities?.length === 0) {
+        // This means the user already exists but needs to confirm their email
+        alert(
+          "An account with this email already exists. Please check your email to confirm your account."
+        );
+      } else if (
+        !data?.user?.confirmed_at &&
+        data?.user?.email_confirmed_at === null
+      ) {
+        // New user that needs to confirm their email
+        alert(
+          "Please check your email for a confirmation link to complete your registration."
+        );
+      }
+
+      // Clear creating_profile flag after 10 seconds to handle cases where user doesn't click the verification link
+      setTimeout(() => {
+        localStorage.removeItem("creating_profile");
+      }, 10000);
     } catch (error) {
+      localStorage.removeItem("creating_profile");
       console.error("Sign up error:", error);
       throw error;
     }

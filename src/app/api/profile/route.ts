@@ -40,11 +40,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create minimal profile first with enum value
+    // Create minimal profile first with FREE role always
     const profile = await prisma.profile.create({
       data: {
         userId: userId,
-        role: UserRole.FREE,
+        role: UserRole.FREE, // Always set role to FREE for new users
         active: true,
       },
     });
