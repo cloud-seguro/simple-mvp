@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Shield, Lock } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion";
+import { Shield, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function EvaluationOptions() {
   const router = useRouter();
@@ -24,12 +24,12 @@ export default function EvaluationOptions() {
         staggerChildren: 0.2,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  }
+  };
 
   return (
     <section className="py-20" id="evaluacion">
@@ -42,9 +42,12 @@ export default function EvaluationOptions() {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Evalúa tu nivel de madurez en ciberseguridad
+            🔍 Diagnóstico inicial: empieza tu camino a la seguridad
           </h2>
           <p className="text-lg max-w-3xl mx-auto">
+            Evalúa tu nivel de madurez en ciberseguridad
+          </p>
+          <p className="text-lg max-w-3xl mx-auto mt-2">
             Selecciona la evaluación que mejor se adapte a tus necesidades y
             descubre cómo mejorar la seguridad de tu empresa
           </p>
@@ -70,13 +73,12 @@ export default function EvaluationOptions() {
               </div>
             </div>
             <h3 className="text-2xl font-bold mb-4 text-center">
-              Evaluación Inicial
+              ✅ Evaluación Gratuita
             </h3>
             <div className="flex-grow">
               <p className="mb-6 text-center">
-                Ideal para empresas que están comenzando su camino en
-                ciberseguridad o necesitan una evaluación básica de su postura de
-                seguridad.
+                Conoce tu estado actual en menos de 5 minutos y recibe una guía
+                de acción básica.
               </p>
               <ul className="mb-6 space-y-3">
                 <li className="flex items-start">
@@ -98,7 +100,7 @@ export default function EvaluationOptions() {
               </ul>
             </div>
             <Button onClick={handleInitialEvaluation}>
-              Comenzar Evaluación Inicial
+              Realizar evaluación gratuita
             </Button>
           </motion.div>
 
@@ -115,13 +117,12 @@ export default function EvaluationOptions() {
               </div>
             </div>
             <h3 className="text-2xl font-bold mb-4 text-center">
-              Evaluación Avanzada
+              🚀 Evaluación Avanzada (paga)
             </h3>
             <div className="flex-grow">
               <p className="mb-6 text-center">
-                Para empresas que ya tienen medidas de seguridad implementadas y
-                buscan una evaluación más profunda basada en estándares como ISO
-                27001 o NIST.
+                Diagnóstico completo, plan personalizado, acceso al dashboard y
+                posibilidad de activar módulos especializados.
               </p>
               <ul className="mb-6 space-y-3">
                 <li className="flex items-start">
@@ -138,12 +139,12 @@ export default function EvaluationOptions() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-black mr-2 font-bold">✓</span>
-                  <span>Tiempo estimado: 15-20 minutos</span>
+                  <span>Acceso al dashboard personalizado</span>
                 </li>
               </ul>
             </div>
             <Button onClick={handleAdvancedEvaluation}>
-              Comenzar Evaluación Avanzada
+              Actualizar a evaluación avanzada
             </Button>
           </motion.div>
         </motion.div>
@@ -151,4 +152,3 @@ export default function EvaluationOptions() {
     </section>
   );
 }
-

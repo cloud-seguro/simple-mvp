@@ -2,7 +2,17 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Shield, Database, Bell, Users, Clock } from "lucide-react";
+import {
+  Shield,
+  Database,
+  Bell,
+  Users,
+  Clock,
+  Layers,
+  Zap,
+  Search,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SimplifiedPricing() {
@@ -169,6 +179,31 @@ export default function SimplifiedPricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
+                    <Database className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium text-white">
+                      Dashboard avanzado
+                    </h4>
+                    <p className="text-white/80">
+                      Visualiza tu estado de seguridad con métricas detalladas y
+                      personalizadas
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={2}
+                >
+                  <motion.div
+                    className="bg-white/20 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
                     <Bell className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
@@ -187,20 +222,20 @@ export default function SimplifiedPricing() {
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true }}
-                  custom={2}
+                  custom={3}
                 >
                   <motion.div
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Database className="h-5 w-5 text-white" />
+                    <Layers className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Dashboard personalizado
+                      Módulos adicionales
                     </h4>
                     <p className="text-white/80">
-                      Visualiza tu estado de seguridad con métricas claras
+                      Acceso a módulos especializados según tus necesidades
                     </p>
                   </div>
                 </motion.div>
@@ -328,6 +363,29 @@ export default function SimplifiedPricing() {
                     </p>
                   </div>
                 </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={3}
+                >
+                  <motion.div
+                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Zap className="h-5 w-5 text-black" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Implementación acelerada</h4>
+                    <p className="text-gray-600">
+                      Configuración rápida de tu dashboard y módulos
+                      personalizados
+                    </p>
+                  </div>
+                </motion.div>
               </div>
             </div>
 
@@ -347,6 +405,79 @@ export default function SimplifiedPricing() {
               Sin compromisos a largo plazo
             </p>
           </motion.div>
+        </motion.div>
+
+        {/* Módulos Adicionales */}
+        <motion.div
+          className="mt-20 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h3 className="text-2xl font-bold mb-6">
+            🧩 Nuestros módulos adicionales
+          </h3>
+          <p className="text-lg mb-8 max-w-3xl mx-auto">
+            Personaliza tu plan con módulos especializados según tus necesidades
+          </p>
+
+          <div className="grid md:grid-cols-5 gap-4 max-w-5xl mx-auto mb-12">
+            <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
+              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-orange-500" />
+              </div>
+              <h4 className="font-bold mb-2">Simple Evalúa</h4>
+              <p className="text-sm text-gray-600">
+                Diagnóstico del estado actual de ciberseguridad y plan de
+                mejora.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
+              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                <Bell className="h-5 w-5 text-orange-500" />
+              </div>
+              <h4 className="font-bold mb-2">Simple Breach</h4>
+              <p className="text-sm text-gray-600">
+                Revisa si los datos de tu empresa han sido comprometidos o
+                filtrados.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
+              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                <Search className="h-5 w-5 text-orange-500" />
+              </div>
+              <h4 className="font-bold mb-2">Simple Scan</h4>
+              <p className="text-sm text-gray-600">
+                Escanea tu sitio web o aplicaciones en busca de
+                vulnerabilidades.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
+              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                <Database className="h-5 w-5 text-orange-500" />
+              </div>
+              <h4 className="font-bold mb-2">Simple API</h4>
+              <p className="text-sm text-gray-600">
+                Analiza la seguridad de tus APIs. Las APIs son el principal
+                riesgo en fintech.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
+              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+                <Users className="h-5 w-5 text-orange-500" />
+              </div>
+              <h4 className="font-bold mb-2">Simple Contrata</h4>
+              <p className="text-sm text-gray-600">
+                Accede al mejor equipo de profesionales de ciberseguridad en
+                LATAM.
+              </p>
+            </div>
+          </div>
         </motion.div>
 
         <motion.div

@@ -7,6 +7,7 @@ import Testimonial from "@/components/views/landing-page/Testimonials";
 import Footer from "@/components/views/landing-page/Footer";
 import Benefits from "@/components/views/landing-page/benefits";
 import SimplifiedPricing from "@/components/views/landing-page/simplified-pricing";
+import DashboardSection from "@/components/views/landing-page/dashboard-section";
 
 export default function Home() {
   return (
@@ -15,6 +16,9 @@ export default function Home() {
       <Hero />
       <section id="evaluacion" className="py-24">
         <EvaluationOptions />
+      </section>
+      <section id="dashboard" className="py-24 bg-gray-50">
+        <DashboardSection />
       </section>
       <section id="beneficios" className="py-24 bg-white">
         <Benefits />

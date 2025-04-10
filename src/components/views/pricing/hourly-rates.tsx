@@ -1,7 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Lock, Search, Terminal } from "lucide-react";
+import {
+  Shield,
+  Lock,
+  Search,
+  Terminal,
+  Database,
+  Layers,
+  Zap,
+  Check,
+  Bell,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function HourlyRates() {
@@ -15,15 +25,15 @@ export default function HourlyRates() {
         transition={{ duration: 0.5 }}
       >
         <span className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-3">
-          Monitoreo continuo de seguridad
+          Equipo de especialistas dedicados
         </span>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Accede a recursos exclusivos con nuestra suscripción mensual
+          Asesoría especializada por hora para tu empresa
         </h2>
         <p className="text-lg max-w-3xl mx-auto">
-          Obtén acceso a un dashboard personalizado para visualizar tus avances
-          en ciberseguridad, realizar un análisis continuo de vulnerabilidades y
-          tomar mejores decisiones para proteger tu empresa.
+          Nuestro equipo de especialistas te ayudará a configurar tu dashboard
+          personalizado, implementar los módulos adecuados y brindar soporte
+          continuo para maximizar tu seguridad.
         </p>
       </motion.div>
 
@@ -36,7 +46,7 @@ export default function HourlyRates() {
       >
         {/* Stats banner */}
         <div className="bg-black text-center py-2 mb-8 font-medium text-white">
-          MONITORA TU SEGURIDAD EN TIEMPO REAL
+          IMPLEMENTACIÓN Y SOPORTE PROFESIONAL
         </div>
 
         {/* Pricing Cards Table */}
@@ -57,19 +67,19 @@ export default function HourlyRates() {
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
                     <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
-                    <span>Dashboard personalizado básico</span>
+                    <span>10 horas de soporte mensual</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Monitoreo de correo empresarial</span>
+                    <span>Configuración de dashboard básico</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Evaluación básica de vulnerabilidades</span>
+                    <span>Implementación de 1 módulo</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Alertas de seguridad básicas</span>
+                    <span>Asesoría técnica básica</span>
                   </li>
                 </ul>
               </div>
@@ -110,19 +120,19 @@ export default function HourlyRates() {
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
                     <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
-                    <span>Dashboard avanzado con métricas</span>
+                    <span>24 horas de soporte mensual</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Monitoreo completo de activos digitales</span>
+                    <span>Configuración de dashboard avanzado</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Análisis continuo de vulnerabilidades</span>
+                    <span>Implementación de 3 módulos</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Alertas en tiempo real</span>
+                    <span>Respuesta prioritaria a incidentes</span>
                   </li>
                 </ul>
               </div>
@@ -160,19 +170,19 @@ export default function HourlyRates() {
                 <ul className="space-y-3">
                   <li className="flex items-baseline">
                     <span className="inline-block bg-yellow-400 text-black rounded-full w-5 h-5 flex-shrink-0 mr-2"></span>
-                    <span>Dashboard empresarial completo</span>
+                    <span>48 horas de soporte mensual</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Monitoreo de APIs y servicios</span>
+                    <span>Dashboard empresarial personalizado</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Análisis predictivo de amenazas</span>
+                    <span>Implementación de módulos ilimitados</span>
                   </li>
                   <li className="flex items-baseline">
                     <span className="text-orange-500 mr-2">✓</span>
-                    <span>Respuesta automática a incidentes</span>
+                    <span>Desarrollo de módulos a medida</span>
                   </li>
                 </ul>
               </div>
@@ -198,58 +208,180 @@ export default function HourlyRates() {
         </div>
       </motion.div>
 
-      {/* Cybersecurity Services */}
+      {/* Module Implementation Services */}
       <motion.div
-        className="mt-20 grid md:grid-cols-4 gap-8"
+        className="mt-20"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Shield className="h-6 w-6 text-black" />
-          </div>
-          <h3 className="text-xl font-bold mb-2">
-            Protección de Infraestructura
-          </h3>
-          <p className="text-gray-600">
-            Evaluación y protección de servidores, redes y sistemas críticos de
-            tu empresa.
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">
+            Servicios de implementación y personalización
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-10">
+            Nuestros especialistas configuran e implementan módulos adaptados a
+            tus necesidades específicas
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Lock className="h-6 w-6 text-black" />
+        <div className="grid md:grid-cols-4 gap-8">
+          <div className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+              <Shield className="h-6 w-6 text-black" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">
+              Implementación de Dashboard
+            </h3>
+            <p className="text-gray-600">
+              Configuración personalizada del dashboard según las necesidades
+              específicas de tu empresa.
+            </p>
           </div>
-          <h3 className="text-xl font-bold mb-2">Seguridad de Aplicaciones</h3>
-          <p className="text-gray-600">
-            Análisis de seguridad de aplicaciones web, móviles y APIs de tu
-            negocio.
-          </p>
-        </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Search className="h-6 w-6 text-black" />
+          <div className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+              <Layers className="h-6 w-6 text-black" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Configuración de Módulos</h3>
+            <p className="text-gray-600">
+              Instalación y configuración de módulos especializados según los
+              requisitos de tu negocio.
+            </p>
           </div>
-          <h3 className="text-xl font-bold mb-2">Monitoreo de Amenazas</h3>
-          <p className="text-gray-600">
-            Vigilancia continua para detectar y responder a amenazas emergentes
-            en tiempo real.
-          </p>
-        </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-            <Terminal className="h-6 w-6 text-black" />
+          <div className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+              <Search className="h-6 w-6 text-black" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Análisis de Seguridad</h3>
+            <p className="text-gray-600">
+              Evaluación continua de vulnerabilidades y riesgos con informes
+              detallados en tu dashboard.
+            </p>
           </div>
-          <h3 className="text-xl font-bold mb-2">Consultoría Especializada</h3>
-          <p className="text-gray-600">
-            Asesoramiento personalizado por expertos en seguridad informática y
-            cumplimiento normativo.
-          </p>
+
+          <div className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+              <Zap className="h-6 w-6 text-black" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Respuesta a Incidentes</h3>
+            <p className="text-gray-600">
+              Soporte especializado para detectar y responder a amenazas de
+              seguridad en tiempo real.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Custom Module Development */}
+      <motion.div
+        className="mt-20 bg-gray-50 rounded-2xl p-8 md:p-12"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold mb-6">
+              Implementación de módulos SIMPLE
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Nuestros especialistas te ayudarán a configurar e implementar los
+              módulos que mejor se adapten a las necesidades específicas de tu
+              empresa, además de brindarte capacitación para su uso adecuado.
+            </p>
+
+            <div className="space-y-4 mb-8">
+              <div className="flex items-start">
+                <div className="bg-yellow-400 p-1 rounded-full mr-3 mt-1">
+                  <Check className="h-4 w-4 text-black" />
+                </div>
+                <div>
+                  <p className="text-gray-800">
+                    Instalación y configuración personalizada
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="bg-yellow-400 p-1 rounded-full mr-3 mt-1">
+                  <Check className="h-4 w-4 text-black" />
+                </div>
+                <div>
+                  <p className="text-gray-800">
+                    Integración perfecta con tu dashboard
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="bg-yellow-400 p-1 rounded-full mr-3 mt-1">
+                  <Check className="h-4 w-4 text-black" />
+                </div>
+                <div>
+                  <p className="text-gray-800">
+                    Capacitación de uso para tu equipo
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              className="bg-black text-white hover:bg-gray-800 border-0 px-8"
+            >
+              Solicitar implementación
+            </Button>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <h4 className="text-lg font-bold mb-4 text-center">
+              Nuestros módulos especializados
+            </h4>
+            <ul className="space-y-4">
+              <li className="flex items-start p-3 border-b border-gray-100">
+                <div className="bg-yellow-100 p-2 rounded-full mr-4">
+                  <Shield className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <h5 className="font-semibold">Simple Evalúa</h5>
+                  <p className="text-sm text-gray-600">
+                    Diagnóstico del estado actual de ciberseguridad y plan de
+                    mejora personalizado
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex items-start p-3 border-b border-gray-100">
+                <div className="bg-yellow-100 p-2 rounded-full mr-4">
+                  <Bell className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <h5 className="font-semibold">Simple Breach + Simple Scan</h5>
+                  <p className="text-sm text-gray-600">
+                    Monitoreo de datos filtrados y escaneo de vulnerabilidades
+                    en sitios web y aplicaciones
+                  </p>
+                </div>
+              </li>
+
+              <li className="flex items-start p-3">
+                <div className="bg-yellow-100 p-2 rounded-full mr-4">
+                  <Database className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <h5 className="font-semibold">Simple API</h5>
+                  <p className="text-sm text-gray-600">
+                    Análisis especializado de seguridad en APIs, ideal para
+                    empresas fintech y de servicios digitales
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </motion.div>
 
@@ -267,7 +399,7 @@ export default function HourlyRates() {
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Nuestro equipo de especialistas cuentan con amplia experiencia y
-            certificaciones de seguridad
+            certificaciones de seguridad para implementar soluciones efectivas
           </p>
         </div>
 
@@ -287,10 +419,10 @@ export default function HourlyRates() {
             </p>
           </div>
           <div className="bg-white p-6 border border-gray-200 rounded-xl">
-            <h3 className="text-xl font-bold mb-2">Respuesta inmediata</h3>
+            <h3 className="text-xl font-bold mb-2">Implementación rápida</h3>
             <p className="text-gray-600">
-              Tiempo de respuesta garantizado según el plan contratado, con
-              soporte prioritario
+              Configuración de tu dashboard y módulos en tiempo récord para que
+              puedas empezar a proteger tu empresa de inmediato
             </p>
           </div>
         </div>

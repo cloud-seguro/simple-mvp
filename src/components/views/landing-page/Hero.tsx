@@ -41,7 +41,7 @@ export default function Hero() {
               className="text-4xl font-bold leading-tight text-black"
               startOnView={true}
             >
-              Hacemos lo complejo de la Ciberseguridad Simple
+              Hacemos lo complejo de la ciberseguridad, SIMPLE.
             </HyperText>
           </motion.div>
 
@@ -112,9 +112,10 @@ export default function Hero() {
             className="text-center"
           >
             <p className="text-lg mb-8 text-black">
-              La ciberseguridad no tiene que ser difícil ni costosa. Con nuestro
-              enfoque, te ayudamos a entender tu nivel actual de seguridad a
-              través de evaluaciones personalizadas.
+              Muchas empresas no acceden a servicios de ciberseguridad porque
+              son costosos, técnicos o difíciles de entender. En Ciberseguridad
+              Simple, transformamos lo difícil en soluciones claras, accesibles
+              y accionables. Evalúa, mejora y protege tu empresa sin enredos.
             </p>
             <div className="flex flex-col gap-4">
               <Button
@@ -143,12 +144,16 @@ export default function Hero() {
               className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-black"
               startOnView={true}
             >
-              Hacemos lo complejo de la Ciberseguridad Simple
+              Hacemos lo complejo de la ciberseguridad, SIMPLE.
             </HyperText>
             <p className="text-xl mb-8 text-black">
-              La ciberseguridad no tiene que ser difícil ni costosa. Con nuestro
-              enfoque, te ayudamos a entender tu nivel actual de seguridad a
-              través de evaluaciones personalizadas.
+              Muchas empresas no acceden a servicios de ciberseguridad porque
+              son costosos, técnicos o difíciles de entender. En Ciberseguridad
+              Simple, transformamos lo difícil en soluciones claras, accesibles
+              y accionables. Evalúa, mejora y protege tu empresa sin enredos.
+            </p>
+            <p className="text-xl font-bold mb-8 text-black">
+              🎯 Todo desde un solo lugar.
             </p>
             <div className="flex flex-row gap-4">
               <Button

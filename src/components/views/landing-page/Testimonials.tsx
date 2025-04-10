@@ -2,11 +2,27 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Quote, Star, Building2, Briefcase } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Quote,
+  Star,
+  Building2,
+  Briefcase,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TextAnimate } from "@/components/magicui/text-animate";
 
 const testimonials = [
+  {
+    quote:
+      "Con Simple Scan encontramos vulnerabilidades críticas que resolvimos en días. Antes esto parecía imposible.",
+    name: "Alejandro Torres",
+    title: "CTO",
+    rating: 5,
+    company: "Fintech LATAM",
+    industry: "Finanzas",
+  },
   {
     quote:
       "Lo que buscábamos era un enfoque de ciberseguridad que fuera efectivo y simple de implementar. SIMPLE fue la solución perfecta para nosotros. Se alineó perfectamente con nuestros valores fundamentales.",
