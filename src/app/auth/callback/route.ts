@@ -97,6 +97,7 @@ export async function GET(request: NextRequest) {
   </script>
 </body>
 </html>
+            `;
 
             // Return the HTML that will process the pending profile data
             return new NextResponse(html, {

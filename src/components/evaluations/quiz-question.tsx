@@ -5,7 +5,6 @@ import type { QuizQuestion as QuizQuestionType } from "./types";
 import { useRef } from "react";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 interface QuizQuestionProps {
   question: QuizQuestionType;
@@ -35,9 +34,7 @@ export function QuizQuestion({
       {/* Header with logo */}
       <header className="p-2 md:p-4 bg-background border-b">
         <div className="flex justify-start">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <SimpleHeader className="text-primary" />
-          </Link>
+          <SimpleHeader className="text-primary hover:opacity-80 transition-opacity" />
         </div>
       </header>
 
