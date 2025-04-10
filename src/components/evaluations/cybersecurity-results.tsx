@@ -751,97 +751,6 @@ export function CybersecurityResults({
                   </>
                 )}
               </div>
-
-              {/* Call to Action Banner */}
-              <div
-                className={cn(
-                  "mt-6 p-6 rounded-xl text-white shadow-lg border transform hover:scale-[1.02] transition-all duration-300",
-                  overallPercentage <= 20
-                    ? "bg-gradient-to-r from-red-500 to-red-600 border-red-300"
-                    : overallPercentage <= 40
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-300"
-                      : overallPercentage <= 60
-                        ? "bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-300"
-                        : overallPercentage <= 80
-                          ? "bg-gradient-to-r from-green-500 to-green-600 border-green-300"
-                          : "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-300"
-                )}
-              >
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                  <div className="flex-shrink-0 mb-4 md:mb-0">
-                    <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="flex-grow text-center md:text-left">
-                    <h3 className="text-xl font-bold mb-2">
-                      ¡Mejora tu nivel de ciberseguridad ahora!
-                    </h3>
-                    <p className="mb-2 max-w-lg">
-                      Nuestros especialistas pueden ayudarte a implementar las
-                      medidas necesarias para proteger tu organización de
-                      amenazas cibernéticas.
-                    </p>
-                    <div className="flex flex-wrap gap-2 justify-center md:justify-start text-sm font-medium mt-1 mb-3">
-                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                        Asesoría personalizada
-                      </span>
-                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                        Implementación de controles
-                      </span>
-                      <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                        Análisis de vulnerabilidades
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <Link href={scheduleUrl} className="inline-block">
-                      <Button
-                        className={cn(
-                          "bg-white px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center",
-                          overallPercentage <= 20
-                            ? "text-red-600 hover:bg-red-50"
-                            : overallPercentage <= 40
-                              ? "text-orange-600 hover:bg-orange-50"
-                              : overallPercentage <= 60
-                                ? "text-yellow-600 hover:bg-yellow-50"
-                                : overallPercentage <= 80
-                                  ? "text-green-600 hover:bg-green-50"
-                                  : "text-blue-600 hover:bg-blue-50"
-                        )}
-                      >
-                        Agendar Especialista
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M5 12h14"></path>
-                          <path d="m12 5 7 7-7 7"></path>
-                        </svg>
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
@@ -1058,6 +967,97 @@ export function CybersecurityResults({
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Call to Action Banner - Moved to bottom of page */}
+            <div
+              className={cn(
+                "p-6 rounded-xl text-white shadow-lg border transform hover:scale-[1.02] transition-all duration-300",
+                overallPercentage <= 20
+                  ? "bg-gradient-to-r from-red-500 to-red-600 border-red-300"
+                  : overallPercentage <= 40
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-300"
+                    : overallPercentage <= 60
+                      ? "bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-300"
+                      : overallPercentage <= 80
+                        ? "bg-gradient-to-r from-green-500 to-green-600 border-green-300"
+                        : "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-300"
+              )}
+            >
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                <div className="flex-shrink-0 mb-4 md:mb-0">
+                  <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-grow text-center md:text-left">
+                  <h3 className="text-xl font-bold mb-2">
+                    ¡Mejora tu nivel de ciberseguridad ahora!
+                  </h3>
+                  <p className="mb-2 max-w-lg">
+                    Nuestros especialistas pueden ayudarte a implementar las
+                    medidas necesarias para proteger tu organización de amenazas
+                    cibernéticas.
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start text-sm font-medium mt-1 mb-3">
+                    <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                      Asesoría personalizada
+                    </span>
+                    <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                      Implementación de controles
+                    </span>
+                    <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                      Análisis de vulnerabilidades
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <Link href={scheduleUrl} className="inline-block">
+                    <Button
+                      className={cn(
+                        "bg-white px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center",
+                        overallPercentage <= 20
+                          ? "text-red-600 hover:bg-red-50"
+                          : overallPercentage <= 40
+                            ? "text-orange-600 hover:bg-orange-50"
+                            : overallPercentage <= 60
+                              ? "text-yellow-600 hover:bg-yellow-50"
+                              : overallPercentage <= 80
+                                ? "text-green-600 hover:bg-green-50"
+                                : "text-blue-600 hover:bg-blue-50"
+                      )}
+                    >
+                      Agendar Especialista
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                      </svg>
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
 
