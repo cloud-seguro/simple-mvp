@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardCharts } from "./components/dashboard-charts";
 import { RecentEvaluations } from "./components/recent-evaluations";
-import { RecommendationsList } from "./components/recommendations-list";
 import { EvaluationType } from "@prisma/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -125,16 +124,6 @@ export default async function DashboardPage() {
     .slice(0, 10)
     .reverse();
 
-  // Process the latest evaluations to generate recommendations
-  const latestInitial = initialEvaluations[0];
-  const latestAdvanced = advancedEvaluations[0];
-
-  // Generate recommendations based on scores
-  const recommendations = generateRecommendations(
-    latestInitial,
-    latestAdvanced
-  );
-
   const userName = profile.firstName
     ? `${profile.firstName} ${profile.lastName || ""}`
     : "Usuario";
@@ -237,13 +226,8 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 h-full">
-          <RecentEvaluations evaluations={recentEvaluations} />
-        </div>
-        <div className="h-full">
-          <RecommendationsList recommendations={recommendations} />
-        </div>
+      <div className="w-full">
+        <RecentEvaluations evaluations={recentEvaluations} />
       </div>
     </div>
   );
@@ -320,102 +304,4 @@ function calculateCategoryScores(
   });
 
   return categoryScores;
-}
-
-// Function to generate recommendations based on evaluation scores
-function generateRecommendations(
-  latestInitial?: SimpleEvaluation,
-  latestAdvanced?: SimpleEvaluation
-) {
-  const recommendations = [];
-
-  // Add recommendations based on initial evaluation
-  if (latestInitial?.answers) {
-    // Check policies score
-    const policiesQuestions = Object.entries(latestInitial.answers).filter(
-      ([key]) => key.startsWith("politicas")
-    );
-
-    const policiesAvg =
-      policiesQuestions.reduce((sum, [, val]) => sum + (val as number), 0) /
-      (policiesQuestions.length || 1);
-
-    if (policiesAvg < 2) {
-      recommendations.push({
-        id: "rec1",
-        category: "Políticas",
-        title: "Establecer políticas formales de seguridad",
-        priority: "Alta" as const,
-      });
-    }
-
-    // Check MFA implementation
-    const mfaQuestion = latestInitial.answers["sgsi-2"] as number;
-    if (mfaQuestion < 2) {
-      recommendations.push({
-        id: "rec2",
-        category: "Seguridad",
-        title: "Implementar autenticación de dos factores en sistemas críticos",
-        priority: "Alta" as const,
-      });
-    }
-
-    // Check training
-    const trainingQuestions = Object.entries(latestInitial.answers).filter(
-      ([key]) => key.startsWith("formacion")
-    );
-
-    const trainingAvg =
-      trainingQuestions.reduce((sum, [, val]) => sum + (val as number), 0) /
-      (trainingQuestions.length || 1);
-
-    if (trainingAvg < 2) {
-      recommendations.push({
-        id: "rec3",
-        category: "Formación",
-        title: "Implementar programa regular de capacitación en ciberseguridad",
-        priority: "Media" as const,
-      });
-    }
-  }
-
-  // Add recommendations based on advanced evaluation
-  if (latestAdvanced?.answers) {
-    // Check penetration testing
-    const pentestQuestion = latestAdvanced.answers["redes-1"] as number;
-    if (pentestQuestion < 2) {
-      recommendations.push({
-        id: "rec4",
-        category: "Redes",
-        title:
-          "Realizar pruebas de penetración (pentesting) en aplicaciones críticas",
-        priority: "Alta" as const,
-      });
-    }
-
-    // Check incident response
-    const incidentQuestion = latestAdvanced.answers["incidentes-1"] as number;
-    if (incidentQuestion < 2) {
-      recommendations.push({
-        id: "rec5",
-        category: "Incidentes",
-        title: "Desarrollar plan formal de respuesta a incidentes",
-        priority: "Media" as const,
-      });
-    }
-
-    // Check development security
-    const devSecQuestion = latestAdvanced.answers["desarrollo-1"] as number;
-    if (devSecQuestion < 2) {
-      recommendations.push({
-        id: "rec6",
-        category: "Desarrollo",
-        title: "Implementar prácticas DevSecOps y revisión de código",
-        priority: "Media" as const,
-      });
-    }
-  }
-
-  // Return up to 4 recommendations
-  return recommendations.slice(0, 4);
 }

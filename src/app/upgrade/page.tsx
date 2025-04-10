@@ -57,8 +57,13 @@ export default async function UpgradePage() {
   // If no profile after retries, create a basic profile
   if (!profile) {
     try {
-      profile = await prisma.profile.create({
-        data: {
+      profile = await prisma.profile.upsert({
+        where: { userId: user.id },
+        update: {
+          role: "FREE",
+          active: true,
+        },
+        create: {
           userId: user.id,
           role: "FREE",
           active: true,

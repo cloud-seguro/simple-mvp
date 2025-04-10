@@ -25,24 +25,14 @@ export async function POST(req: Request) {
       });
     }
 
-    // Check if profile already exists
-    const existingProfile = await prisma.profile.findUnique({
+    // Create or update profile with FREE role
+    const profile = await prisma.profile.upsert({
       where: { userId },
-    });
-
-    if (existingProfile) {
-      return new Response(
-        JSON.stringify({ error: "Profile already exists for this user" }),
-        {
-          status: 409,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Create minimal profile first with FREE role always
-    const profile = await prisma.profile.create({
-      data: {
+      update: {
+        role: UserRole.FREE,
+        active: true,
+      },
+      create: {
         userId: userId,
         role: UserRole.FREE, // Always set role to FREE for new users
         active: true,
