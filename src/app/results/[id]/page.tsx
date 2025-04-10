@@ -1,11 +1,16 @@
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getEvaluationById } from "@/lib/evaluation-utils";
 import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
 import { getMaturityLevel } from "@/lib/maturity-utils";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { getQuizData } from "../../../lib/quiz-data";
 import type { InterestOption, QuizData } from "@/components/evaluations/types";
+import { cookies } from "next/headers";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { prisma } from "@/lib/prisma";
+import { UserRole } from "@prisma/client";
+import { ResultsHeader } from "@/components/results-header";
 
 // Fallback quiz data in case the actual data is not found
 import { initialEvaluationData } from "@/data/initial-evaluation";
@@ -56,6 +61,32 @@ export async function generateMetadata({ params }: ResultsPageProps) {
 
 export default async function ResultsPage({ params }: ResultsPageProps) {
   try {
+    // Get user session to check authentication and permissions
+    const supabase = createServerComponentClient({ cookies });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    // If not authenticated, redirect to sign-in
+    if (!session) {
+      redirect("/sign-in");
+    }
+
+    // Get the user's profile to check their role
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+      select: { role: true },
+    });
+
+    // If no profile or not a premium/superadmin user, redirect to upgrade page
+    if (
+      !profile ||
+      (profile.role !== UserRole.PREMIUM &&
+        profile.role !== UserRole.SUPERADMIN)
+    ) {
+      redirect("/upgrade");
+    }
+
     // Use Promise.resolve to ensure params is awaited
     const { id } = await Promise.resolve(params);
 
@@ -355,7 +386,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       0
     );
     const maturityInfo = getMaturityLevel(quizData.id, totalScore);
-    const categories = Object.entries(
+    const categoryScores = Object.entries(
       quizData.questions.reduce(
         (acc, q) => {
           const category = q.category || "General";
@@ -435,10 +466,12 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     });
 
     // Calculate the weakest categories for specialist recommendations
-    const categoryPercentages = categories.map(({ name, score, maxScore }) => ({
-      category: name,
-      percentage: maxScore > 0 ? Math.round((score / maxScore) * 100) : 0,
-    }));
+    const categoryPercentages = categoryScores.map(
+      ({ name, score, maxScore }) => ({
+        category: name,
+        percentage: maxScore > 0 ? Math.round((score / maxScore) * 100) : 0,
+      })
+    );
 
     // Get the two lowest scoring categories (areas that need the most help)
     const weakestCategories = [...categoryPercentages]
@@ -447,44 +480,58 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       .map((item) => item.category);
 
     return (
-      <Suspense
-        fallback={<SecurityLoadingScreen message="Cargando resultados..." />}
-      >
-        <CybersecurityResults
-          quizData={quizData}
-          results={finalAnswers}
-          isSharedView={true}
-          interest={interestData?.reason as InterestOption}
-          evaluationId={id}
-          score={totalScore}
-          maxScore={maxScore}
-          maturityDescription={maturityInfo.description}
-          maturityLevelNumber={parseInt(
-            maturityInfo.level.split("–")[0].replace("Nivel ", "").trim(),
-            10
-          )}
-          categories={categories}
-          recommendations={recommendations}
-          weakestCategories={weakestCategories}
-          userInfo={userInfo}
-        />
-      </Suspense>
+      <div className="min-h-screen flex flex-col">
+        <ResultsHeader />
+        <main className="flex-grow">
+          <Suspense
+            fallback={
+              <SecurityLoadingScreen message="Cargando resultados..." />
+            }
+          >
+            <CybersecurityResults
+              quizData={quizData}
+              results={finalAnswers}
+              userInfo={userInfo}
+              isSharedView={true}
+              interest={interestData?.reason as InterestOption}
+              evaluationId={evaluation.id}
+              score={evaluation.score}
+              maxScore={100}
+              maturityDescription={
+                getMaturityLevel(evaluation.score).description
+              }
+              maturityLevelNumber={parseInt(
+                getMaturityLevel(evaluation.score)
+                  .level.split("–")[0]
+                  .replace("Nivel ", "")
+                  .trim(),
+                10
+              )}
+              weakestCategories={weakestCategories}
+              recommendations={recommendations}
+              categories={categoryScores}
+              hideHeader={true}
+            />
+          </Suspense>
+        </main>
+      </div>
     );
   } catch (error) {
-    console.error("Error loading evaluation results:", error);
+    console.error("Error loading results:", error);
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h1 className="text-2xl font-bold text-red-600 mb-4">
-          Error al cargar resultados
-        </h1>
-        <p className="text-center">
-          Lo sentimos, ha ocurrido un error al cargar los resultados de la
-          evaluación.
-        </p>
-        <p className="text-center text-gray-600 mt-2">
-          Detalles del error:{" "}
-          {error instanceof Error ? error.message : String(error)}
-        </p>
+      <div className="min-h-screen flex flex-col">
+        <ResultsHeader />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center p-8">
+            <h1 className="text-2xl font-bold mb-4">
+              Error al cargar los resultados
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Lo sentimos, ha ocurrido un error al cargar los resultados de la
+              evaluación. Por favor intenta nuevamente más tarde.
+            </p>
+          </div>
+        </main>
       </div>
     );
   }

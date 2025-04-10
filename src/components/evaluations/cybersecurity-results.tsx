@@ -44,6 +44,7 @@ interface CybersecurityResultsProps {
     score: number;
     maxScore: number;
   }>;
+  hideHeader?: boolean;
 }
 
 interface QuestionRecommendation {
@@ -88,8 +89,11 @@ export function CybersecurityResults({
   weakestCategories,
   recommendations: providedRecommendations,
   categories,
+  hideHeader = false,
 }: CybersecurityResultsProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [specialistsAvailable, setSpecialistsAvailable] = useState(false);
+  const [loadingSpecialists, setLoadingSpecialists] = useState(true);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -446,15 +450,59 @@ export function CybersecurityResults({
     .slice(0, 2)
     .map((item) => item.category);
 
-  // Use the provided weakest categories if available, otherwise use the calculated ones
-  const finalWeakestCategories =
-    weakestCategories || calculatedWeakestCategories;
-
   // Inside the CybersecurityResults component
   // Extract the maturity level number (1-5) if it's not already provided
   const finalMaturityLevelNumber =
     maturityLevelNumber ||
     parseInt(maturity.level.split("–")[0].replace("Nivel ", "").trim(), 10);
+
+  // Use the provided weakest categories if available, otherwise use the calculated ones
+  const finalWeakestCategories =
+    weakestCategories || calculatedWeakestCategories;
+
+  // Now check specialists availability after we have the necessary variables
+  useEffect(() => {
+    const checkSpecialistsAvailability = async () => {
+      setLoadingSpecialists(true);
+      try {
+        const categoriesParam =
+          finalWeakestCategories.length > 0
+            ? `&categories=${finalWeakestCategories.join(",")}`
+            : "";
+
+        const url = `/api/specialists/recommended?level=${finalMaturityLevelNumber}${categoriesParam}`;
+        console.log("Checking specialists availability at URL:", url);
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          console.error(
+            "Failed to fetch specialists availability:",
+            response.status
+          );
+          setSpecialistsAvailable(false);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Specialists availability check response:", data);
+        console.log("Specialists length:", data.length);
+        setSpecialistsAvailable(data && data.length > 0);
+      } catch (err) {
+        console.error("Error checking specialists availability:", err);
+        setSpecialistsAvailable(false);
+      } finally {
+        setLoadingSpecialists(false);
+      }
+    };
+
+    if (finalMaturityLevelNumber && finalWeakestCategories) {
+      checkSpecialistsAvailability();
+    } else {
+      console.log("Missing maturity level or categories for specialists check");
+      setSpecialistsAvailable(false);
+      setLoadingSpecialists(false);
+    }
+  }, [finalMaturityLevelNumber, finalWeakestCategories]);
 
   // Create the URL for the scheduling page with evaluation data
   const scheduleUrl = `/schedule?level=${finalMaturityLevelNumber}&categories=${finalWeakestCategories.join(",")}${evaluationId ? `&evaluationId=${evaluationId}` : ""}`;
@@ -504,32 +552,24 @@ export function CybersecurityResults({
   const scoreColor = getColorByPercentage(overallPercentage);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {isSharedView && (
+    <div className="w-full bg-gray-50 min-h-screen pb-16">
+      {!hideHeader && (
         <header className="p-3 bg-white border-b">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <Link href="/" className="hover:opacity-80 transition-opacity">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">S</span>
-                </div>
-                <span className="text-xl font-bold text-gray-800">SIMPLE</span>
-              </div>
-            </Link>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="gap-1 hover:bg-gray-100"
-            >
-              <Link href={isAuthenticated ? "/dashboard" : "/"}>
-                <ChevronLeft className="h-4 w-4" />
-                <span>
-                  {isAuthenticated ? "Volver al dashboard" : "Volver al inicio"}
-                </span>
+          <div className="container flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href={isSharedView ? "/dashboard" : "/"}>
+                <Button variant="ghost" size="sm">
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  {isSharedView ? "Dashboard" : "Volver"}
+                </Button>
               </Link>
-            </Button>
+              <h1 className="text-lg font-semibold">
+                Resultados de {quizData?.title || "la evaluación"}
+              </h1>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {userInfo.firstName} {userInfo.lastName}
+            </div>
           </div>
         </header>
       )}
@@ -1020,12 +1060,14 @@ export function CybersecurityResults({
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <SpecialistsRecommendations
-                maturityLevel={finalMaturityLevelNumber}
-                categories={finalWeakestCategories}
-              />
-            </div>
+            {!loadingSpecialists && specialistsAvailable && (
+              <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <SpecialistsRecommendations
+                  maturityLevel={finalMaturityLevelNumber}
+                  categories={finalWeakestCategories}
+                />
+              </div>
+            )}
 
             {!isSharedView && onRestart && (
               <div className="flex justify-center mt-8">
