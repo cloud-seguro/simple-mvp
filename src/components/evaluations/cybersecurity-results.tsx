@@ -14,6 +14,9 @@ import { cn } from "@/lib/utils";
 import { getMaturityLevel } from "@/lib/maturity-utils";
 import { SpecialistsRecommendations } from "./specialists-recommendations";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useState, useEffect } from "react";
 
 interface CybersecurityResultsProps {
   quizData: QuizData;
@@ -86,6 +89,24 @@ export function CybersecurityResults({
   recommendations: providedRecommendations,
   categories,
 }: CybersecurityResultsProps) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (!error) {
+          setIsAuthenticated(!!data.session);
+        }
+      } catch (err) {
+        console.error("Error checking auth:", err);
+      }
+    }
+
+    checkAuth();
+  }, [supabase]);
+
   // Log the input data for debugging
   console.log(
     "CybersecurityResults - quizData:",
@@ -486,7 +507,7 @@ export function CybersecurityResults({
     <div className="min-h-screen flex flex-col bg-gray-50">
       {isSharedView && (
         <header className="p-3 bg-white border-b">
-          <div className="max-w-3xl mx-auto flex items-center justify-start">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
             <Link href="/" className="hover:opacity-80 transition-opacity">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -495,6 +516,20 @@ export function CybersecurityResults({
                 <span className="text-xl font-bold text-gray-800">SIMPLE</span>
               </div>
             </Link>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="gap-1 hover:bg-gray-100"
+            >
+              <Link href={isAuthenticated ? "/dashboard" : "/"}>
+                <ChevronLeft className="h-4 w-4" />
+                <span>
+                  {isAuthenticated ? "Volver al dashboard" : "Volver al inicio"}
+                </span>
+              </Link>
+            </Button>
           </div>
         </header>
       )}
