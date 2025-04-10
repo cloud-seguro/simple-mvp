@@ -100,7 +100,8 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       (profile.role !== UserRole.PREMIUM &&
         profile.role !== UserRole.SUPERADMIN)
     ) {
-      return <ClientRedirect href="/upgrade" />;
+      // Redirect FREE users to the home page instead of the upgrade page
+      return <ClientRedirect href="/" />;
     }
 
     // Use Promise.resolve to ensure params is awaited
