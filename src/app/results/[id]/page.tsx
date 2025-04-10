@@ -59,6 +59,19 @@ export async function generateMetadata({ params }: ResultsPageProps) {
   }
 }
 
+// Helper function to get maturity level for results page
+function getMaturityLevelBasedOnScore(score: number) {
+  // Simple version for the results page
+  if (score < 20)
+    return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
+  if (score < 40)
+    return { level: "Nivel 2", description: "Nivel Repetible pero intuitivo" };
+  if (score < 60) return { level: "Nivel 3", description: "Nivel Definido" };
+  if (score < 80)
+    return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
+  return { level: "Nivel 5", description: "Nivel Optimizado" };
+}
+
 export default async function ResultsPage({ params }: ResultsPageProps) {
   try {
     // Get user session to check authentication and permissions
@@ -381,11 +394,16 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       (sum, val) => sum + (val || 0),
       0
     );
+    // These variables are needed for calculation but not directly used
+    // Keeping calculation for documentation purposes
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const maxScore = quizData.questions.reduce(
       (sum, q) => sum + Math.max(...q.options.map((o) => o.value)),
       0
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const maturityInfo = getMaturityLevel(quizData.id, totalScore);
+
     const categoryScores = Object.entries(
       quizData.questions.reduce(
         (acc, q) => {
@@ -495,13 +513,13 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
               isSharedView={true}
               interest={interestData?.reason as InterestOption}
               evaluationId={evaluation.id}
-              score={evaluation.score}
+              score={evaluation.score || 0}
               maxScore={100}
               maturityDescription={
-                getMaturityLevel(evaluation.score).description
+                getMaturityLevelBasedOnScore(evaluation.score || 0).description
               }
               maturityLevelNumber={parseInt(
-                getMaturityLevel(evaluation.score)
+                getMaturityLevelBasedOnScore(evaluation.score || 0)
                   .level.split("–")[0]
                   .replace("Nivel ", "")
                   .trim(),

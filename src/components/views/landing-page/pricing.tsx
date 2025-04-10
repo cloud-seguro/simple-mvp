@@ -7,10 +7,8 @@ import {
   Database,
   Lock,
   Check,
-  CheckCircle2,
   X,
   Layers,
-  Zap,
   Search,
   Users,
 } from "lucide-react";

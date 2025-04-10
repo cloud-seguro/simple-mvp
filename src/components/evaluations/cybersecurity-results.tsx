@@ -91,6 +91,7 @@ export function CybersecurityResults({
   categories,
   hideHeader = false,
 }: CybersecurityResultsProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [specialistsAvailable, setSpecialistsAvailable] = useState(false);
   const [loadingSpecialists, setLoadingSpecialists] = useState(true);

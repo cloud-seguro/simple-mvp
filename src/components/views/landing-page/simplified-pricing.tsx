@@ -11,7 +11,6 @@ import {
   Layers,
   Zap,
   Search,
-  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

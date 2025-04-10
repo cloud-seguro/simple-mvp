@@ -18,7 +18,7 @@ type SimpleEvaluation = {
   profileId: string;
   createdAt: Date;
   completedAt: Date | null;
-  answers: any; // JSON data
+  answers: Record<string, number | string>; // Replace any with a more specific type
 };
 
 // Categories from evaluations
@@ -292,14 +292,14 @@ function calculateCategoryScores(
     const prefixes = categoryPrefixes[category] || [];
 
     const categoryAnswers = Object.entries(latestEvaluation.answers || {})
-      .filter(([key, _]) => {
+      .filter(([key]) => {
         // Skip metadata
         if (key.includes("questionData")) return false;
 
         // Check if any of the category prefixes match
         return prefixes.some((prefix) => key.startsWith(prefix));
       })
-      .map(([_, value]) => value as number);
+      .map(([, value]) => value as number);
 
     if (categoryAnswers.length > 0) {
       const totalScore = categoryAnswers.reduce((sum, score) => sum + score, 0);
@@ -337,7 +337,7 @@ function generateRecommendations(
     );
 
     const policiesAvg =
-      policiesQuestions.reduce((sum, [_, val]) => sum + (val as number), 0) /
+      policiesQuestions.reduce((sum, [, val]) => sum + (val as number), 0) /
       (policiesQuestions.length || 1);
 
     if (policiesAvg < 2) {
@@ -366,7 +366,7 @@ function generateRecommendations(
     );
 
     const trainingAvg =
-      trainingQuestions.reduce((sum, [_, val]) => sum + (val as number), 0) /
+      trainingQuestions.reduce((sum, [, val]) => sum + (val as number), 0) /
       (trainingQuestions.length || 1);
 
     if (trainingAvg < 2) {

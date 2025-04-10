@@ -21,14 +21,13 @@ import type { SignUpFormProps, SignUpFormData } from "@/types/auth/sign-up";
 import { signUpFormSchema } from "@/types/auth/sign-up";
 import { toast } from "@/components/ui/use-toast";
 import Image from "next/image";
-import { uploadAvatar } from "@/lib/supabase/upload-avatar";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
 
 // Extended props to include evaluation results
 interface ExtendedSignUpFormProps extends SignUpFormProps {
   onSignUpComplete?: (userId: string) => Promise<void>;
   onSignUpStart?: () => void;
+  // These props are not currently used but kept for future implementation
   onProfileCreationStart?: () => void;
   evaluationResults?: {
     quizId: string;
@@ -38,9 +37,12 @@ interface ExtendedSignUpFormProps extends SignUpFormProps {
 
 export function SignUpForm({
   className,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSignUpComplete,
   onSignUpStart,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onProfileCreationStart,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   evaluationResults,
   ...props
 }: ExtendedSignUpFormProps) {

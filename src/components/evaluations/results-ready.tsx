@@ -7,7 +7,6 @@ import type { UserInfo } from "./types";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { toast } from "@/components/ui/use-toast";
-import Link from "next/link";
 
 interface ResultsReadyProps {
   userInfo: UserInfo;

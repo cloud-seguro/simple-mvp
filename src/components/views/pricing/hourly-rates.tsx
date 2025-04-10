@@ -3,9 +3,7 @@
 import { motion } from "framer-motion";
 import {
   Shield,
-  Lock,
   Search,
-  Terminal,
   Database,
   Layers,
   Zap,

@@ -9,8 +9,6 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import {
-  Bar,
-  BarChart,
   CartesianGrid,
   Line,
   LineChart,
@@ -20,20 +18,13 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
-  Text,
-  Label,
-  Cell,
-  PieChart,
-  Pie,
   RadarChart,
   Radar,
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  LabelList,
 } from "recharts";
 import {
-  BarChart3,
   LineChart as LineChartIcon,
   PieChartIcon,
   InfoIcon,
@@ -95,13 +86,16 @@ function abbreviateCategory(name: string): string {
   return words.slice(0, 2).join(" ");
 }
 
-// Custom tooltip formatter function
-const formatTooltipValue = (value: any) => {
-  return [`${value}%`, "Puntuación"];
-};
-
 // Custom tooltip component
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number }>;
+  label?: string;
+}) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background border border-border p-2 rounded-md shadow-md">
