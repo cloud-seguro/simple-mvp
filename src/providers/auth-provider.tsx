@@ -212,11 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set flag in localStorage to prevent premature profile fetching attempts
       localStorage.setItem("creating_profile", "true");
 
-      // Determine the redirect URL based on environment
-      const isProd = process.env.NEXT_PUBLIC_APP_ENV === "production";
-      const redirectUrl = isProd
-        ? `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/auth/callback`
-        : `${window.location.origin}/auth/callback`;
+      const redirectUrl = `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/auth/callback`;
 
       // Sign up with email verification enabled
       const { data, error } = await supabase.auth.signUp({
