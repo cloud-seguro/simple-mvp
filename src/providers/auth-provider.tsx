@@ -217,10 +217,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Sign up with email verification enabled
       const { data, error } = await supabase.auth.signUp({
         email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-        },
+        password
       });
 
       if (error) {
