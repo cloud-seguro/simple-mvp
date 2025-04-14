@@ -212,8 +212,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set flag in localStorage to prevent premature profile fetching attempts
       localStorage.setItem("creating_profile", "true");
 
-      const redirectUrl = `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/auth/callback`;
-
       // Sign up with email verification enabled
       const { data, error } = await supabase.auth.signUp({
         email,
