@@ -20,29 +20,17 @@ export async function GET(request: NextRequest) {
       await supabase.auth.exchangeCodeForSession(code);
 
       // Check if this is a password recovery flow
-      // Supabase can use 'recovery' or 'password_recovery' as the type
-      if (type === "recovery" || type === "password_recovery") {
+      if (type === "recovery") {
         console.log(
           "Password recovery flow detected, redirecting to reset-password"
         );
         return NextResponse.redirect(`${requestUrl.origin}/reset-password`);
       }
 
-      // Get the current session and check for password reset flow
+      // Get the current session
       const {
         data: { session },
       } = await supabase.auth.getSession();
-
-      // Additional check: If the user came from a password reset flow,
-      // they should be redirected to reset-password page
-      if (
-        session?.user?.email_confirmed_at &&
-        !session?.user?.last_sign_in_at
-      ) {
-        // This likely indicates a first-time verification or password reset
-        console.log("Detected potential password reset flow");
-        return NextResponse.redirect(`${requestUrl.origin}/reset-password`);
-      }
 
       if (session?.user) {
         console.log(`Email verified for user ${session.user.id}`);
