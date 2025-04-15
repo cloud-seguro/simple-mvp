@@ -20,6 +20,16 @@ const getURL = () => {
   return url;
 };
 
+// Type for profile data during signup (subset of Profile)
+interface ProfileSignupData {
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  company?: string;
+  company_role?: string;
+  avatarUrl?: string;
+}
+
 type AuthContextType = {
   user: User | null;
   session: Session | null;
@@ -30,7 +40,11 @@ type AuthContextType = {
     password: string,
     noRedirect?: boolean
   ) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    profileData: ProfileSignupData
+  ) => Promise<void>;
   signOut: () => Promise<void>;
   checkPasswordStrength: (password: string) => Promise<{
     strength: number;
@@ -74,16 +88,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch profile function with retry logic
   const fetchProfile = async (userId: string, isAfterSignUp = false) => {
-    // Check if we're in the process of creating a profile
-    // If so, skip the profile fetch to avoid 404 errors
-    if (
-      typeof window !== "undefined" &&
-      localStorage.getItem("creating_profile") === "true"
-    ) {
-      console.log("Skipping profile fetch as profile creation is in progress");
-      return false;
-    }
-
     let retryCount = 0;
     const maxRetries = isAfterSignUp ? 5 : 2; // More retries after sign-up
     const initialDelay = isAfterSignUp ? 1000 : 300; // Longer initial delay after sign-up
@@ -130,13 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        // Check if we're in the process of creating a profile
-        if (
-          typeof window !== "undefined" &&
-          localStorage.getItem("creating_profile") !== "true"
-        ) {
-          fetchProfile(session.user.id);
-        }
+        fetchProfile(session.user.id);
       }
       setIsLoading(false);
     });
@@ -152,26 +150,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         console.log("User available in session:", session.user.id);
 
-        // For sign-up events, use the retry logic with longer delays
-        // But only if we're not in the process of creating a profile
-        if (
-          typeof window !== "undefined" &&
-          localStorage.getItem("creating_profile") !== "true"
-        ) {
-          // Use string literals for event types
-          const isSignUp = event === "SIGNED_UP" || event === "SIGNED_IN";
-          console.log(
-            "Fetching profile for user:",
-            session.user.id,
-            "isSignUp:",
-            isSignUp
-          );
-          await fetchProfile(session.user.id, isSignUp);
-        } else {
-          console.log(
-            "Skipping profile fetch as profile creation is in progress"
-          );
-        }
+        // Use string literals for event types
+        const isSignUp = event === "SIGNED_UP" || event === "SIGNED_IN";
+        console.log(
+          "Fetching profile for user:",
+          session.user.id,
+          "isSignUp:",
+          isSignUp
+        );
+        await fetchProfile(session.user.id, isSignUp);
       } else {
         console.log("No user in session");
         setProfile(null);
@@ -204,13 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
 
     if (data.user) {
-      // Use the retry logic for profile fetching, but only if we're not creating a profile
-      if (
-        typeof window !== "undefined" &&
-        localStorage.getItem("creating_profile") !== "true"
-      ) {
-        await fetchProfile(data.user.id, true);
-      }
+      await fetchProfile(data.user.id, true);
     }
 
     if (!noRedirect) {
@@ -218,12 +199,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string): Promise<void> => {
+  const signUp = async (
+    email: string,
+    password: string,
+    profileData: ProfileSignupData
+  ): Promise<void> => {
     try {
       console.log("Starting sign-up process for:", email);
-
-      // Set flag in localStorage to prevent premature profile fetching attempts
-      localStorage.setItem("creating_profile", "true");
 
       // Sign up with email verification enabled
       const { data, error } = await supabase.auth.signUp({
@@ -241,6 +223,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log("Sign-up successful, verification email sent to:", email);
 
+      // Create profile for the new user
+      if (data.user) {
+        try {
+          // Create the profile immediately
+          const response = await fetch("/api/profile", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: data.user.id,
+              email: email,
+              firstName: profileData.firstName || "",
+              lastName: profileData.lastName || "",
+              phoneNumber: profileData.phoneNumber || "",
+              company: profileData.company || "",
+              company_role: profileData.company_role || "",
+              avatarUrl: profileData.avatarUrl,
+            }),
+          });
+
+          if (!response.ok) {
+            console.error("Error creating profile:", await response.text());
+          } else {
+            console.log("Profile created successfully for user:", data.user.id);
+          }
+        } catch (profileError) {
+          console.error("Error creating profile:", profileError);
+        }
+      }
+
       // Check if email confirmation is required
       if (data?.user?.identities?.length === 0) {
         // This means the user already exists but needs to confirm their email
@@ -256,13 +269,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           "Please check your email for a confirmation link to complete your registration."
         );
       }
-
-      // Clear creating_profile flag after 10 seconds to handle cases where user doesn't click the verification link
-      setTimeout(() => {
-        localStorage.removeItem("creating_profile");
-      }, 10000);
     } catch (error) {
-      localStorage.removeItem("creating_profile");
       console.error("Sign up error:", error);
       throw error;
     }

@@ -12,7 +12,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-FormMessage,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/utils/password-input";
@@ -121,9 +121,25 @@ export function SignUpForm({
         onSignUpStart();
       }
 
-      // Call the signUp function from the auth provider
-      // This will handle email verification
-      await signUp(data.email, data.password);
+      // Extract profile data from form
+      const profileData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phoneNumber: data.phoneNumber,
+        company: data.company,
+        company_role: data.company_role,
+      };
+
+      // Call the signUp function from the auth provider with profile data
+      // This will handle email verification and profile creation
+      await signUp(data.email, data.password, profileData);
+
+      // If we have an avatar file, save for later processing
+      if (avatarFile) {
+        // Store reference to the avatar but we'll need a separate mechanism to upload it
+        // since we can't pass File objects to the API in the initial request
+        localStorage.setItem("hasAvatarPending", "true");
+      }
 
       // Show success message
       toast({
@@ -132,26 +148,6 @@ export function SignUpForm({
           "Por favor, verifica tu correo electrónico para completar el registro.",
         variant: "default",
       });
-
-      // Store user data temporarily in localStorage to use after email verification
-      // This will be used by the profile creation process after verification
-      localStorage.setItem(
-        "pendingProfileData",
-        JSON.stringify({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phoneNumber: data.phoneNumber,
-          company: data.company,
-          company_role: data.company_role,
-          email: data.email,
-        })
-      );
-
-      // If avatar file exists, store the fact that we have one
-      // (we can't store the file itself in localStorage)
-      if (avatarFile) {
-        localStorage.setItem("hasAvatarPending", "true");
-      }
 
       setIsLoading(false);
 

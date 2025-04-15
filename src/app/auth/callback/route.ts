@@ -2,8 +2,6 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,29 +18,10 @@ export async function GET(request: NextRequest) {
       } = await supabase.auth.getSession();
 
       if (session?.user) {
-        try {
-          // Check if profile already exists
-          const existingProfile = await prisma.profile.findUnique({
-            where: { userId: session.user.id },
-          });
+        console.log(`Email verified for user ${session.user.id}`);
 
-          // Only create profile if it doesn't exist
-          if (!existingProfile) {
-            // Create a profile with FREE role
-            await prisma.profile.create({
-              data: {
-                userId: session.user.id,
-                firstName: "",
-                lastName: "",
-                email: session.user.email,
-                role: UserRole.FREE,
-                active: true,
-              },
-            });
-            console.log(`Profile created for user ${session.user.id}`);
-
-            // Create HTML with script that will read localStorage and update the profile
-            const html = `
+        // Create HTML with a message confirming successful verification
+        const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -58,58 +37,25 @@ export async function GET(request: NextRequest) {
 <body>
   <div class="container">
     <h1>Email verificado con éxito</h1>
-    <div class="message">Completando tu registro...</div>
+    <div class="message">Redirigiendo al panel de control...</div>
   </div>
   <script>
-    (async function() {
-      try {
-        // Check if we have pending profile data
-        const pendingData = localStorage.getItem('pendingProfileData');
-        
-        if (pendingData) {
-          const profileData = JSON.parse(pendingData);
-          
-          // Create or update the profile with the saved data
-          const response = await fetch('/api/profile', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(profileData)
-          });
-          
-          if (!response.ok) {
-            throw new Error('Error updating profile');
-          }
-          
-          // Clear the pending data
-          localStorage.removeItem('pendingProfileData');
-        }
-        
-        // Redirect to profile setup or dashboard
-        window.location.href = '${requestUrl.origin}/dashboard';
-      } catch (error) {
-        console.error('Error processing pending profile data:', error);
-        // Still redirect to dashboard even if there's an error
-        window.location.href = '${requestUrl.origin}/dashboard';
-      }
-    })();
+    // Short delay before redirecting to dashboard
+    setTimeout(() => {
+      window.location.href = '${requestUrl.origin}/dashboard';
+    }, 1500);
   </script>
 </body>
 </html>
-            `;
+        `;
 
-            // Return the HTML that will process the pending profile data
-            return new NextResponse(html, {
-              headers: { "Content-Type": "text/html" },
-            });
-          }
-        } catch (error) {
-          console.error("Error creating profile:", error);
-        }
+        // Return the HTML with simple redirect
+        return new NextResponse(html, {
+          headers: { "Content-Type": "text/html" },
+        });
       }
 
-      // For returning users with existing profiles, redirect to dashboard
+      // For returning users, redirect to dashboard
       return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
     }
 
