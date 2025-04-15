@@ -9,13 +9,21 @@ export async function GET(request: NextRequest) {
     const code = requestUrl.searchParams.get("code");
     const type = requestUrl.searchParams.get("type");
 
+    console.log("Auth callback triggered with:", {
+      url: request.url,
+      code: code ? "present" : "missing",
+      type,
+    });
+
     if (code) {
       const supabase = createRouteHandlerClient({ cookies });
       await supabase.auth.exchangeCodeForSession(code);
 
       // Check if this is a password recovery flow
       if (type === "recovery") {
-        // Redirect to reset password page
+        console.log(
+          "Password recovery flow detected, redirecting to reset-password"
+        );
         return NextResponse.redirect(`${requestUrl.origin}/reset-password`);
       }
 

@@ -19,10 +19,12 @@ export async function middleware(req: NextRequest) {
   }
 
   // If there's a session and the user is trying to access auth routes
+  // Don't redirect from reset-password even if the user has a session
   if (
     session &&
     (req.nextUrl.pathname.startsWith("/sign-in") ||
-      req.nextUrl.pathname.startsWith("/sign-up"))
+      req.nextUrl.pathname.startsWith("/sign-up")) &&
+    !req.nextUrl.pathname.startsWith("/reset-password")
   ) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";
