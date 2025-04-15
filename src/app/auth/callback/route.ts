@@ -1,32 +1,27 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next") || "/dashboard";
+
   try {
-    const requestUrl = new URL(request.url);
-    const code = requestUrl.searchParams.get("code");
-    const type = requestUrl.searchParams.get("type");
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
+    // Handle code exchange (used in OAuth flows and magic links)
     if (code) {
-      const supabase = createRouteHandlerClient({ cookies });
+      console.log("Processing auth callback with code");
       await supabase.auth.exchangeCodeForSession(code);
-
-      // Check if this is a password recovery flow
-      if (type === "recovery") {
-        // Redirect to reset password page
-        return NextResponse.redirect(`${requestUrl.origin}/reset-password`);
-      }
-
-      // For all other auth flows, redirect to dashboard
-      return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
     }
 
-    // If no code, redirect to home page
-    return NextResponse.redirect(`${requestUrl.origin}`);
+    // Redirect to the requested page
+    return NextResponse.redirect(new URL(next, requestUrl.origin));
   } catch (error) {
-    console.error("Auth callback error:", error);
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+    console.error("Error in auth callback:", error);
+    // Redirect to sign-in page if there's an error
+    return NextResponse.redirect(new URL("/sign-in", requestUrl.origin));
   }
 }

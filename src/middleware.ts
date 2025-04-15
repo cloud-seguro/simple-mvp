@@ -10,13 +10,25 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Auth callback route should never be redirected
-  if (req.nextUrl.pathname === "/auth/callback") {
+  // Auth routes for password reset flow should never be redirected
+  if (req.nextUrl.pathname.startsWith("/auth/")) {
     return res;
   }
 
-  // Reset password page should be accessible without a session
+  // Reset password page should always be accessible
+  // It will handle its own recovery token verification
   if (req.nextUrl.pathname === "/reset-password") {
+    return res;
+  }
+
+  // Forgot password page should be accessible without a session
+  if (req.nextUrl.pathname === "/forgot-password") {
+    // If user is logged in, redirect to dashboard instead of showing forgot password
+    if (session) {
+      const redirectUrl = req.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      return NextResponse.redirect(redirectUrl);
+    }
     return res;
   }
 
@@ -49,6 +61,6 @@ export const config = {
     "/sign-up",
     "/reset-password",
     "/forgot-password",
-    "/auth/callback",
+    "/auth/:path*",
   ],
 };

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,10 +38,10 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 export function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [resetComplete, setResetComplete] = useState(false);
-  const [isValidResetLink, setIsValidResetLink] = useState(true);
+  const [isValidResetContext, setIsValidResetContext] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const { checkPasswordStrength } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
 
   // Password strength state
@@ -61,32 +61,35 @@ export function ResetPasswordForm() {
     },
   });
 
-  // Check if we're in a valid context for password reset
+  // Check for auth session on component mount
   useEffect(() => {
-    const handlePasswordReset = async () => {
+    const checkAuthSession = async () => {
       try {
-        // When a user clicks the reset password link from their email,
-        // Supabase will set the hash in the URL and handle session creation
+        setIsInitializing(true);
+        // Simple check for a valid session
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
-        // Check for hash parameters which indicate we're in a valid reset flow
-        const hasResetFlowParams =
-          window.location.hash.includes("access_token") ||
-          window.location.hash.includes("type=recovery");
+        console.log(
+          "Auth session check:",
+          session ? "Valid session" : "No session"
+        );
 
-        // If there's no session and no recovery hash parameters, the reset link is not valid
-        if (!session && !hasResetFlowParams) {
-          setIsValidResetLink(false);
+        if (session) {
+          setIsValidResetContext(true);
+        } else {
+          setIsValidResetContext(false);
         }
       } catch (error) {
-        console.error("Error checking reset session:", error);
-        setIsValidResetLink(false);
+        console.error("Error checking auth session:", error);
+        setIsValidResetContext(false);
+      } finally {
+        setIsInitializing(false);
       }
     };
 
-    handlePasswordReset();
+    checkAuthSession();
   }, [supabase.auth]);
 
   // Check password strength when password changes
@@ -102,27 +105,26 @@ export function ResetPasswordForm() {
   async function onSubmit(data: ResetPasswordFormData) {
     try {
       setIsLoading(true);
+      console.log("Updating password...");
 
-      // Update the user's password
-      // This will work because the user should have a valid session
-      // from clicking the reset password link in their email
+      // Basic password update
       const { error } = await supabase.auth.updateUser({
         password: data.password,
       });
 
       if (error) {
         console.error("Password update error:", error);
-
         toast({
           title: "Error",
           description:
             "La sesión de recuperación puede haber expirado. Por favor, solicita un nuevo enlace de recuperación.",
           variant: "destructive",
         });
-
-        setIsValidResetLink(false);
+        setIsValidResetContext(false);
         return;
       }
+
+      console.log("Password updated successfully");
 
       // Show success message
       setResetComplete(true);
@@ -147,8 +149,17 @@ export function ResetPasswordForm() {
     }
   }
 
-  // If the reset link is invalid or expired, show error message
-  if (!isValidResetLink) {
+  // Show loading state
+  if (isInitializing) {
+    return (
+      <div className="flex flex-col items-center space-y-4 text-center">
+        <p>Verificando tu solicitud de restablecimiento de contraseña...</p>
+      </div>
+    );
+  }
+
+  // Show error if invalid reset context
+  if (!isValidResetContext) {
     return (
       <div className="flex flex-col space-y-4 text-center">
         <p className="text-red-500">
@@ -164,6 +175,7 @@ export function ResetPasswordForm() {
     );
   }
 
+  // Show success message or form
   return (
     <div className="grid gap-6">
       {resetComplete ? (
