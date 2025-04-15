@@ -59,7 +59,7 @@ export function ForgotPasswordForm() {
 
       // Call Supabase to send password reset email
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${getURL()}reset-password`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://ciberseguridadsimple.com"}/reset-password`,
       });
 
       if (error) {
