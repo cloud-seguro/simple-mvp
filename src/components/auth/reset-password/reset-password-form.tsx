@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +40,7 @@ export function ResetPasswordForm() {
   const [resetComplete, setResetComplete] = useState(false);
   const [isValidResetLink, setIsValidResetLink] = useState(true);
   const { checkPasswordStrength } = useAuth();
-  const router = useRouter();
+  // const router = useRouter();
   const supabase = createClientComponentClient();
 
   // Password strength state
@@ -81,7 +81,7 @@ export function ResetPasswordForm() {
         setPasswordRequirements(result.requirements);
       });
     }
-  }, [form.watch("password"), checkPasswordStrength]);
+  }, [checkPasswordStrength, form]);
 
   async function onSubmit(data: ResetPasswordFormData) {
     try {
