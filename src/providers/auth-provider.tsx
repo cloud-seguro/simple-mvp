@@ -7,6 +7,19 @@ import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/profile";
 import { hashPassword } from "@/lib/utils/password-utils";
 
+// URL helper function
+const getURL = () => {
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+    "http://localhost:3000/";
+  // Make sure to include `https://` when not localhost.
+  url = url.startsWith("http") ? url : `https://${url}`;
+  // Make sure to include a trailing `/`.
+  url = url.endsWith("/") ? url : `${url}/`;
+  return url;
+};
+
 type AuthContextType = {
   user: User | null;
   session: Session | null;
@@ -215,7 +228,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Sign up with email verification enabled
       const { data, error } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: getURL() + "auth/callback",
+        },
       });
 
       if (error) {
