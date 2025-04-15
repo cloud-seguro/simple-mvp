@@ -18,6 +18,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 
+// URL helper function - same as in auth-provider.tsx
+const getURL = () => {
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+    "http://localhost:3000/";
+  // Make sure to include `https://` when not localhost.
+  url = url.startsWith("http") ? url : `https://${url}`;
+  // Make sure to include a trailing `/`.
+  url = url.endsWith("/") ? url : `${url}/`;
+  return url;
+};
+
 // Schema for the form
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Ingresa un correo electrónico válido" }),
@@ -43,10 +56,9 @@ export function ForgotPasswordForm() {
 
       console.log("Sending password reset email to:", data.email);
 
-      // Use auth/reset-password for PKCE flow
-      // This server route will handle the code exchange
+      // Use the same URL construction pattern as in auth-provider.tsx
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: getURL() + "auth/reset-password",
       });
 
       if (error) {
