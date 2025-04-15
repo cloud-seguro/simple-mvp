@@ -19,50 +19,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(`${requestUrl.origin}/reset-password`);
       }
 
-      // Get the current session
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        console.log(`Email verified for user ${session.user.id}`);
-
-        // Create HTML with a message confirming successful verification
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Email verificado con éxito</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
-    .container { text-align: center; max-width: 500px; }
-    .message { margin: 20px 0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Email verificado con éxito</h1>
-    <div class="message">Redirigiendo al panel de control...</div>
-  </div>
-  <script>
-    // Short delay before redirecting to dashboard
-    setTimeout(() => {
-      window.location.href = '${requestUrl.origin}/dashboard';
-    }, 1500);
-  </script>
-</body>
-</html>
-        `;
-
-        // Return the HTML with simple redirect
-        return new NextResponse(html, {
-          headers: { "Content-Type": "text/html" },
-        });
-      }
-
-      // For returning users, redirect to dashboard
+      // For all other auth flows, redirect to dashboard
       return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
     }
 

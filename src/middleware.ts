@@ -10,6 +10,16 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Auth callback route should never be redirected
+  if (req.nextUrl.pathname === "/auth/callback") {
+    return res;
+  }
+
+  // Reset password page should be accessible without a session
+  if (req.nextUrl.pathname === "/reset-password") {
+    return res;
+  }
+
   // If there's no session and the user is trying to access a protected route
   if (!session && req.nextUrl.pathname.startsWith("/dashboard")) {
     const redirectUrl = req.nextUrl.clone();
@@ -33,5 +43,12 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/sign-in", "/sign-up", "/reset-password"],
+  matcher: [
+    "/dashboard/:path*",
+    "/sign-in",
+    "/sign-up",
+    "/reset-password",
+    "/forgot-password",
+    "/auth/callback",
+  ],
 };

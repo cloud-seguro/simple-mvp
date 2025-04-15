@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-// import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +40,8 @@ export function ResetPasswordForm() {
   const [resetComplete, setResetComplete] = useState(false);
   const [isValidResetLink, setIsValidResetLink] = useState(true);
   const { checkPasswordStrength } = useAuth();
-  // const router = useRouter();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
 
   // Password strength state
@@ -60,17 +61,32 @@ export function ResetPasswordForm() {
     },
   });
 
-  // Check if this is a valid password reset session
+  // Check if we're in a valid context for password reset
   useEffect(() => {
-    const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !data.session) {
+    const handlePasswordReset = async () => {
+      try {
+        // When a user clicks the reset password link from their email,
+        // Supabase will set the hash in the URL and handle session creation
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        // Check for hash parameters which indicate we're in a valid reset flow
+        const hasResetFlowParams =
+          window.location.hash.includes("access_token") ||
+          window.location.hash.includes("type=recovery");
+
+        // If there's no session and no recovery hash parameters, the reset link is not valid
+        if (!session && !hasResetFlowParams) {
+          setIsValidResetLink(false);
+        }
+      } catch (error) {
+        console.error("Error checking reset session:", error);
         setIsValidResetLink(false);
-        console.error("Invalid reset link or session expired:", error);
       }
     };
 
-    checkSession();
+    handlePasswordReset();
   }, [supabase.auth]);
 
   // Check password strength when password changes
@@ -88,12 +104,24 @@ export function ResetPasswordForm() {
       setIsLoading(true);
 
       // Update the user's password
+      // This will work because the user should have a valid session
+      // from clicking the reset password link in their email
       const { error } = await supabase.auth.updateUser({
         password: data.password,
       });
 
       if (error) {
-        throw error;
+        console.error("Password update error:", error);
+
+        toast({
+          title: "Error",
+          description:
+            "La sesión de recuperación puede haber expirado. Por favor, solicita un nuevo enlace de recuperación.",
+          variant: "destructive",
+        });
+
+        setIsValidResetLink(false);
+        return;
       }
 
       // Show success message
@@ -102,6 +130,11 @@ export function ResetPasswordForm() {
         title: "Contraseña actualizada",
         description: "Tu contraseña ha sido actualizada correctamente.",
       });
+
+      // Redirect to sign-in after 2 seconds
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
     } catch (error) {
       console.error("Error resetting password:", error);
       toast({
