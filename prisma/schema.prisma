@@ -59,6 +59,7 @@ model Profile {
   // Relations
   evaluations   Evaluation[]
   specialists   Specialist[]  // Only for SUPERADMIN users
+  blogPosts     BlogPost[]    // Relation to blog posts
 
   @@index([userId])
   @@map("profiles")
@@ -106,4 +107,25 @@ model Specialist {
 
   @@index([createdById])
   @@map("specialists")
+}
+
+// Blog post model
+model BlogPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String
+  content     String    @db.Text
+  coverImage  String?
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  authorId    String
+  tags        String[]
+  
+  // Relations
+  author      Profile   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@map("blog_posts")
 }

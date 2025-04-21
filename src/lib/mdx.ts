@@ -15,7 +15,13 @@ export type BlogPost = {
   readingTime?: string;
 };
 
-// Mock data for blog posts
+// Calculate reading time based on word count (average reading speed: 200 words per minute)
+export function calculateReadingTime(content: string): string {
+  const wordCount = content.split(/\s+/).length;
+  return `${Math.ceil(wordCount / 200)} min`;
+}
+
+// Mock data for blog posts (used as fallback if database is not available)
 const MOCK_POSTS: Record<
   string,
   {
@@ -124,8 +130,7 @@ export function getPostBySlug(slug: string): BlogPost {
     }
 
     // Calculate reading time (rough estimate: 200 words per minute)
-    const wordCount = content.split(/\s+/).length;
-    const readingTime = `${Math.ceil(wordCount / 200)} min`;
+    const readingTime = calculateReadingTime(content);
 
     // Format the date
     const date = new Date(data.date);

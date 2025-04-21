@@ -1,4 +1,11 @@
-import { LayoutDashboard, FileBarChart, Settings, Command } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileBarChart,
+  Settings,
+  Command,
+  Users,
+  FileText,
+} from "lucide-react";
 import type { SidebarData } from "../types";
 
 export const sidebarData: SidebarData = {

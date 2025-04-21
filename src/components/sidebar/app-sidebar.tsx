@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
 import { useMemo } from "react";
-import { Users } from "lucide-react";
+import { Users, FileText } from "lucide-react";
 
 export function AppSidebar({
   className,
@@ -44,6 +44,13 @@ export function AppSidebar({
         title: "Especialistas",
         url: "/specialists",
         icon: Users,
+      });
+
+      // Add blog management link
+      adminGroup.items.push({
+        title: "Blog",
+        url: "/dashboard/blog",
+        icon: FileText,
       });
     }
 

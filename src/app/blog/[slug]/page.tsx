@@ -1,64 +1,98 @@
-import { getPostBySlug, getAllPosts } from "@/lib/mdx";
-import BlogPostClient from "@/components/blog/BlogPostClient";
-import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { prisma } from "@/lib/prisma";
+import { calculateReadingTime } from "@/lib/mdx";
+import BlogPostClient from "@/components/blog/BlogPostClient";
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
+interface BlogPostPageProps {
+  params: {
+    slug: string;
+  };
 }
 
-// Generate metadata for the page
+// Generate metadata for the post
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
-  const resolvedParams = await params;
+}: BlogPostPageProps): Promise<Metadata> {
   try {
-    const post = getPostBySlug(resolvedParams.slug);
+    const slug = params.slug;
+
+    // Fetch the post from the database
+    const post = await prisma.blogPost.findUnique({
+      where: { slug, published: true },
+    });
+
+    if (!post) {
+      return {
+        title: "Post no encontrado | SIMPLE",
+      };
+    }
 
     return {
       title: `${post.title} | SIMPLE Blog`,
       description: post.excerpt,
       openGraph: {
-        title: post.title,
+        title: `${post.title} | SIMPLE Blog`,
         description: post.excerpt,
         type: "article",
-        authors: [post.author],
-        ...(post.coverImage && {
-          images: [{ url: post.coverImage, alt: post.title }],
-        }),
+        images: post.coverImage ? [{ url: post.coverImage }] : undefined,
       },
     };
-  } catch {
+  } catch (error) {
+    console.error(`Error generating metadata for post ${params.slug}:`, error);
     return {
-      title: "Post Not Found | SIMPLE Blog",
-      description: "The requested blog post could not be found",
+      title: "Blog | SIMPLE",
     };
   }
 }
 
-// Generate static params for all posts
-export async function generateStaticParams() {
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
   try {
-    const posts = getAllPosts();
+    const slug = params.slug;
 
-    return posts.map((post) => ({
-      slug: post.slug,
-    }));
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    return [];
-  }
-}
+    // Fetch the post from the database
+    const dbPost = await prisma.blogPost.findUnique({
+      where: { slug, published: true },
+      include: {
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
 
-// The page component with simpler error handling
-export default async function BlogPostPage({ params }: PageProps) {
-  // Try to get the post data
-  try {
-    const resolvedParams = await params;
-    const post = getPostBySlug(resolvedParams.slug);
+    if (!dbPost) {
+      notFound();
+    }
+
+    // Transform the post data to match the expected format
+    const date = new Date(dbPost.createdAt);
+    const formattedDate = format(date, "MMMM dd, yyyy", { locale: es });
+    const readingTime = calculateReadingTime(dbPost.content);
+
+    const post = {
+      slug: dbPost.slug,
+      title: dbPost.title,
+      date: date.toISOString(),
+      formattedDate,
+      excerpt: dbPost.excerpt,
+      content: dbPost.content,
+      author:
+        dbPost.author.firstName && dbPost.author.lastName
+          ? `${dbPost.author.firstName} ${dbPost.author.lastName}`
+          : "SIMPLE",
+      coverImage: dbPost.coverImage,
+      tags: dbPost.tags,
+      readingTime,
+    };
+
     return <BlogPostClient post={post} />;
-  } catch {
-    // Use Next.js's built-in notFound() for handling missing posts
+  } catch (error) {
+    console.error(`Error loading post ${params.slug}:`, error);
     notFound();
   }
 }
