@@ -6,18 +6,19 @@ import { prisma } from "@/lib/prisma";
 import { calculateReadingTime } from "@/lib/mdx";
 import BlogPostClient from "@/components/blog/BlogPostClient";
 
-interface BlogPostPageProps {
+type BlogPostPageProps = {
   params: {
     slug: string;
   };
-}
+};
 
 // Generate metadata for the post
-export async function generateMetadata({
-  params,
-}: BlogPostPageProps): Promise<Metadata> {
+export async function generateMetadata(
+  props: BlogPostPageProps
+): Promise<Metadata> {
   try {
-    const slug = params.slug;
+    // Wait for params to resolve and then access slug safely
+    const slug = (await props.params).slug;
 
     // Fetch the post from the database
     const post = await prisma.blogPost.findUnique({
@@ -41,16 +42,21 @@ export async function generateMetadata({
       },
     };
   } catch (error) {
-    console.error(`Error generating metadata for post ${params.slug}:`, error);
+    console.error(`Error generating metadata for post:`, error);
     return {
       title: "Blog | SIMPLE",
     };
   }
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   try {
-    const slug = params.slug;
+    // Get the slug safely
+    const { slug } = await params;
 
     // Fetch the post from the database
     const dbPost = await prisma.blogPost.findUnique({
@@ -92,7 +98,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
     return <BlogPostClient post={post} />;
   } catch (error) {
-    console.error(`Error loading post ${params.slug}:`, error);
+    console.error(`Error loading post:`, error);
     notFound();
   }
 }

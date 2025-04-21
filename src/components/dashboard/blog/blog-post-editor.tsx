@@ -22,9 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { generateSlug } from "@/lib/utils";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import { MarkdownWithMermaid } from "@/components/markdown/markdown-with-mermaid";
 import { BlogImageUpload } from "./blog-image-upload";
 
 // Define the form schema
@@ -159,6 +157,30 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
     }
   };
 
+  // Add example Mermaid diagram to content
+  const insertMermaidExample = () => {
+    const example = `\`\`\`mermaid
+flowchart LR
+  subgraph VPC
+    A[Public Subnet] -->|HTTPS| API[(API Gateway)]
+    B[Private Subnet] --> DB[(PostgreSQL)]
+    API --> SVC[Microservicio]
+    SVC --> DB
+  end
+  classDef public fill:#e8f5ff,stroke:#036,border:1px;
+  classDef private fill:#f7f7f7,stroke:#666,border:1px;
+  class A public;
+  class B,DB,SVC private;
+\`\`\``;
+
+    const currentContent = form.getValues("content");
+    const newContent = currentContent
+      ? `${currentContent}\n\n${example}`
+      : example;
+    form.setValue("content", newContent);
+    setMarkdownContent(newContent);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -286,34 +308,42 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
               <TabsTrigger value="preview">Vista previa</TabsTrigger>
             </TabsList>
             <TabsContent value="editor" className="p-0 border-t">
-              <div className="min-h-[500px]">
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          className="min-h-[500px] p-4 font-mono resize-none"
-                          placeholder="# Contenido del artículo en Markdown"
-                          onChange={handleContentChange}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="flex flex-col">
+                <div className="p-2 bg-gray-50 border-b flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Editor Markdown</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={insertMermaidExample}
+                  >
+                    Insertar diagrama Mermaid
+                  </Button>
+                </div>
+                <div className="min-h-[500px]">
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            className="min-h-[500px] p-4 font-mono resize-none"
+                            placeholder="# Contenido del artículo en Markdown"
+                            onChange={handleContentChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </TabsContent>
             <TabsContent value="preview" className="p-6 border-t">
               <div className="prose prose-slate max-w-none">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                >
-                  {markdownContent}
-                </ReactMarkdown>
+                <MarkdownWithMermaid>{markdownContent}</MarkdownWithMermaid>
               </div>
             </TabsContent>
           </Tabs>
