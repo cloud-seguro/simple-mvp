@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
+import { UserRole, BlogPostStatus } from "@prisma/client";
 import { generateSlug } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
@@ -63,6 +63,9 @@ export async function POST(request: NextRequest) {
         content: body.content,
         coverImage: body.coverImage,
         published: body.published || false,
+        status: body.status || BlogPostStatus.DRAFT,
+        description: body.description,
+        featuredImage: body.featuredImage,
         slug,
         authorId: profile.id,
         tags: body.tags || [],

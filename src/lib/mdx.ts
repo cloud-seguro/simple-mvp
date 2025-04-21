@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { BlogPostStatus } from "@/types/blog";
 
 // Define the BlogPost type
 export type BlogPost = {
@@ -13,6 +14,9 @@ export type BlogPost = {
   coverImage?: string;
   tags?: string[];
   readingTime?: string;
+  status?: BlogPostStatus;
+  description?: string;
+  featuredImage?: string;
 };
 
 // Calculate reading time based on word count (average reading speed: 200 words per minute)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,13 +17,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { generateSlug } from "@/lib/utils";
 import { MarkdownWithMermaid } from "@/components/markdown/markdown-with-mermaid";
-import { BlogImageUpload } from "./blog-image-upload";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Copy, FileText, Trash } from "lucide-react";
+import { DeleteBlogPostAlertDialog } from "./delete-blog-post-alert-dialog";
+import { YooptaEditorComponent } from "./yoopta-editor";
+import "@/styles/yoopta.css";
+import { BlogPostStatus } from "@/types/blog";
 
 // Define the form schema
 const blogPostSchema = z.object({
@@ -34,6 +48,9 @@ const blogPostSchema = z.object({
   content: z.string().min(1, "El contenido es obligatorio"),
   published: z.boolean().default(false),
   tags: z.array(z.string()).optional(),
+  description: z.string().optional(),
+  featuredImage: z.string().optional(),
+  status: z.nativeEnum(BlogPostStatus),
 });
 
 type BlogPostFormValues = z.infer<typeof blogPostSchema>;
@@ -51,6 +68,9 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
   const [activeTab, setActiveTab] = useState<string>("editor");
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [tempPostId, setTempPostId] = useState<string>("");
+  const [content, setContent] = useState<string>(post?.content || "");
+  const [isCopied, setIsCopied] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Generate a temporary ID for new posts (for image uploads)
   useEffect(() => {
@@ -70,8 +90,17 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
       content: post?.content || "",
       published: post?.published || false,
       tags: post?.tags || [],
+      description: post?.description || "",
+      featuredImage: post?.featuredImage || "",
+      status: post?.status || BlogPostStatus.DRAFT,
     },
   });
+
+  // Set initial content
+  useEffect(() => {
+    setContent(post?.content || "");
+    setMarkdownContent(post?.content || "");
+  }, [post]);
 
   // Update preview content when form content changes
   useEffect(() => {
@@ -94,7 +123,15 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     form.setValue("content", value);
+    setContent(value);
     setMarkdownContent(value);
+  };
+
+  // Handle rich editor content change
+  const handleRichEditorChange = (newContent: string) => {
+    form.setValue("content", newContent);
+    setContent(newContent);
+    setMarkdownContent(newContent);
   };
 
   // Handle image upload complete
@@ -181,22 +218,47 @@ flowchart LR
     setMarkdownContent(newContent);
   };
 
+  const copyContentToClipboard = () => {
+    navigator.clipboard.writeText(content);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">
+          {post ? "Edit Blog Post" : "Create New Blog Post"}
+        </h1>
+        {post && (
+          <Button
+            variant="destructive"
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
+            <Trash className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+        )}
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título</FormLabel>
+                  <FormLabel>Title</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Título del artículo"
                       onChange={handleTitleChange}
+                      placeholder="My Awesome Blog Post"
                     />
                   </FormControl>
                   <FormMessage />
@@ -209,15 +271,25 @@ flowchart LR
               name="slug"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL del artículo (slug)</FormLabel>
+                  <FormLabel>Slug</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="url-del-articulo" />
+                    <Input
+                      {...field}
+                      placeholder="my-awesome-blog-post"
+                      onChange={(e) => {
+                        const slug = generateSlug(e.target.value);
+                        form.setValue("slug", slug);
+                      }}
+                      value={form.getValues("slug")}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="excerpt"
@@ -236,119 +308,160 @@ flowchart LR
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="coverImage"
-              render={({ field }) => (
-                <BlogImageUpload
-                  postId={post?.id || tempPostId}
-                  currentImageUrl={field.value}
-                  onUploadComplete={handleImageUploadComplete}
-                  onUploadError={handleImageUploadError}
-                />
-              )}
-            />
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="featuredImage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Featured Image URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={BlogPostStatus.DRAFT}>
+                          Draft
+                        </SelectItem>
+                        <SelectItem value={BlogPostStatus.PUBLISHED}>
+                          Published
+                        </SelectItem>
+                        <SelectItem value={BlogPostStatus.ARCHIVED}>
+                          Archived
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="published"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>Publicar</FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          {field.value
-                            ? "El artículo será visible públicamente"
-                            : "El artículo se guardará como borrador"}
-                        </div>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <FormLabel>Content</FormLabel>
+              <div className="flex items-center space-x-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={insertMermaidExample}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Insert Mermaid Diagram
+                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={copyContentToClipboard}
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        {isCopied ? "Copied!" : "Copy"}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Copy content to clipboard</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+
+            <Tabs
+              defaultValue="editor"
+              className="w-full"
+              value={activeTab}
+              onValueChange={handleTabChange}
+            >
+              <TabsList className="grid grid-cols-3">
+                <TabsTrigger value="editor">Markdown</TabsTrigger>
+                <TabsTrigger value="rich-editor">Rich Editor</TabsTrigger>
+                <TabsTrigger value="preview">Preview</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="editor" className="mt-2">
+                <Textarea
+                  value={content}
+                  onChange={(e) => handleContentChange(e)}
+                  className="min-h-[500px] font-mono"
+                  placeholder="# My Awesome Blog Post
+
+Write your content here using Markdown syntax.
+
+## Features
+- Support for **bold text**
+- Support for *italic text*
+- Support for `code blocks`
+- Support for [links](https://example.com)
+- Support for images ![alt text](https://example.com/image.jpg)
+- Support for Mermaid diagrams
+                  "
                 />
+              </TabsContent>
 
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push("/dashboard/blog")}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting
-                      ? "Guardando..."
-                      : post
-                        ? "Actualizar"
-                        : "Crear"}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <TabsContent value="rich-editor" className="mt-2">
+                <YooptaEditorComponent
+                  content={content}
+                  onChange={handleRichEditorChange}
+                  placeholder="Start typing your blog post content here..."
+                />
+              </TabsContent>
 
-        <div className="border rounded-md">
-          <Tabs
-            defaultValue="editor"
-            value={activeTab}
-            onValueChange={setActiveTab}
-          >
-            <TabsList className="w-full justify-start px-2 pt-2 bg-transparent">
-              <TabsTrigger value="editor">Editor</TabsTrigger>
-              <TabsTrigger value="preview">Vista previa</TabsTrigger>
-            </TabsList>
-            <TabsContent value="editor" className="p-0 border-t">
-              <div className="flex flex-col">
-                <div className="p-2 bg-gray-50 border-b flex justify-between items-center">
-                  <span className="text-sm text-gray-500">Editor Markdown</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={insertMermaidExample}
-                  >
-                    Insertar diagrama Mermaid
-                  </Button>
+              <TabsContent
+                value="preview"
+                className="mt-2 prose dark:prose-invert max-w-none"
+              >
+                <div className="p-4 border rounded-md min-h-[500px] overflow-auto bg-background">
+                  <MarkdownWithMermaid>{markdownContent}</MarkdownWithMermaid>
                 </div>
-                <div className="min-h-[500px]">
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            className="min-h-[500px] p-4 font-mono resize-none"
-                            placeholder="# Contenido del artículo en Markdown"
-                            onChange={handleContentChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="preview" className="p-6 border-t">
-              <div className="prose prose-slate max-w-none">
-                <MarkdownWithMermaid>{markdownContent}</MarkdownWithMermaid>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </form>
-    </Form>
+              </TabsContent>
+            </Tabs>
+
+            <FormMessage />
+          </div>
+
+          <div className="flex justify-end">
+            <Button type="submit">
+              {post ? "Update Blog Post" : "Create Blog Post"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+
+      {post && (
+        <DeleteBlogPostAlertDialog
+          blogPostId={post.id}
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+        />
+      )}
+    </div>
   );
 }
