@@ -23,6 +23,7 @@ export function ResultsReady({
   evaluationId,
 }: ResultsReadyProps) {
   const [emailSent, setEmailSent] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
   const emailSentRef = useRef(false);
 
@@ -32,7 +33,8 @@ export function ResultsReady({
       emailSentRef.current = true; // Set flag immediately to prevent duplicate sends
       sendResultsEmail();
     }
-  }, []); // Empty dependency array ensures this only runs once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo?.email, evaluationId]); // Added required dependencies
 
   const sendResultsEmail = async () => {
     if (!userInfo?.email || !evaluationId) {

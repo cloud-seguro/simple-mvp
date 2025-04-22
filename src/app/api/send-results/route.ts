@@ -5,9 +5,7 @@ import { getEvaluationById } from "@/lib/evaluation-utils";
 import { getQuizData } from "@/lib/quiz-data";
 import { initialEvaluationData } from "@/data/initial-evaluation";
 import { advancedEvaluationData } from "@/data/advanced-evaluation";
-import { evaluacionInicial } from "@/components/evaluations/data/initial-evaluation";
-import { evaluacionAvanzada } from "@/components/evaluations/data/advanced-evaluation";
-import { getMaturityLevel } from "@/lib/maturity-utils";
+import React from "react";
 
 // Initialize Resend with the API key from environment variables
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -237,7 +235,7 @@ export async function POST(request: Request) {
       from: "Evaluación de Ciberseguridad <onboarding@resend.dev>",
       to: [email],
       subject: "Sus resultados de evaluación de ciberseguridad están listos",
-      react: ResultsEmail({
+      react: React.createElement(ResultsEmail, {
         userInfo,
         evaluationId,
         baseUrl,

@@ -63,6 +63,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
   const scoreColor = getScoreColor(overallPercentage);
 
   // Group recommendations by category for organization
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const recommendationsByCategory = recommendations.reduce(
     (acc, rec) => {
       if (!acc[rec.category]) {
@@ -89,7 +90,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
     <table
       cellPadding="0"
       cellSpacing="0"
-      border="0"
+      border={0}
       width="100%"
       style={{
         fontFamily: "Arial, sans-serif",
@@ -104,7 +105,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
           <table
             cellPadding="0"
             cellSpacing="0"
-            border="0"
+            border={0}
             width="100%"
             style={{
               maxWidth: "600px",
@@ -140,7 +141,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                 <table
                   cellPadding="0"
                   cellSpacing="0"
-                  border="0"
+                  border={0}
                   width="100%"
                   style={{
                     backgroundColor: "white",
@@ -155,7 +156,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                       <table
                         cellPadding="0"
                         cellSpacing="0"
-                        border="0"
+                        border={0}
                         width="100%"
                       >
                         <tr>
@@ -167,7 +168,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                             <table
                               cellPadding="0"
                               cellSpacing="0"
-                              border="0"
+                              border={0}
                               width="100%"
                             >
                               <tr>
@@ -208,7 +209,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                             <table
                               cellPadding="0"
                               cellSpacing="0"
-                              border="0"
+                              border={0}
                               width="100%"
                               style={{
                                 backgroundColor: "#e0e0e0",
@@ -220,22 +221,22 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                               <tr>
                                 <td
                                   width={`${overallPercentage}%`}
-                                  bgcolor={scoreColor}
                                   height="20"
                                   style={{
                                     fontSize: "0",
                                     lineHeight: "0",
+                                    backgroundColor: scoreColor,
                                   }}
                                 >
                                   &nbsp;
                                 </td>
                                 <td
                                   width={`${100 - overallPercentage}%`}
-                                  bgcolor="#e0e0e0"
                                   height="20"
                                   style={{
                                     fontSize: "0",
                                     lineHeight: "0",
+                                    backgroundColor: "#e0e0e0",
                                   }}
                                 >
                                   &nbsp;
@@ -253,7 +254,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                 <table
                   cellPadding="0"
                   cellSpacing="0"
-                  border="0"
+                  border={0}
                   width="100%"
                   style={{
                     backgroundColor: "white",
@@ -278,7 +279,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                       <table
                         cellPadding="0"
                         cellSpacing="0"
-                        border="0"
+                        border={0}
                         width="100%"
                         style={{
                           borderRadius: "8px",
@@ -307,7 +308,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                 <table
                   cellPadding="0"
                   cellSpacing="0"
-                  border="0"
+                  border={0}
                   width="100%"
                   style={{
                     backgroundColor: "white",
@@ -345,7 +346,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                               key={category}
                               cellPadding="0"
                               cellSpacing="0"
-                              border="0"
+                              border={0}
                               width="100%"
                               style={{
                                 marginBottom: "30px",
@@ -357,7 +358,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                   <table
                                     cellPadding="0"
                                     cellSpacing="0"
-                                    border="0"
+                                    border={0}
                                     width="100%"
                                   >
                                     <tr>
@@ -393,7 +394,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                   <table
                                     cellPadding="0"
                                     cellSpacing="0"
-                                    border="0"
+                                    border={0}
                                     width="100%"
                                     style={{
                                       backgroundColor: "#e0e0e0",
@@ -405,22 +406,22 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                     <tr>
                                       <td
                                         width={`${percentage}%`}
-                                        bgcolor={categoryColor}
                                         height="8"
                                         style={{
                                           fontSize: "0",
                                           lineHeight: "0",
+                                          backgroundColor: categoryColor,
                                         }}
                                       >
                                         &nbsp;
                                       </td>
                                       <td
                                         width={`${100 - percentage}%`}
-                                        bgcolor="#e0e0e0"
                                         height="8"
                                         style={{
                                           fontSize: "0",
                                           lineHeight: "0",
+                                          backgroundColor: "#e0e0e0",
                                         }}
                                       >
                                         &nbsp;
@@ -453,7 +454,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                         key={index}
                                         cellPadding="0"
                                         cellSpacing="0"
-                                        border="0"
+                                        border={0}
                                         width="100%"
                                         style={{
                                           backgroundColor: "#f5f5f5",
@@ -468,7 +469,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                             <table
                                               cellPadding="0"
                                               cellSpacing="0"
-                                              border="0"
+                                              border={0}
                                               width="100%"
                                               style={{ marginBottom: "10px" }}
                                             >
@@ -525,7 +526,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                             <table
                                               cellPadding="0"
                                               cellSpacing="0"
-                                              border="0"
+                                              border={0}
                                               width="100%"
                                               style={{
                                                 backgroundColor: "#e0e0e0",
@@ -538,24 +539,23 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                               <tr>
                                                 <td
                                                   width={`${questionPercentage}%`}
-                                                  bgcolor={questionColor}
                                                   height="6"
                                                   style={{
                                                     fontSize: "0",
                                                     lineHeight: "0",
+                                                    backgroundColor:
+                                                      questionColor,
                                                   }}
                                                 >
                                                   &nbsp;
                                                 </td>
                                                 <td
-                                                  width={`${
-                                                    100 - questionPercentage
-                                                  }%`}
-                                                  bgcolor="#e0e0e0"
+                                                  width={`${100 - questionPercentage}%`}
                                                   height="6"
                                                   style={{
                                                     fontSize: "0",
                                                     lineHeight: "0",
+                                                    backgroundColor: "#e0e0e0",
                                                   }}
                                                 >
                                                   &nbsp;
@@ -567,7 +567,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                             <table
                                               cellPadding="0"
                                               cellSpacing="0"
-                                              border="0"
+                                              border={0}
                                               width="100%"
                                               style={{
                                                 marginTop: "10px",
@@ -627,7 +627,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                 <table
                   cellPadding="0"
                   cellSpacing="0"
-                  border="0"
+                  border={0}
                   width="100%"
                   style={{
                     width: "100%",
@@ -665,7 +665,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                       <table
                         cellPadding="0"
                         cellSpacing="0"
-                        border="0"
+                        border={0}
                         width="100%"
                         style={{ marginBottom: "10px" }}
                       >
@@ -674,7 +674,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                             <table
                               cellPadding="0"
                               cellSpacing="0"
-                              border="0"
+                              border={0}
                               style={{
                                 display: "inline-block",
                                 marginRight: "10px",
@@ -698,7 +698,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                             <table
                               cellPadding="0"
                               cellSpacing="0"
-                              border="0"
+                              border={0}
                               style={{
                                 display: "inline-block",
                                 marginRight: "10px",
@@ -722,7 +722,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                             <table
                               cellPadding="0"
                               cellSpacing="0"
-                              border="0"
+                              border={0}
                               style={{
                                 display: "inline-block",
                                 marginBottom: "10px",
@@ -753,7 +753,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                 <table
                   cellPadding="0"
                   cellSpacing="0"
-                  border="0"
+                  border={0}
                   width="100%"
                   style={{
                     width: "100%",
@@ -774,7 +774,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                       <table
                         cellPadding="0"
                         cellSpacing="0"
-                        border="0"
+                        border={0}
                         style={{
                           margin: "0 auto",
                         }}
