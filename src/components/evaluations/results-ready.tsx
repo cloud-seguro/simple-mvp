@@ -7,6 +7,7 @@ import type { UserInfo } from "./types";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { toast } from "@/components/ui/use-toast";
+import { useEffect, useState, useRef } from "react";
 
 interface ResultsReadyProps {
   userInfo: UserInfo;
@@ -21,6 +22,63 @@ export function ResultsReady({
   shareUrl,
   evaluationId,
 }: ResultsReadyProps) {
+  const [emailSent, setEmailSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const emailSentRef = useRef(false);
+
+  useEffect(() => {
+    // Only send email if we have the required information and it hasn't been sent yet
+    if (userInfo?.email && evaluationId && !emailSentRef.current) {
+      emailSentRef.current = true; // Set flag immediately to prevent duplicate sends
+      sendResultsEmail();
+    }
+  }, []); // Empty dependency array ensures this only runs once on mount
+
+  const sendResultsEmail = async () => {
+    if (!userInfo?.email || !evaluationId) {
+      console.error("Missing required fields for sending email");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/send-results", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userInfo,
+          evaluationId,
+          email: userInfo.email,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send email");
+      }
+
+      setEmailSent(true);
+      toast({
+        title: "Email enviado",
+        description:
+          "Los resultados han sido enviados a su correo electrónico.",
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast({
+        title: "Error",
+        description:
+          "No se pudo enviar el correo electrónico. Por favor intente más tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCopyLink = () => {
     // If we have an evaluation ID, use that for the share URL
     const linkToShare = evaluationId
@@ -74,6 +132,12 @@ export function ResultsReady({
             organización. Descubra las áreas de fortaleza y oportunidades de
             mejora.
           </p>
+
+          {emailSent && (
+            <p className="text-sm text-green-600 font-medium">
+              Los resultados también han sido enviados a su correo electrónico.
+            </p>
+          )}
 
           <Button
             onClick={onViewResults}

@@ -102,6 +102,7 @@
     "rehype-highlight": "^7.0.2",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
+    "resend": "^4.4.0",
     "slate": "^0.94.0",
     "slate-history": "^0.93.0",
     "slate-react": "^0.94.0",
