@@ -89,7 +89,7 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
       excerpt: post?.excerpt || "",
       coverImage: post?.coverImage || "",
       content: post?.content || "",
-      published: post?.published || false,
+      published: post?.status === BlogPostStatus.PUBLISHED,
       tags: post?.tags || [],
       description: post?.description || "",
       featuredImage: post?.featuredImage || "",
@@ -332,7 +332,14 @@ flowchart LR
                   <FormItem>
                     <FormLabel>Estado</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Synchronize published status with the status field
+                        form.setValue(
+                          "published",
+                          value === BlogPostStatus.PUBLISHED
+                        );
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>

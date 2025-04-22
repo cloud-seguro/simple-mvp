@@ -6,11 +6,11 @@ import { es } from "date-fns/locale";
 import { calculateReadingTime } from "@/lib/mdx";
 
 export const metadata: Metadata = {
-  title: "Blog | SIMPLE",
+  title: "Blog",
   description:
     "Artículos sobre ciberseguridad, privacidad y protección de datos",
   openGraph: {
-    title: "Blog | SIMPLE",
+    title: "Blog",
     description:
       "Artículos sobre ciberseguridad, privacidad y protección de datos",
     type: "website",

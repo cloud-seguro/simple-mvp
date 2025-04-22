@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         excerpt: body.excerpt,
         content: body.content,
         coverImage: body.coverImage,
-        published: body.published || false,
+        published: body.status === "PUBLISHED",
         status: body.status || BlogPostStatus.DRAFT,
         description: body.description,
         featuredImage: body.featuredImage,

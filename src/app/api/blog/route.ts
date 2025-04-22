@@ -29,8 +29,13 @@ export async function GET(request: NextRequest) {
     const pageSize = parseInt(searchParams.get("pageSize") || "10");
     const skip = (page - 1) * pageSize;
 
-    // Regular users can only see published posts
-    const where = isSuperAdmin ? {} : { published: true };
+    // Regular users can only see published posts, using both published flag and status
+    const where = isSuperAdmin
+      ? {}
+      : {
+          status: "PUBLISHED",
+          published: true,
+        };
 
     const [posts, totalCount] = await Promise.all([
       prisma.blogPost.findMany({

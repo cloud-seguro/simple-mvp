@@ -119,7 +119,7 @@ export async function PUT(
         excerpt: body.excerpt,
         content: body.content,
         coverImage: body.coverImage,
-        published: body.published,
+        published: body.status === "PUBLISHED",
         status: body.status,
         description: body.description,
         featuredImage: body.featuredImage,
