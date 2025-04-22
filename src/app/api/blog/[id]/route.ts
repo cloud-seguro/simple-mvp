@@ -8,7 +8,7 @@ import { generateSlug } from "@/lib/utils";
 // Get a single blog post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createRouteHandlerClient({ cookies });
   const {
@@ -21,7 +21,7 @@ export async function GET(
 
   try {
     const post = await prisma.blogPost.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: {
         author: {
           select: {
@@ -141,7 +141,7 @@ export async function PUT(
 // Delete a blog post
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createRouteHandlerClient({ cookies });
   const {
@@ -161,7 +161,7 @@ export async function DELETE(
 
     // Check if post exists
     const existingPost = await prisma.blogPost.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: { authorId: true },
     });
 
@@ -182,7 +182,7 @@ export async function DELETE(
 
     // Delete post
     await prisma.blogPost.delete({
-      where: { id: params.id },
+      where: { id: (await params).id },
     });
 
     return NextResponse.json({ success: true });

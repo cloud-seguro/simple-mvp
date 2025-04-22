@@ -1,4 +1,85 @@
-import { Descendant, Element as SlateElement } from "slate";
+import { Descendant } from "slate";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// Define types for custom Slate elements
+type CustomText = {
+  text: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+};
+
+type BaseElement = {
+  children: any[];
+};
+
+type ParagraphElement = BaseElement & {
+  type: "paragraph";
+  children: CustomText[];
+};
+
+type HeadingElement = BaseElement & {
+  type: "heading";
+  level: number;
+  children: CustomText[];
+};
+
+type BlockquoteElement = BaseElement & {
+  type: "blockquote";
+  children: CustomText[];
+};
+
+type CodeBlockElement = BaseElement & {
+  type: "code-block";
+  children: CustomText[];
+};
+
+type ListItemElement = BaseElement & {
+  type: "list-item";
+  children: CustomText[];
+};
+
+type BulletedListElement = BaseElement & {
+  type: "bulleted-list";
+  children: ListItemElement[];
+};
+
+type NumberedListElement = BaseElement & {
+  type: "numbered-list";
+  children: ListItemElement[];
+};
+
+type LinkElement = BaseElement & {
+  type: "link";
+  url: string;
+  children: CustomText[];
+};
+
+type ImageElement = BaseElement & {
+  type: "image";
+  url: string;
+  alt: string;
+  children: CustomText[];
+};
+
+type CustomElement =
+  | ParagraphElement
+  | HeadingElement
+  | BlockquoteElement
+  | CodeBlockElement
+  | ListItemElement
+  | BulletedListElement
+  | NumberedListElement
+  | LinkElement
+  | ImageElement;
+
+declare module "slate" {
+  interface CustomTypes {
+    Element: CustomElement;
+    Text: CustomText;
+  }
+}
 
 // Convert Markdown string to Slate nodes
 export const markdownToSlate = (markdown: string): Descendant[] => {
@@ -7,7 +88,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
       {
         type: "paragraph",
         children: [{ text: "" }],
-      },
+      } as ParagraphElement,
     ];
   }
 
@@ -17,15 +98,15 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
     const lines = markdown.split("\n");
     const slateNodes: Descendant[] = [];
 
-    let currentListItems: Descendant[] = [];
+    let currentListItems: ListItemElement[] = [];
     let listType: "numbered-list" | "bulleted-list" | null = null;
 
     const flushListItems = () => {
       if (currentListItems.length > 0) {
         slateNodes.push({
-          type: listType as string,
+          type: listType as any,
           children: currentListItems,
-        });
+        } as BulletedListElement | NumberedListElement);
         currentListItems = [];
         listType = null;
       }
@@ -41,21 +122,21 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
           type: "heading",
           level: 1,
           children: [{ text: line.slice(2) }],
-        });
+        } as HeadingElement);
       } else if (line.startsWith("## ")) {
         flushListItems();
         slateNodes.push({
           type: "heading",
           level: 2,
           children: [{ text: line.slice(3) }],
-        });
+        } as HeadingElement);
       } else if (line.startsWith("### ")) {
         flushListItems();
         slateNodes.push({
           type: "heading",
           level: 3,
           children: [{ text: line.slice(4) }],
-        });
+        } as HeadingElement);
       }
       // Handle blockquotes
       else if (line.startsWith("> ")) {
@@ -63,7 +144,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
         slateNodes.push({
           type: "blockquote",
           children: [{ text: line.slice(2) }],
-        });
+        } as BlockquoteElement);
       }
       // Handle unordered lists
       else if (line.startsWith("- ") || line.startsWith("* ")) {
@@ -74,7 +155,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
         currentListItems.push({
           type: "list-item",
           children: [{ text: line.slice(2) }],
-        });
+        } as ListItemElement);
       }
       // Handle ordered lists
       else if (line.match(/^\d+\.\s/)) {
@@ -86,7 +167,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
         currentListItems.push({
           type: "list-item",
           children: [{ text: content }],
-        });
+        } as ListItemElement);
       }
       // Handle code blocks
       else if (line.startsWith("```")) {
@@ -102,7 +183,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
         slateNodes.push({
           type: "code-block",
           children: [{ text: codeContent }],
-        });
+        } as CodeBlockElement);
 
         // Skip to the end of the code block
         i = j;
@@ -113,7 +194,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
         slateNodes.push({
           type: "paragraph",
           children: [{ text: line }],
-        });
+        } as ParagraphElement);
       }
       // Handle empty lines
       else {
@@ -121,7 +202,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
         slateNodes.push({
           type: "paragraph",
           children: [{ text: "" }],
-        });
+        } as ParagraphElement);
       }
     }
 
@@ -133,7 +214,7 @@ export const markdownToSlate = (markdown: string): Descendant[] => {
       {
         type: "paragraph",
         children: [{ text: markdown }],
-      },
+      } as ParagraphElement,
     ];
   }
 };
@@ -147,55 +228,56 @@ export const slateToMarkdown = (nodes: Descendant[]): string => {
   try {
     let markdown = "";
 
-    const processNode = (node: Descendant): string => {
+    const processNode = (node: any): string => {
       if (!("type" in node)) {
         return node.text || "";
       }
 
-      const slateElement = node as SlateElement;
-      const { type, children } = slateElement;
+      const { type, children } = node;
 
       if (!type) {
-        return children.map(processNode).join("");
+        return (children as any[]).map(processNode).join("");
       }
 
       switch (type) {
         case "heading":
-          const level = (slateElement as any).level || 1;
+          const level = node.level || 1;
           const headingMarker = "#".repeat(level);
-          return `${headingMarker} ${children.map(processNode).join("")}`;
+          return `${headingMarker} ${(children as any[]).map(processNode).join("")}`;
 
         case "paragraph":
-          return children.map(processNode).join("");
+          return (children as any[]).map(processNode).join("");
 
         case "blockquote":
-          return `> ${children.map(processNode).join("")}`;
+          return `> ${(children as any[]).map(processNode).join("")}`;
 
         case "code-block":
-          return `\`\`\`\n${children.map(processNode).join("")}\n\`\`\``;
+          return `\`\`\`\n${(children as any[]).map(processNode).join("")}\n\`\`\``;
 
         case "bulleted-list":
-          return children.map((item) => processNode(item)).join("\n");
+          return (children as any[])
+            .map((item) => processNode(item))
+            .join("\n");
 
         case "numbered-list":
-          return children
+          return (children as any[])
             .map((item, index) => `${index + 1}. ${processNode(item)}`)
             .join("\n");
 
         case "list-item":
-          return `- ${children.map(processNode).join("")}`;
+          return `- ${(children as any[]).map(processNode).join("")}`;
 
         case "link":
-          const url = (slateElement as any).url || "";
-          return `[${children.map(processNode).join("")}](${url})`;
+          const url = node.url || "";
+          return `[${(children as any[]).map(processNode).join("")}](${url})`;
 
         case "image":
-          const imageUrl = (slateElement as any).url || "";
-          const alt = (slateElement as any).alt || "";
+          const imageUrl = node.url || "";
+          const alt = node.alt || "";
           return `![${alt}](${imageUrl})`;
 
         default:
-          return children.map(processNode).join("");
+          return (children as any[]).map(processNode).join("");
       }
     };
 

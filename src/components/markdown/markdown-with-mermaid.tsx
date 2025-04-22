@@ -9,7 +9,9 @@ import { useToast } from "@/components/ui/use-toast";
 
 // Ensure isSpace is defined globally
 if (typeof window !== "undefined") {
-  (window as any).isSpace = (char: string) => /\s/.test(char);
+  (window as unknown as { isSpace: (char: string) => boolean }).isSpace = (
+    char: string
+  ) => /\s/.test(char);
 }
 
 interface MarkdownWithMermaidProps {
@@ -84,7 +86,7 @@ export function MarkdownWithMermaid({
         rehypePlugins={[rehypeRaw]}
         components={{
           // Special handler for mermaid blocks using our placeholders
-          p: ({ node, children, ...props }) => {
+          p: ({ children, ...props }) => {
             try {
               const content = String(children || "");
               const mermaidMatch = content.match(/^:::mermaid-block-(\d+):::$/);
@@ -115,7 +117,7 @@ export function MarkdownWithMermaid({
           },
 
           // Standard code block handler for non-mermaid code
-          code: ({ node, inline, className, children, ...props }) => {
+          code: ({ className, children, ...props }) => {
             try {
               const match = /language-(\w+)/.exec(className || "");
               const language = match && match[1] ? match[1] : "";
@@ -141,7 +143,7 @@ export function MarkdownWithMermaid({
           },
 
           // Handle pre tags to avoid nesting issues
-          pre: ({ node, children, ...props }) => {
+          pre: ({ children, ...props }) => {
             try {
               return (
                 <pre className="pre-wrap" {...props}>

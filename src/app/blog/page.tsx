@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { calculateReadingTime } from "@/lib/mdx";
+import type { BlogPost } from "@/lib/mdx";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -38,7 +39,7 @@ export default async function BlogPage() {
     });
 
     // Transform the post data to match the expected format
-    const posts = dbPosts.map((post) => {
+    const posts: BlogPost[] = dbPosts.map((post) => {
       const date = new Date(post.createdAt);
       const formattedDate = format(date, "MMMM dd, yyyy", { locale: es });
       const readingTime = calculateReadingTime(post.content);
@@ -54,8 +55,8 @@ export default async function BlogPage() {
           post.author.firstName && post.author.lastName
             ? `${post.author.firstName} ${post.author.lastName}`
             : "SIMPLE",
-        coverImage: post.coverImage,
-        tags: post.tags,
+        coverImage: post.coverImage || undefined,
+        tags: post.tags || [],
         readingTime,
       };
     });

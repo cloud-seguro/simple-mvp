@@ -82,6 +82,7 @@ export function BlogManagement() {
 
   useEffect(() => {
     fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle page change
@@ -111,7 +112,7 @@ export function BlogManagement() {
 
       // Refresh the post list
       fetchPosts(currentPage);
-    } catch (err) {
+    } catch {
       toast({
         variant: "destructive",
         title: "Error",

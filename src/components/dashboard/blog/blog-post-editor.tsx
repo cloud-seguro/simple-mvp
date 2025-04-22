@@ -58,14 +58,25 @@ type BlogPostFormValues = z.infer<typeof blogPostSchema>;
 
 // Define the props for the component
 interface BlogPostEditorProps {
-  post: any | null; // The post to edit, null if creating a new post
+  post: {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    coverImage?: string;
+    published?: boolean;
+    tags?: string[];
+    description?: string;
+    featuredImage?: string;
+    status: BlogPostStatus | string;
+  } | null; // The post to edit, null if creating a new post
   authorId: string; // The ID of the current user
 }
 
 export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("rich-editor");
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [tempPostId, setTempPostId] = useState<string>("");
@@ -93,7 +104,7 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
       tags: post?.tags || [],
       description: post?.description || "",
       featuredImage: post?.featuredImage || "",
-      status: post?.status || BlogPostStatus.DRAFT,
+      status: (post?.status as BlogPostStatus) || BlogPostStatus.DRAFT,
     },
   });
 
@@ -120,21 +131,6 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
     }
   };
 
-  // When content changes, update the markdown preview
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    form.setValue("content", value);
-    setContent(value);
-    setMarkdownContent(value);
-  };
-
-  // Handle rich editor content change
-  const handleRichEditorChange = (newContent: string) => {
-    form.setValue("content", newContent);
-    setContent(newContent);
-    setMarkdownContent(newContent);
-  };
-
   // Handle image upload complete
   const handleImageUploadComplete = (imageUrl: string) => {
     form.setValue("coverImage", imageUrl);
@@ -151,8 +147,6 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
 
   // Handle form submission
   const onSubmit = async (values: BlogPostFormValues) => {
-    setIsSubmitting(true);
-
     try {
       const endpoint = post ? `/api/blog/${post.id}` : "/api/blog/create";
       const method = post ? "PUT" : "POST";
@@ -190,8 +184,6 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
         description:
           (error as Error).message || "Ocurrió un error al guardar el artículo",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -279,9 +271,9 @@ flowchart LR
                       placeholder="mi-articulo-increible"
                       onChange={(e) => {
                         const slug = generateSlug(e.target.value);
-                        form.setValue("slug", slug);
+                        field.onChange(slug);
                       }}
-                      value={form.getValues("slug")}
+                      value={field.value}
                     />
                   </FormControl>
                   <FormMessage />
@@ -316,7 +308,7 @@ flowchart LR
                 render={({ field }) => (
                   <BlogImageUpload
                     postId={post?.id || tempPostId}
-                    currentImageUrl={form.getValues("coverImage")}
+                    currentImageUrl={field.value}
                     onUploadComplete={handleImageUploadComplete}
                     onUploadError={handleImageUploadError}
                     label="Imagen de portada"
@@ -414,7 +406,11 @@ flowchart LR
               <TabsContent value="rich-editor" className="mt-2">
                 <EnhancedEditor
                   content={content}
-                  onChange={handleRichEditorChange}
+                  onChange={(newContent) => {
+                    form.setValue("content", newContent);
+                    setContent(newContent);
+                    setMarkdownContent(newContent);
+                  }}
                   placeholder="Comienza a escribir el contenido de tu artículo aquí..."
                 />
               </TabsContent>

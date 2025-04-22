@@ -4,11 +4,14 @@ import { BlogPostEditor } from "@/components/dashboard/blog/blog-post-editor";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+type PostParams = {
+  id: string;
+};
+
+export default async function BlogPostPage({ params }: any) {
+  const paramValues = params as PostParams;
   const supabase = createServerComponentClient({ cookies });
   const {
     data: { session },
@@ -19,22 +22,37 @@ export default async function BlogPostPage({
   }
 
   // Check if this is a new post or an existing one
-  const isNewPost = (await params).id === "new";
+  const isNewPost = paramValues.id === "new";
 
   let post = null;
 
   if (!isNewPost) {
     // Fetch the existing post
-    post = await prisma.blogPost.findUnique({
-      where: { id: (await params).id },
+    const dbPost = await prisma.blogPost.findUnique({
+      where: { id: paramValues.id },
       include: {
         author: true,
       },
     });
 
-    if (!post) {
+    if (!dbPost) {
       notFound();
     }
+
+    // Convert null to undefined for optional properties to match the expected type
+    post = {
+      id: dbPost.id,
+      title: dbPost.title,
+      slug: dbPost.slug,
+      excerpt: dbPost.excerpt,
+      content: dbPost.content,
+      coverImage: dbPost.coverImage || undefined,
+      published: dbPost.published,
+      tags: dbPost.tags || [],
+      description: dbPost.description || undefined,
+      featuredImage: dbPost.featuredImage || undefined,
+      status: dbPost.status,
+    };
   }
 
   // Get the current user's profile

@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Card } from "@/components/ui/card";
 import AuthLayout from "@/components/auth/auth-layout";
 import { ResetPasswordForm } from "@/components/auth/reset-password/reset-password-form";

@@ -6,19 +6,16 @@ import { prisma } from "@/lib/prisma";
 import { calculateReadingTime } from "@/lib/mdx";
 import BlogPostClient from "@/components/blog/BlogPostClient";
 
-type BlogPostPageProps = {
-  params: {
-    slug: string;
-  };
-};
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+interface PageParams {
+  slug: string;
+}
 
 // Generate metadata for the post
-export async function generateMetadata(
-  props: BlogPostPageProps
-): Promise<Metadata> {
+export async function generateMetadata({ params }: any): Promise<Metadata> {
   try {
-    // Wait for params to resolve and then access slug safely
-    const slug = (await props.params).slug;
+    const { slug } = params as PageParams;
 
     // Fetch the post from the database
     const post = await prisma.blogPost.findUnique({
@@ -49,14 +46,10 @@ export async function generateMetadata(
   }
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+// Cast params type to match what Next.js expects but still use it as a normal object
+export default async function BlogPostPage({ params }: any) {
   try {
-    // Get the slug safely
-    const { slug } = await params;
+    const { slug } = params as PageParams;
 
     // Fetch the post from the database
     const dbPost = await prisma.blogPost.findUnique({

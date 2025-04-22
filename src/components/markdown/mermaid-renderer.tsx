@@ -7,12 +7,31 @@ import { useToast } from "@/components/ui/use-toast";
 // Add isSpace function to window to ensure it's globally available
 // This is a workaround for a bug in mermaid
 if (typeof window !== "undefined") {
-  (window as any).isSpace = (char: string) => /\s/.test(char);
+  (window as unknown as { isSpace: (char: string) => boolean }).isSpace = (
+    char: string
+  ) => /\s/.test(char);
 }
 
 interface MermaidRendererProps {
   chart: string;
   className?: string;
+}
+
+interface CustomWindow extends Window {
+  isSpace?: (char: string) => boolean;
+}
+
+interface Mermaid {
+  initialize: (config: MermaidConfig) => void;
+  render: (id: string, chart: string) => Promise<{ svg: string }>;
+  isSpace?: (char: string) => boolean;
+}
+
+interface MermaidConfig {
+  startOnLoad: boolean;
+  theme: string;
+  securityLevel: string;
+  fontFamily: string;
 }
 
 export function MermaidRenderer({
@@ -32,9 +51,11 @@ export function MermaidRenderer({
       // Make isSpace available to mermaid
       if (
         !mermaid.hasOwnProperty("isSpace") &&
-        typeof (window as any).isSpace === "function"
+        typeof (window as unknown as CustomWindow).isSpace === "function"
       ) {
-        (mermaid as any).isSpace = (window as any).isSpace;
+        (mermaid as Mermaid).isSpace = (
+          window as unknown as CustomWindow
+        ).isSpace;
       }
 
       // Configure mermaid
@@ -58,13 +79,17 @@ export function MermaidRenderer({
           try {
             const { svg } = await mermaid.render(mermaidId.current, chart);
             setSvg(svg);
-          } catch (renderErr: any) {
+          } catch (renderErr) {
             console.error("Error rendering mermaid chart:", renderErr);
 
             // Specifically handle isSpace not defined error
-            if (renderErr.toString().includes("isSpace is not defined")) {
+            if (
+              renderErr instanceof Error &&
+              renderErr.toString().includes("isSpace is not defined")
+            ) {
               // Try to add isSpace to window and retry
-              (window as any).isSpace = (char: string) => /\s/.test(char);
+              (window as unknown as CustomWindow).isSpace = (char: string) =>
+                /\s/.test(char);
 
               try {
                 const { svg } = await mermaid.render(mermaidId.current, chart);
@@ -90,12 +115,13 @@ export function MermaidRenderer({
               "Error al renderizar el diagrama. Por favor verifica la sintaxis."
             );
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error("Failed to process mermaid chart:", err);
 
           const errorMessage =
-            err.message ||
-            "Error al procesar el diagrama. Por favor verifica la sintaxis.";
+            err instanceof Error
+              ? err.message
+              : "Error al procesar el diagrama. Por favor verifica la sintaxis.";
 
           setError(errorMessage);
 
