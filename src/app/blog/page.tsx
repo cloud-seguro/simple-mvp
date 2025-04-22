@@ -6,6 +6,8 @@ import { es } from "date-fns/locale";
 import { calculateReadingTime } from "@/lib/mdx";
 import type { BlogPost } from "@/lib/mdx";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Blog",
   description:

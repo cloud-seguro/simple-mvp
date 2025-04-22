@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { calculateReadingTime } from "@/lib/mdx";
 import BlogPostClient from "@/components/blog/BlogPostClient";
 
+export const dynamic = "force-dynamic";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 interface PageParams {
