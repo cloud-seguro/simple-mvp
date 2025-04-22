@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadCloud } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,6 @@ import { PasswordStrengthIndicator } from "@/components/utils/password-strength-
 import type { SignUpFormProps, SignUpFormData } from "@/types/auth/sign-up";
 import { signUpFormSchema } from "@/types/auth/sign-up";
 import { toast } from "@/components/ui/use-toast";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 // Extended props to include evaluation results
@@ -48,8 +46,6 @@ export function SignUpForm({
 }: ExtendedSignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { signUp, checkPasswordStrength } = useAuth();
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>("");
   const [passwordValue, setPasswordValue] = useState<string>("");
   const [passwordStrength, setPasswordStrength] = useState<number>(0);
@@ -75,19 +71,6 @@ export function SignUpForm({
       confirmPassword: "",
     },
   });
-
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   // Check password strength when password changes
   useEffect(() => {
@@ -134,13 +117,6 @@ export function SignUpForm({
       // This will handle email verification and profile creation
       await signUp(data.email, data.password, profileData);
 
-      // If we have an avatar file, save for later processing
-      if (avatarFile) {
-        // Store reference to the avatar but we'll need a separate mechanism to upload it
-        // since we can't pass File objects to the API in the initial request
-        localStorage.setItem("hasAvatarPending", "true");
-      }
-
       // Show success message
       toast({
         title: "Cuenta creada",
@@ -169,29 +145,6 @@ export function SignUpForm({
     <div className={cn("grid gap-6", className)} {...props}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative h-24 w-24">
-              {avatarPreview ? (
-                <Image
-                  src={avatarPreview}
-                  alt="Avatar preview"
-                  fill
-                  className="rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-                  <UploadCloud className="h-8 w-8 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="w-full max-w-xs"
-            />
-          </div>
-
           <FormField
             control={form.control}
             name="email"
