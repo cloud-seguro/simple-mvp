@@ -35,8 +35,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Copy, FileText, Trash } from "lucide-react";
 import { DeleteBlogPostAlertDialog } from "./delete-blog-post-alert-dialog";
-import { YooptaEditorComponent } from "./yoopta-editor";
-import "@/styles/yoopta.css";
+import { EnhancedEditor } from "./enhanced-editor";
+import { BlogImageUpload } from "./blog-image-upload";
+import "@/styles/enhanced-editor.css";
 import { BlogPostStatus } from "@/types/blog";
 
 // Define the form schema
@@ -65,7 +66,7 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("editor");
+  const [activeTab, setActiveTab] = useState<string>("rich-editor");
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [tempPostId, setTempPostId] = useState<string>("");
   const [content, setContent] = useState<string>(post?.content || "");
@@ -232,7 +233,7 @@ flowchart LR
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">
-          {post ? "Edit Blog Post" : "Create New Blog Post"}
+          {post ? "Editar artículo" : "Crear nuevo artículo"}
         </h1>
         {post && (
           <Button
@@ -240,7 +241,7 @@ flowchart LR
             onClick={() => setIsDeleteDialogOpen(true)}
           >
             <Trash className="h-4 w-4 mr-2" />
-            Delete
+            Eliminar
           </Button>
         )}
       </div>
@@ -253,12 +254,12 @@ flowchart LR
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Título</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       onChange={handleTitleChange}
-                      placeholder="My Awesome Blog Post"
+                      placeholder="Mi artículo increíble"
                     />
                   </FormControl>
                   <FormMessage />
@@ -275,7 +276,7 @@ flowchart LR
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="my-awesome-blog-post"
+                      placeholder="mi-articulo-increible"
                       onChange={(e) => {
                         const slug = generateSlug(e.target.value);
                         form.setValue("slug", slug);
@@ -311,18 +312,16 @@ flowchart LR
             <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="featuredImage"
+                name="coverImage"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Featured Image URL</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="https://example.com/image.jpg"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <BlogImageUpload
+                    postId={post?.id || tempPostId}
+                    currentImageUrl={form.getValues("coverImage")}
+                    onUploadComplete={handleImageUploadComplete}
+                    onUploadError={handleImageUploadError}
+                    label="Imagen de portada"
+                    description="Sube una imagen de portada para tu artículo. Tamaño máximo 5MB."
+                  />
                 )}
               />
 
@@ -331,25 +330,25 @@ flowchart LR
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>Estado</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a status" />
+                          <SelectValue placeholder="Selecciona un estado" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value={BlogPostStatus.DRAFT}>
-                          Draft
+                          Borrador
                         </SelectItem>
                         <SelectItem value={BlogPostStatus.PUBLISHED}>
-                          Published
+                          Publicado
                         </SelectItem>
                         <SelectItem value={BlogPostStatus.ARCHIVED}>
-                          Archived
+                          Archivado
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -362,7 +361,7 @@ flowchart LR
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <FormLabel>Content</FormLabel>
+              <FormLabel>Contenido</FormLabel>
               <div className="flex items-center space-x-2">
                 <Button
                   type="button"
@@ -371,7 +370,7 @@ flowchart LR
                   onClick={insertMermaidExample}
                 >
                   <FileText className="h-4 w-4 mr-2" />
-                  Insert Mermaid Diagram
+                  Insertar diagrama Mermaid
                 </Button>
                 <TooltipProvider>
                   <Tooltip>
@@ -383,11 +382,11 @@ flowchart LR
                         onClick={copyContentToClipboard}
                       >
                         <Copy className="h-4 w-4 mr-2" />
-                        {isCopied ? "Copied!" : "Copy"}
+                        {isCopied ? "¡Copiado!" : "Copiar"}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Copy content to clipboard</p>
+                      <p>Copiar contenido al portapapeles</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -395,42 +394,21 @@ flowchart LR
             </div>
 
             <Tabs
-              defaultValue="editor"
+              defaultValue="rich-editor"
               className="w-full"
               value={activeTab}
               onValueChange={handleTabChange}
             >
-              <TabsList className="grid grid-cols-3">
-                <TabsTrigger value="editor">Markdown</TabsTrigger>
-                <TabsTrigger value="rich-editor">Rich Editor</TabsTrigger>
-                <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsList className="grid grid-cols-2">
+                <TabsTrigger value="rich-editor">Editor</TabsTrigger>
+                <TabsTrigger value="preview">Vista previa</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="editor" className="mt-2">
-                <Textarea
-                  value={content}
-                  onChange={(e) => handleContentChange(e)}
-                  className="min-h-[500px] font-mono"
-                  placeholder="# My Awesome Blog Post
-
-Write your content here using Markdown syntax.
-
-## Features
-- Support for **bold text**
-- Support for *italic text*
-- Support for `code blocks`
-- Support for [links](https://example.com)
-- Support for images ![alt text](https://example.com/image.jpg)
-- Support for Mermaid diagrams
-                  "
-                />
-              </TabsContent>
-
               <TabsContent value="rich-editor" className="mt-2">
-                <YooptaEditorComponent
+                <EnhancedEditor
                   content={content}
                   onChange={handleRichEditorChange}
-                  placeholder="Start typing your blog post content here..."
+                  placeholder="Comienza a escribir el contenido de tu artículo aquí..."
                 />
               </TabsContent>
 
@@ -449,7 +427,7 @@ Write your content here using Markdown syntax.
 
           <div className="flex justify-end">
             <Button type="submit">
-              {post ? "Update Blog Post" : "Create Blog Post"}
+              {post ? "Actualizar artículo" : "Crear artículo"}
             </Button>
           </div>
         </form>

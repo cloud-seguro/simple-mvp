@@ -91,7 +91,7 @@ export default async function BlogPostPage({
         dbPost.author.firstName && dbPost.author.lastName
           ? `${dbPost.author.firstName} ${dbPost.author.lastName}`
           : "SIMPLE",
-      coverImage: dbPost.coverImage,
+      coverImage: dbPost.coverImage || undefined,
       tags: dbPost.tags,
       readingTime,
     };

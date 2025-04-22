@@ -67,7 +67,7 @@ export async function GET(
 // Update a blog post
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createRouteHandlerClient({ cookies });
   const {
@@ -89,7 +89,7 @@ export async function PUT(
 
     // Check if post exists
     const existingPost = await prisma.blogPost.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: { authorId: true },
     });
 
@@ -113,7 +113,7 @@ export async function PUT(
 
     // Update post
     const updatedPost = await prisma.blogPost.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         title: body.title,
         excerpt: body.excerpt,
