@@ -45,3 +45,20 @@ export const verifyPassword = (
   const newHashedPassword = SHA256(`${password}${salt}`).toString();
   return newHashedPassword === hashedPassword;
 };
+
+/**
+ * Client-side encryption for passwords before sending to Supabase Auth
+ *
+ * This acts as a transport layer security measure to ensure passwords
+ * are never sent in plain text over the network, even if HTTPS is used.
+ *
+ * Note: Supabase will still hash this password again server-side.
+ *
+ * @param password Plain text password
+ * @returns Encrypted password safe for network transmission
+ */
+export const encryptPasswordForTransport = (password: string): string => {
+  // Use SHA-256 for a one-way hash of the password
+  // This prevents the password from being sent in plain text
+  return SHA256(password).toString();
+};

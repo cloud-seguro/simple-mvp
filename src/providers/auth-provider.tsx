@@ -1,11 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User, Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/profile";
 import { hashPassword } from "@/lib/utils/password-utils";
+import { secureSupabaseClient } from "@/lib/supabase/client";
 
 // URL helper function
 const getURL = () => {
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = secureSupabaseClient;
 
   // Fetch profile function with retry logic
   const fetchProfile = async (userId: string, isAfterSignUp = false) => {
@@ -181,21 +181,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     noRedirect?: boolean
   ) => {
-    // Note: We don't hash passwords for Supabase Auth - it handles security properly
-    // This is the correct approach as Supabase handles password hashing server-side
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // The secureSupabaseClient already handles password encryption
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    if (data.user) {
-      await fetchProfile(data.user.id, true);
-    }
+      if (data.user) {
+        await fetchProfile(data.user.id, true);
+      }
 
-    if (!noRedirect) {
-      router.push("/dashboard");
+      if (!noRedirect) {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Sign-in error:", error);
+      throw error;
     }
   };
 
@@ -207,7 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Starting sign-up process for:", email);
 
-      // Sign up with email verification enabled
+      // The secureSupabaseClient already handles password encryption
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
