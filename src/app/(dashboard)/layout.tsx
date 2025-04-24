@@ -12,7 +12,9 @@ async function DashboardLayoutContent({
 }: {
   children: React.ReactNode;
 }) {
+  // For server components, we can only pass cookies as parameter
   const supabase = createServerComponentClient({ cookies });
+
   const {
     data: { session },
   } = await supabase.auth.getSession();

@@ -5,13 +5,15 @@ import {
   SignUpWithPasswordCredentials,
 } from "@supabase/supabase-js";
 
-// Create a secure Supabase client with password encryption
+// Create a secure Supabase client with password encryption and session protection
 export const createSecureSupabaseClient = () => {
+  // Create the client - note that cookie settings are now managed by middleware
   const supabase = createClientComponentClient();
 
   // Intercept and wrap the original auth methods to add client-side encryption
   const originalSignIn = supabase.auth.signInWithPassword;
   const originalSignUp = supabase.auth.signUp;
+  const originalSignOut = supabase.auth.signOut;
 
   // Override signInWithPassword to apply client-side encryption
   supabase.auth.signInWithPassword = async (
@@ -51,6 +53,23 @@ export const createSecureSupabaseClient = () => {
 
     // If no password is provided, just pass through
     return originalSignUp.call(supabase.auth, credentials);
+  };
+
+  // Add a security check before each session access
+  const originalGetSession = supabase.auth.getSession;
+  supabase.auth.getSession = async () => {
+    // Check for security cookie to ensure this is a valid session
+    const hasSecurity = document.cookie.includes("session_secure=true");
+
+    if (!hasSecurity) {
+      // No security cookie present - could be a hijacked session
+      // Force sign out for safety
+      console.warn("Security validation failed - forcing sign out");
+      await originalSignOut.call(supabase.auth);
+      return { data: { session: null } };
+    }
+
+    return originalGetSession.call(supabase.auth);
   };
 
   return supabase;

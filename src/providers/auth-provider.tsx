@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/profile";
 import { hashPassword } from "@/lib/utils/password-utils";
 import { secureSupabaseClient } from "@/lib/supabase/client";
+import { generateClientFingerprint } from "@/lib/utils/session-utils";
 
 // URL helper function
 const getURL = () => {
@@ -191,6 +192,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       if (data.user) {
+        // Store IP address and device fingerprint in user metadata for security validation
+        try {
+          // Get the user's current IP address
+          const ipResponse = await fetch("https://api.ipify.org?format=json");
+          if (ipResponse.ok) {
+            const { ip } = await ipResponse.json();
+            const userAgent = navigator.userAgent;
+
+            // Generate a fingerprint based on user agent and IP
+            const fingerprint = generateClientFingerprint(userAgent, ip);
+
+            // Update user metadata with security information
+            await supabase.auth.updateUser({
+              data: {
+                ip_address: ip,
+                fingerprint: fingerprint,
+                last_login: new Date().toISOString(),
+                user_agent: userAgent,
+              },
+            });
+          }
+        } catch (ipError) {
+          console.error("Error storing security information:", ipError);
+          // Continue even if IP detection fails
+        }
+
         await fetchProfile(data.user.id, true);
       }
 
@@ -211,12 +238,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Starting sign-up process for:", email);
 
+      // Get the user's IP address for security tracking
+      let ipAddress = "unknown";
+      let fingerprint = "";
+      try {
+        const ipResponse = await fetch("https://api.ipify.org?format=json");
+        if (ipResponse.ok) {
+          const { ip } = await ipResponse.json();
+          ipAddress = ip;
+
+          // Generate a device fingerprint for security
+          const userAgent = navigator.userAgent;
+          fingerprint = generateClientFingerprint(userAgent, ip);
+        }
+      } catch (ipError) {
+        console.error("Error fetching IP during signup:", ipError);
+        // Continue with signup even if IP detection fails
+      }
+
       // The secureSupabaseClient already handles password encryption
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: getURL() + "auth/callback",
+          data: {
+            ip_address: ipAddress,
+            fingerprint: fingerprint,
+            signup_time: new Date().toISOString(),
+            first_name: profileData.firstName || "",
+            last_name: profileData.lastName || "",
+            user_agent: navigator.userAgent,
+          },
         },
       });
 
