@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/lib/supabase/client";
+import { secureSupabaseClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 // Types for the component props
@@ -132,7 +132,7 @@ export const EngagementForm = ({
     try {
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } = await secureSupabaseClient.auth.getSession();
 
       if (!session) {
         router.push("/sign-in");
