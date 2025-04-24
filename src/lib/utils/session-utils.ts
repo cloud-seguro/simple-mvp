@@ -1,20 +1,25 @@
 import { SHA256 } from "crypto-js";
 
 /**
- * Generate a fingerprint from request/browser data
- * This helps identify potential session hijacking
+ * Generate a fingerprint from browser data only
+ * This helps identify potential session hijacking without external API calls
  *
  * @param userAgent User agent string
- * @param ip IP address
  * @returns Fingerprint hash
  */
-export const generateClientFingerprint = (
-  userAgent: string,
-  ip: string
-): string => {
-  // Create a fingerprint based on key identifiers
-  // This is a simple implementation - real fingerprinting would be more sophisticated
-  return SHA256(`${userAgent}|${ip}`).toString();
+export const generateClientFingerprint = (userAgent: string): string => {
+  // Create a fingerprint based on user agent and browser properties
+  // This doesn't use IP address to avoid external API calls
+  const browserInfo = [
+    userAgent,
+    typeof window !== "undefined" ? window.navigator.language : "",
+    typeof window !== "undefined" ? window.screen.colorDepth.toString() : "",
+    typeof window !== "undefined"
+      ? `${window.screen.width}x${window.screen.height}`
+      : "",
+  ].join("|");
+
+  return SHA256(browserInfo).toString();
 };
 
 /**
@@ -23,22 +28,17 @@ export const generateClientFingerprint = (
  *
  * @param originalFingerprint The stored fingerprint from session creation
  * @param currentUserAgent Current user agent
- * @param currentIp Current IP address
  * @returns Whether the session appears valid
  */
 export const validateSessionIntegrity = (
   originalFingerprint: string | undefined,
-  currentUserAgent: string,
-  currentIp: string
+  currentUserAgent: string
 ): boolean => {
   if (!originalFingerprint) {
     return false; // No fingerprint to compare against
   }
 
-  const currentFingerprint = generateClientFingerprint(
-    currentUserAgent,
-    currentIp
-  );
+  const currentFingerprint = generateClientFingerprint(currentUserAgent);
 
   // Compare fingerprints to detect potential session hijacking
   return originalFingerprint === currentFingerprint;

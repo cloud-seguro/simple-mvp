@@ -21,30 +21,29 @@ export async function middleware(req: NextRequest) {
 
   // For better security, set secure cookies in the response
   if (session) {
-    // Get client IP and user agent for security checks
-    const clientIp = req.headers.get("x-forwarded-for") || "unknown";
+    // Get user agent for security checks
     const userAgent = req.headers.get("user-agent") || "unknown";
 
     // Get stored data from session
-    const sessionIp = session.user?.user_metadata?.ip_address;
     const sessionFingerprint = session.user?.user_metadata?.fingerprint;
 
-    // Generate current fingerprint
-    const currentFingerprint = generateClientFingerprint(userAgent, clientIp);
+    // Security check with relaxed validation
+    let shouldInvalidateSession = false;
 
-    // Potential session hijacking detection - combine IP and fingerprint checks
-    const isValidSession =
-      (sessionIp === clientIp || !sessionIp) && // IP check is lenient if not set
-      (sessionFingerprint === currentFingerprint || !sessionFingerprint); // Fingerprint check
+    // Only invalidate if we have fingerprint data that doesn't match
+    if (sessionFingerprint) {
+      const currentFingerprint = generateClientFingerprint(userAgent);
 
-    if (!isValidSession) {
-      console.warn("Potential session hijacking detected", {
-        sessionIp,
-        clientIp,
-        userId: session.user?.id,
-        fingerprintMatch: sessionFingerprint === currentFingerprint,
-      });
+      // Check if fingerprints don't match, indicating potential session hijacking
+      if (sessionFingerprint !== currentFingerprint) {
+        console.warn("Potential session hijacking detected", {
+          userId: session.user?.id,
+        });
+        shouldInvalidateSession = true;
+      }
+    }
 
+    if (shouldInvalidateSession) {
       // Force re-authentication for suspicious sessions
       await supabase.auth.signOut();
 
@@ -64,32 +63,6 @@ export async function middleware(req: NextRequest) {
       maxAge: 60 * 60 * 24, // 1 day
       path: "/",
     });
-
-    // Also set a unique session identifier that changes on each request
-    // This prevents replay attacks
-    const sessionToken = crypto.randomUUID();
-    res.cookies.set("session_token", sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60, // 1 hour
-      path: "/",
-    });
-
-    // Try to update the user metadata with the latest fingerprint if needed
-    // This helps improve security over time
-    if (!sessionFingerprint) {
-      try {
-        await supabase.auth.updateUser({
-          data: {
-            fingerprint: currentFingerprint,
-            last_access: new Date().toISOString(),
-          },
-        });
-      } catch (error) {
-        console.error("Error updating user security metadata:", error);
-      }
-    }
   }
 
   // Auth routes for password reset flow should never be redirected

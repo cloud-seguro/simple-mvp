@@ -192,33 +192,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       if (data.user) {
-        // Store IP address and device fingerprint in user metadata for security validation
-        try {
-          // Get the user's current IP address
-          const ipResponse = await fetch("https://api.ipify.org?format=json");
-          if (ipResponse.ok) {
-            const { ip } = await ipResponse.json();
-            const userAgent = navigator.userAgent;
-
-            // Generate a fingerprint based on user agent and IP
-            const fingerprint = generateClientFingerprint(userAgent, ip);
-
-            // Update user metadata with security information
-            await supabase.auth.updateUser({
-              data: {
-                ip_address: ip,
-                fingerprint: fingerprint,
-                last_login: new Date().toISOString(),
-                user_agent: userAgent,
-              },
-            });
-          }
-        } catch (ipError) {
-          console.error("Error storing security information:", ipError);
-          // Continue even if IP detection fails
-        }
-
+        // First fetch the profile to ensure we have user data
         await fetchProfile(data.user.id, true);
+
+        // Then update security metadata in a separate call
+        // This prevents potential race conditions
+        try {
+          const userAgent = navigator.userAgent;
+          // Generate a fingerprint based on user agent and browser properties
+          const fingerprint = generateClientFingerprint(userAgent);
+
+          // Update user metadata with security information
+          // Use a small delay to prevent race conditions with other auth operations
+          setTimeout(async () => {
+            try {
+              await supabase.auth.updateUser({
+                data: {
+                  fingerprint: fingerprint,
+                  last_login: new Date().toISOString(),
+                  user_agent: userAgent,
+                },
+              });
+            } catch (err) {
+              console.error("Delayed metadata update failed:", err);
+            }
+          }, 1000);
+        } catch (secError) {
+          console.error("Error storing security information:", secError);
+          // Continue even if security update fails
+        }
       }
 
       if (!noRedirect) {
@@ -238,37 +240,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Starting sign-up process for:", email);
 
-      // Get the user's IP address for security tracking
-      let ipAddress = "unknown";
-      let fingerprint = "";
-      try {
-        const ipResponse = await fetch("https://api.ipify.org?format=json");
-        if (ipResponse.ok) {
-          const { ip } = await ipResponse.json();
-          ipAddress = ip;
-
-          // Generate a device fingerprint for security
-          const userAgent = navigator.userAgent;
-          fingerprint = generateClientFingerprint(userAgent, ip);
-        }
-      } catch (ipError) {
-        console.error("Error fetching IP during signup:", ipError);
-        // Continue with signup even if IP detection fails
-      }
+      // Generate a device fingerprint for security
+      const userAgent = navigator.userAgent;
+      const fingerprint = generateClientFingerprint(userAgent);
 
       // The secureSupabaseClient already handles password encryption
+      // Store minimal data during sign-up to avoid potential issues
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: getURL() + "auth/callback",
           data: {
-            ip_address: ipAddress,
-            fingerprint: fingerprint,
-            signup_time: new Date().toISOString(),
             first_name: profileData.firstName || "",
             last_name: profileData.lastName || "",
-            user_agent: navigator.userAgent,
           },
         },
       });
@@ -305,6 +290,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error("Error creating profile:", await response.text());
           } else {
             console.log("Profile created successfully for user:", data.user.id);
+
+            // After successful profile creation, add security metadata
+            setTimeout(async () => {
+              try {
+                await supabase.auth.updateUser({
+                  data: {
+                    fingerprint: fingerprint,
+                    signup_time: new Date().toISOString(),
+                    user_agent: navigator.userAgent,
+                  },
+                });
+                console.log("Security metadata added for new user");
+              } catch (err) {
+                console.error("Error adding security metadata:", err);
+              }
+            }, 1000);
           }
         } catch (profileError) {
           console.error("Error creating profile:", profileError);
