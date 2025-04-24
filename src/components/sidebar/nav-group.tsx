@@ -47,14 +47,14 @@ export function NavGroup({ title, items }: NavGroupType) {
       </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item: NavItem) => {
-          const key = `${item.title}-${item.url}`;
+          const key = `${item.title}-${item.url || ""}`;
 
-          if (!item.items)
+          if (!item.items && isNavLink(item))
             return (
               <SidebarMenuLink key={key} item={item} pathname={pathname} />
             );
 
-          if (state === "collapsed")
+          if (state === "collapsed" && isNavCollapsible(item))
             return (
               <SidebarMenuCollapsedDropdown
                 key={key}
@@ -63,9 +63,16 @@ export function NavGroup({ title, items }: NavGroupType) {
               />
             );
 
-          return (
-            <SidebarMenuCollapsible key={key} item={item} pathname={pathname} />
-          );
+          if (isNavCollapsible(item))
+            return (
+              <SidebarMenuCollapsible
+                key={key}
+                item={item}
+                pathname={pathname}
+              />
+            );
+
+          return null; // Handle any edge cases where item doesn't match expected types
         })}
       </SidebarMenu>
     </SidebarGroup>
@@ -80,6 +87,10 @@ const NavBadge = ({ children }: { children: ReactNode }) => (
 
 function isNavLink(item: NavItem): item is NavLink {
   return "url" in item;
+}
+
+function isNavCollapsible(item: NavItem): item is NavCollapsible {
+  return "items" in item && Array.isArray(item.items);
 }
 
 const SidebarMenuLink = ({

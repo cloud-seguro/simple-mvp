@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
 import { useMemo } from "react";
-import { Users, FileText } from "lucide-react";
+import { Users, FileText, Shield } from "lucide-react";
 
 export function AppSidebar({
   className,
@@ -25,6 +25,30 @@ export function AppSidebar({
   // Add specialists management link for SUPERADMIN users
   const navGroups = useMemo(() => {
     const groups = [...sidebarData.navGroups];
+
+    // Add CONTRATA link for PREMIUM and SUPERADMIN users
+    if (
+      profile?.role === UserRole.PREMIUM ||
+      profile?.role === UserRole.SUPERADMIN
+    ) {
+      // Find or create Services group
+      let servicesGroup = groups.find((group) => group.title === "Services");
+
+      if (!servicesGroup) {
+        servicesGroup = {
+          title: "Services",
+          items: [],
+        };
+        groups.push(servicesGroup);
+      }
+
+      // Add CONTRATA link
+      servicesGroup.items.push({
+        title: "CONTRATA",
+        url: "/contrata",
+        icon: Shield,
+      });
+    }
 
     // If user is SUPERADMIN, add specialists management link
     if (profile?.role === UserRole.SUPERADMIN) {

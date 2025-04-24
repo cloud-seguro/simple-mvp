@@ -47,6 +47,16 @@ enum ExpertiseArea {
   GENERAL
 }
 
+// Engagement status for the CONTRATA module
+enum EngagementStatus {
+  PENDING      // Initial request, waiting for specialist response
+  ACCEPTED     // Specialist accepted the request
+  REJECTED     // Specialist rejected the request
+  IN_PROGRESS  // Work is in progress
+  COMPLETED    // Work has been completed
+  CANCELLED    // Engagement was cancelled
+}
+
 // User management
 model Profile {
   id            String        @id @default(cuid())
@@ -67,6 +77,8 @@ model Profile {
   evaluations   Evaluation[]
   specialists   Specialist[]  // Only for SUPERADMIN users
   blogPosts     BlogPost[]    // Relation to blog posts
+  engagements   Engagement[]  // User's engagements with specialists (CONTRATA)
+  specialistDeals SpecialistDeal[] // Deals created by specialists for users
 
   @@index([userId])
   @@map("profiles")
@@ -111,6 +123,10 @@ model Specialist {
   // Relations - which SuperAdmin created/manages this specialist
   createdById      String
   createdBy        Profile         @relation(fields: [createdById], references: [id])
+  
+  // CONTRATA relations
+  engagements      Engagement[]    // Engagements with users
+  deals            SpecialistDeal[] // Deals offered by this specialist
 
   @@index([createdById])
   @@map("specialists")
@@ -138,4 +154,69 @@ model BlogPost {
 
   @@index([authorId])
   @@map("blog_posts")
+}
+
+// CONTRATA Module - Engagements between users and specialists
+model Engagement {
+  id               String           @id @default(cuid())
+  title            String           // Title/subject of the engagement
+  description      String           @db.Text // Detailed description of the work needed
+  status           EngagementStatus @default(PENDING)
+  budget           Float?           // Optional budget information
+  startDate        DateTime?        // When the engagement begins
+  endDate          DateTime?        // When the engagement is expected to end
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  
+  // Relations
+  profileId        String           // The user who requested the engagement
+  profile          Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  specialistId     String           // The specialist hired for the work
+  specialist       Specialist       @relation(fields: [specialistId], references: [id])
+  messages         Message[]        // Communication between user and specialist
+  dealId           String?          // If this engagement was created from a deal
+  deal             SpecialistDeal?  @relation(fields: [dealId], references: [id])
+
+  @@index([profileId])
+  @@index([specialistId])
+  @@index([dealId])
+  @@map("engagements")
+}
+
+// Messages between user and specialist for an engagement
+model Message {
+  id             String     @id @default(cuid())
+  content        String     @db.Text
+  sentAt         DateTime   @default(now())
+  senderIsUser   Boolean    // True if the user sent it, false if specialist sent it
+  
+  // Relations
+  engagementId   String
+  engagement     Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  
+  @@index([engagementId])
+  @@map("engagement_messages")
+}
+
+// Specialist Deals model - predefined service packages offered by specialists
+model SpecialistDeal {
+  id              String     @id @default(cuid())
+  title           String     // Name of the service package
+  description     String     @db.Text // Description of what's included
+  price           Float      // Price of the package
+  durationDays    Int        // Estimated duration in days
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  active          Boolean    @default(true)
+  
+  // Relations
+  specialistId    String
+  specialist      Specialist @relation(fields: [specialistId], references: [id])
+  createdById     String     // The admin who created this deal
+  createdBy       Profile    @relation(fields: [createdById], references: [id])
+  engagements     Engagement[] // Engagements created from this deal
+
+  @@index([specialistId])
+  @@index([createdById])
+  @@map("specialist_deals")
 }

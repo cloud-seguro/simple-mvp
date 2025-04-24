@@ -197,18 +197,19 @@ export async function GET(
     } = evaluation as EvaluationData;
 
     // Calculate the total score from answers if not already calculated
-    let calculatedScore: number = score || 0;
+    let calculatedScore = score || 0;
     const totalPossibleScore = type === "INITIAL" ? 45 : 75; // 45 for initial evaluations, 75 for advanced
 
     if (answers && typeof answers === "object") {
       // Convert answers object values to numbers and calculate total
-      calculatedScore = Object.values(
+      const summedScore = Object.values(
         answers as Record<string, unknown>
       ).reduce(
         (sum: number, val: unknown) =>
           sum + (typeof val === "number" ? val : Number(val) || 0),
         0
-      );
+      ) as number;
+      calculatedScore = summedScore;
     }
 
     // Get maturity level information based on evaluation type and score
