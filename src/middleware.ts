@@ -20,6 +20,11 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
+  // Skip auth check for the auth callback route
+  if (req.nextUrl.pathname.startsWith("/auth/callback")) {
+    return res;
+  }
+
   // For better security, set secure cookies in the response
   if (session) {
     // Get authenticated user data when possible
@@ -175,13 +180,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/sign-in",
-    "/sign-up",
-    "/reset-password",
-    "/forgot-password",
-    "/auth/:path*",
-    "/upgrade",
-  ],
+  matcher: ["/dashboard/:path*", "/sign-in", "/sign-up", "/auth/callback"],
 };
