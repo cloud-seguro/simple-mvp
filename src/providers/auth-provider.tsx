@@ -202,17 +202,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Generate a fingerprint based on user agent and browser properties
           const fingerprint = generateClientFingerprint(userAgent);
 
+          // Store additional browser data for more accurate matching
+          const browserData = {
+            fingerprint: fingerprint,
+            last_login: new Date().toISOString(),
+            user_agent: userAgent,
+            // Reset the mismatch counter on successful login
+            fingerprintMismatchCount: 0,
+            // Add these browser-specific properties for better security checks
+            language: navigator.language,
+            platform: navigator.platform,
+            // Store basic screen info separately to help with comparisons
+            screen_width: window.screen.width,
+            screen_height: window.screen.height,
+          };
+
           // Update user metadata with security information
           // Use a small delay to prevent race conditions with other auth operations
           setTimeout(async () => {
             try {
               await supabase.auth.updateUser({
-                data: {
-                  fingerprint: fingerprint,
-                  last_login: new Date().toISOString(),
-                  user_agent: userAgent,
-                },
+                data: browserData,
               });
+              console.log("Security fingerprint updated successfully");
             } catch (err) {
               console.error("Delayed metadata update failed:", err);
             }
@@ -294,12 +306,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // After successful profile creation, add security metadata
             setTimeout(async () => {
               try {
+                // Store more detailed browser fingerprint data
+                const browserData = {
+                  fingerprint: fingerprint,
+                  signup_time: new Date().toISOString(),
+                  user_agent: navigator.userAgent,
+                  // Initialize the mismatch counter to 0
+                  fingerprintMismatchCount: 0,
+                  // Add these browser-specific properties for better security checks
+                  language: navigator.language,
+                  platform: navigator.platform,
+                  // Store basic screen info separately to help with comparisons
+                  screen_width: window.screen.width,
+                  screen_height: window.screen.height,
+                };
+
                 await supabase.auth.updateUser({
-                  data: {
-                    fingerprint: fingerprint,
-                    signup_time: new Date().toISOString(),
-                    user_agent: navigator.userAgent,
-                  },
+                  data: browserData,
                 });
                 console.log("Security metadata added for new user");
               } catch (err) {

@@ -8,15 +8,36 @@ import { SHA256 } from "crypto-js";
  * @returns Fingerprint hash
  */
 export const generateClientFingerprint = (userAgent: string): string => {
-  // Create a fingerprint based on user agent and browser properties
-  // This doesn't use IP address to avoid external API calls
+  // In server environment (middleware), we should only use user agent
+  // to avoid accessing window which doesn't exist on the server
+  if (typeof window === "undefined") {
+    // Extract only the browser and OS info for a more stable fingerprint
+    // This makes fingerprint matching more tolerant to minor changes
+    const browserMatch = userAgent.match(
+      /(Chrome|Firefox|Safari|Edge|MSIE|Trident)/i
+    );
+    const osMatch = userAgent.match(
+      /(Windows|Mac|Linux|Android|iOS|iPhone|iPad)/i
+    );
+
+    const browserName = browserMatch ? browserMatch[1] : "Unknown";
+    const osName = osMatch ? osMatch[1] : "Unknown";
+
+    return SHA256(`${browserName}|${osName}`).toString();
+  }
+
+  // Client-side fingerprinting - use a simplified approach for consistency
   const browserInfo = [
-    userAgent,
-    typeof window !== "undefined" ? window.navigator.language : "",
-    typeof window !== "undefined" ? window.screen.colorDepth.toString() : "",
-    typeof window !== "undefined"
-      ? `${window.screen.width}x${window.screen.height}`
-      : "",
+    // Extract browser and OS instead of full user agent
+    navigator.userAgent.match(
+      /(Chrome|Firefox|Safari|Edge|MSIE|Trident)/i
+    )?.[1] || "Unknown",
+    navigator.userAgent.match(
+      /(Windows|Mac|Linux|Android|iOS|iPhone|iPad)/i
+    )?.[1] || "Unknown",
+    navigator.language,
+    // Use broader screen size buckets (rounded to nearest 100)
+    `${Math.floor(window.screen.width / 100) * 100}x${Math.floor(window.screen.height / 100) * 100}`,
   ].join("|");
 
   return SHA256(browserInfo).toString();

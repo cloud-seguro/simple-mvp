@@ -1,9 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
+import { NavigationLink } from "@/components/ui/navigation-link";
 import {
   Collapsible,
   CollapsibleContent,
@@ -115,13 +115,13 @@ const SidebarMenuLink = ({
             : "text-white hover:bg-yellow-500 hover:text-black"
         }
       >
-        <Link href={item.url} onClick={() => setOpenMobile(false)}>
+        <NavigationLink href={item.url} onClick={() => setOpenMobile(false)}>
           {item.icon && (
             <item.icon className={isActive ? "text-black" : "text-white"} />
           )}
           <span>{item.title}</span>
           {item.badge && <NavBadge>{item.badge}</NavBadge>}
-        </Link>
+        </NavigationLink>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -173,7 +173,7 @@ const SidebarMenuCollapsible = ({
                           : "text-white hover:bg-yellow-500 hover:text-black"
                       }
                     >
-                      <Link
+                      <NavigationLink
                         href={subItem.url}
                         onClick={() => setOpenMobile(false)}
                       >
@@ -186,7 +186,7 @@ const SidebarMenuCollapsible = ({
                         )}
                         <span>{subItem.title}</span>
                         {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
-                      </Link>
+                      </NavigationLink>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 );
@@ -249,7 +249,7 @@ const SidebarMenuCollapsedDropdown = ({
                   asChild
                   className="text-white hover:bg-yellow-500 hover:text-black focus:bg-yellow-500 focus:text-black"
                 >
-                  <Link
+                  <NavigationLink
                     href={sub.url}
                     className={
                       isSubActive
@@ -266,7 +266,7 @@ const SidebarMenuCollapsedDropdown = ({
                     {sub.badge && (
                       <span className="ml-auto text-xs">{sub.badge}</span>
                     )}
-                  </Link>
+                  </NavigationLink>
                 </DropdownMenuItem>
               );
             }

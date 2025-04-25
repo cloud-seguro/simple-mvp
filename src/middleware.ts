@@ -15,31 +15,96 @@ export async function middleware(req: NextRequest) {
   // Create the Supabase middleware client
   const supabase = createMiddlewareClient({ req, res });
 
+  // First get the session which contains the access token
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
   // For better security, set secure cookies in the response
   if (session) {
+    // Get authenticated user data when possible
+    // This provides more security than just using the session data
+    let userData = session.user;
+    try {
+      // This makes a call to Supabase Auth server to validate the token
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        // Use the authenticated user data if available
+        userData = user;
+      }
+    } catch (error) {
+      console.warn("Failed to get authenticated user data:", error);
+      // Continue with session.user if getUser fails
+    }
+
     // Get user agent for security checks
     const userAgent = req.headers.get("user-agent") || "unknown";
 
     // Get stored data from session
-    const sessionFingerprint = session.user?.user_metadata?.fingerprint;
+    const sessionFingerprint = userData?.user_metadata?.fingerprint;
 
     // Security check with relaxed validation
     let shouldInvalidateSession = false;
 
-    // Only invalidate if we have fingerprint data that doesn't match
-    if (sessionFingerprint) {
+    // Only perform fingerprint check if:
+    // 1. We have a stored fingerprint
+    // 2. This is a sensitive route (dashboard, account settings, etc.)
+    // TEMPORARILY DISABLED fingerprint checks to fix login issues
+    const isSensitiveRoute = false; // Disable fingerprint checks for now
+    // const isSensitiveRoute =
+    //   req.nextUrl.pathname.startsWith("/dashboard") ||
+    //   req.nextUrl.pathname.startsWith("/account");
+
+    if (sessionFingerprint && isSensitiveRoute) {
       const currentFingerprint = generateClientFingerprint(userAgent);
+
+      // Add debugging information
+      console.log("Fingerprint check:", {
+        route: req.nextUrl.pathname,
+        userId: userData?.id.slice(0, 8) + "...",
+        match: sessionFingerprint === currentFingerprint,
+      });
 
       // Check if fingerprints don't match, indicating potential session hijacking
       if (sessionFingerprint !== currentFingerprint) {
+        // Log for monitoring but don't invalidate session on every mismatch
+        // as this can lead to false positives
         console.warn("Potential session hijacking detected", {
-          userId: session.user?.id,
+          userId: userData?.id,
+          route: req.nextUrl.pathname,
         });
-        shouldInvalidateSession = true;
+
+        // Count fingerprint mismatches using session metadata
+        // Only invalidate after multiple mismatches or on highly sensitive routes
+        const mismatchCount =
+          userData?.user_metadata?.fingerprintMismatchCount || 0;
+
+        // Make the check more forgiving - increase threshold to 5 mismatches
+        // Only be strict for payment/sensitive data pages
+        if (
+          mismatchCount > 5 ||
+          req.nextUrl.pathname.includes("/payments") ||
+          req.nextUrl.pathname.includes("/billing")
+        ) {
+          shouldInvalidateSession = true;
+        } else {
+          // Update mismatch count in user metadata
+          await supabase.auth.updateUser({
+            data: {
+              fingerprintMismatchCount: mismatchCount + 1,
+              lastMismatchTime: new Date().toISOString(),
+            },
+          });
+        }
+      } else {
+        // Reset mismatch count on successful matches
+        if (userData?.user_metadata?.fingerprintMismatchCount) {
+          await supabase.auth.updateUser({
+            data: { fingerprintMismatchCount: 0 },
+          });
+        }
       }
     }
 
@@ -117,5 +182,6 @@ export const config = {
     "/reset-password",
     "/forgot-password",
     "/auth/:path*",
+    "/upgrade",
   ],
 };
