@@ -21,7 +21,6 @@ import { signUpFormSchema } from "@/types/auth/sign-up";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { validateCorporateEmail } from "@/lib/utils/email-validation";
 
 // Extended props to include evaluation results
@@ -226,9 +225,11 @@ export function SignUpForm({
                   />
                 </FormControl>
                 {emailError && (
-                  <div className="flex items-center gap-2 mt-2 p-2.5 bg-red-50 border border-red-200 rounded-md">
-                    <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
-                    <span className="text-xs text-red-600 font-medium">
+                  <div className="flex items-center gap-2.5 mt-2 p-3 bg-red-50 border border-red-200 rounded-md shadow-sm animate-in fade-in duration-200">
+                    <div className="p-1 bg-red-100 rounded-full">
+                      <AlertTriangle className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
+                    </div>
+                    <span className="text-sm text-red-700 font-medium">
                       {emailError}
                     </span>
                   </div>

@@ -1,4 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import {
+  getCurrentUser,
+  canAccessUserData,
+} from "@/lib/auth/permission-checks";
 
 export async function GET(
   request: Request,
@@ -6,6 +10,32 @@ export async function GET(
 ) {
   try {
     const { userId } = await params;
+
+    // Get current user from auth session
+    const currentUser = await getCurrentUser();
+
+    // If no user is authenticated, return unauthorized
+    if (!currentUser) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Check if the current user has permission to access this user's data
+    const hasAccess = await canAccessUserData(currentUser.id, userId);
+
+    if (!hasAccess) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden - Insufficient permissions" }),
+        {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // If authorized, fetch the profile
     const profile = await prisma.profile.findUnique({
       where: { userId },
     });
@@ -41,6 +71,30 @@ export async function PATCH(
   try {
     const { userId } = await params;
     const json = await request.json();
+
+    // Get current user from auth session
+    const currentUser = await getCurrentUser();
+
+    // If no user is authenticated, return unauthorized
+    if (!currentUser) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Check if the current user has permission to update this user's data
+    const hasAccess = await canAccessUserData(currentUser.id, userId);
+
+    if (!hasAccess) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden - Insufficient permissions" }),
+        {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     const profile = await prisma.profile.update({
       where: { userId },

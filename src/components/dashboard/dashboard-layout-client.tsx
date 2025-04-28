@@ -13,6 +13,7 @@ import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { generateClientFingerprint } from "@/lib/utils/session-utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -56,6 +57,7 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClientComponentClient();
+  const { profile, isLoading } = useCurrentUser();
 
   // Handle initial loading with timeout
   useEffect(() => {
@@ -80,25 +82,10 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
         // Get current session
         const { data } = await supabase.auth.getSession();
 
-        if (data?.session) {
+        if (data?.session && profile) {
           // Check if user has premium access before updating fingerprint
-          const { data: userData, error } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("userId", data.session.user.id)
-            .single();
-
-          if (error) {
-            console.error("Error checking user role:", error);
-            // Don't throw here, continue with the fingerprint update
-          }
-
-          // If we know the user is not premium, don't update fingerprint and let the server redirect
-          if (
-            userData &&
-            userData.role !== "PREMIUM" &&
-            userData.role !== "SUPERADMIN"
-          ) {
+          // Now using the profile data from useCurrentUser hook
+          if (profile.role !== "PREMIUM" && profile.role !== "SUPERADMIN") {
             console.log(
               "Non-premium user detected, redirecting to upgrade page"
             );
@@ -128,9 +115,11 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       }
     };
 
-    // Run fingerprint update
-    updateUserFingerprint();
-  }, [supabase]);
+    // Only run fingerprint update when we have both a profile and we're not loading
+    if (profile && !isLoading) {
+      updateUserFingerprint();
+    }
+  }, [supabase, profile, isLoading]);
 
   useEffect(() => {
     // Reset navigation state when path changes
@@ -157,8 +146,8 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
     };
   }, []);
 
-  // If the component is still in initial loading state, show a loading screen
-  if (isInitialLoading) {
+  // If the component is still in initial loading state or we're waiting for user data, show a loading screen
+  if (isInitialLoading || isLoading) {
     return <SecurityLoadingScreen message="Cargando dashboard..." />;
   }
 
