@@ -12,6 +12,8 @@ import { EvaluationComparison } from "../components/evaluation-comparison";
 import type { UserInfo } from "@/components/evaluations/types";
 import { Badge } from "@/components/ui/badge";
 
+export const dynamic = "force-dynamic";
+
 interface ComparePageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{

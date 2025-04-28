@@ -13,6 +13,9 @@ export const metadata = {
   description: "View details of your specialist engagement",
 };
 
+// Add dynamic export to handle the cookies usage
+export const dynamic = "force-dynamic";
+
 // Helper function to get status badge styling
 const getStatusBadgeClass = (status: EngagementStatus) => {
   switch (status) {

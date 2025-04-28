@@ -12,6 +12,9 @@ export const metadata = {
     "Ver detalles sobre un especialista en ciberseguridad y sus servicios",
 };
 
+// Add dynamic export to handle the cookies usage
+export const dynamic = "force-dynamic";
+
 export default async function SpecialistDetailPage({
   params,
 }: {

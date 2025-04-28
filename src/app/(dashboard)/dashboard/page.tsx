@@ -8,6 +8,9 @@ import { RecentEvaluations } from "./components/recent-evaluations";
 import { EvaluationType } from "@prisma/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Add at the top of the file, below any imports
+export const dynamic = "force-dynamic";
+
 // Define a simple type for evaluations
 type SimpleEvaluation = {
   id: string;

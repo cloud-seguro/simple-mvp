@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { SpecialistsClient } from "@/components/specialists/specialists-client";
 import { UserRole } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Gestión de Especialistas | SIMPLE",
   description:

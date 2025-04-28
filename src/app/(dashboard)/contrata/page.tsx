@@ -6,6 +6,9 @@ import { UserRole } from "@prisma/client";
 import Link from "next/link";
 import Image from "next/image";
 
+// Add dynamic export to handle the cookies usage
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "CONTRATA - Contrata Especialistas | SIMPLE",
   description:

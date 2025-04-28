@@ -8,6 +8,8 @@ import { EvaluationsList } from "./components/evaluations-list";
 import { CompareEvaluationsButton } from "./components/compare-evaluations-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Historial de Evaluaciones | Dashboard",
   description:

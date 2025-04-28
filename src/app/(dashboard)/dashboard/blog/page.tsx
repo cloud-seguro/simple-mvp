@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import { BlogManagement } from "@/components/dashboard/blog/blog-management";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Gestión de Blog | SIMPLE",
   description: "Administración y creación de artículos de blog",

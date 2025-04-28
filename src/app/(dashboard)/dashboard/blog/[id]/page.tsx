@@ -6,6 +6,8 @@ import { cookies } from "next/headers";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export const dynamic = "force-dynamic";
+
 type PostParams = {
   id: string;
 };

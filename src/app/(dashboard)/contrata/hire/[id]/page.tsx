@@ -11,6 +11,9 @@ export const metadata = {
   description: "Hire a cybersecurity specialist for your security needs",
 };
 
+// Add dynamic export to handle the cookies usage
+export const dynamic = "force-dynamic";
+
 export default async function HireSpecialistPage({
   params,
   searchParams,
