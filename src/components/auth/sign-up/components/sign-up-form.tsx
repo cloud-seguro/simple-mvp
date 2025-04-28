@@ -226,15 +226,12 @@ export function SignUpForm({
                   />
                 </FormControl>
                 {emailError && (
-                  <Alert
-                    variant="destructive"
-                    className="py-2 mt-1 flex items-center gap-2"
-                  >
-                    <AlertTriangle className="h-4 w-4 static ml-0 mr-0 mt-0" />
-                    <AlertDescription className="text-xs pl-0 mt-0">
+                  <div className="flex items-center gap-2 mt-2 p-2.5 bg-red-50 border border-red-200 rounded-md">
+                    <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <span className="text-xs text-red-600 font-medium">
                       {emailError}
-                    </AlertDescription>
-                  </Alert>
+                    </span>
+                  </div>
                 )}
                 <FormMessage />
               </FormItem>
