@@ -5,8 +5,9 @@ import {
   SignUpWithPasswordCredentials,
 } from "@supabase/supabase-js";
 
-// Create a secure Supabase client with password encryption
+// Create a secure Supabase client with password encryption and session protection
 export const createSecureSupabaseClient = () => {
+  // Create the client - note that cookie settings are now managed by middleware
   const supabase = createClientComponentClient();
 
   // Intercept and wrap the original auth methods to add client-side encryption
@@ -52,6 +53,9 @@ export const createSecureSupabaseClient = () => {
     // If no password is provided, just pass through
     return originalSignUp.call(supabase.auth, credentials);
   };
+
+  // Remove the security check that's causing problems
+  // We'll rely on the middleware for security checks instead
 
   return supabase;
 };

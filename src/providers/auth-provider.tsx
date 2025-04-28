@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/profile";
 import { hashPassword } from "@/lib/utils/password-utils";
 import { secureSupabaseClient } from "@/lib/supabase/client";
+import { generateClientFingerprint } from "@/lib/utils/session-utils";
 
 // URL helper function
 const getURL = () => {
@@ -191,7 +192,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       if (data.user) {
+        // First fetch the profile to ensure we have user data
         await fetchProfile(data.user.id, true);
+
+        // Then update security metadata in a separate call
+        // This prevents potential race conditions
+        try {
+          const userAgent = navigator.userAgent;
+          // Generate a fingerprint based on user agent and browser properties
+          const fingerprint = generateClientFingerprint(userAgent);
+
+          // Store additional browser data for more accurate matching
+          const browserData = {
+            fingerprint: fingerprint,
+            last_login: new Date().toISOString(),
+            user_agent: userAgent,
+            // Reset the mismatch counter on successful login
+            fingerprintMismatchCount: 0,
+            // Add these browser-specific properties for better security checks
+            language: navigator.language,
+            platform: navigator.platform,
+            // Store basic screen info separately to help with comparisons
+            screen_width: window.screen.width,
+            screen_height: window.screen.height,
+          };
+
+          // Update user metadata with security information
+          // Use a small delay to prevent race conditions with other auth operations
+          setTimeout(async () => {
+            try {
+              await supabase.auth.updateUser({
+                data: browserData,
+              });
+              console.log("Security fingerprint updated successfully");
+            } catch (err) {
+              console.error("Delayed metadata update failed:", err);
+            }
+          }, 1000);
+        } catch (secError) {
+          console.error("Error storing security information:", secError);
+          // Continue even if security update fails
+        }
       }
 
       if (!noRedirect) {
@@ -211,12 +252,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Starting sign-up process for:", email);
 
+      // Generate a device fingerprint for security
+      const userAgent = navigator.userAgent;
+      const fingerprint = generateClientFingerprint(userAgent);
+
       // The secureSupabaseClient already handles password encryption
+      // Store minimal data during sign-up to avoid potential issues
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: getURL() + "auth/callback",
+          data: {
+            first_name: profileData.firstName || "",
+            last_name: profileData.lastName || "",
+          },
         },
       });
 
@@ -252,6 +302,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error("Error creating profile:", await response.text());
           } else {
             console.log("Profile created successfully for user:", data.user.id);
+
+            // After successful profile creation, add security metadata
+            setTimeout(async () => {
+              try {
+                // Store more detailed browser fingerprint data
+                const browserData = {
+                  fingerprint: fingerprint,
+                  signup_time: new Date().toISOString(),
+                  user_agent: navigator.userAgent,
+                  // Initialize the mismatch counter to 0
+                  fingerprintMismatchCount: 0,
+                  // Add these browser-specific properties for better security checks
+                  language: navigator.language,
+                  platform: navigator.platform,
+                  // Store basic screen info separately to help with comparisons
+                  screen_width: window.screen.width,
+                  screen_height: window.screen.height,
+                };
+
+                await supabase.auth.updateUser({
+                  data: browserData,
+                });
+                console.log("Security metadata added for new user");
+              } catch (err) {
+                console.error("Error adding security metadata:", err);
+              }
+            }, 1000);
           }
         } catch (profileError) {
           console.error("Error creating profile:", profileError);

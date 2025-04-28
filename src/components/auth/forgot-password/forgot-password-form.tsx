@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,71 +16,62 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
-// URL helper function - same as in auth-provider.tsx
-const getURL = () => {
-  let url =
-    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
-    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
-    "http://localhost:3000/";
-  // Make sure to include `https://` when not localhost.
-  url = url.startsWith("http") ? url : `https://${url}`;
-  // Make sure to include a trailing `/`.
-  url = url.endsWith("/") ? url : `${url}/`;
-  return url;
-};
-
-// Schema for the form
-const forgotPasswordSchema = z.object({
-  email: z.string().email({ message: "Ingresa un correo electrónico válido" }),
+const formSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "Please enter your email" })
+    .email({ message: "Invalid email address" }),
 });
 
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
-export function ForgotPasswordForm() {
+type ForgotPasswordFormProps = React.HTMLAttributes<HTMLDivElement>;
+
+export function ForgotPasswordForm({
+  className,
+  ...props
+}: ForgotPasswordFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const supabase = createClientComponentClient();
 
-  const form = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
     },
   });
 
-  async function onSubmit(data: ForgotPasswordFormData) {
+  async function onSubmit(data: FormValues) {
     try {
       setIsLoading(true);
 
-      console.log("Sending password reset email to:", data.email);
+      // Get the site URL from the environment or current location
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
 
-      // Use the same URL construction pattern as in auth-provider.tsx
+      // Call Supabase's resetPasswordForEmail method
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: getURL() + "auth/reset-password",
+        redirectTo: `${siteUrl}/auth/reset-password`,
       });
 
       if (error) {
-        console.error("Reset password error:", error);
         throw error;
       }
 
-      // Show success message, even if email doesn't exist for security
-      setResetSent(true);
+      setIsSuccess(true);
       toast({
-        title: "Correo enviado",
-        description:
-          "Si existe una cuenta con este correo, recibirás un enlace para restablecer tu contraseña.",
+        title: "Check your email",
+        description: "We've sent you a password reset link.",
       });
     } catch (error) {
-      console.error("Error sending reset email:", error);
-
-      // Always show success for security reasons (don't reveal if email exists)
-      setResetSent(true);
+      console.error("Reset password error:", error);
       toast({
-        title: "Correo enviado",
-        description:
-          "Si existe una cuenta con este correo, recibirás un enlace para restablecer tu contraseña.",
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -89,46 +79,34 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="grid gap-6">
-      {resetSent ? (
-        <div className="flex flex-col space-y-4 text-center">
-          <p>
-            Hemos enviado un correo con instrucciones para restablecer tu
-            contraseña.
-          </p>
+    <div className={cn("grid gap-6", className)} {...props}>
+      {isSuccess ? (
+        <div className="text-center">
+          <h3 className="mb-1 text-lg font-medium">Check your email</h3>
           <p className="text-sm text-muted-foreground">
-            Por favor, revisa tu bandeja de entrada y sigue las instrucciones.
+            We&apos;ve sent a password reset link to your email. Please check
+            your inbox and follow the instructions.
           </p>
-          <Button asChild variant="outline" className="mt-2">
-            <Link href="/sign-in">Volver a iniciar sesión</Link>
-          </Button>
         </div>
       ) : (
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="space-y-1">
-                    <FormLabel>Correo electrónico</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="nombre@ejemplo.com"
-                        type="email"
-                        autoComplete="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button className="mt-2" disabled={isLoading}>
-                {isLoading ? "Enviando..." : "Enviar enlace de recuperación"}
-              </Button>
-            </div>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="name@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Sending..." : "Send reset link"}
+            </Button>
           </form>
         </Form>
       )}
