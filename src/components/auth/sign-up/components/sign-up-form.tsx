@@ -127,8 +127,8 @@ export function SignUpForm({
 
       setIsLoading(false);
 
-      // Redirect to sign-in page or a custom page instructing them to check email
-      router.push("/auth/verify-email");
+      // Redirect to verify-email page with email as query parameter
+      router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       console.error("Error in form submission:", error);
       setIsLoading(false);

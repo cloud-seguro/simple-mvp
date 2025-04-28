@@ -25,40 +25,53 @@ export async function POST(req: Request) {
       });
     }
 
-    // Create or update profile with FREE role
+    // Check if a profile with this email already exists (that doesn't belong to this user)
+    if (email) {
+      const existingProfile = await prisma.profile.findFirst({
+        where: {
+          email,
+          userId: { not: userId }, // Make sure it's not the current user's profile
+        },
+      });
+
+      if (existingProfile) {
+        return new Response(
+          JSON.stringify({ error: "Email already in use by another account" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+
+    // Create or update profile with all fields in a single operation
     const profile = await prisma.profile.upsert({
       where: { userId },
       update: {
         role: UserRole.FREE,
         active: true,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        email: email || null,
+        phoneNumber: phoneNumber || null,
+        company: company || null,
+        company_role: company_role || null,
+        avatarUrl: avatarUrl || null,
       },
       create: {
         userId: userId,
         role: UserRole.FREE, // Always set role to FREE for new users
         active: true,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        email: email || null,
+        phoneNumber: phoneNumber || null,
+        company: company || null,
+        company_role: company_role || null,
+        avatarUrl: avatarUrl || null,
       },
     });
-
-    // If successful, update with additional fields
-    if (profile) {
-      const updatedProfile = await prisma.profile.update({
-        where: { id: profile.id },
-        data: {
-          firstName: firstName || null,
-          lastName: lastName || null,
-          email: email || null,
-          phoneNumber: phoneNumber || null,
-          company: company || null,
-          company_role: company_role || null,
-          avatarUrl: avatarUrl || null,
-        },
-      });
-
-      return new Response(JSON.stringify({ profile: updatedProfile }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
 
     return new Response(JSON.stringify({ profile }), {
       status: 200,

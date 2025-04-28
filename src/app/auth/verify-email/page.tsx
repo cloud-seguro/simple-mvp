@@ -11,24 +11,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function VerifyEmail() {
   const [email, setEmail] = useState<string | null>(null);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Try to get the email from localStorage if available
-    const pendingProfileData = localStorage.getItem("pendingProfileData");
-    if (pendingProfileData) {
-      try {
-        const profileData = JSON.parse(pendingProfileData);
-        if (profileData.email) {
-          setEmail(profileData.email);
-        }
-      } catch (e) {
-        console.error("Error parsing pendingProfileData:", e);
-      }
+    // Get email from URL query parameter
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
     }
-  }, []);
+  }, [searchParams]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
