@@ -7,6 +7,7 @@ import type { Profile } from "@/types/profile";
 import { hashPassword } from "@/lib/utils/password-utils";
 import { secureSupabaseClient } from "@/lib/supabase/client";
 import { generateClientFingerprint } from "@/lib/utils/session-utils";
+import { validateCorporateEmail } from "@/lib/utils/email-validation";
 
 // URL helper function
 const getURL = () => {
@@ -251,6 +252,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ): Promise<void> => {
     try {
       console.log("Starting sign-up process for:", email);
+
+      // Validate email before proceeding
+      const emailValidation = validateCorporateEmail(email);
+      if (!emailValidation.isValid) {
+        throw new Error(
+          emailValidation.reason || "Dirección de correo electrónico no válida"
+        );
+      }
 
       // Generate a device fingerprint for security
       const userAgent = navigator.userAgent;

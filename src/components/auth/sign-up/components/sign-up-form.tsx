@@ -20,6 +20,9 @@ import type { SignUpFormProps, SignUpFormData } from "@/types/auth/sign-up";
 import { signUpFormSchema } from "@/types/auth/sign-up";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { validateCorporateEmail } from "@/lib/utils/email-validation";
 
 // Extended props to include evaluation results
 interface ExtendedSignUpFormProps extends SignUpFormProps {
@@ -56,6 +59,8 @@ export function SignUpForm({
     numbers: false,
     special: false,
   });
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const router = useRouter();
 
   const form = useForm<SignUpFormData>({
@@ -71,6 +76,58 @@ export function SignUpForm({
       confirmPassword: "",
     },
   });
+
+  // Real-time email validation when the email field changes
+  const emailValue = form.watch("email");
+  useEffect(() => {
+    const validateEmail = async () => {
+      if (emailValue && emailValue.includes("@") && emailValue.includes(".")) {
+        // Basic format check first
+        setIsCheckingEmail(true);
+        setEmailError(null);
+
+        try {
+          // Client-side validation
+          const localValidation = validateCorporateEmail(emailValue);
+
+          if (!localValidation.isValid) {
+            setEmailError(
+              localValidation.reason || "Correo electrónico no válido"
+            );
+            return;
+          }
+
+          // Server-side validation for extra security
+          const response = await fetch("/api/auth/validate-email", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: emailValue }),
+          });
+
+          const data = await response.json();
+
+          if (!data.isValid) {
+            setEmailError(data.reason || "Correo electrónico no válido");
+          } else {
+            setEmailError(null);
+          }
+        } catch (error) {
+          console.error("Error validating email:", error);
+        } finally {
+          setIsCheckingEmail(false);
+        }
+      }
+    };
+
+    // Use a debounce to avoid too many API calls
+    const debounceTimeout = setTimeout(validateEmail, 500);
+
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [emailValue]);
 
   // Check password strength when password changes
   useEffect(() => {
@@ -96,6 +153,16 @@ export function SignUpForm({
 
   async function onSubmit(data: SignUpFormData) {
     try {
+      // Prevent form submission if there's an email error
+      if (emailError) {
+        toast({
+          title: "Error",
+          description: emailError,
+          variant: "destructive",
+        });
+        return;
+      }
+
       setIsLoading(true);
       setLoadingMessage("Creando cuenta...");
 
@@ -152,8 +219,23 @@ export function SignUpForm({
               <FormItem>
                 <FormLabel>Correo Electrónico</FormLabel>
                 <FormControl>
-                  <Input placeholder="nombre@ejemplo.com" {...field} />
+                  <Input
+                    placeholder="nombre@empresa.com"
+                    {...field}
+                    className={emailError ? "border-red-500" : ""}
+                  />
                 </FormControl>
+                {emailError && (
+                  <Alert
+                    variant="destructive"
+                    className="py-2 mt-1 flex items-center gap-2"
+                  >
+                    <AlertTriangle className="h-4 w-4 static ml-0 mr-0 mt-0" />
+                    <AlertDescription className="text-xs pl-0 mt-0">
+                      {emailError}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -271,8 +353,16 @@ export function SignUpForm({
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? loadingMessage || "Procesando..." : "Crear Cuenta"}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading || !!emailError || isCheckingEmail}
+          >
+            {isLoading
+              ? loadingMessage || "Procesando..."
+              : isCheckingEmail
+                ? "Verificando correo..."
+                : "Crear Cuenta"}
           </Button>
         </form>
       </Form>

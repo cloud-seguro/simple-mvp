@@ -1,10 +1,20 @@
 import { z } from "zod";
+import {
+  isConsumerEmail,
+  isDisposableEmail,
+} from "@/lib/utils/email-validation";
 
 export const signUpFormSchema = z
   .object({
     email: z
       .string()
-      .email({ message: "Dirección de correo electrónico inválida" }),
+      .email({ message: "Dirección de correo electrónico inválida" })
+      .refine((email) => !isDisposableEmail(email), {
+        message: "No se permiten correos temporales o desechables",
+      })
+      .refine((email) => !isConsumerEmail(email), {
+        message: "Por favor utiliza un correo corporativo",
+      }),
     firstName: z
       .string()
       .min(2, { message: "El nombre debe tener al menos 2 caracteres" })
