@@ -144,6 +144,7 @@ const CommandItem = React.forwardRef<HTMLDivElement, CommandItemProps>(
         className
       )}
       role="option"
+      aria-selected={false}
       data-value={value}
       onClick={onSelect}
       {...props}

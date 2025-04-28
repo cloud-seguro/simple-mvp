@@ -1,13 +1,12 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 
 /**
  * Gets the current user from a request, using Supabase auth
  */
-export async function getCurrentUser(req?: NextRequest) {
+export async function getCurrentUser() {
   const supabase = createServerComponentClient({ cookies });
 
   const {
