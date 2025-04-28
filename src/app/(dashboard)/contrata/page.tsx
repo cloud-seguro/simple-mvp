@@ -110,7 +110,7 @@ export default async function ContrataPage() {
             {engagements.map((engagement) => (
               <Link
                 key={engagement.id}
-                href={`/dashboard/contrata/engagements/${engagement.id}`}
+                href={`/contrata/engagements/${engagement.id}`}
                 className="block p-4 border rounded-lg hover:shadow-md transition"
               >
                 <div className="flex items-center">
@@ -136,7 +136,7 @@ export default async function ContrataPage() {
           </div>
           <div className="mt-4">
             <Link
-              href="/dashboard/contrata/engagements"
+              href="/contrata/engagements"
               className="text-primary hover:text-primary/80 font-medium"
             >
               Ver todos los contratos →
@@ -218,13 +218,13 @@ export default async function ContrataPage() {
 
               <div className="flex justify-between mt-4">
                 <Link
-                  href={`/dashboard/contrata/specialists/${specialist.id}`}
+                  href={`/contrata/specialists/${specialist.id}`}
                   className="text-primary hover:text-primary/80 text-sm font-medium"
                 >
                   Ver Perfil
                 </Link>
                 <Link
-                  href={`/dashboard/contrata/hire/${specialist.id}`}
+                  href={`/contrata/hire/${specialist.id}`}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition"
                 >
                   Contratar

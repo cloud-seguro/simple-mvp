@@ -87,7 +87,7 @@ export default async function EngagementDetailPage({
   return (
     <div className="max-w-4xl mx-auto">
       <Link
-        href="/dashboard/contrata/engagements"
+        href="/contrata/engagements"
         className="inline-flex items-center text-primary hover:text-primary/80 mb-6"
       >
         <svg
@@ -269,7 +269,7 @@ export default async function EngagementDetailPage({
                 </div>
                 <div className="mt-4">
                   <Link
-                    href={`/dashboard/contrata/specialists/${engagement.specialist.id}`}
+                    href={`/contrata/specialists/${engagement.specialist.id}`}
                     className="text-primary hover:text-primary/80 text-sm font-medium"
                   >
                     View Specialist Profile
