@@ -182,13 +182,13 @@ export async function middleware(req: NextRequest) {
     });
   }
 
-  // Auth routes for password reset flow should never be redirected
+  // Auth routes for all auth-related flows should never be redirected
   if (req.nextUrl.pathname.startsWith("/auth/")) {
     return res;
   }
 
-  // Reset password page should always be accessible
-  // It will handle its own recovery token verification
+  // Reset password page is no longer necessary as we're using magic links,
+  // but keep it accessible for backward compatibility
   if (req.nextUrl.pathname === "/reset-password") {
     return res;
   }

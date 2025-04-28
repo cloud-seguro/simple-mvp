@@ -19,7 +19,7 @@ import { toast } from "@/components/ui/use-toast";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { PasswordInput } from "@/components/utils/password-input";
 import { PasswordStrengthIndicator } from "@/components/utils/password-strength-indicator";
-import { hashPassword } from "@/lib/utils/password-utils";
+import { encryptPasswordForTransport } from "@/lib/utils/password-utils";
 
 const formSchema = z
   .object({
@@ -42,10 +42,13 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
-type ResetPasswordFormProps = React.HTMLAttributes<HTMLDivElement>;
+type ResetPasswordFormProps = React.HTMLAttributes<HTMLDivElement> & {
+  onSuccessCallback?: () => void;
+};
 
 export function ResetPasswordForm({
   className,
+  onSuccessCallback,
   ...props
 }: ResetPasswordFormProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -78,12 +81,12 @@ export function ResetPasswordForm({
         throw new Error("User not found. Please try logging in again.");
       }
 
-      // Hash the password before sending to server
-      const { hashedPassword } = hashPassword(data.password);
+      // Use the same encryption method as the login form
+      const encryptedPassword = encryptPasswordForTransport(data.password);
 
       // Update the user's password
       const { error } = await supabase.auth.updateUser({
-        password: hashedPassword,
+        password: encryptedPassword,
       });
 
       if (error) {
@@ -95,8 +98,13 @@ export function ResetPasswordForm({
         description: "Your password has been reset successfully.",
       });
 
-      // Redirect to the login page
-      router.push("/sign-in");
+      // If callback provided, call it instead of redirecting
+      if (onSuccessCallback) {
+        onSuccessCallback();
+      } else {
+        // Otherwise redirect to the login page
+        router.push("/sign-in");
+      }
     } catch (error) {
       console.error("Reset password error:", error);
       toast({
@@ -147,7 +155,7 @@ export function ResetPasswordForm({
           />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Resetting..." : "Reset Password"}
+            {isLoading ? "Updating..." : "Update Password"}
           </Button>
         </form>
       </Form>

@@ -52,9 +52,12 @@ export function ForgotPasswordForm({
       const siteUrl =
         process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
 
-      // Call Supabase's resetPasswordForEmail method
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${siteUrl}/auth/reset-password`,
+      // Use signInWithOtp instead of resetPasswordForEmail
+      const { error } = await supabase.auth.signInWithOtp({
+        email: data.email,
+        options: {
+          emailRedirectTo: `${siteUrl}/auth/callback?next=/settings?reset_password=true`,
+        },
       });
 
       if (error) {
@@ -64,10 +67,11 @@ export function ForgotPasswordForm({
       setIsSuccess(true);
       toast({
         title: "Check your email",
-        description: "We've sent you a password reset link.",
+        description:
+          "We've sent you a magic link to sign in and reset your password.",
       });
     } catch (error) {
-      console.error("Reset password error:", error);
+      console.error("Magic link error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -84,8 +88,8 @@ export function ForgotPasswordForm({
         <div className="text-center">
           <h3 className="mb-1 text-lg font-medium">Check your email</h3>
           <p className="text-sm text-muted-foreground">
-            We&apos;ve sent a password reset link to your email. Please check
-            your inbox and follow the instructions.
+            We&apos;ve sent a magic link to your email. Click the link to sign
+            in and reset your password.
           </p>
         </div>
       ) : (
@@ -105,7 +109,7 @@ export function ForgotPasswordForm({
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send reset link"}
+              {isLoading ? "Sending..." : "Send magic link"}
             </Button>
           </form>
         </Form>
