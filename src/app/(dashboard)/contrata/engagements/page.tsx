@@ -126,7 +126,7 @@ export default async function EngagementsPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">All Engagements</h2>
           <Link
-            href="/contrata"
+            href="/dashboard/contrata"
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
           >
             Hire New Specialist
@@ -156,7 +156,7 @@ export default async function EngagementsPage() {
             </p>
             <div className="mt-6">
               <Link
-                href="/contrata"
+                href="/dashboard/contrata"
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
               >
                 Find a Specialist
@@ -182,7 +182,7 @@ export default async function EngagementsPage() {
                     {groupedEngagements[status].map((engagement) => (
                       <Link
                         key={engagement.id}
-                        href={`/contrata/engagements/${engagement.id}`}
+                        href={`/dashboard/contrata/engagements/${engagement.id}`}
                         className="border rounded-lg p-4 hover:shadow-md transition flex flex-col md:flex-row md:items-center"
                       >
                         <div className="flex items-center mb-4 md:mb-0 md:mr-6">

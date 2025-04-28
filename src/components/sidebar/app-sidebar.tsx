@@ -45,7 +45,7 @@ export function AppSidebar({
       // Add CONTRATA link
       servicesGroup.items.push({
         title: "CONTRATA",
-        url: "/contrata",
+        url: "/dashboard/contrata",
         icon: Shield,
       });
     }

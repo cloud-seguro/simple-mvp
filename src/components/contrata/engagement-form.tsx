@@ -169,7 +169,7 @@ export const EngagementForm = ({
         title: "Éxito",
         description: "Solicitud enviada con éxito",
       });
-      router.push(`/contrata/engagements/${result.id}`);
+      router.push(`/dashboard/contrata/engagements/${result.id}`);
     } catch (error) {
       console.error("Error submitting engagement:", error);
       toast({

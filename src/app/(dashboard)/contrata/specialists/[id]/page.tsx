@@ -216,7 +216,7 @@ export default async function SpecialistDetailPage({
                         </p>
                       </div>
                       <Link
-                        href={`/contrata/hire/${specialist.id}?dealId=${deal.id}`}
+                        href={`/dashboard/contrata/hire/${specialist.id}?dealId=${deal.id}`}
                         className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
                       >
                         Seleccionar Paquete
@@ -230,7 +230,7 @@ export default async function SpecialistDetailPage({
 
           <div className="mt-8 flex justify-center">
             <Link
-              href={`/contrata/hire/${specialist.id}`}
+              href={`/dashboard/contrata/hire/${specialist.id}`}
               className="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition text-center"
             >
               Contratar Este Especialista
