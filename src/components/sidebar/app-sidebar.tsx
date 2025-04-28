@@ -36,7 +36,7 @@ export function AppSidebar({
 
       if (!servicesGroup) {
         servicesGroup = {
-          title: "Services",
+          title: "Add-ons",
           items: [],
         };
         groups.push(servicesGroup);
