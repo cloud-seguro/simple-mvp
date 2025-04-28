@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 import Link from "next/link";
 import Image from "next/image";
+import { User } from "lucide-react";
 
 // Add dynamic export to handle the cookies usage
 export const dynamic = "force-dynamic";
@@ -118,13 +119,7 @@ export default async function ContrataPage() {
               >
                 <div className="flex items-center">
                   {engagement.specialist.imageUrl && (
-                    <Image
-                      src={engagement.specialist.imageUrl}
-                      alt={engagement.specialist.name}
-                      width={48}
-                      height={48}
-                      className="w-12 h-12 rounded-full mr-4 object-cover"
-                    />
+                    <User/>
                   )}
                   <div>
                     <h3 className="font-medium">{engagement.title}</h3>
