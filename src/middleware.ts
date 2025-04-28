@@ -7,10 +7,57 @@ export async function middleware(req: NextRequest) {
   // Create a response object
   const res = NextResponse.next();
 
+  // Get the origin from the request
+  const origin = req.headers.get("origin");
+
+  // Define allowed origins
+  const allowedOrigins = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    "https://simple-mvp.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+  ].filter(Boolean);
+
+  // Set CORS headers only if the origin header is present (for CORS requests)
+  if (origin) {
+    // Check if the origin is allowed
+    if (allowedOrigins.includes(origin)) {
+      res.headers.set("Access-Control-Allow-Origin", origin);
+    } else {
+      // For security, don't set the header if origin isn't allowed
+      // This effectively blocks cross-origin requests from unauthorized domains
+    }
+
+    // Add other CORS headers
+    res.headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    res.headers.set("Access-Control-Max-Age", "86400"); // 24 hours
+
+    // Only allow credentials for trusted origins
+    if (allowedOrigins.includes(origin)) {
+      res.headers.set("Access-Control-Allow-Credentials", "true");
+    }
+  }
+
   // Add security headers to prevent clickjacking, XSS, etc.
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("X-XSS-Protection", "1; mode=block");
+
+  // Handle preflight OPTIONS requests
+  if (req.method === "OPTIONS") {
+    return new NextResponse(null, {
+      status: 204,
+      headers: res.headers,
+    });
+  }
 
   // Create the Supabase middleware client
   const supabase = createMiddlewareClient({ req, res });
@@ -179,6 +226,14 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
+// Update the config to include OPTIONS requests and API routes
 export const config = {
-  matcher: ["/dashboard/:path*", "/sign-in", "/sign-up", "/auth/callback"],
+  matcher: [
+    "/dashboard/:path*",
+    "/sign-in",
+    "/sign-up",
+    "/auth/callback",
+    "/api/:path*",
+    "/(.*)",
+  ],
 };
