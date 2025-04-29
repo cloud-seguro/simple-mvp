@@ -91,7 +91,7 @@ export default function EvaluationsPage() {
         fallback={
           <div className="flex flex-col items-center justify-center gap-4">
             <SecurityLoadingScreen message="Cargando evaluaciones..." />
-          </div>
+        </div>
         }
       >
         <EvaluationsContent />

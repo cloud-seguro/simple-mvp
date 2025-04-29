@@ -25,6 +25,8 @@ import { formatDistance } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pencil, Trash2, MoreHorizontal, PlusCircle, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { LoadingScreen } from "@/components/ui/loading-screen";
+import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
 interface BlogPost {
   id: string;
@@ -132,9 +134,7 @@ export function BlogManagement() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center my-8">
-          <p>Cargando artículos...</p>
-        </div>
+        <SecurityLoadingScreen />
       ) : error ? (
         <div className="bg-red-50 p-4 rounded-md">
           <p className="text-red-600">{error}</p>

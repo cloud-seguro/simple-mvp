@@ -217,8 +217,17 @@ flowchart LR
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleTabChange = (value: string) => {
+  const handleTabChange = (value: string, e?: React.MouseEvent) => {
+    if (e) {
+      preventFormSubmission(e);
+    }
     setActiveTab(value);
+  };
+
+  // Stop buttons from submitting the form
+  const preventFormSubmission = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   return (
@@ -229,8 +238,12 @@ flowchart LR
         </h1>
         {post && (
           <Button
+            type="button"
             variant="destructive"
-            onClick={() => setIsDeleteDialogOpen(true)}
+            onClick={(e) => {
+              preventFormSubmission(e);
+              setIsDeleteDialogOpen(true);
+            }}
           >
             <Trash className="h-4 w-4 mr-2" />
             Eliminar
@@ -239,7 +252,21 @@ flowchart LR
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4"
+          noValidate
+          onKeyDown={(e) => {
+            // Prevent Enter key from submitting the form
+            if (
+              e.key === "Enter" &&
+              e.target &&
+              (e.target as HTMLElement).tagName !== "TEXTAREA"
+            ) {
+              e.preventDefault();
+            }
+          }}
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -335,7 +362,10 @@ flowchart LR
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger
+                          type="button"
+                          onClick={preventFormSubmission}
+                        >
                           <SelectValue placeholder="Selecciona un estado" />
                         </SelectTrigger>
                       </FormControl>
@@ -366,7 +396,10 @@ flowchart LR
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={insertMermaidExample}
+                  onClick={(e) => {
+                    preventFormSubmission(e);
+                    insertMermaidExample();
+                  }}
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Insertar diagrama Mermaid
@@ -378,7 +411,10 @@ flowchart LR
                         type="button"
                         size="sm"
                         variant="outline"
-                        onClick={copyContentToClipboard}
+                        onClick={(e) => {
+                          preventFormSubmission(e);
+                          copyContentToClipboard();
+                        }}
                       >
                         <Copy className="h-4 w-4 mr-2" />
                         {isCopied ? "¡Copiado!" : "Copiar"}
@@ -396,11 +432,23 @@ flowchart LR
               defaultValue="rich-editor"
               className="w-full"
               value={activeTab}
-              onValueChange={handleTabChange}
+              onValueChange={(value) => handleTabChange(value)}
             >
               <TabsList className="grid grid-cols-2">
-                <TabsTrigger value="rich-editor">Editor</TabsTrigger>
-                <TabsTrigger value="preview">Vista previa</TabsTrigger>
+                <TabsTrigger
+                  type="button"
+                  value="rich-editor"
+                  onClick={preventFormSubmission}
+                >
+                  Editor
+                </TabsTrigger>
+                <TabsTrigger
+                  type="button"
+                  value="preview"
+                  onClick={preventFormSubmission}
+                >
+                  Vista previa
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="rich-editor" className="mt-2">

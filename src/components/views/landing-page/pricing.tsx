@@ -255,33 +255,26 @@ export default function Pricing() {
               style={{ backgroundSize: "200% 200%" }}
             />
 
-            <div className="flex justify-between items-start mb-6 relative z-10">
+            <div className="flex justify-between items-center mb-6 relative z-10">
               <h3 className="text-2xl font-bold text-white">Plan Premium</h3>
               <motion.div
-                className="bg-white text-black rounded-full px-4 py-1 text-sm font-medium"
-                initial={{ scale: 1 }}
-                animate={{
-                  scale: [1, 1.05, 1],
-                  transition: {
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                  },
-                }}
+                className="bg-black text-white rounded-full px-4 py-1 text-sm font-medium"
+                initial={pulse.initial}
+                animate={pulse.animate}
               >
                 Recomendado
               </motion.div>
             </div>
 
             <div className="mb-6 relative z-10">
-              <span className="text-4xl font-bold text-white">$49.99</span>
+              <span className="text-4xl font-bold text-white">$25</span>
               <span className="text-white/80 ml-2">/mes</span>
             </div>
 
             <div className="mb-8 flex-grow relative z-10">
               <p className="text-white/90 mb-4">
-                Accede a recursos exclusivos con nuestra suscripción mensual y
-                mantén tu empresa protegida contra ciberataques.
+                Protección completa con todas las funciones y módulos para
+                mantener tu empresa segura.
               </p>
 
               <div className="space-y-4">
@@ -301,11 +294,10 @@ export default function Pricing() {
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Evaluación completa
+                      Evaluación avanzada
                     </h4>
                     <p className="text-white/80">
-                      Evaluación exhaustiva de seguridad con 50+ puntos de
-                      verificación
+                      Evaluación completa con 25+ preguntas y análisis detallado
                     </p>
                   </div>
                 </motion.div>
@@ -326,11 +318,11 @@ export default function Pricing() {
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Dashboard avanzado
+                      Dashboard completo
                     </h4>
                     <p className="text-white/80">
-                      Visualiza tu estado de seguridad con métricas detalladas y
-                      personalizadas
+                      Acceso a todas las funciones y visualizaciones del
+                      dashboard
                     </p>
                   </div>
                 </motion.div>
@@ -351,10 +343,10 @@ export default function Pricing() {
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Alertas en tiempo real
+                      Alertas de seguridad
                     </h4>
                     <p className="text-white/80">
-                      Monitoreo continuo de datos filtrados y vulnerabilidades
+                      Notificaciones en tiempo real sobre vulnerabilidades
                     </p>
                   </div>
                 </motion.div>
@@ -371,14 +363,39 @@ export default function Pricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
+                    <Search className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium text-white">
+                      Verificación de brechas
+                    </h4>
+                    <p className="text-white/80">
+                      Incluye tres consultas para verificar brechas de la
+                      empresa
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={4}
+                >
+                  <motion.div
+                    className="bg-white/20 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
                     <Layers className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Módulos adicionales
+                      Módulos especializados
                     </h4>
                     <p className="text-white/80">
-                      Acceso a módulos especializados según tus necesidades
+                      Acceso a todos los módulos de seguridad disponibles
                     </p>
                   </div>
                 </motion.div>

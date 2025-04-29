@@ -266,6 +266,7 @@ export const EnhancedEditor = ({
     <div className="border rounded-lg shadow-sm overflow-hidden">
       <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-gray-800 border-b">
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleBold}
@@ -277,6 +278,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleItalic}
@@ -288,6 +290,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleUnderline}
@@ -299,6 +302,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleStrike}
@@ -312,6 +316,7 @@ export const EnhancedEditor = ({
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={() => toggleHeading(1)}
@@ -325,6 +330,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={() => toggleHeading(2)}
@@ -338,6 +344,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={() => toggleHeading(3)}
@@ -353,6 +360,7 @@ export const EnhancedEditor = ({
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleBulletList}
@@ -364,6 +372,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleOrderedList}
@@ -375,6 +384,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleBlockquote}
@@ -386,6 +396,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={toggleCodeBlock}
@@ -401,6 +412,7 @@ export const EnhancedEditor = ({
         <Popover open={showLinkPopover} onOpenChange={setShowLinkPopover}>
           <PopoverTrigger asChild>
             <Button
+              type="button"
               variant="ghost"
               size="icon"
               className={
@@ -423,6 +435,7 @@ export const EnhancedEditor = ({
               <div className="flex justify-end space-x-2">
                 {editor.isActive("link") && (
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => {
@@ -433,7 +446,7 @@ export const EnhancedEditor = ({
                     Remove Link
                   </Button>
                 )}
-                <Button size="sm" onClick={setLink}>
+                <Button type="button" size="sm" onClick={setLink}>
                   {editor.isActive("link") ? "Update" : "Add"} Link
                 </Button>
               </div>
@@ -443,7 +456,7 @@ export const EnhancedEditor = ({
 
         <Popover open={showImagePopover} onOpenChange={setShowImagePopover}>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button type="button" variant="ghost" size="icon">
               <ImageIcon className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -456,7 +469,7 @@ export const EnhancedEditor = ({
                 onChange={(e) => setImageUrl(e.target.value)}
               />
               <div className="flex justify-end">
-                <Button size="sm" onClick={addImage}>
+                <Button type="button" size="sm" onClick={addImage}>
                   Add Image
                 </Button>
               </div>
@@ -464,13 +477,14 @@ export const EnhancedEditor = ({
           </PopoverContent>
         </Popover>
 
-        <Button variant="ghost" size="icon" onClick={addTable}>
+        <Button type="button" variant="ghost" size="icon" onClick={addTable}>
           <TableIcon className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={() => setTextAlign("left")}
@@ -479,6 +493,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={() => setTextAlign("center")}
@@ -487,6 +502,7 @@ export const EnhancedEditor = ({
         </Button>
 
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={() => setTextAlign("right")}
@@ -496,17 +512,22 @@ export const EnhancedEditor = ({
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
-        <Button variant="ghost" size="icon" onClick={undo}>
+        <Button type="button" variant="ghost" size="icon" onClick={undo}>
           <Undo className="h-4 w-4" />
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={redo}>
+        <Button type="button" variant="ghost" size="icon" onClick={redo}>
           <Redo className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
-        <Button variant="ghost" size="icon" onClick={clearContent}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={clearContent}
+        >
           <Trash className="h-4 w-4" />
         </Button>
       </div>

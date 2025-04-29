@@ -130,7 +130,7 @@ export default function SimplifiedPricing() {
             </div>
 
             <div className="mb-6 relative z-10">
-              <span className="text-4xl font-bold text-white">$49.99</span>
+              <span className="text-4xl font-bold text-white">$25</span>
               <span className="text-white/80 ml-2">/mes</span>
             </div>
 
@@ -222,6 +222,31 @@ export default function SimplifiedPricing() {
                   whileInView="show"
                   viewport={{ once: true }}
                   custom={3}
+                >
+                  <motion.div
+                    className="bg-white/20 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Search className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium text-white">
+                      Verificación de brechas
+                    </h4>
+                    <p className="text-white/80">
+                      Incluye tres consultas para verificar brechas de la
+                      empresa
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={4}
                 >
                   <motion.div
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
