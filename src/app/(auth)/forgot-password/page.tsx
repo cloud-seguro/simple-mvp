@@ -3,13 +3,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/auth/auth-layout";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password/forgot-password-form";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Magic Link Sign In",
-  description: "Sign in with a magic link to reset your password",
+  title: "Iniciar Sesión con Enlace Mágico",
+  description:
+    "Inicie sesión con un enlace mágico para restablecer su contraseña",
 };
 
 export default async function ForgotPasswordPage() {
@@ -28,20 +30,19 @@ export default async function ForgotPasswordPage() {
       <Card className="p-6">
         <div className="flex flex-col space-y-2 text-left">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Magic Link Sign In
+            Iniciar Sesión con Enlace Mágico
           </h1>
           <p className="text-sm text-muted-foreground">
-            Enter your email below to receive a magic link to sign in and reset
-            your password.{" "}
-            <Link
-              href="/sign-in"
-              className="underline underline-offset-4 hover:text-primary"
-            >
-              Back to Sign In
-            </Link>
+            Ingrese su correo electrónico a continuación para recibir un enlace
+            mágico para iniciar sesión y restablecer su contraseña.
           </p>
         </div>
         <ForgotPasswordForm />
+        <div className="mt-4">
+          <Button variant="outline" asChild className="w-full">
+            <Link href="/sign-in">Volver a Iniciar Sesión</Link>
+          </Button>
+        </div>
       </Card>
     </AuthLayout>
   );
