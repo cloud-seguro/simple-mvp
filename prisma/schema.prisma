@@ -1,23 +1,160 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-// Enums
+model Profile {
+  id              String           @id @default(cuid())
+  userId          String           @unique
+  avatarUrl       String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  active          Boolean          @default(true)
+  firstName       String?          @map("first_name")
+  lastName        String?          @map("last_name")
+  role            UserRole         @default(FREE)
+  company         String?
+  company_role    String?
+  email           String?          @unique
+  phoneNumber     String?          @map("phone_number")
+  blogPosts       BlogPost[]
+  engagements     Engagement[]
+  evaluations     Evaluation[]
+  specialistDeals SpecialistDeal[]
+  specialists     Specialist[]
+
+  @@index([userId])
+  @@map("profiles")
+}
+
+model Evaluation {
+  id          String         @id @default(cuid())
+  type        EvaluationType
+  title       String
+  score       Float?
+  profileId   String?
+  answers     Json
+  createdAt   DateTime       @default(now())
+  completedAt DateTime?
+  metadata    Json?
+  accessCode  String?
+  guestEmail  String?
+  profile     Profile?       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([accessCode])
+  @@map("evaluations")
+}
+
+model Specialist {
+  id               String           @id @default(cuid())
+  name             String
+  bio              String
+  expertiseAreas   ExpertiseArea[]
+  contactEmail     String
+  contactPhone     String?
+  website          String?
+  imageUrl         String?
+  minMaturityLevel Int
+  maxMaturityLevel Int
+  location         String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  active           Boolean          @default(true)
+  createdById      String
+  engagements      Engagement[]
+  deals            SpecialistDeal[]
+  createdBy        Profile          @relation(fields: [createdById], references: [id])
+
+  @@index([createdById])
+  @@map("specialists")
+}
+
+model BlogPost {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  title         String
+  excerpt       String
+  content       String
+  coverImage    String?
+  published     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  authorId      String
+  tags          String[]
+  description   String?
+  featuredImage String?
+  status        BlogPostStatus @default(DRAFT)
+  author        Profile        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@map("blog_posts")
+}
+
+model Engagement {
+  id           String           @id @default(cuid())
+  title        String
+  description  String
+  status       EngagementStatus @default(PENDING)
+  budget       Float?
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  profileId    String
+  specialistId String
+  dealId       String?
+  messages     Message[]
+  deal         SpecialistDeal?  @relation(fields: [dealId], references: [id])
+  profile      Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  specialist   Specialist       @relation(fields: [specialistId], references: [id])
+
+  @@index([profileId])
+  @@index([specialistId])
+  @@index([dealId])
+  @@map("engagements")
+}
+
+model Message {
+  id           String     @id @default(cuid())
+  content      String
+  sentAt       DateTime   @default(now())
+  senderIsUser Boolean
+  engagementId String
+  engagement   Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@map("engagement_messages")
+}
+
+model SpecialistDeal {
+  id           String       @id @default(cuid())
+  title        String
+  description  String
+  price        Float
+  durationDays Int
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  active       Boolean      @default(true)
+  specialistId String
+  createdById  String
+  engagements  Engagement[]
+  createdBy    Profile      @relation(fields: [createdById], references: [id])
+  specialist   Specialist   @relation(fields: [specialistId], references: [id])
+
+  @@index([specialistId])
+  @@index([createdById])
+  @@map("specialist_deals")
+}
+
 enum UserRole {
-  FREE      // Basic users who can only access initial evaluations
-  PREMIUM   // Premium users who can access advanced evaluations and dashboard
+  FREE
+  PREMIUM
   SUPERADMIN
 }
 
@@ -26,14 +163,12 @@ enum EvaluationType {
   ADVANCED
 }
 
-// Blog post status
 enum BlogPostStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
 }
 
-// Specialist expertise areas
 enum ExpertiseArea {
   NETWORK_SECURITY
   APPLICATION_SECURITY
@@ -47,176 +182,11 @@ enum ExpertiseArea {
   GENERAL
 }
 
-// Engagement status for the CONTRATA module
 enum EngagementStatus {
-  PENDING      // Initial request, waiting for specialist response
-  ACCEPTED     // Specialist accepted the request
-  REJECTED     // Specialist rejected the request
-  IN_PROGRESS  // Work is in progress
-  COMPLETED    // Work has been completed
-  CANCELLED    // Engagement was cancelled
-}
-
-// User management
-model Profile {
-  id            String        @id @default(cuid())
-  userId        String        @unique
-  avatarUrl     String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  active        Boolean       @default(true)
-  firstName     String?       @map("first_name")
-  lastName      String?       @map("last_name")
-  email         String?       @unique
-  phoneNumber   String?       @map("phone_number")
-  company       String?
-  company_role  String?
-  role          UserRole      @default(FREE)
-  
-  // Relations
-  evaluations   Evaluation[]
-  specialists   Specialist[]  // Only for SUPERADMIN users
-  blogPosts     BlogPost[]    // Relation to blog posts
-  engagements   Engagement[]  // User's engagements with specialists (CONTRATA)
-  specialistDeals SpecialistDeal[] // Deals created by specialists for users
-
-  @@index([userId])
-  @@map("profiles")
-}
-
-// Simplified evaluation model
-model Evaluation {
-  id            String          @id @default(cuid())
-  type          EvaluationType
-  title         String
-  score         Float?
-  profileId     String
-  answers       Json            // Stores the entire answers object as JSON
-  metadata      Json?           // Stores additional metadata like interest information
-  createdAt     DateTime        @default(now())
-  completedAt   DateTime?
-  
-  // Relations
-  profile       Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  @@index([profileId])
-  @@map("evaluations")
-}
-
-// Cybersecurity Specialists model (managed by SuperAdmin)
-model Specialist {
-  id               String          @id @default(cuid())
-  name             String
-  bio              String
-  expertiseAreas   ExpertiseArea[] // Areas of expertise
-  contactEmail     String
-  contactPhone     String?
-  website          String?
-  imageUrl         String?         // Profile image
-  minMaturityLevel Int             // Minimum maturity level for recommendation (1-5)
-  maxMaturityLevel Int             // Maximum maturity level for recommendation (1-5)
-  location         String?         // Geographic location
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  active           Boolean         @default(true)
-  
-  // Relations - which SuperAdmin created/manages this specialist
-  createdById      String
-  createdBy        Profile         @relation(fields: [createdById], references: [id])
-  
-  // CONTRATA relations
-  engagements      Engagement[]    // Engagements with users
-  deals            SpecialistDeal[] // Deals offered by this specialist
-
-  @@index([createdById])
-  @@map("specialists")
-}
-
-// Blog post model
-model BlogPost {
-  id          String          @id @default(cuid())
-  slug        String          @unique
-  title       String
-  excerpt     String
-  content     String          @db.Text
-  coverImage  String?
-  published   Boolean         @default(false)
-  status      BlogPostStatus  @default(DRAFT)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  authorId    String
-  tags        String[]
-  description String?
-  featuredImage String?
-  
-  // Relations
-  author      Profile         @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  @@index([authorId])
-  @@map("blog_posts")
-}
-
-// CONTRATA Module - Engagements between users and specialists
-model Engagement {
-  id               String           @id @default(cuid())
-  title            String           // Title/subject of the engagement
-  description      String           @db.Text // Detailed description of the work needed
-  status           EngagementStatus @default(PENDING)
-  budget           Float?           // Optional budget information
-  startDate        DateTime?        // When the engagement begins
-  endDate          DateTime?        // When the engagement is expected to end
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  
-  // Relations
-  profileId        String           // The user who requested the engagement
-  profile          Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  specialistId     String           // The specialist hired for the work
-  specialist       Specialist       @relation(fields: [specialistId], references: [id])
-  messages         Message[]        // Communication between user and specialist
-  dealId           String?          // If this engagement was created from a deal
-  deal             SpecialistDeal?  @relation(fields: [dealId], references: [id])
-
-  @@index([profileId])
-  @@index([specialistId])
-  @@index([dealId])
-  @@map("engagements")
-}
-
-// Messages between user and specialist for an engagement
-model Message {
-  id             String     @id @default(cuid())
-  content        String     @db.Text
-  sentAt         DateTime   @default(now())
-  senderIsUser   Boolean    // True if the user sent it, false if specialist sent it
-  
-  // Relations
-  engagementId   String
-  engagement     Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
-  
-  @@index([engagementId])
-  @@map("engagement_messages")
-}
-
-// Specialist Deals model - predefined service packages offered by specialists
-model SpecialistDeal {
-  id              String     @id @default(cuid())
-  title           String     // Name of the service package
-  description     String     @db.Text // Description of what's included
-  price           Float      // Price of the package
-  durationDays    Int        // Estimated duration in days
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  active          Boolean    @default(true)
-  
-  // Relations
-  specialistId    String
-  specialist      Specialist @relation(fields: [specialistId], references: [id])
-  createdById     String     // The admin who created this deal
-  createdBy       Profile    @relation(fields: [createdById], references: [id])
-  engagements     Engagement[] // Engagements created from this deal
-
-  @@index([specialistId])
-  @@index([createdById])
-  @@map("specialist_deals")
+  PENDING
+  ACCEPTED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }

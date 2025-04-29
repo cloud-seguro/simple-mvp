@@ -224,3 +224,65 @@ export async function getEvaluationById(id: string) {
     throw error;
   }
 }
+
+/**
+ * Retrieves a specific evaluation by ID and access code
+ * @param id - The ID of the evaluation
+ * @param accessCode - The access code for the evaluation
+ * @returns The evaluation or null if not found or access code is invalid
+ */
+export async function getEvaluationByAccessCode(
+  id: string,
+  accessCode: string
+) {
+  if (!id || !accessCode) {
+    throw new Error("Evaluation ID and access code are required");
+  }
+
+  try {
+    const evaluation = await prisma.evaluation.findFirst({
+      where: {
+        id,
+        accessCode,
+      },
+      include: {
+        profile: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            company: true,
+            company_role: true,
+          },
+        },
+      },
+    });
+
+    if (evaluation) {
+      console.log(
+        `Successfully accessed evaluation with access code: ${accessCode}`
+      );
+
+      // Create a "fake" profile if this is a guest evaluation without a profile
+      if (!evaluation.profile && evaluation.guestEmail) {
+        // @ts-ignore - Add a synthetic profile for guest users
+        evaluation.profile = {
+          firstName: "Usuario",
+          lastName: "",
+          email: evaluation.guestEmail,
+          company: "",
+          company_role: "",
+        };
+      }
+    } else {
+      console.log(
+        `No evaluation found with ID ${id} and access code ${accessCode}`
+      );
+    }
+
+    return evaluation;
+  } catch (error) {
+    console.error(`Error fetching evaluation with access code:`, error);
+    throw error;
+  }
+}

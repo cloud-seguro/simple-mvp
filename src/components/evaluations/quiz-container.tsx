@@ -9,6 +9,7 @@ import { CybersecurityResults } from "./cybersecurity-results";
 import { getMaturityLevel } from "@/lib/maturity-utils";
 import { EvaluationSignUp } from "./evaluation-sign-up";
 import { CybersecurityInterest } from "./cybersecurity-interest";
+import { EmailCollection } from "./email-collection";
 import type {
   QuizData,
   QuizResults,
@@ -28,6 +29,7 @@ type QuizStage =
   | "intro"
   | "questions"
   | "interest"
+  | "email-collection"
   | "sign-up"
   | "results-ready"
   | "results";
@@ -109,8 +111,8 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             };
             await handleSaveResults(defaultInterestData);
           } else {
-            // For non-logged in users, go to sign-up
-            setStage("sign-up");
+            // For non-logged in users, go to email collection
+            setStage("email-collection");
           }
           return; // Exit early to avoid executing the code below
         }
@@ -126,9 +128,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         if (quizData.id === "evaluacion-inicial") {
           setStage("interest");
         } else {
-          // For advanced evaluations, go to sign-up if not logged in
+          // For advanced evaluations, go to email collection if not logged in
           if (!user || !profile) {
-            setStage("sign-up");
+            setStage("email-collection");
           } else {
             // Try to save with default interest data as a fallback
             try {
@@ -139,7 +141,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
               await handleSaveResults(defaultInterestData);
             } catch (innerError) {
               console.error("Error saving with default interest:", innerError);
-              setStage("sign-up");
+              setStage("email-collection");
             }
           }
         }
@@ -164,10 +166,121 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     setInterest(interestData);
 
     try {
-      // Pass the interest data directly to handleSaveResults
-      await handleSaveResults(interestData);
+      // If user is logged in, continue with saving
+      if (user && profile) {
+        await handleSaveResults(interestData);
+      } else {
+        // Otherwise, go to email collection first
+        setIsSubmitting(false);
+        setStage("email-collection");
+      }
     } catch (error) {
       console.error("Error in handleInterestSubmit:", error);
+      setIsSubmitting(false);
+
+      // If error is related to user not being logged in, go to email collection
+      setStage("email-collection");
+    }
+  };
+
+  const handleEmailSubmit = async (email: string) => {
+    try {
+      setIsSubmitting(true);
+      setLoadingMessage("Guardando resultados...");
+
+      // Update the user info with the provided email
+      setUserInfo((prev) => ({
+        ...prev,
+        email,
+      }));
+
+      // Create a complete set of answers with default values for any missing answers
+      const completeAnswers = { ...results };
+      const existingValues = Object.values(completeAnswers).filter(
+        (v) => typeof v === "number"
+      ) as number[];
+      const averageValue =
+        existingValues.length > 0
+          ? Math.round(
+              existingValues.reduce((sum, val) => sum + val, 0) /
+                existingValues.length
+            )
+          : 2;
+
+      quizData.questions.forEach((question) => {
+        if (completeAnswers[question.id] === undefined) {
+          completeAnswers[question.id] = averageValue;
+        }
+      });
+
+      // Determine evaluation type
+      const evaluationType =
+        quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
+
+      // Ensure we have interest data (or create default)
+      const finalInterestData = interest || {
+        reason: evaluationType === "INITIAL" ? "general" : "advanced",
+        otherReason:
+          evaluationType === "INITIAL"
+            ? "Evaluación inicial de ciberseguridad"
+            : "Evaluación avanzada de ciberseguridad",
+      };
+
+      // Send the data to the guest evaluation endpoint
+      const response = await fetch("/api/evaluations/guest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          type: evaluationType,
+          title:
+            evaluationType === "INITIAL"
+              ? "Evaluación Inicial"
+              : "Evaluación Avanzada",
+          answers: completeAnswers,
+          interest: finalInterestData,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error al guardar los resultados");
+      }
+
+      const data = await response.json();
+      setEvaluationId(data.evaluation.id);
+
+      // Clear local storage after successful save
+      try {
+        localStorage.removeItem(`quiz_results_${quizData.id}`);
+      } catch (error) {
+        console.error("Error clearing local storage:", error);
+      }
+
+      toast({
+        title: "Éxito",
+        description: "Los resultados se han enviado a tu correo electrónico.",
+      });
+
+      // Transition to results-ready stage
+      setStage("results-ready");
+
+      // Remove loading state after a short delay
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 500);
+    } catch (error) {
+      console.error("Error submitting guest evaluation:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Error al guardar los resultados",
+        variant: "destructive",
+      });
       setIsSubmitting(false);
     }
   };
@@ -377,6 +490,15 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         </div>
       )}
 
+      {stage === "email-collection" && (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <EmailCollection
+            onEmailSubmit={handleEmailSubmit}
+            onSkip={() => setStage("sign-up")}
+          />
+        </div>
+      )}
+
       {stage === "sign-up" && (
         <div className="max-w-4xl mx-auto px-4 py-8">
           <EvaluationSignUp
@@ -422,68 +544,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
                 Object.values(results).reduce((sum, val) => sum + (val || 0), 0)
               ).description
             }
-            recommendations={quizData.questions.map((question) => {
-              const category = question.category || "General";
-              const questionScore = results[question.id] || 0;
-              const maxScore = Math.max(
-                ...question.options.map((o) => o.value)
-              );
-              const selectedOption = question.options.find(
-                (o) => o.value === questionScore
-              );
-
-              const percentage = (questionScore / maxScore) * 100;
-              let recommendation = "";
-
-              if (quizData.id === "evaluacion-inicial") {
-                if (percentage <= 20) {
-                  recommendation =
-                    "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
-                } else if (percentage <= 40) {
-                  recommendation =
-                    "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
-                } else if (percentage <= 60) {
-                  recommendation =
-                    "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
-                } else if (percentage <= 80) {
-                  recommendation =
-                    "Bien establecido. Continue monitoreando y mejorando los procesos.";
-                } else {
-                  recommendation =
-                    "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
-                }
-              } else {
-                if (percentage <= 20) {
-                  recommendation =
-                    "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
-                } else if (percentage <= 40) {
-                  recommendation =
-                    "Importante: Estandarice procesos y documente políticas de seguridad.";
-                } else if (percentage <= 60) {
-                  recommendation =
-                    "Moderado: Mejore la medición y optimización de controles existentes.";
-                } else if (percentage <= 80) {
-                  recommendation =
-                    "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
-                } else {
-                  recommendation =
-                    "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
-                }
-              }
-
-              return {
-                score: questionScore,
-                maxScore: maxScore,
-                text: question.text,
-                selectedOption: selectedOption
-                  ? selectedOption.text ||
-                    selectedOption.label ||
-                    `Opción ${questionScore}`
-                  : `Opción ${questionScore}`,
-                category: category,
-                recommendation: recommendation,
-              };
-            })}
             categories={Object.entries(
               quizData.questions.reduce(
                 (acc, q) => {

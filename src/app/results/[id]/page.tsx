@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getEvaluationById } from "@/lib/evaluation-utils";
+import {
+  getEvaluationById,
+  getEvaluationByAccessCode,
+} from "@/lib/evaluation-utils";
 import { CybersecurityResults } from "@/components/evaluations/cybersecurity-results";
 import { getMaturityLevel } from "@/lib/maturity-utils";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
@@ -24,6 +27,7 @@ import ClientRedirect from "@/components/utils/client-redirect";
 
 interface ResultsPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: { code?: string };
 }
 
 interface EvaluationMetadata {
@@ -52,7 +56,7 @@ export async function generateMetadata({ params }: ResultsPageProps) {
 
     return {
       title: `Resultados de ${evaluation.title}`,
-      description: `Resultados de la evaluación de ciberseguridad para ${evaluation.profile.firstName || "Usuario"}`,
+      description: `Resultados de la evaluación de ciberseguridad para ${evaluation.profile?.firstName || "Usuario"}`,
     };
   } catch (error) {
     console.error("Error generating metadata:", error);
@@ -75,39 +79,79 @@ function getMaturityLevelBasedOnScore(score: number) {
   return { level: "Nivel 5", description: "Nivel Optimizado" };
 }
 
-export default async function ResultsPage({ params }: ResultsPageProps) {
+export default async function ResultsPage({
+  params,
+  searchParams,
+}: ResultsPageProps) {
   try {
-    // Get user session to check authentication and permissions
-    const supabase = createServerComponentClient({ cookies });
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    // If not authenticated, use client-side redirect component
-    if (!session) {
-      return <ClientRedirect href="/" />;
-    }
-
-    // Get the user's profile to check their role
-    const profile = await prisma.profile.findUnique({
-      where: { userId: session.user.id },
-      select: { role: true },
-    });
-
-    // If no profile or not a premium/superadmin user, use client-side redirect
-    if (
-      !profile ||
-      (profile.role !== UserRole.PREMIUM &&
-        profile.role !== UserRole.SUPERADMIN)
-    ) {
-      // Redirect FREE users to the home page instead of the upgrade page
-      return <ClientRedirect href="/" />;
-    }
-
     // Use Promise.resolve to ensure params is awaited
     const { id } = await Promise.resolve(params);
 
-    const evaluation = await getEvaluationById(id);
+    // Check if access code is provided in the URL - must await searchParams
+    const accessCode = searchParams?.code;
+    let evaluation = null;
+    let isGuestAccess = false;
+
+    // If an access code is provided, try to get the evaluation using the access code
+    if (accessCode) {
+      evaluation = await getEvaluationByAccessCode(id, accessCode);
+      if (evaluation) {
+        isGuestAccess = true; // Mark this as guest access
+      }
+    }
+
+    // If no evaluation found with access code or no access code provided, fall back to auth check
+    if (!evaluation) {
+      // Get user session to check authentication and permissions
+      const cookieStore = cookies();
+      const supabase = createServerComponentClient({
+        cookies: () => cookieStore,
+      });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      // If not authenticated, check if there's a public evaluation before redirecting
+      if (!session) {
+        // Try to get the evaluation - it might be publicly viewable
+        const publicEvaluation = await getEvaluationById(id);
+
+        // Allow viewing for INITIAL evaluations without login
+        if (publicEvaluation && publicEvaluation.type === "INITIAL") {
+          evaluation = publicEvaluation;
+        } else {
+          // For advanced evaluations or no evaluation found, redirect to login
+          return <ClientRedirect href="/" />;
+        }
+      } else {
+        // User is logged in - get the profile to check role
+        const profile = await prisma.profile.findUnique({
+          where: { userId: session.user.id },
+          select: { role: true },
+        });
+
+        // If no profile or not a premium/superadmin user, check if it's an initial evaluation
+        if (
+          !profile ||
+          (profile.role !== UserRole.PREMIUM &&
+            profile.role !== UserRole.SUPERADMIN)
+        ) {
+          // Try to get the evaluation - it might be viewable by free users
+          const publicEvaluation = await getEvaluationById(id);
+
+          if (publicEvaluation && publicEvaluation.type === "INITIAL") {
+            // Initial evaluations can be viewed by free users
+            evaluation = publicEvaluation;
+          } else {
+            // For advanced evaluations, redirect to home
+            return <ClientRedirect href="/" />;
+          }
+        } else {
+          // User is premium/superadmin, they can see any evaluation
+          evaluation = await getEvaluationById(id);
+        }
+      }
+    }
 
     if (!evaluation) {
       notFound();

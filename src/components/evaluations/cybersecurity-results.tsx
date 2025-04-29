@@ -466,6 +466,16 @@ export function CybersecurityResults({
     const checkSpecialistsAvailability = async () => {
       setLoadingSpecialists(true);
       try {
+        // First check if user is authenticated
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+          // User is not logged in, don't try to fetch specialists
+          console.log("User not authenticated, skipping specialists check");
+          setSpecialistsAvailable(false);
+          setLoadingSpecialists(false);
+          return;
+        }
+
         const categoriesParam =
           finalWeakestCategories.length > 0
             ? `&categories=${finalWeakestCategories.join(",")}`
@@ -484,10 +494,10 @@ export function CybersecurityResults({
           return;
         }
 
-        const data = await response.json();
-        console.log("Specialists availability check response:", data);
-        console.log("Specialists length:", data.length);
-        setSpecialistsAvailable(data && data.length > 0);
+        const responseData = await response.json();
+        console.log("Specialists availability check response:", responseData);
+        console.log("Specialists length:", responseData.length);
+        setSpecialistsAvailable(responseData && responseData.length > 0);
       } catch (err) {
         console.error("Error checking specialists availability:", err);
         setSpecialistsAvailable(false);
@@ -503,7 +513,7 @@ export function CybersecurityResults({
       setSpecialistsAvailable(false);
       setLoadingSpecialists(false);
     }
-  }, [finalMaturityLevelNumber, finalWeakestCategories]);
+  }, [finalMaturityLevelNumber, finalWeakestCategories, supabase]);
 
   // Create the URL for the scheduling page with evaluation data
   const scheduleUrl = `/schedule?level=${finalMaturityLevelNumber}&categories=${finalWeakestCategories.join(",")}${evaluationId ? `&evaluationId=${evaluationId}` : ""}`;
