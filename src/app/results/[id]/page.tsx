@@ -99,16 +99,16 @@ function getMaturityLevelBasedOnScore(score: number, evaluationType: string) {
       return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
     return { level: "Nivel 5", description: "Nivel Optimizado" };
   } else {
-    // Advanced evaluation (max 75 points)
-    if (score <= 15)
+    // Advanced evaluation (max 100 points instead of 75)
+    if (score <= 20)
       return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-    if (score <= 34)
+    if (score <= 45)
       return {
         level: "Nivel 2",
         description: "Nivel Repetible pero intuitivo",
       };
-    if (score <= 51) return { level: "Nivel 3", description: "Nivel Definido" };
-    if (score <= 66)
+    if (score <= 68) return { level: "Nivel 3", description: "Nivel Definido" };
+    if (score <= 88)
       return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
     return { level: "Nivel 5", description: "Nivel Optimizado" };
   }
@@ -605,7 +605,7 @@ export default async function ResultsPage({
               interest={interestData?.reason as InterestOption}
               evaluationId={evaluation.id}
               score={evaluation.score || 0}
-              maxScore={evaluation.type === "INITIAL" ? 45 : 75}
+              maxScore={evaluation.type === "INITIAL" ? 45 : 100}
               maturityDescription={
                 getMaturityLevelBasedOnScore(
                   evaluation.score || 0,

@@ -259,6 +259,19 @@ export function CybersecurityResults({
   let overallScore = score || 0;
   let maxPossibleScore = maxScore || 0;
 
+  // If maxScore wasn't provided, calculate it based on quiz type
+  if (!maxScore) {
+    if (quizData.id === "evaluacion-avanzada") {
+      maxPossibleScore = 100; // Set to 100 for advanced evaluation
+    } else {
+      // For initial evaluation or others, calculate from quiz data
+      maxPossibleScore = quizData.questions.reduce(
+        (sum, q) => sum + Math.max(...q.options.map((o) => o.value)),
+        0
+      );
+    }
+  }
+
   const maturity = maturityDescription
     ? {
         level: maturityLevelNumber ? `Nivel ${maturityLevelNumber}` : "",
@@ -520,7 +533,11 @@ export function CybersecurityResults({
 
   // Calculate overall percentage early in the component
   // After maturity is defined, add an overall percentage calculation for use with colors
-  const overallPercentage = Math.round((overallScore / maxPossibleScore) * 100);
+  const overallPercentage = Math.round(
+    (overallScore /
+      (quizData.id === "evaluacion-avanzada" ? 100 : maxPossibleScore)) *
+      100
+  );
 
   // Define color helper function
   const getColorByPercentage = (percentage: number) => {
@@ -603,32 +620,6 @@ export function CybersecurityResults({
               </div>
             )}
 
-            {interest && (
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="font-semibold text-gray-800 mb-3 text-lg">
-                  Tu interés en ciberseguridad
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {typeof interest === "string"
-                    ? getInterestReasonText(interest as InterestOption)
-                    : interest &&
-                        typeof interest === "object" &&
-                        "reason" in interest
-                      ? getInterestReasonText(interest.reason as InterestOption)
-                      : "No especificado"}
-                  {typeof interest === "object" &&
-                    interest !== null &&
-                    "reason" in interest &&
-                    interest.reason === "other" &&
-                    interest.otherReason && (
-                      <span className="block mt-2 italic text-gray-600">
-                        &ldquo;{interest.otherReason}&rdquo;
-                      </span>
-                    )}
-                </p>
-              </div>
-            )}
-
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-2xl font-semibold mb-8 text-gray-800">
                 Resumen General
@@ -639,7 +630,10 @@ export function CybersecurityResults({
                     Puntuación Total
                   </p>
                   <p className={`text-4xl font-bold ${scoreColor.color}`}>
-                    {overallScore}/{maxPossibleScore}
+                    {overallScore}/
+                    {quizData.id === "evaluacion-avanzada"
+                      ? 100
+                      : maxPossibleScore}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
                     {overallPercentage}% de madurez
@@ -653,10 +647,10 @@ export function CybersecurityResults({
                     className={`text-4xl font-bold ${scoreColor.color} flex items-center gap-3`}
                   >
                     <span>{scoreColor.emoji}</span>
-                    <span>{maturity.level}</span>
+                    <span>Nivel {maturity.level.replace("Nivel ", "")}</span>
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    {maturity.description}
+                    Nivel {maturity.description}
                   </p>
                 </div>
               </div>
@@ -726,6 +720,200 @@ export function CybersecurityResults({
                 >
                   {maturity.description}
                 </p>
+
+                {/* Detailed maturity level description and recommendation based on evaluation type */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  {quizData.id === "evaluacion-inicial" ? (
+                    <>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {overallScore <= 9 && (
+                          <>
+                            No hay un enfoque estructurado de ciberseguridad.
+                            Los controles son inexistentes o informales. Se
+                            requiere establecer procesos y medidas de seguridad
+                            básicas. Te podemos apoyar en subir este nivel de
+                            madurez hacerlo solo toma más tiempo.
+                          </>
+                        )}
+                        {overallScore >= 10 && overallScore <= 19 && (
+                          <>
+                            Existen algunos controles de ciberseguridad, pero no
+                            están formalizados ni aplicados de manera
+                            consistente. Aún se depende de acciones individuales
+                            y no hay gestión centralizada. Para validar tu
+                            estado de seguridad, Ciberseguridad Simple puede
+                            realizar una auditoría y verificación de
+                            documentación, controles y riesgos.
+                          </>
+                        )}
+                        {overallScore >= 20 && overallScore <= 29 && (
+                          <>
+                            La organización cuenta con políticas y procesos
+                            documentados de ciberseguridad. Hay roles definidos,
+                            pero aún falta optimizar la aplicación y supervisión
+                            de estos controles. Se recomienda una verificación
+                            con Ciberseguridad Simple para revisar
+                            documentación, procesos y riesgos clave.
+                          </>
+                        )}
+                        {overallScore >= 30 && overallScore <= 39 && (
+                          <>
+                            La ciberseguridad se gestiona activamente con
+                            métricas, auditorías y monitoreo continuo. Se
+                            aplican mejoras constantes, pero hay oportunidades
+                            de optimización en procesos críticos. Se recomienda
+                            una verificación con Ciberseguridad Simple para
+                            revisar documentación, procesos y riesgos clave.
+                          </>
+                        )}
+                        {overallScore >= 40 && overallScore <= 44 && (
+                          <>
+                            La ciberseguridad está en un nivel avanzado con
+                            controles implementados y revisados periódicamente.
+                            Se han adoptado procesos de mejora continua, aunque
+                            aún pueden fortalecerse ciertos aspectos
+                            estratégicos. Se recomienda una verificación con
+                            Ciberseguridad Simple para evaluar la efectividad de
+                            los controles, revisar la documentación de seguridad
+                            y validar la gestión de riesgos.
+                          </>
+                        )}
+                        {overallScore === 45 && (
+                          <>
+                            La ciberseguridad es robusta y completamente
+                            integrada en la organización. Se han automatizado
+                            procesos, gestionado proactivamente los riesgos y
+                            optimizado los controles. Sin embargo, siempre hay
+                            margen de evolución ante nuevas amenazas. Para
+                            validar tu estado de seguridad, Ciberseguridad
+                            Simple puede realizar una auditoría y verificación
+                            de documentación, controles y riesgos.
+                          </>
+                        )}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                        Puntuación Total (Máx. 100 puntos)
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {overallScore <= 20 && (
+                          <>
+                            <span className="block mb-2">
+                              La seguridad se maneja de forma reactiva. No hay
+                              procesos documentados ni una estructura clara para
+                              gestionar riesgos y proteger la información.
+                            </span>
+                            <span className="block mt-3 font-medium text-red-600">
+                              🛑 Consejo: Trabaja en establecer una estrategia
+                              inicial de seguridad, enfocada en definir
+                              políticas, roles y procesos básicos para proteger
+                              la información. ISO 27001 y NIST recomiendan
+                              empezar con la identificación de activos y
+                              riesgos.
+                            </span>
+                          </>
+                        )}
+                        {overallScore >= 21 && overallScore <= 45 && (
+                          <>
+                            <span className="block mb-2">
+                              ⚠️ Existen controles básicos, pero su aplicación
+                              no es uniforme. La seguridad depende de esfuerzos
+                              individuales y acciones aisladas en lugar de
+                              procesos bien definidos.
+                            </span>
+                            <span className="block mt-3 font-medium text-orange-600">
+                              🔄 Consejo: Estandariza y documenta las políticas
+                              de seguridad, asegurando que sean aplicadas en
+                              toda la organización. Trabaja en la gestión de
+                              riesgos y en el uso de controles técnicos
+                              recomendados por CIS Controls y NIST CSF.
+                            </span>
+                          </>
+                        )}
+                        {overallScore >= 46 && overallScore <= 68 && (
+                          <>
+                            <span className="block mb-2">
+                              📋 Los procesos de ciberseguridad están
+                              estructurados y alineados con estándares como ISO
+                              27001, NIST y CIS. Se han implementado controles
+                              en la nube, gestión de vulnerabilidades y
+                              auditorías.
+                            </span>
+                            <span className="block mt-3 font-medium text-yellow-600">
+                              📊 Consejo: Profundiza en la medición y
+                              optimización de los controles, con el uso de
+                              monitoreo continuo y métricas de seguridad.
+                              Explora herramientas de Zero Trust, segmentación
+                              de red y pruebas de seguridad en aplicaciones
+                              (DevSecOps, OWASP ASVS).
+                            </span>
+                          </>
+                        )}
+                        {overallScore >= 69 && overallScore <= 88 && (
+                          <>
+                            <span className="block mb-2">
+                              🏢 La ciberseguridad es gestionada con métricas,
+                              auditorías y monitoreo activo. Se han implementado
+                              SOC, SIEM, análisis de amenazas y simulaciones de
+                              incidentes (Red Team, Blue Team).
+                            </span>
+                            <span className="block mt-3 font-medium text-green-600">
+                              📈 Consejo: Asegura la mejora continua en la
+                              gestión de incidentes y la resiliencia
+                              organizacional. Refuerza el uso de inteligencia de
+                              amenazas (OSINT, Dark Web Monitoring) y la
+                              automatización de respuestas a incidentes (SOAR,
+                              XDR).
+                            </span>
+                          </>
+                        )}
+                        {overallScore >= 89 && overallScore <= 99 && (
+                          <>
+                            <span className="block mb-2">
+                              🤖 Ciberseguridad avanzada con procesos
+                              automatizados y monitoreo en tiempo real. Se han
+                              adoptado estrategias como Zero Trust, detección de
+                              amenazas con IA y seguridad en la nube con
+                              cumplimiento de marcos como AWS Well-Architected,
+                              Google Cloud Security y Azure Security Center.
+                            </span>
+                            <span className="block mt-3 font-medium text-blue-600">
+                              🔐 Consejo: Sigue fortaleciendo la estrategia de
+                              seguridad con ciberinteligencia y automatización.
+                              Evalúa constantemente nuevas tecnologías, mejora
+                              la gestión de crisis y resiliencia y optimiza los
+                              procesos de respuesta a incidentes con IA.
+                            </span>
+                          </>
+                        )}
+                        {overallScore === 100 && (
+                          <>
+                            <span className="block mb-2">
+                              🏅 Ciberseguridad completamente integrada en la
+                              cultura organizacional. Se han implementado
+                              detección de amenazas con IA, automatización total
+                              de respuesta a incidentes, monitoreo continuo de
+                              la Dark Web y cumplimiento avanzado de seguridad
+                              en entornos híbridos y en la nube.
+                            </span>
+                            <span className="block mt-3 font-medium text-blue-600">
+                              💡 Consejo: Se nota que has trabajado en
+                              ciberseguridad y dominas los estándares. Mantén un
+                              enfoque en innovación y evolución, asegurando que
+                              el equipo y la organización estén preparados para
+                              amenazas emergentes. Continúa reforzando la
+                              estrategia con simulaciones avanzadas y escenarios
+                              de crisis en entornos reales.
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    </>
+                  )}
+                </div>
+
                 {maturity.advice && (
                   <>
                     <h3
