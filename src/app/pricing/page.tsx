@@ -1,15 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import Navbar from "@/components/views/landing-page/navbar";
 import Footer from "@/components/views/landing-page/Footer";
-import Pricing from "@/components/views/landing-page/pricing";
-import HourlyRates from "@/components/views/pricing/hourly-rates";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { HelpCircle } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+
+// Lazy load heavy components
+const Pricing = lazy(() => import("@/components/views/landing-page/pricing"));
+const HourlyRates = lazy(
+  () => import("@/components/views/pricing/hourly-rates")
+);
+
+// Simple loading components
+const LoadingSection = () => (
+  <div className="w-full py-20 flex justify-center items-center">
+    <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
+
+// Simplified FAQ component without animations
+const FAQItem = ({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) => (
+  <div className="bg-gray-50 p-6 rounded-lg">
+    <h3 className="text-lg font-medium mb-2">{question}</h3>
+    <p className="text-gray-600">{answer}</p>
+  </div>
+);
 
 export default function PricingPage() {
   const [mounted, setMounted] = useState(false);
@@ -20,35 +42,22 @@ export default function PricingPage() {
   useEffect(() => {
     setMounted(true);
 
-    // Set active tab based on hash
-    if (window.location.hash === "#hourly") {
+    // Set active tab based on hash - simplified approach
+    const hash = window.location.hash;
+    if (hash === "#hourly") {
       setActiveTab("hourly");
-    } else {
-      setActiveTab("subscription");
+    } else if (hash === "#faq" && document.getElementById("faq")) {
+      document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
     }
 
-    // Handle scroll to FAQ if hash is #faq
-    if (window.location.hash === "#faq") {
-      setTimeout(() => {
-        const faqSection = document.getElementById("faq");
-        if (faqSection) {
-          faqSection.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 500); // Slight delay to ensure the page is loaded
-    }
-
-    // Listen for hash changes
+    // Simplified hash change handler
     const handleHashChange = () => {
-      if (window.location.hash === "#hourly") {
+      const newHash = window.location.hash;
+      if (newHash === "#hourly") {
         setActiveTab("hourly");
-      } else if (window.location.hash === "#faq") {
-        setTimeout(() => {
-          const faqSection = document.getElementById("faq");
-          if (faqSection) {
-            faqSection.scrollIntoView({ behavior: "smooth" });
-          }
-        }, 100);
-      } else {
+      } else if (newHash === "#faq" && document.getElementById("faq")) {
+        document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
+      } else if (newHash === "") {
         setActiveTab("subscription");
       }
     };
@@ -68,157 +77,82 @@ export default function PricingPage() {
     <main className="flex min-h-screen flex-col">
       <Navbar />
 
-      {/* Header */}
+      {/* Header - simplified without animations */}
       <div className="pt-32 bg-white">
         <div className="max-w-6xl mx-auto px-4 text-center mb-12">
-          <motion.span
-            className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-4"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
+          <span className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-4">
             Soluciones a medida
-          </motion.span>
-          <motion.h1
-            className="text-4xl md:text-5xl font-bold mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
+          </span>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Planes y tarifas
-          </motion.h1>
-          <motion.p
-            className="text-xl text-gray-600 max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Selecciona el plan que mejor se adapte a tus necesidades o contrata
             especialistas por hora para una solución personalizada
-          </motion.p>
+          </p>
 
-          {/* Tab Navigation */}
-          <motion.div
-            className="flex justify-center mt-10 border-b border-gray-200"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Link
-              href={pathname}
-              onClick={(e) => {
-                e.preventDefault();
-                handleTabChange("subscription");
-              }}
+          {/* Tab Navigation - simplified */}
+          <div className="flex justify-center mt-10 border-b border-gray-200">
+            <button
+              onClick={() => handleTabChange("subscription")}
               className={`px-6 py-3 text-lg font-medium transition-colors ${
                 activeTab === "subscription"
                   ? "text-black border-b-2 border-orange-500"
                   : "text-gray-500 hover:text-yellow-500"
               }`}
             >
-              <motion.span whileHover={{ y: -2 }} whileTap={{ y: 0 }}>
-                Suscripción mensual
-              </motion.span>
-            </Link>
-            <Link
-              href={`${pathname}#hourly`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleTabChange("hourly");
-              }}
+              Suscripción mensual
+            </button>
+            <button
+              onClick={() => handleTabChange("hourly")}
               className={`px-6 py-3 text-lg font-medium transition-colors ${
                 activeTab === "hourly"
                   ? "text-black border-b-2 border-orange-500"
                   : "text-gray-500 hover:text-yellow-500"
               }`}
             >
-              <motion.span whileHover={{ y: -2 }} whileTap={{ y: 0 }}>
-                Especialistas por hora
-              </motion.span>
-            </Link>
-          </motion.div>
+              Especialistas por hora
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Subscription pricing */}
-      <motion.section
+      {/* Content sections with Suspense for lazy loading */}
+      <section
         id="subscription"
         className={activeTab === "subscription" ? "block" : "hidden"}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: activeTab === "subscription" ? 1 : 0 }}
-        transition={{ duration: 0.5 }}
       >
-        <Pricing />
-      </motion.section>
+        <Suspense fallback={<LoadingSection />}>
+          <Pricing />
+        </Suspense>
+      </section>
 
-      {/* Hourly Rates */}
-      <motion.section
+      <section
         id="hourly"
         className={`py-20 bg-white ${activeTab === "hourly" ? "block" : "hidden"}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: activeTab === "hourly" ? 1 : 0 }}
-        transition={{ duration: 0.5 }}
       >
-        <HourlyRates />
-      </motion.section>
+        <Suspense fallback={<LoadingSection />}>
+          <HourlyRates />
+        </Suspense>
+      </section>
 
-      {/* Unified FAQ Section */}
-      <motion.section
-        id="faq"
-        className="py-20 bg-white"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-      >
+      {/* Simplified FAQ Section without animations */}
+      <section id="faq" className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <motion.span
-              className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-3"
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
+          <div className="text-center mb-16">
+            <span className="inline-block bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-medium mb-3">
               Respuestas a tus dudas
-            </motion.span>
-            <motion.h2
-              className="text-3xl md:text-4xl font-bold mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Preguntas frecuentes
-            </motion.h2>
-            <motion.p
-              className="text-lg max-w-3xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
+            </h2>
+            <p className="text-lg max-w-3xl mx-auto">
               Resolvemos las dudas más comunes sobre nuestros servicios
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
 
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              className="grid md:grid-cols-2 gap-6"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{
-                duration: 0.5,
-                staggerChildren: 0.1,
-              }}
-            >
+            <div className="grid md:grid-cols-2 gap-6">
               {[
                 {
                   question:
@@ -249,91 +183,21 @@ export default function PricingPage() {
                     "Sí, puedes ajustar o cambiar tu plan en cualquier momento según evolucionen las necesidades de ciberseguridad de tu empresa.",
                 },
                 {
-                  question: "¿Ofrecen soporte técnico?",
+                  question: "¿Ofrecen soporte técnico con todos los planes?",
                   answer:
-                    "Ofrecemos soporte técnico para todos nuestros clientes. Los usuarios premium y con planes de horas disfrutan de soporte prioritario.",
+                    "Todos nuestros planes incluyen soporte técnico, aunque el nivel de prioridad y los tiempos de respuesta varían según el plan elegido.",
                 },
               ].map((faq, index) => (
-                <motion.div
+                <FAQItem
                   key={index}
-                  className="bg-white p-6 rounded-xl shadow-sm border border-gray-200"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    duration: 0.5,
-                    delay: index * 0.1,
-                  }}
-                  whileHover={{
-                    y: -5,
-                    boxShadow: "0 12px 20px -5px rgba(0, 0, 0, 0.1)",
-                    transition: { duration: 0.2 },
-                  }}
-                >
-                  <div className="flex items-start">
-                    <motion.div
-                      className="bg-yellow-400 p-2 rounded-full mr-3 mt-1 flex-shrink-0"
-                      whileHover={{
-                        rotate: [0, -10, 10, -10, 0],
-                        transition: { duration: 0.5 },
-                      }}
-                    >
-                      <HelpCircle className="h-5 w-5 text-black" />
-                    </motion.div>
-                    <div>
-                      <h4 className="font-bold mb-2">{faq.question}</h4>
-                      <p className="text-gray-600">{faq.answer}</p>
-                    </div>
-                  </div>
-                </motion.div>
+                  question={faq.question}
+                  answer={faq.answer}
+                />
               ))}
-            </motion.div>
+            </div>
           </div>
         </div>
-      </motion.section>
-
-      {/* Contact Section */}
-      <motion.section
-        className="py-20 bg-white"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-      >
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.h2
-              className="text-3xl md:text-4xl font-bold mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              ¿Necesitas una solución personalizada?
-            </motion.h2>
-            <motion.p
-              className="text-lg text-gray-600 mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Contáctanos para discutir tus necesidades específicas de
-              ciberseguridad y encontrar la mejor solución para tu empresa
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Button className="px-8 py-6 bg-black text-white hover:bg-gray-800">
-                Contactar a un especialista
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </motion.section>
+      </section>
 
       <Footer />
     </main>

@@ -5,6 +5,7 @@ import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
+import Script from "next/script";
 
 const APP_NAME = "SIMPLE";
 const APP_DESCRIPTION = "Your Mind's Best Friend";
@@ -50,11 +51,13 @@ export const metadata: Metadata = {
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export default function RootLayout({
@@ -64,6 +67,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://supabase.co" />
+        <link rel="dns-prefetch" href="https://supabase.co" />
+        <Script src="/sw-register.js" strategy="afterInteractive" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -75,6 +83,24 @@ export default function RootLayout({
             </QueryProvider>
           </AuthProvider>
         </ThemeProvider>
+
+        <Script id="performance-metrics" strategy="afterInteractive">
+          {`
+            // Simple performance metrics
+            const observer = new PerformanceObserver((list) => {
+              const entries = list.getEntries();
+              entries.forEach((entry) => {
+                if (entry.entryType === 'largest-contentful-paint') {
+                  console.log('LCP:', entry.startTime);
+                }
+                if (entry.entryType === 'layout-shift') {
+                  console.log('CLS contribution:', entry.value);
+                }
+              });
+            });
+            observer.observe({ entryTypes: ['largest-contentful-paint', 'layout-shift'] });
+          `}
+        </Script>
       </body>
     </html>
   );

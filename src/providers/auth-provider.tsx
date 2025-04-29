@@ -88,85 +88,99 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const supabase = secureSupabaseClient;
 
-  // Fetch profile function with retry logic
+  // Optimized fetch profile function with smarter retry logic
   const fetchProfile = async (userId: string, isAfterSignUp = false) => {
+    // Don't retry too many times
+    const maxRetries = isAfterSignUp ? 3 : 1;
+    const initialDelay = isAfterSignUp ? 500 : 200;
+
+    let success = false;
     let retryCount = 0;
-    const maxRetries = isAfterSignUp ? 5 : 2; // More retries after sign-up
-    const initialDelay = isAfterSignUp ? 1000 : 300; // Longer initial delay after sign-up
 
-    const attemptFetch = async () => {
+    while (!success && retryCount <= maxRetries) {
       try {
-        const response = await fetch(`/api/profile/${userId}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
+
+        const response = await fetch(`/api/profile/${userId}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+
+        clearTimeout(timeoutId);
+
         if (!response.ok) {
-          // Only throw for non-404 errors or if we've exhausted retries
           if (response.status !== 404 || retryCount >= maxRetries) {
-            throw new Error("Failed to fetch profile");
+            throw new Error(`Failed to fetch profile: ${response.status}`);
           }
-          return false; // Profile not found but we can retry
+          // Profile not found but we can retry
+        } else {
+          const data = await response.json();
+          setProfile(data.profile);
+          return true; // Success
         }
-        const data = await response.json();
-        setProfile(data.profile);
-        return true; // Success
       } catch (error) {
-        if (retryCount >= maxRetries) {
-          console.error("Error fetching profile after retries:", error);
-          setProfile(null);
+        if (error instanceof Error && error.name === "AbortError") {
+          console.log("Profile fetch request timed out");
+        } else {
+          console.error(
+            `Error fetching profile (attempt ${retryCount + 1}):`,
+            error
+          );
         }
-        return false;
       }
-    };
 
-    // First attempt
-    let success = await attemptFetch();
-
-    // Retry logic with exponential backoff
-    while (!success && retryCount < maxRetries) {
       retryCount++;
-      const delay = initialDelay * 1.5 ** (retryCount - 1);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      success = await attemptFetch();
+      if (retryCount <= maxRetries) {
+        // Wait before retry with exponential backoff
+        await new Promise((resolve) =>
+          setTimeout(resolve, initialDelay * Math.pow(1.5, retryCount - 1))
+        );
+      }
+    }
+
+    if (!success) {
+      console.warn("Failed to fetch profile after retries");
+      setProfile(null);
     }
 
     return success;
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // Load auth state once on mount
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    const loadInitialSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error("Error loading initial session:", error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    };
+
+    loadInitialSession();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event: string, session) => {
-      console.log("Auth state change event:", event);
-
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        console.log("User available in session:", session.user.id);
-
-        // Use string literals for event types
         const isSignUp = event === "SIGNED_UP" || event === "SIGNED_IN";
-        console.log(
-          "Fetching profile for user:",
-          session.user.id,
-          "isSignUp:",
-          isSignUp
-        );
         await fetchProfile(session.user.id, isSignUp);
       } else {
-        console.log("No user in session");
         setProfile(null);
       }
-
-      setIsLoading(false);
 
       if (event === "SIGNED_OUT") {
         router.push("/sign-in");
@@ -184,7 +198,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     noRedirect?: boolean
   ) => {
     try {
-      // The secureSupabaseClient already handles password encryption
       const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -193,47 +206,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
 
       if (data.user) {
-        // First fetch the profile to ensure we have user data
+        // Get profile data
         await fetchProfile(data.user.id, true);
 
-        // Then update security metadata in a separate call
-        // This prevents potential race conditions
-        try {
-          const userAgent = navigator.userAgent;
-          // Generate a fingerprint based on user agent and browser properties
-          const fingerprint = generateClientFingerprint(userAgent);
-
-          // Store additional browser data for more accurate matching
-          const browserData = {
-            fingerprint: fingerprint,
-            last_login: new Date().toISOString(),
-            user_agent: userAgent,
-            // Reset the mismatch counter on successful login
-            fingerprintMismatchCount: 0,
-            // Add these browser-specific properties for better security checks
-            language: navigator.language,
-            platform: navigator.platform,
-            // Store basic screen info separately to help with comparisons
-            screen_width: window.screen.width,
-            screen_height: window.screen.height,
-          };
-
-          // Update user metadata with security information
-          // Use a small delay to prevent race conditions with other auth operations
-          setTimeout(async () => {
-            try {
-              await supabase.auth.updateUser({
-                data: browserData,
-              });
-              console.log("Security fingerprint updated successfully");
-            } catch (err) {
-              console.error("Delayed metadata update failed:", err);
-            }
-          }, 1000);
-        } catch (secError) {
-          console.error("Error storing security information:", secError);
-          // Continue even if security update fails
-        }
+        // Capture basic fingerprint in a non-blocking way
+        setTimeout(async () => {
+          try {
+            const fingerprint = generateClientFingerprint(navigator.userAgent);
+            await supabase.auth.updateUser({
+              data: {
+                fingerprint: fingerprint,
+                last_login: new Date().toISOString(),
+                user_agent: navigator.userAgent,
+                fingerprintMismatchCount: 0,
+              },
+            });
+          } catch (err) {
+            console.error("Error storing security information:", err);
+          }
+        }, 500);
       }
 
       if (!noRedirect) {
@@ -251,8 +242,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profileData: ProfileSignupData
   ): Promise<void> => {
     try {
-      console.log("Starting sign-up process for:", email);
-
       // Validate email before proceeding
       const emailValidation = validateCorporateEmail(email);
       if (!emailValidation.isValid) {
@@ -261,12 +250,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      // Generate a device fingerprint for security
-      const userAgent = navigator.userAgent;
-      const fingerprint = generateClientFingerprint(userAgent);
-
       // The secureSupabaseClient already handles password encryption
-      // Store minimal data during sign-up to avoid potential issues
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -284,12 +268,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      console.log("Sign-up successful, verification email sent to:", email);
-
       // Create profile for the new user
       if (data.user) {
         try {
-          // Create the profile immediately
           const response = await fetch("/api/profile", {
             method: "POST",
             headers: {
@@ -309,36 +290,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!response.ok) {
             console.error("Error creating profile:", await response.text());
-          } else {
-            console.log("Profile created successfully for user:", data.user.id);
+          }
 
-            // After successful profile creation, add security metadata
-            setTimeout(async () => {
-              try {
-                // Store more detailed browser fingerprint data
-                const browserData = {
+          // Add security metadata in the background
+          const fingerprint = generateClientFingerprint(navigator.userAgent);
+          setTimeout(async () => {
+            try {
+              await supabase.auth.updateUser({
+                data: {
                   fingerprint: fingerprint,
                   signup_time: new Date().toISOString(),
                   user_agent: navigator.userAgent,
-                  // Initialize the mismatch counter to 0
                   fingerprintMismatchCount: 0,
-                  // Add these browser-specific properties for better security checks
-                  language: navigator.language,
-                  platform: navigator.platform,
-                  // Store basic screen info separately to help with comparisons
-                  screen_width: window.screen.width,
-                  screen_height: window.screen.height,
-                };
-
-                await supabase.auth.updateUser({
-                  data: browserData,
-                });
-                console.log("Security metadata added for new user");
-              } catch (err) {
-                console.error("Error adding security metadata:", err);
-              }
-            }, 1000);
-          }
+                },
+              });
+            } catch (err) {
+              console.error("Error adding security metadata:", err);
+            }
+          }, 500);
         } catch (profileError) {
           console.error("Error creating profile:", profileError);
         }
@@ -346,7 +315,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Check if email confirmation is required
       if (data?.user?.identities?.length === 0) {
-        // This means the user already exists but needs to confirm their email
         alert(
           "An account with this email already exists. Please check your email to confirm your account."
         );
@@ -354,7 +322,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         !data?.user?.confirmed_at &&
         data?.user?.email_confirmed_at === null
       ) {
-        // New user that needs to confirm their email
         alert(
           "Please check your email for a confirmation link to complete your registration."
         );
@@ -366,59 +333,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const checkPasswordStrength = async (password: string) => {
-    try {
-      // For password strength checking, we can securely use our API
-      // We're not sending the actual password that will be stored - just checking requirements
-      const { hashedPassword, salt } = hashPassword(password);
+    // Client-side password strength checking to avoid network request
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+    const isLongEnough = password.length >= 8;
 
-      const response = await fetch("/api/auth/password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "check_strength",
-          password,
-          hashedPassword,
-          salt,
-        }),
-      });
+    const strengthScore = [
+      isLongEnough,
+      hasUpperCase,
+      hasLowerCase,
+      hasNumbers,
+      hasSpecialChar,
+    ].filter(Boolean).length;
 
-      if (!response.ok) {
-        throw new Error("Failed to check password strength");
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error checking password strength:", error);
-
-      // Fallback to client-side checking if API fails
-      const hasUpperCase = /[A-Z]/.test(password);
-      const hasLowerCase = /[a-z]/.test(password);
-      const hasNumbers = /\d/.test(password);
-      const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
-      const isLongEnough = password.length >= 8;
-
-      const strengthScore = [
-        isLongEnough,
-        hasUpperCase,
-        hasLowerCase,
-        hasNumbers,
-        hasSpecialChar,
-      ].filter(Boolean).length;
-
-      return {
-        strength: strengthScore,
-        requirements: {
-          length: isLongEnough,
-          uppercase: hasUpperCase,
-          lowercase: hasLowerCase,
-          numbers: hasNumbers,
-          special: hasSpecialChar,
-        },
-      };
-    }
+    return {
+      strength: strengthScore,
+      requirements: {
+        length: isLongEnough,
+        uppercase: hasUpperCase,
+        lowercase: hasLowerCase,
+        numbers: hasNumbers,
+        special: hasSpecialChar,
+      },
+    };
   };
 
   const signOut = async () => {
