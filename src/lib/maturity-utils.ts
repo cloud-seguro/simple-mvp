@@ -1,4 +1,3 @@
-import { MaturityLevel } from "@/components/evaluations/types";
 
 // Determine maturity level based on quiz type and score
 export function getMaturityLevel(

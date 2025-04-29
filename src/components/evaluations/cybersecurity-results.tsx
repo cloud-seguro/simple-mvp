@@ -8,7 +8,6 @@ import type {
   QuizResults,
   UserInfo,
   CybersecurityInterest as InterestType,
-  InterestOption,
 } from "./types";
 import { cn } from "@/lib/utils";
 import { getMaturityLevel } from "@/lib/maturity-utils";
@@ -54,24 +53,6 @@ interface QuestionRecommendation {
   selectedOption: string;
   category: string;
   recommendation: string;
-}
-
-// Function to translate interest reason to Spanish
-function getInterestReasonText(reason: InterestOption): string {
-  switch (reason) {
-    case "process":
-      return "Estoy en un proceso de ciberseguridad en mi empresa";
-    case "nothing":
-      return "No tengo nada en mi empresa y quiero aumentar el nivel de madurez";
-    case "curiosity":
-      return "Tengo curiosidad y quiero aprender más sobre ciberseguridad";
-    case "requirement":
-      return "Me piden evaluar la ciberseguridad en mi organización";
-    case "other":
-      return "Otro motivo";
-    default:
-      return "No especificado";
-  }
 }
 
 export function CybersecurityResults({
