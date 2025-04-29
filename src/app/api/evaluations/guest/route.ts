@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getRandomString } from "@/lib/utils/string-utils";
 import { validateCorporateEmail } from "@/lib/utils/email-validation";
 import { sendEvaluationResults } from "@/lib/email/send-evaluation-results";
+import { EvaluationType } from "@prisma/client";
 
 // Interface for request body
 interface GuestEvaluationRequest {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
     const body: GuestEvaluationRequest = await req.json();
 
     // Validate email
-    const { email, type, title, answers, interest } = body;
+    const { email, type: typeString, title, answers, interest } = body;
     if (!email) {
       return NextResponse.json(
         { message: "Email is required" },
@@ -36,6 +37,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Convert string type to EvaluationType enum
+    const type =
+      typeString === "INITIAL"
+        ? EvaluationType.INITIAL
+        : EvaluationType.ADVANCED;
 
     // Generate a unique access code for retrieving the evaluation later
     const accessCode = getRandomString(12);
@@ -62,7 +69,7 @@ export async function POST(req: NextRequest) {
         evaluationId: evaluation.id,
         accessCode,
         type: type as "INITIAL" | "ADVANCED",
-        score: evaluation.score,
+        score: evaluation.score || 0,
         firstName: "Usuario",
       });
     } catch (emailError) {

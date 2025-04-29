@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: EvaluationPageProps) {
 
     return {
       title: `${evaluation.title} | Dashboard`,
-      description: `Resultados de la evaluación de ciberseguridad para ${evaluation.profile.firstName || "Usuario"}`,
+      description: `Resultados de la evaluación de ciberseguridad para ${evaluation.profile?.firstName || "Usuario"}`,
     };
   } catch (error) {
     console.error("Error generating metadata:", error);

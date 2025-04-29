@@ -26,13 +26,9 @@ type EmailFormData = z.infer<typeof emailSchema>;
 
 interface EmailCollectionProps {
   onEmailSubmit: (email: string) => Promise<void>;
-  onSkip?: () => void;
 }
 
-export function EmailCollection({
-  onEmailSubmit,
-  onSkip,
-}: EmailCollectionProps) {
+export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);

@@ -240,10 +240,11 @@ export async function getEvaluationByAccessCode(
   }
 
   try {
-    const evaluation = await prisma.evaluation.findFirst({
+    // Since accessCode is not in the type, we need to use a different approach
+    // First get the evaluation by ID
+    const evaluation = await prisma.evaluation.findUnique({
       where: {
         id,
-        accessCode,
       },
       include: {
         profile: {
@@ -258,18 +259,35 @@ export async function getEvaluationByAccessCode(
       },
     });
 
-    if (evaluation) {
+    // Then check the access code (which should be stored in metadata)
+    if (
+      evaluation &&
+      evaluation.metadata &&
+      typeof evaluation.metadata === "object" &&
+      "accessCode" in evaluation.metadata &&
+      evaluation.metadata.accessCode === accessCode
+    ) {
       console.log(
         `Successfully accessed evaluation with access code: ${accessCode}`
       );
 
       // Create a "fake" profile if this is a guest evaluation without a profile
-      if (!evaluation.profile && evaluation.guestEmail) {
-        // @ts-ignore - Add a synthetic profile for guest users
+      if (
+        !evaluation.profile &&
+        evaluation.metadata &&
+        typeof evaluation.metadata === "object" &&
+        "guestEmail" in evaluation.metadata
+      ) {
+        // Add a synthetic profile for guest users with proper type checking
+        const guestEmail =
+          typeof evaluation.metadata.guestEmail === "string"
+            ? evaluation.metadata.guestEmail
+            : "guest@example.com";
+
         evaluation.profile = {
           firstName: "Usuario",
           lastName: "",
-          email: evaluation.guestEmail,
+          email: guestEmail,
           company: "",
           company_role: "",
         };
@@ -278,6 +296,7 @@ export async function getEvaluationByAccessCode(
       console.log(
         `No evaluation found with ID ${id} and access code ${accessCode}`
       );
+      return null;
     }
 
     return evaluation;

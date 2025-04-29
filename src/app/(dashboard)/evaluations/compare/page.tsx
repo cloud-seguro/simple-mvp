@@ -121,15 +121,15 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
 
     // Prepare user info for both evaluations
     const firstUserInfo: UserInfo = {
-      firstName: firstEvaluation.profile.firstName || "Usuario",
-      lastName: firstEvaluation.profile.lastName || "",
-      email: firstEvaluation.profile.email || "",
+      firstName: firstEvaluation.profile?.firstName || "Usuario",
+      lastName: firstEvaluation.profile?.lastName || "",
+      email: firstEvaluation.profile?.email || "",
     };
 
     const secondUserInfo: UserInfo = {
-      firstName: secondEvaluation.profile.firstName || "Usuario",
-      lastName: secondEvaluation.profile.lastName || "",
-      email: secondEvaluation.profile.email || "",
+      firstName: secondEvaluation.profile?.firstName || "Usuario",
+      lastName: secondEvaluation.profile?.lastName || "",
+      email: secondEvaluation.profile?.email || "",
     };
 
     // Format dates

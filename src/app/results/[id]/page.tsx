@@ -27,7 +27,7 @@ import ClientRedirect from "@/components/utils/client-redirect";
 
 interface ResultsPageProps {
   params: Promise<{ id: string }>;
-  searchParams?: { code?: string };
+  searchParams?: Promise<{ code?: string }>;
 }
 
 interface EvaluationMetadata {
@@ -41,10 +41,26 @@ interface EvaluationMetadata {
   [key: string]: unknown;
 }
 
+// Define the Evaluation type based on what getEvaluationById returns
+interface Evaluation {
+  id: string;
+  type: "INITIAL" | "ADVANCED";
+  title: string;
+  answers?: Record<string, unknown> | string | unknown[];
+  metadata?: unknown;
+  score?: number;
+  profile?: {
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+    company: string | null;
+    company_role: string | null;
+  };
+}
+
 export async function generateMetadata({ params }: ResultsPageProps) {
   try {
-    // Use Promise.resolve to ensure params is awaited
-    const { id } = await Promise.resolve(params);
+    const { id } = await params;
 
     const evaluation = await getEvaluationById(id);
 
@@ -84,19 +100,17 @@ export default async function ResultsPage({
   searchParams,
 }: ResultsPageProps) {
   try {
-    // Use Promise.resolve to ensure params is awaited
-    const { id } = await Promise.resolve(params);
+    const { id } = await params;
 
-    // Check if access code is provided in the URL - must await searchParams
-    const accessCode = searchParams?.code;
-    let evaluation = null;
-    let isGuestAccess = false;
+    // Check if access code is provided in the URL
+    const accessCode = searchParams ? (await searchParams).code : undefined;
+    let evaluation: Evaluation | null = null;
 
     // If an access code is provided, try to get the evaluation using the access code
     if (accessCode) {
-      evaluation = await getEvaluationByAccessCode(id, accessCode);
-      if (evaluation) {
-        isGuestAccess = true; // Mark this as guest access
+      const result = await getEvaluationByAccessCode(id, accessCode);
+      if (result) {
+        evaluation = result as Evaluation;
       }
     }
 
@@ -118,7 +132,7 @@ export default async function ResultsPage({
 
         // Allow viewing for INITIAL evaluations without login
         if (publicEvaluation && publicEvaluation.type === "INITIAL") {
-          evaluation = publicEvaluation;
+          evaluation = publicEvaluation as Evaluation;
         } else {
           // For advanced evaluations or no evaluation found, redirect to login
           return <ClientRedirect href="/" />;
@@ -141,14 +155,17 @@ export default async function ResultsPage({
 
           if (publicEvaluation && publicEvaluation.type === "INITIAL") {
             // Initial evaluations can be viewed by free users
-            evaluation = publicEvaluation;
+            evaluation = publicEvaluation as Evaluation;
           } else {
             // For advanced evaluations, redirect to home
             return <ClientRedirect href="/" />;
           }
         } else {
           // User is premium/superadmin, they can see any evaluation
-          evaluation = await getEvaluationById(id);
+          const result = await getEvaluationById(id);
+          if (result) {
+            evaluation = result as Evaluation;
+          }
         }
       }
     }

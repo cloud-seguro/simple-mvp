@@ -24,9 +24,9 @@ export async function getEvaluationData(id: string) {
 
   // Prepare user info
   const userInfo: UserInfo = {
-    firstName: evaluation.profile.firstName || "Usuario",
-    lastName: evaluation.profile.lastName || "",
-    email: evaluation.profile.email || "",
+    firstName: evaluation.profile?.firstName || "Usuario",
+    lastName: evaluation.profile?.lastName || "",
+    email: evaluation.profile?.email || "",
   };
 
   // Ensure answers is a valid Record<string, number>
