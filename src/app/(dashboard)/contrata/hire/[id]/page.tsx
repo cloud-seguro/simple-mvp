@@ -11,6 +11,15 @@ export const metadata = {
   description: "Hire a cybersecurity specialist for your security needs",
 };
 
+// Define the deal type to use for proper typing
+type SpecialistDeal = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  durationDays: number;
+};
+
 // Add dynamic export to handle the cookies usage
 export const dynamic = "force-dynamic";
 
@@ -84,7 +93,7 @@ export default async function HireSpecialistPage({
   }
 
   // If dealId is provided, get that specific deal
-  let selectedDeal = null;
+  let selectedDeal: SpecialistDeal | null = null;
   if (dealId) {
     selectedDeal = specialist.deals.find((deal) => deal.id === dealId) || null;
   }

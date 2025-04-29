@@ -3,7 +3,6 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import Navbar from "@/components/views/landing-page/navbar";
 import Footer from "@/components/views/landing-page/Footer";
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 
 // Lazy load heavy components

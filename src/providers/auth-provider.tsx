@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { User, Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/profile";
-import { hashPassword } from "@/lib/utils/password-utils";
 import { secureSupabaseClient } from "@/lib/supabase/client";
 import { generateClientFingerprint } from "@/lib/utils/session-utils";
 import { validateCorporateEmail } from "@/lib/utils/email-validation";
@@ -94,10 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const maxRetries = isAfterSignUp ? 3 : 1;
     const initialDelay = isAfterSignUp ? 500 : 200;
 
-    let success = false;
-    let retryCount = 0;
-
-    while (!success && retryCount <= maxRetries) {
+    // Implement retry logic with async/await and for loop instead of while
+    for (let retryCount = 0; retryCount <= maxRetries; retryCount++) {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
@@ -113,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (response.status !== 404 || retryCount >= maxRetries) {
             throw new Error(`Failed to fetch profile: ${response.status}`);
           }
-          // Profile not found but we can retry
+          // Profile not found but we can retry if not at max retries
         } else {
           const data = await response.json();
           setProfile(data.profile);
@@ -130,21 +127,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      retryCount++;
-      if (retryCount <= maxRetries) {
-        // Wait before retry with exponential backoff
+      // If this isn't the last retry, wait before trying again
+      if (retryCount < maxRetries) {
         await new Promise((resolve) =>
-          setTimeout(resolve, initialDelay * Math.pow(1.5, retryCount - 1))
+          setTimeout(resolve, initialDelay * Math.pow(1.5, retryCount))
         );
       }
     }
 
-    if (!success) {
-      console.warn("Failed to fetch profile after retries");
-      setProfile(null);
-    }
-
-    return success;
+    // If we get here, all retries failed
+    console.warn("Failed to fetch profile after all retries");
+    setProfile(null);
+    return false;
   };
 
   // Load auth state once on mount

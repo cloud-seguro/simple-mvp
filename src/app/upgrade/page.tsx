@@ -8,6 +8,13 @@ import { UpgradeHeader } from "@/components/upgrade/upgrade-header";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { UserRole } from "@prisma/client";
 
+// Define a type for the user profile
+type UserProfile = {
+  id: string;
+  firstName: string | null;
+  role: UserRole;
+} | null;
+
 export default async function UpgradePage() {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
@@ -22,7 +29,7 @@ export default async function UpgradePage() {
   }
 
   // Get the user's profile with retry logic
-  let profile = null;
+  let profile: UserProfile = null;
   let retryCount = 0;
   const maxRetries = 3;
 

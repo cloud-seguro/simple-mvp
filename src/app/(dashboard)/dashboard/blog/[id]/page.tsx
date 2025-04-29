@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { BlogPostEditor } from "@/components/dashboard/blog/blog-post-editor";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { BlogPostStatus } from "@prisma/client";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -10,6 +11,21 @@ export const dynamic = "force-dynamic";
 
 type PostParams = {
   id: string;
+};
+
+// Define the Post type to match the structure we're creating
+type Post = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImage?: string;
+  published: boolean;
+  tags: string[];
+  description?: string;
+  featuredImage?: string;
+  status: BlogPostStatus;
 };
 
 export default async function BlogPostPage({ params }: any) {
@@ -26,7 +42,8 @@ export default async function BlogPostPage({ params }: any) {
   // Check if this is a new post or an existing one
   const isNewPost = paramValues.id === "new";
 
-  let post = null;
+  // Initialize post with the correct type annotation
+  let post: Post | null = null;
 
   if (!isNewPost) {
     // Fetch the existing post

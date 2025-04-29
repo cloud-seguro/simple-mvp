@@ -150,7 +150,7 @@ export function EvaluationSignUp({
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Proceed to the next step with the evaluation ID
-      onComplete(savedEvaluationId);
+      onComplete(savedEvaluationId || undefined);
 
       toast({
         title: "Éxito",

@@ -262,7 +262,14 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     console.log("Expected questions count:", quizData.questions.length);
 
     // Extract interest data from metadata if available
-    let interestData = null;
+    let interestData: {
+      reason: InterestOption;
+      otherReason?: string;
+      areas: string[];
+      level: string;
+      [key: string]: unknown;
+    } | null = null;
+
     if (evaluation.metadata) {
       try {
         const metadata = evaluation.metadata as EvaluationMetadata;
