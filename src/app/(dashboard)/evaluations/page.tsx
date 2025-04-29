@@ -90,7 +90,6 @@ export default function EvaluationsPage() {
       <Suspense
         fallback={
           <div className="flex flex-col items-center justify-center gap-4">
-            <Loader size="lg" variant="primary" />
             <SecurityLoadingScreen message="Cargando evaluaciones..." />
           </div>
         }
