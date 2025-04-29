@@ -21,70 +21,132 @@ interface MaturityLevelInfo {
   actionText: string;
 }
 
-const getMaturityLevelInfo = (percentage: number): MaturityLevelInfo => {
-  if (percentage >= 0 && percentage <= 15) {
-    return {
-      level: 1,
-      title: "Nivel 1 - Inicial / Ad-hoc",
-      description:
-        "La seguridad se maneja de forma reactiva. No hay procesos documentados ni una estructura clara para gestionar riesgos y proteger la información.",
-      advice:
-        "Trabaja en establecer una estrategia inicial de seguridad, enfocada en definir políticas, roles y procesos básicos para proteger la información. ISO 27001 y NIST recomiendan empezar con la identificación de activos y riesgos.",
-      actionText: "Comenzar Estrategia",
-    };
-  } else if (percentage >= 16 && percentage <= 34) {
-    return {
-      level: 2,
-      title: "Nivel 2 - Repetible pero intuitivo",
-      description:
-        "Existen controles básicos, pero su aplicación no es uniforme. La seguridad depende de esfuerzos individuales y acciones aisladas en lugar de procesos bien definidos.",
-      advice:
-        "Estandariza y documenta las políticas de seguridad, asegurando que sean aplicadas en toda la organización. Trabaja en la gestión de riesgos y en el uso de controles técnicos recomendados por CIS Controls y NIST CSF.",
-      actionText: "Estandarizar Procesos",
-    };
-  } else if (percentage >= 35 && percentage <= 51) {
-    return {
-      level: 3,
-      title: "Nivel 3 - Definido",
-      description:
-        "Los procesos de ciberseguridad están estructurados y alineados con estándares como ISO 27001, NIST y CIS. Se han implementado controles en la nube, gestión de vulnerabilidades y auditorías.",
-      advice:
-        "Profundiza en la medición y optimización de los controles, con el uso de monitoreo continuo y métricas de seguridad. Explora herramientas de Zero Trust, segmentación de red y pruebas de seguridad en aplicaciones (DevSecOps, OWASP ASVS).",
-      actionText: "Optimizar Controles",
-    };
-  } else if (percentage >= 52 && percentage <= 66) {
-    return {
-      level: 4,
-      title: "Nivel 4 - Gestionado y Medido",
-      description:
-        "La ciberseguridad es gestionada con métricas, auditorías y monitoreo activo. Se han implementado SOC, SIEM, análisis de amenazas y simulaciones de incidentes (Red Team, Blue Team).",
-      advice:
-        "Asegura la mejora continua en la gestión de incidentes y la resiliencia organizacional. Refuerza el uso de inteligencia de amenazas (OSINT, Dark Web Monitoring) y la automatización de respuestas a incidentes (SOAR, XDR).",
-      actionText: "Fortalecer Resiliencia",
-    };
-  } else if (percentage >= 67 && percentage <= 74) {
-    return {
-      level: 5,
-      title: "Nivel 5 - Optimizado",
-      description:
-        "Ciberseguridad avanzada con procesos automatizados y monitoreo en tiempo real. Se han adoptado estrategias como Zero Trust, detección de amenazas con IA y seguridad en la nube con cumplimiento de marcos como AWS Well-Architected, Google Cloud Security y Azure Security Center.",
-      advice:
-        "Sigue fortaleciendo la estrategia de seguridad con ciberinteligencia y automatización. Evalúa constantemente nuevas tecnologías, mejora la gestión de crisis y resiliencia y optimiza los procesos de respuesta a incidentes con IA.",
-      actionText: "Innovar Seguridad",
-    };
-  } else if (percentage === 75) {
-    return {
-      level: 5,
-      title: "Nivel 5 - Óptimo",
-      description:
-        "Ciberseguridad completamente integrada en la cultura organizacional. Se han implementado detección de amenazas con IA, automatización total de respuesta a incidentes, monitoreo continuo de la Dark Web y cumplimiento avanzado de seguridad en entornos híbridos y en la nube.",
-      advice:
-        "Se nota que has trabajado en ciberseguridad y dominas los estándares. Mantén un enfoque en innovación y evolución, asegurando que el equipo y la organización estén preparados para amenazas emergentes. Continúa reforzando la estrategia con simulaciones avanzadas y escenarios de crisis en entornos reales.",
-      actionText: "Mantener Excelencia",
-    };
+const getMaturityLevelInfo = (
+  percentage: number,
+  evaluationType: string = "ADVANCED"
+): MaturityLevelInfo => {
+  // Convert percentage to actual score based on evaluation type
+  const score =
+    evaluationType === "INITIAL"
+      ? Math.round((percentage / 100) * 45) // Initial eval (45 points)
+      : Math.round((percentage / 100) * 75); // Advanced eval (75 points)
+
+  if (evaluationType === "INITIAL") {
+    // Initial evaluation scoring
+    if (score <= 9) {
+      return {
+        level: 1,
+        title: "Nivel 1 - Inicial / Ad-hoc",
+        description:
+          "No hay un enfoque estructurado de ciberseguridad. Los controles son inexistentes o informales. Se requiere establecer procesos y medidas de seguridad básicas.",
+        advice:
+          "Trabaja en establecer una estrategia inicial de seguridad, enfocada en definir políticas, roles y procesos básicos para proteger la información.",
+        actionText: "Comenzar Estrategia",
+      };
+    } else if (score <= 19) {
+      return {
+        level: 2,
+        title: "Nivel 2 - Repetible pero intuitivo",
+        description:
+          "Existen algunos controles de ciberseguridad, pero no están formalizados ni aplicados de manera consistente. Aún se depende de acciones individuales y no hay gestión centralizada.",
+        advice:
+          "Estandariza y documenta las políticas de seguridad, asegurando que sean aplicadas en toda la organización.",
+        actionText: "Estandarizar Procesos",
+      };
+    } else if (score <= 29) {
+      return {
+        level: 3,
+        title: "Nivel 3 - Definido",
+        description:
+          "La organización cuenta con políticas y procesos documentados de ciberseguridad. Hay roles definidos, pero aún falta optimizar la aplicación y supervisión de estos controles.",
+        advice:
+          "Profundiza en la medición y optimización de los controles, con el uso de monitoreo continuo y métricas de seguridad.",
+        actionText: "Optimizar Controles",
+      };
+    } else if (score <= 39) {
+      return {
+        level: 4,
+        title: "Nivel 4 - Gestionado y Medido",
+        description:
+          "La ciberseguridad se gestiona activamente con métricas, auditorías y monitoreo continuo. Se aplican mejoras constantes, pero hay oportunidades de optimización en procesos críticos.",
+        advice:
+          "Asegura la mejora continua en la gestión de incidentes y la resiliencia organizacional.",
+        actionText: "Fortalecer Resiliencia",
+      };
+    } else {
+      return {
+        level: 5,
+        title: "Nivel 5 - Optimizado",
+        description:
+          "La ciberseguridad es robusta y completamente integrada en la organización. Se han automatizado procesos, gestionado proactivamente los riesgos y optimizado los controles.",
+        advice:
+          "Continúa innovando y evolucionando tu estrategia de seguridad para mantener el ritmo de las amenazas emergentes.",
+        actionText: "Mantener Excelencia",
+      };
+    }
   } else {
-    // Fallback for any unexpected values
-    return getMaturityLevelInfo(75); // Return the highest level as fallback
+    // Advanced evaluation scoring
+    if (score <= 15) {
+      return {
+        level: 1,
+        title: "Nivel 1 - Inicial / Ad-hoc",
+        description:
+          "La seguridad se maneja de forma reactiva. No hay procesos documentados ni una estructura clara para gestionar riesgos y proteger la información.",
+        advice:
+          "Trabaja en establecer una estrategia inicial de seguridad, enfocada en definir políticas, roles y procesos básicos para proteger la información. ISO 27001 y NIST recomiendan empezar con la identificación de activos y riesgos.",
+        actionText: "Comenzar Estrategia",
+      };
+    } else if (score <= 34) {
+      return {
+        level: 2,
+        title: "Nivel 2 - Repetible pero intuitivo",
+        description:
+          "Existen controles básicos, pero su aplicación no es uniforme. La seguridad depende de esfuerzos individuales y acciones aisladas en lugar de procesos bien definidos.",
+        advice:
+          "Estandariza y documenta las políticas de seguridad, asegurando que sean aplicadas en toda la organización. Trabaja en la gestión de riesgos y en el uso de controles técnicos recomendados por CIS Controls y NIST CSF.",
+        actionText: "Estandarizar Procesos",
+      };
+    } else if (score <= 51) {
+      return {
+        level: 3,
+        title: "Nivel 3 - Definido",
+        description:
+          "Los procesos de ciberseguridad están estructurados y alineados con estándares como ISO 27001, NIST y CIS. Se han implementado controles en la nube, gestión de vulnerabilidades y auditorías.",
+        advice:
+          "Profundiza en la medición y optimización de los controles, con el uso de monitoreo continuo y métricas de seguridad. Explora herramientas de Zero Trust, segmentación de red y pruebas de seguridad en aplicaciones (DevSecOps, OWASP ASVS).",
+        actionText: "Optimizar Controles",
+      };
+    } else if (score <= 66) {
+      return {
+        level: 4,
+        title: "Nivel 4 - Gestionado y Medido",
+        description:
+          "La ciberseguridad es gestionada con métricas, auditorías y monitoreo activo. Se han implementado SOC, SIEM, análisis de amenazas y simulaciones de incidentes (Red Team, Blue Team).",
+        advice:
+          "Asegura la mejora continua en la gestión de incidentes y la resiliencia organizacional. Refuerza el uso de inteligencia de amenazas (OSINT, Dark Web Monitoring) y la automatización de respuestas a incidentes (SOAR, XDR).",
+        actionText: "Fortalecer Resiliencia",
+      };
+    } else if (score <= 74) {
+      return {
+        level: 5,
+        title: "Nivel 5 - Optimizado",
+        description:
+          "Ciberseguridad avanzada con procesos automatizados y monitoreo en tiempo real. Se han adoptado estrategias como Zero Trust, detección de amenazas con IA y seguridad en la nube con cumplimiento de marcos como AWS Well-Architected, Google Cloud Security y Azure Security Center.",
+        advice:
+          "Sigue fortaleciendo la estrategia de seguridad con ciberinteligencia y automatización. Evalúa constantemente nuevas tecnologías, mejora la gestión de crisis y resiliencia y optimiza los procesos de respuesta a incidentes con IA.",
+        actionText: "Innovar Seguridad",
+      };
+    } else {
+      return {
+        level: 5,
+        title: "Nivel 5 - Óptimo",
+        description:
+          "Ciberseguridad completamente integrada en la cultura organizacional. Se han implementado detección de amenazas con IA, automatización total de respuesta a incidentes, monitoreo continuo de la Dark Web y cumplimiento avanzado de seguridad en entornos híbridos y en la nube.",
+        advice:
+          "Se nota que has trabajado en ciberseguridad y dominas los estándares. Mantén un enfoque en innovación y evolución, asegurando que el equipo y la organización estén preparados para amenazas emergentes. Continúa reforzando la estrategia con simulaciones avanzadas y escenarios de crisis en entornos reales.",
+        actionText: "Mantener Excelencia",
+      };
+    }
   }
 };
 
@@ -128,7 +190,10 @@ export function QuizResults({
   );
 
   const overallPercentage = Math.round((overallScore / maxPossibleScore) * 100);
-  const maturityInfo = getMaturityLevelInfo(overallPercentage);
+  const maturityInfo = getMaturityLevelInfo(
+    overallPercentage,
+    quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED"
+  );
 
   // Get top categories (for specialists recommendations)
   const categoryPercentages = Object.entries(categoryScores).map(

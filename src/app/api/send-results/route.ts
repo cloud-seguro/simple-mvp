@@ -212,23 +212,50 @@ export async function POST(request: Request) {
       baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
     }
 
-    // Get maturity level info
-    function getMaturityLevelBasedOnScore(score: number) {
-      if (score < 20)
-        return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-      if (score < 40)
-        return {
-          level: "Nivel 2",
-          description: "Nivel Repetible pero intuitivo",
-        };
-      if (score < 60)
-        return { level: "Nivel 3", description: "Nivel Definido" };
-      if (score < 80)
-        return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
-      return { level: "Nivel 5", description: "Nivel Optimizado" };
+    // Helper function to get maturity level for results page
+    function getMaturityLevelBasedOnScore(
+      score: number,
+      evaluationType: string
+    ) {
+      // Use appropriate ranges based on evaluation type
+      if (evaluationType === "INITIAL") {
+        // Initial evaluation (max 45 points)
+        if (score <= 9)
+          return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
+        if (score <= 19)
+          return {
+            level: "Nivel 2",
+            description: "Nivel Repetible pero intuitivo",
+          };
+        if (score <= 29)
+          return { level: "Nivel 3", description: "Nivel Definido" };
+        if (score <= 39)
+          return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
+        return { level: "Nivel 5", description: "Nivel Optimizado" };
+      } else {
+        // Advanced evaluation (max 75 points)
+        if (score <= 15)
+          return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
+        if (score <= 34)
+          return {
+            level: "Nivel 2",
+            description: "Nivel Repetible pero intuitivo",
+          };
+        if (score <= 51)
+          return { level: "Nivel 3", description: "Nivel Definido" };
+        if (score <= 66)
+          return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
+        return { level: "Nivel 5", description: "Nivel Optimizado" };
+      }
     }
 
-    const maturityInfo = getMaturityLevelBasedOnScore(evaluation.score || 0);
+    const maturityInfo = getMaturityLevelBasedOnScore(
+      evaluation.score || 0,
+      evaluation.type || "ADVANCED"
+    );
+
+    // Calculate maxScore based on evaluation type
+    const maxScore = evaluation.type === "INITIAL" ? 45 : 75;
 
     // Send the email with the actual results
     const { data, error } = await resend.emails.send({
@@ -240,11 +267,12 @@ export async function POST(request: Request) {
         evaluationId,
         baseUrl,
         score: evaluation.score || 0,
-        maxScore: 100,
+        maxScore,
         maturityLevel: maturityInfo.level,
         maturityDescription: maturityInfo.description,
         categories: categoryScores,
         recommendations: recommendations,
+        evaluationType: evaluation.type || "ADVANCED",
       }),
     });
 

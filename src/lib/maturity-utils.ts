@@ -3,7 +3,7 @@ import { MaturityLevel } from "@/components/evaluations/types";
 // Determine maturity level based on quiz type and score
 export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
   if (quizId === "evaluacion-inicial") {
-    // Initial evaluation tiers
+    // Initial evaluation tiers (max 45 points)
     if (score <= 9) {
       return {
         level: "Nivel 1 – Inicial / Ad-hoc",
@@ -12,6 +12,8 @@ export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
         bgColor: "bg-red-100",
         description:
           "No hay un enfoque estructurado de ciberseguridad. Los controles son inexistentes o informales. Se requiere establecer procesos y medidas de seguridad básicas.",
+        advice:
+          "Te podemos ayudar a subir este nivel de madurez hacerlo solo toma más tiempo.",
       };
     }
     if (score <= 19) {
@@ -22,6 +24,8 @@ export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
         bgColor: "bg-orange-100",
         description:
           "Existen algunos controles de ciberseguridad, pero no están formalizados ni aplicados de manera consistente. Aún se depende de acciones individuales y no hay gestión centralizada.",
+        advice:
+          "Para validar tu estado de seguridad, Ciberseguridad Simple puede realizar una auditoría y verificación de documentación, controles y riesgos.",
       };
     }
     if (score <= 29) {
@@ -32,6 +36,8 @@ export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
         bgColor: "bg-yellow-100",
         description:
           "La organización cuenta con políticas y procesos documentados de ciberseguridad. Hay roles definidos, pero aún falta optimizar la aplicación y supervisión de estos controles.",
+        advice:
+          "Se recomienda una verificación con Ciberseguridad Simple para revisar documentación, procesos y riesgos clave.",
       };
     }
     if (score <= 39) {
@@ -42,6 +48,8 @@ export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
         bgColor: "bg-green-100",
         description:
           "La ciberseguridad se gestiona activamente con métricas, auditorías y monitoreo continuo. Se aplican mejoras constantes, pero hay oportunidades de optimización en procesos críticos.",
+        advice:
+          "Se recomienda una verificación con Ciberseguridad Simple para revisar documentación, procesos y riesgos clave.",
       };
     }
     if (score <= 44) {
@@ -52,6 +60,8 @@ export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
         bgColor: "bg-blue-100",
         description:
           "La ciberseguridad está en un nivel avanzado con controles implementados y revisados periódicamente. Se han adoptado procesos de mejora continua, aunque aún pueden fortalecerse ciertos aspectos estratégicos.",
+        advice:
+          "Se recomienda una verificación con Ciberseguridad Simple para evaluar la efectividad de los controles, revisar la documentación de seguridad y validar la gestión de riesgos.",
       };
     }
     return {
@@ -61,10 +71,12 @@ export function getMaturityLevel(quizId: string, score: number): MaturityLevel {
       bgColor: "bg-blue-100",
       description:
         "La ciberseguridad es robusta y completamente integrada en la organización. Se han automatizado procesos, gestionado proactivamente los riesgos y optimizado los controles. Sin embargo, siempre hay margen de evolución ante nuevas amenazas.",
+      advice:
+        "Para validar tu estado de seguridad, Ciberseguridad Simple puede realizar una auditoría y verificación de documentación, controles y riesgos.",
     };
   }
 
-  // Advanced evaluation tiers (out of 75 points)
+  // Advanced evaluation tiers (max 75 points)
   if (score <= 15) {
     return {
       level: "Nivel 1 – Inicial / Ad-hoc",

@@ -83,16 +83,35 @@ export async function generateMetadata({ params }: ResultsPageProps) {
 }
 
 // Helper function to get maturity level for results page
-function getMaturityLevelBasedOnScore(score: number) {
-  // Simple version for the results page
-  if (score < 20)
-    return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-  if (score < 40)
-    return { level: "Nivel 2", description: "Nivel Repetible pero intuitivo" };
-  if (score < 60) return { level: "Nivel 3", description: "Nivel Definido" };
-  if (score < 80)
-    return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
-  return { level: "Nivel 5", description: "Nivel Optimizado" };
+function getMaturityLevelBasedOnScore(score: number, evaluationType: string) {
+  // Use appropriate ranges based on evaluation type
+  if (evaluationType === "INITIAL") {
+    // Initial evaluation (max 45 points)
+    if (score <= 9)
+      return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
+    if (score <= 19)
+      return {
+        level: "Nivel 2",
+        description: "Nivel Repetible pero intuitivo",
+      };
+    if (score <= 29) return { level: "Nivel 3", description: "Nivel Definido" };
+    if (score <= 39)
+      return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
+    return { level: "Nivel 5", description: "Nivel Optimizado" };
+  } else {
+    // Advanced evaluation (max 75 points)
+    if (score <= 15)
+      return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
+    if (score <= 34)
+      return {
+        level: "Nivel 2",
+        description: "Nivel Repetible pero intuitivo",
+      };
+    if (score <= 51) return { level: "Nivel 3", description: "Nivel Definido" };
+    if (score <= 66)
+      return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
+    return { level: "Nivel 5", description: "Nivel Optimizado" };
+  }
 }
 
 export default async function ResultsPage({
@@ -586,12 +605,18 @@ export default async function ResultsPage({
               interest={interestData?.reason as InterestOption}
               evaluationId={evaluation.id}
               score={evaluation.score || 0}
-              maxScore={100}
+              maxScore={evaluation.type === "INITIAL" ? 45 : 75}
               maturityDescription={
-                getMaturityLevelBasedOnScore(evaluation.score || 0).description
+                getMaturityLevelBasedOnScore(
+                  evaluation.score || 0,
+                  evaluation.type || "ADVANCED"
+                ).description
               }
               maturityLevelNumber={parseInt(
-                getMaturityLevelBasedOnScore(evaluation.score || 0)
+                getMaturityLevelBasedOnScore(
+                  evaluation.score || 0,
+                  evaluation.type || "ADVANCED"
+                )
                   .level.split("–")[0]
                   .replace("Nivel ", "")
                   .trim(),

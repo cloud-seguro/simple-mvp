@@ -2,7 +2,7 @@ import * as React from "react";
 import { UserInfo } from "../evaluations/types";
 import type { Category } from "../evaluations/types";
 
-interface ResultsEmailProps {
+export interface ResultsEmailProps {
   userInfo: UserInfo;
   evaluationId: string;
   baseUrl: string;
@@ -19,6 +19,7 @@ interface ResultsEmailProps {
     category: string;
     selectedOption?: string;
   }>;
+  evaluationType?: string;
 }
 
 export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
@@ -31,36 +32,79 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
   maturityDescription,
   categories,
   recommendations = [],
+  evaluationType,
 }) => {
   // Calculate percentage for the progress bar
   const overallPercentage = Math.round((score / maxScore) * 100);
 
-  // Get color based on the score percentage
-  const getScoreColor = (percent: number) => {
-    if (percent < 20) return "#FF4136"; // Red
-    if (percent < 40) return "#FF851B"; // Orange
-    if (percent < 60) return "#FFDC00"; // Yellow
-    if (percent < 80) return "#2ECC40"; // Green
-    return "#0074D9"; // Blue
+  // Get color based on the score percentage and evaluation type
+  const getScoreColor = (percent: number, type: string) => {
+    const score =
+      type === "INITIAL"
+        ? Math.round((percent / 100) * 45) // Initial eval (45 points)
+        : Math.round((percent / 100) * 75); // Advanced eval (75 points)
+
+    if (type === "INITIAL") {
+      if (score <= 9) return "#FF4136"; // Red
+      if (score <= 19) return "#FF851B"; // Orange
+      if (score <= 29) return "#FFDC00"; // Yellow
+      if (score <= 39) return "#2ECC40"; // Green
+      return "#0074D9"; // Blue
+    } else {
+      if (score <= 15) return "#FF4136"; // Red
+      if (score <= 34) return "#FF851B"; // Orange
+      if (score <= 51) return "#FFDC00"; // Yellow
+      if (score <= 66) return "#2ECC40"; // Green
+      return "#0074D9"; // Blue
+    }
   };
 
-  const getScoreBgColor = (percent: number) => {
-    if (percent < 20) return "#FFEEEE"; // Light Red
-    if (percent < 40) return "#FFF5EE"; // Light Orange
-    if (percent < 60) return "#FFFCEE"; // Light Yellow
-    if (percent < 80) return "#F0FFF0"; // Light Green
-    return "#F0F8FF"; // Light Blue
+  const getScoreBgColor = (percent: number, type: string) => {
+    const score =
+      type === "INITIAL"
+        ? Math.round((percent / 100) * 45) // Initial eval (45 points)
+        : Math.round((percent / 100) * 75); // Advanced eval (75 points)
+
+    if (type === "INITIAL") {
+      if (score <= 9) return "#FFEEEE"; // Light Red
+      if (score <= 19) return "#FFF5EE"; // Light Orange
+      if (score <= 29) return "#FFFCEE"; // Light Yellow
+      if (score <= 39) return "#F0FFF0"; // Light Green
+      return "#F0F8FF"; // Light Blue
+    } else {
+      if (score <= 15) return "#FFEEEE"; // Light Red
+      if (score <= 34) return "#FFF5EE"; // Light Orange
+      if (score <= 51) return "#FFFCEE"; // Light Yellow
+      if (score <= 66) return "#F0FFF0"; // Light Green
+      return "#F0F8FF"; // Light Blue
+    }
   };
 
-  const getScoreEmoji = (percent: number) => {
-    if (percent < 20) return "🔴";
-    if (percent < 40) return "🟠";
-    if (percent < 60) return "🟡";
-    if (percent < 80) return "🟢";
-    return "🔵";
+  const getScoreEmoji = (percent: number, type: string) => {
+    const score =
+      type === "INITIAL"
+        ? Math.round((percent / 100) * 45) // Initial eval (45 points)
+        : Math.round((percent / 100) * 75); // Advanced eval (75 points)
+
+    if (type === "INITIAL") {
+      if (score <= 9) return "🔴";
+      if (score <= 19) return "🟠";
+      if (score <= 29) return "🟡";
+      if (score <= 39) return "🟢";
+      return "🔵";
+    } else {
+      if (score <= 15) return "🔴";
+      if (score <= 34) return "🟠";
+      if (score <= 51) return "🟡";
+      if (score <= 66) return "🟢";
+      return "🔵";
+    }
   };
 
-  const scoreColor = getScoreColor(overallPercentage);
+  const scoreColor = getScoreColor(
+    overallPercentage,
+    evaluationType || "ADVANCED"
+  );
 
   // Group recommendations by category for organization
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -334,8 +378,14 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                       {/* Category by category */}
                       {categoryMaturityLevels.map(
                         ({ category, total, max, percentage }) => {
-                          const categoryColor = getScoreColor(percentage);
-                          const categoryEmoji = getScoreEmoji(percentage);
+                          const categoryColor = getScoreColor(
+                            percentage,
+                            evaluationType || "ADVANCED"
+                          );
+                          const categoryEmoji = getScoreEmoji(
+                            percentage,
+                            evaluationType || "ADVANCED"
+                          );
                           const categoryRecommendations =
                             recommendations.filter(
                               (rec) => rec.category === category
@@ -444,10 +494,14 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                     const questionPercentage = Math.round(
                                       (rec.score / rec.maxScore) * 100
                                     );
-                                    const questionColor =
-                                      getScoreColor(questionPercentage);
-                                    const questionBgColor =
-                                      getScoreBgColor(questionPercentage);
+                                    const questionColor = getScoreColor(
+                                      questionPercentage,
+                                      evaluationType || "ADVANCED"
+                                    );
+                                    const questionBgColor = getScoreBgColor(
+                                      questionPercentage,
+                                      evaluationType || "ADVANCED"
+                                    );
 
                                     return (
                                       <table
