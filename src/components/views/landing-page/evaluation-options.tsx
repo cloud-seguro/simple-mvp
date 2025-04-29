@@ -12,12 +12,11 @@ export default function EvaluationOptions() {
   const supabase = createClientComponentClient();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
-  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     async function checkAuthStatus() {
       try {
-        setLoading(true);
         // Check if user is logged in
         const {
           data: { session },
@@ -28,14 +27,12 @@ export default function EvaluationOptions() {
           console.error("Error checking auth session:", sessionError);
           setIsLoggedIn(false);
           setIsPremiumUser(false);
-          setLoading(false);
           return;
         }
 
         if (!session) {
           setIsLoggedIn(false);
           setIsPremiumUser(false);
-          setLoading(false);
           return;
         }
 
@@ -49,8 +46,6 @@ export default function EvaluationOptions() {
         console.error("Unexpected error checking auth:", error);
         setIsLoggedIn(false);
         setIsPremiumUser(false);
-      } finally {
-        setLoading(false);
       }
     }
 

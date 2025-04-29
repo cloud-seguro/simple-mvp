@@ -25,7 +25,6 @@ import { formatDistance } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pencil, Trash2, MoreHorizontal, PlusCircle, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { LoadingScreen } from "@/components/ui/loading-screen";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
 interface BlogPost {
