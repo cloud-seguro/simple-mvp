@@ -22,6 +22,15 @@ export async function getEvaluationData(id: string) {
     throw new Error(`Quiz data not found for type: ${evaluation.type}`);
   }
 
+  // Calculate max possible score based on evaluation type
+  const maxScore = evaluation.type === "INITIAL" ? 45 : 100;
+
+  // Ensure score doesn't exceed max possible score for initial evaluations
+  const cappedScore =
+    evaluation.type === "INITIAL" && (evaluation.score || 0) > maxScore
+      ? maxScore
+      : evaluation.score || 0;
+
   // Prepare user info
   const userInfo: UserInfo = {
     firstName: evaluation.profile?.firstName || "Usuario",
@@ -52,7 +61,10 @@ export async function getEvaluationData(id: string) {
   }
 
   return {
-    evaluation,
+    evaluation: {
+      ...evaluation,
+      score: cappedScore,
+    },
     quizData,
     answers,
     userInfo,

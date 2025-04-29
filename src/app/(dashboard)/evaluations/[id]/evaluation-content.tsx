@@ -50,7 +50,7 @@ export function EvaluationContent({
   useEffect(() => {
     const fetchEvaluation = async () => {
       try {
-        const response = await fetch(`/api/evaluations/${id}`);
+        const response = await fetch(`/api/evaluations/${id}/detailed`);
         if (!response.ok) {
           throw new Error("Failed to fetch evaluation");
         }

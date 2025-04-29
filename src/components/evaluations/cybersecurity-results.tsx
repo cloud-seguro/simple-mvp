@@ -787,9 +787,6 @@ export function CybersecurityResults({
                     </>
                   ) : (
                     <>
-                      <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                        Puntuación Total (Máx. 100 puntos)
-                      </h3>
                       <p className="text-sm text-gray-600 mb-2">
                         {overallScore <= 20 && (
                           <>
