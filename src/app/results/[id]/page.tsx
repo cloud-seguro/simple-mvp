@@ -485,15 +485,25 @@ export default async function ResultsPage({
       (sum, val) => sum + (val || 0),
       0
     );
-    // These variables are needed for calculation but not directly used
-    // Keeping calculation for documentation purposes
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const maxScore = quizData.questions.reduce(
+
+    // Calculate max possible score
+    const calculatedMaxScore = quizData.questions.reduce(
       (sum, q) => sum + Math.max(...q.options.map((o) => o.value)),
       0
     );
+
+    // Ensure score doesn't exceed max possible score for initial evaluations
+    const cappedScore =
+      evaluation.type === "INITIAL" && totalScore > calculatedMaxScore
+        ? calculatedMaxScore
+        : totalScore;
+
+    // These variables are needed for calculation but not directly used
+    // Keeping calculation for documentation purposes
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const maturityInfo = getMaturityLevel(quizData.id, totalScore);
+    const maxScore = calculatedMaxScore;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const maturityInfo = getMaturityLevel(quizData.id, cappedScore);
 
     const categoryScores = Object.entries(
       quizData.questions.reduce(
@@ -506,11 +516,13 @@ export default async function ResultsPage({
         },
         {} as Record<string, { score: number; maxScore: number }>
       )
-    ).map(([name, { score, maxScore }]) => ({
-      name,
-      score,
-      maxScore,
-    }));
+    ).map(([name, { score, maxScore }]) => {
+      // For initial evaluations, ensure category scores don't exceed their maximum
+      if (evaluation.type === "INITIAL" && score > maxScore) {
+        score = maxScore;
+      }
+      return { name, score, maxScore };
+    });
 
     // Generate recommendations for each question
     const recommendations = quizData.questions.map((question) => {
@@ -604,17 +616,25 @@ export default async function ResultsPage({
               isSharedView={true}
               interest={interestData?.reason as InterestOption}
               evaluationId={evaluation.id}
-              score={evaluation.score || 0}
+              score={
+                evaluation.type === "INITIAL"
+                  ? cappedScore
+                  : evaluation.score || 0
+              }
               maxScore={evaluation.type === "INITIAL" ? 45 : 100}
               maturityDescription={
                 getMaturityLevelBasedOnScore(
-                  evaluation.score || 0,
+                  evaluation.type === "INITIAL"
+                    ? cappedScore
+                    : evaluation.score || 0,
                   evaluation.type || "ADVANCED"
                 ).description
               }
               maturityLevelNumber={parseInt(
                 getMaturityLevelBasedOnScore(
-                  evaluation.score || 0,
+                  evaluation.type === "INITIAL"
+                    ? cappedScore
+                    : evaluation.score || 0,
                   evaluation.type || "ADVANCED"
                 )
                   .level.split("–")[0]

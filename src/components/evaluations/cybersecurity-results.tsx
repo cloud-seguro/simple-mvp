@@ -272,6 +272,11 @@ export function CybersecurityResults({
     }
   }
 
+  // Ensure overall score doesn't exceed maximum
+  if (quizData.id === "evaluacion-inicial" && overallScore > maxPossibleScore) {
+    overallScore = maxPossibleScore;
+  }
+
   const maturity = maturityDescription
     ? {
         level: maturityLevelNumber ? `Nivel ${maturityLevelNumber}` : "",
@@ -539,6 +544,9 @@ export function CybersecurityResults({
       100
   );
 
+  // Add a capped percentage for display purposes
+  const displayPercentage = Math.min(overallPercentage, 100);
+
   // Define color helper function
   const getColorByPercentage = (percentage: number) => {
     if (percentage <= 20)
@@ -577,7 +585,7 @@ export function CybersecurityResults({
     };
   };
 
-  const scoreColor = getColorByPercentage(overallPercentage);
+  const scoreColor = getColorByPercentage(displayPercentage);
 
   return (
     <div className="w-full bg-gray-50 min-h-screen pb-16">
@@ -630,13 +638,17 @@ export function CybersecurityResults({
                     Puntuación Total
                   </p>
                   <p className={`text-4xl font-bold ${scoreColor.color}`}>
-                    {overallScore}/
+                    {quizData.id === "evaluacion-inicial"
+                      ? Math.min(overallScore, maxPossibleScore)
+                      : overallScore}
+                    /
                     {quizData.id === "evaluacion-avanzada"
                       ? 100
                       : maxPossibleScore}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    {overallPercentage}% de madurez
+                    {displayPercentage > 100 ? 100 : displayPercentage}% de
+                    madurez
                   </p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -650,7 +662,7 @@ export function CybersecurityResults({
                     <span>Nivel {maturity.level.replace("Nivel ", "")}</span>
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    Nivel {maturity.description}
+                    {maturity.description}
                   </p>
                 </div>
               </div>
@@ -665,21 +677,21 @@ export function CybersecurityResults({
                   </div>
                   <div className={`${scoreColor.color} text-right`}>
                     <span className="text-xs font-semibold inline-block">
-                      {overallPercentage}%
+                      {displayPercentage}%
                     </span>
                   </div>
                 </div>
                 <Progress
-                  value={overallPercentage}
+                  value={displayPercentage}
                   className={cn(
                     "h-2.5",
-                    overallPercentage <= 20
+                    displayPercentage <= 20
                       ? "bg-red-100 [&>div]:bg-red-600"
-                      : overallPercentage <= 40
+                      : displayPercentage <= 40
                         ? "bg-orange-100 [&>div]:bg-orange-600"
-                        : overallPercentage <= 60
+                        : displayPercentage <= 60
                           ? "bg-yellow-100 [&>div]:bg-yellow-600"
-                          : overallPercentage <= 80
+                          : displayPercentage <= 80
                             ? "bg-green-100 [&>div]:bg-green-600"
                             : "bg-blue-100 [&>div]:bg-blue-600"
                   )}
@@ -694,26 +706,26 @@ export function CybersecurityResults({
               <div
                 className={cn(
                   "p-5 rounded-lg border",
-                  overallPercentage <= 20
+                  displayPercentage <= 20
                     ? "border-red-600"
-                    : overallPercentage <= 40
+                    : displayPercentage <= 40
                       ? "border-orange-600"
-                      : overallPercentage <= 60
+                      : displayPercentage <= 60
                         ? "border-yellow-600"
-                        : overallPercentage <= 80
+                        : displayPercentage <= 80
                           ? "border-green-600"
                           : "border-blue-600"
                 )}
               >
                 <p
                   className={`${
-                    overallPercentage <= 20
+                    displayPercentage <= 20
                       ? "text-red-600"
-                      : overallPercentage <= 40
+                      : displayPercentage <= 40
                         ? "text-orange-600"
-                        : overallPercentage <= 60
+                        : displayPercentage <= 60
                           ? "text-yellow-600"
-                          : overallPercentage <= 80
+                          : displayPercentage <= 80
                             ? "text-green-600"
                             : "text-blue-600"
                   } font-medium mb-4`}
@@ -918,13 +930,13 @@ export function CybersecurityResults({
                   <>
                     <h3
                       className={`font-semibold mt-4 mb-2 ${
-                        overallPercentage <= 20
+                        displayPercentage <= 20
                           ? "text-red-600"
-                          : overallPercentage <= 40
+                          : displayPercentage <= 40
                             ? "text-orange-600"
-                            : overallPercentage <= 60
+                            : displayPercentage <= 60
                               ? "text-yellow-600"
-                              : overallPercentage <= 80
+                              : displayPercentage <= 80
                                 ? "text-green-600"
                                 : "text-blue-600"
                       }`}
@@ -933,13 +945,13 @@ export function CybersecurityResults({
                     </h3>
                     <p
                       className={`${
-                        overallPercentage <= 20
+                        displayPercentage <= 20
                           ? "text-red-600"
-                          : overallPercentage <= 40
+                          : displayPercentage <= 40
                             ? "text-orange-600"
-                            : overallPercentage <= 60
+                            : displayPercentage <= 60
                               ? "text-yellow-600"
-                              : overallPercentage <= 80
+                              : displayPercentage <= 80
                                 ? "text-green-600"
                                 : "text-blue-600"
                       }`}
@@ -1172,13 +1184,13 @@ export function CybersecurityResults({
             <div
               className={cn(
                 "p-6 rounded-xl text-white shadow-lg border transform hover:scale-[1.02] transition-all duration-300",
-                overallPercentage <= 20
+                displayPercentage <= 20
                   ? "bg-gradient-to-r from-red-500 to-red-600 border-red-300"
-                  : overallPercentage <= 40
+                  : displayPercentage <= 40
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 border-orange-300"
-                    : overallPercentage <= 60
+                    : displayPercentage <= 60
                       ? "bg-gradient-to-r from-yellow-500 to-yellow-600 border-yellow-300"
-                      : overallPercentage <= 80
+                      : displayPercentage <= 80
                         ? "bg-gradient-to-r from-green-500 to-green-600 border-green-300"
                         : "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-300"
               )}
@@ -1227,13 +1239,13 @@ export function CybersecurityResults({
                     <Button
                       className={cn(
                         "bg-white px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center",
-                        overallPercentage <= 20
+                        displayPercentage <= 20
                           ? "text-red-600 hover:bg-red-50"
-                          : overallPercentage <= 40
+                          : displayPercentage <= 40
                             ? "text-orange-600 hover:bg-orange-50"
-                            : overallPercentage <= 60
+                            : displayPercentage <= 60
                               ? "text-yellow-600 hover:bg-yellow-50"
-                              : overallPercentage <= 80
+                              : displayPercentage <= 80
                                 ? "text-green-600 hover:bg-green-50"
                                 : "text-blue-600 hover:bg-blue-50"
                       )}
@@ -1273,13 +1285,13 @@ export function CybersecurityResults({
                 <Button
                   onClick={onRestart}
                   className={`${
-                    overallPercentage <= 20
+                    displayPercentage <= 20
                       ? "bg-red-600"
-                      : overallPercentage <= 40
+                      : displayPercentage <= 40
                         ? "bg-orange-600"
-                        : overallPercentage <= 60
+                        : displayPercentage <= 60
                           ? "bg-yellow-600"
-                          : overallPercentage <= 80
+                          : displayPercentage <= 80
                             ? "bg-green-600"
                             : "bg-blue-600"
                   } text-white hover:opacity-90 rounded-full px-8 py-6`}
