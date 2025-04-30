@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import type { User, Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@/types/profile";
@@ -87,90 +93,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const supabase = secureSupabaseClient;
 
-  // Optimized fetch profile function with smarter retry logic
-  const fetchProfile = async (userId: string, isAfterSignUp = false) => {
-    // Don't retry too many times
-    const maxRetries = isAfterSignUp ? 3 : 1;
-    const initialDelay = isAfterSignUp ? 500 : 200;
+  // Wrap fetchProfile in useCallback to stabilize it for dependency array
+  const fetchProfile = useCallback(async (userId: string) => {
+    try {
+      const response = await fetch(`/api/profile/${userId}`);
+      if (!response.ok) {
+        console.error("Error fetching profile:", await response.text());
+        return false;
+      }
+      const profileData = await response.json();
+      setProfile(profileData);
+      return true;
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      return false;
+    }
+  }, []);
 
-    // Implement retry logic with async/await and for loop instead of while
-    for (let retryCount = 0; retryCount <= maxRetries; retryCount++) {
+  // Wrap signOut in useCallback to stabilize it for dependency array
+  const signOut = useCallback(
+    async (silent = false) => {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
+        await supabase.auth.signOut();
+        setUser(null);
+        setSession(null);
+        setProfile(null);
 
-        const response = await fetch(`/api/profile/${userId}`, {
-          signal: controller.signal,
-          cache: "no-store",
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          if (response.status !== 404 || retryCount >= maxRetries) {
-            throw new Error(`Failed to fetch profile: ${response.status}`);
-          }
-          // Profile not found but we can retry if not at max retries
-        } else {
-          const data = await response.json();
-          setProfile(data.profile);
-          return true; // Success
+        if (!silent) {
+          router.push("/");
         }
       } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") {
-          console.log("Profile fetch request timed out");
-        } else {
-          console.error(
-            `Error fetching profile (attempt ${retryCount + 1}):`,
-            error
-          );
-        }
+        console.error("Sign-out error:", error);
       }
-
-      // If this isn't the last retry, wait before trying again
-      if (retryCount < maxRetries) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, initialDelay * Math.pow(1.5, retryCount))
-        );
-      }
-    }
-
-    // If we get here, all retries failed
-    console.warn("Failed to fetch profile after all retries");
-    setProfile(null);
-
-    // Auto sign out if profile fetch fails completely
-    if (session) {
-      console.error("Profile fetch failed completely, signing out user");
-      await signOut(true);
-    }
-
-    return false;
-  };
-
-  // Updated signOut function to handle silent signouts
-  const signOut = async (silent = false) => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setProfile(null);
-      setUser(null);
-      setSession(null);
-
-      if (!silent) {
-        router.push("/sign-in");
-      } else {
-        router.push("/sign-in?error=session_expired");
-      }
-    } catch (error) {
-      console.error("Error during sign out:", error);
-      // Force client-side state cleanup even if the API call fails
-      setProfile(null);
-      setUser(null);
-      setSession(null);
-      router.push("/sign-in?error=signout_failed");
-    }
-  };
+    },
+    [router, supabase.auth]
+  );
 
   // Load auth state once on mount
   useEffect(() => {
@@ -220,8 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          const isSignUp = event === "SIGNED_UP" || event === "SIGNED_IN";
-          const profileSuccess = await fetchProfile(session.user.id, isSignUp);
+          const profileSuccess = await fetchProfile(session.user.id);
 
           // If auth changed to a valid session but profile fails, something's wrong
           if (!profileSuccess && event !== "SIGNED_OUT") {
@@ -247,7 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, fetchProfile, signOut, supabase.auth]);
 
   const signIn = async (
     email: string,
@@ -264,7 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.user) {
         // Get profile data
-        const profileSuccess = await fetchProfile(data.user.id, true);
+        const profileSuccess = await fetchProfile(data.user.id);
 
         // If we successfully authenticated but can't get a profile, sign out
         if (!profileSuccess) {

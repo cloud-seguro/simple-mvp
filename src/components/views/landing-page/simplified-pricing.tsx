@@ -10,7 +10,6 @@ import {
   Clock,
   Layers,
   Zap,
-  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

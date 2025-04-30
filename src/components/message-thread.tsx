@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import type { Locale } from "date-fns";
 import Image from "next/image";
 
 type Message = {
@@ -138,7 +139,7 @@ export function MessageThread({
   const safeFormatDate = (
     dateString: string | Date | number,
     formatStr: string,
-    options?: any
+    options?: { locale?: Locale }
   ) => {
     try {
       // If dateString is already a Date object, use it directly

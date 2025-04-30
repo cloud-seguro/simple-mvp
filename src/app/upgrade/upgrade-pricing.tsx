@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Shield, Database, Bell, Search, Layers, Check, X } from "lucide-react";
+import { Shield, Database, Bell, Check, X } from "lucide-react";
 
 export default function UpgradePricing() {
   return (

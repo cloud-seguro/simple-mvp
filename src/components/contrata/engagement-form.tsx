@@ -188,7 +188,7 @@ export const EngagementForm = ({
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = `engagements/${profileId}/${fileName}`;
 
-        const { data, error } = await secureSupabaseClient.storage
+        const { error } = await secureSupabaseClient.storage
           .from("attachments")
           .upload(filePath, file);
 

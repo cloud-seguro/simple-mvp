@@ -6,9 +6,9 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard";
-  
+
   if (code) {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,10 +17,20 @@ export async function GET(req: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(
+            name: string,
+            value: string,
+            options: {
+              expires?: Date;
+              path?: string;
+              domain?: string;
+              secure?: boolean;
+              sameSite?: "strict" | "lax" | "none";
+            }
+          ) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: { path?: string; domain?: string }) {
             cookieStore.set({ name, value: "", ...options });
           },
         },
@@ -29,16 +39,20 @@ export async function GET(req: NextRequest) {
 
     try {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
-      
+
       if (error) {
         console.error("Error exchanging code for session:", error);
-        return NextResponse.redirect(new URL("/sign-in?error=auth_error", req.url));
+        return NextResponse.redirect(
+          new URL("/sign-in?error=auth_error", req.url)
+        );
       }
-      
+
       return NextResponse.redirect(new URL(next, req.url));
     } catch (error) {
       console.error("Unexpected error during auth callback:", error);
-      return NextResponse.redirect(new URL("/sign-in?error=auth_error", req.url));
+      return NextResponse.redirect(
+        new URL("/sign-in?error=auth_error", req.url)
+      );
     }
   }
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Specialist } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Phone, Globe, MapPin } from "lucide-react";
+import { User, Mail, MapPin, Linkedin } from "lucide-react";
 import Image from "next/image";
 
 interface SpecialistsRecommendationsProps {
@@ -185,19 +185,7 @@ export function SpecialistsRecommendations({
                     <Mail className="h-4 w-4 mr-2" /> Email
                   </a>
                 </Button>
-                {specialist.contactPhone && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex items-center"
-                    asChild
-                  >
-                    <a href={`tel:${specialist.contactPhone}`}>
-                      <Phone className="h-4 w-4 mr-2" /> Llamar
-                    </a>
-                  </Button>
-                )}
-                {specialist.website && (
+                {specialist.linkedinProfileUrl && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -205,11 +193,11 @@ export function SpecialistsRecommendations({
                     asChild
                   >
                     <a
-                      href={specialist.website}
+                      href={specialist.linkedinProfileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Globe className="h-4 w-4 mr-2" /> Sitio Web
+                      <Linkedin className="h-4 w-4 mr-2" /> LinkedIn
                     </a>
                   </Button>
                 )}

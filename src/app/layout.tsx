@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
 import { ErrorBoundary } from "@/components/error-boundary";
 import Script from "next/script";
+import Link from "next/link";
 
 const APP_NAME = "SIMPLE";
 const APP_DESCRIPTION = "Your Mind's Best Friend";
@@ -85,15 +86,15 @@ export default function RootLayout({
                     Something went wrong
                   </h2>
                   <p className="mb-4">
-                    We've encountered an unexpected error. Please try again or
-                    contact support if the issue persists.
+                    We&apos;ve encountered an unexpected error. Please try again
+                    or contact support if the issue persists.
                   </p>
-                  <a
+                  <Link
                     href="/"
                     className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
                   >
                     Return to Home
-                  </a>
+                  </Link>
                 </div>
               </div>
             }
