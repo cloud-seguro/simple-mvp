@@ -5,6 +5,7 @@ import { QueryProvider } from "@/lib/providers/QueryProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
+import { ErrorBoundary } from "@/components/error-boundary";
 import Script from "next/script";
 
 const APP_NAME = "SIMPLE";
@@ -76,12 +77,34 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="light" storageKey="app-theme">
-          <AuthProvider>
-            <QueryProvider>
-              {children}
-              <Toaster />
-            </QueryProvider>
-          </AuthProvider>
+          <ErrorBoundary
+            fallback={
+              <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center p-8 max-w-md">
+                  <h2 className="text-2xl font-bold mb-4">
+                    Something went wrong
+                  </h2>
+                  <p className="mb-4">
+                    We've encountered an unexpected error. Please try again or
+                    contact support if the issue persists.
+                  </p>
+                  <a
+                    href="/"
+                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+                  >
+                    Return to Home
+                  </a>
+                </div>
+              </div>
+            }
+          >
+            <AuthProvider>
+              <QueryProvider>
+                {children}
+                <Toaster />
+              </QueryProvider>
+            </AuthProvider>
+          </ErrorBoundary>
         </ThemeProvider>
 
         <Script id="performance-metrics" strategy="afterInteractive">

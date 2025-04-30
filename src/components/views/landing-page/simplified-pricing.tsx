@@ -130,7 +130,7 @@ export default function SimplifiedPricing() {
             </div>
 
             <div className="mb-6 relative z-10">
-              <span className="text-4xl font-bold text-white">$49.99</span>
+              <span className="text-4xl font-bold text-white">$25</span>
               <span className="text-white/80 ml-2">/mes</span>
             </div>
 
@@ -227,7 +227,7 @@ export default function SimplifiedPricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Search className="h-5 w-5 text-white" />
+                    <Layers className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
@@ -471,7 +471,7 @@ export default function SimplifiedPricing() {
 
             <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
               <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <Search className="h-5 w-5 text-orange-500" />
+                <Layers className="h-5 w-5 text-orange-500" />
               </div>
               <h4 className="font-bold mb-2">Simple Scan</h4>
               <p className="text-sm text-gray-600">

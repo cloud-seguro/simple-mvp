@@ -138,7 +138,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // If we get here, all retries failed
     console.warn("Failed to fetch profile after all retries");
     setProfile(null);
+
+    // Auto sign out if profile fetch fails completely
+    if (session) {
+      console.error("Profile fetch failed completely, signing out user");
+      await signOut(true);
+    }
+
     return false;
+  };
+
+  // Updated signOut function to handle silent signouts
+  const signOut = async (silent = false) => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setProfile(null);
+      setUser(null);
+      setSession(null);
+
+      if (!silent) {
+        router.push("/sign-in");
+      } else {
+        router.push("/sign-in?error=session_expired");
+      }
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      // Force client-side state cleanup even if the API call fails
+      setProfile(null);
+      setUser(null);
+      setSession(null);
+      router.push("/sign-in?error=signout_failed");
+    }
   };
 
   // Load auth state once on mount
@@ -147,15 +178,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const {
           data: { session },
+          error: sessionError,
         } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          await signOut(true);
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          const profileSuccess = await fetchProfile(session.user.id);
+
+          // If we have a session but can't get a profile, something's wrong
+          if (!profileSuccess) {
+            console.error(
+              "Valid session but profile fetch failed, signing out"
+            );
+            await signOut(true);
+            return;
+          }
         }
       } catch (error) {
         console.error("Error loading initial session:", error);
+        await signOut(true);
       } finally {
         setIsLoading(false);
       }
@@ -166,25 +215,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event: string, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      try {
+        setSession(session);
+        setUser(session?.user ?? null);
 
-      if (session?.user) {
-        const isSignUp = event === "SIGNED_UP" || event === "SIGNED_IN";
-        await fetchProfile(session.user.id, isSignUp);
-      } else {
-        setProfile(null);
-      }
+        if (session?.user) {
+          const isSignUp = event === "SIGNED_UP" || event === "SIGNED_IN";
+          const profileSuccess = await fetchProfile(session.user.id, isSignUp);
 
-      if (event === "SIGNED_OUT") {
-        router.push("/sign-in");
+          // If auth changed to a valid session but profile fails, something's wrong
+          if (!profileSuccess && event !== "SIGNED_OUT") {
+            console.error(
+              "Auth state changed but profile fetch failed, signing out"
+            );
+            await signOut(true);
+            return;
+          }
+        } else {
+          setProfile(null);
+        }
+
+        if (event === "SIGNED_OUT") {
+          router.push("/sign-in");
+        }
+      } catch (error) {
+        console.error("Error during auth state change:", error);
+        await signOut(true);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [router, supabase]);
+  }, [router]);
 
   const signIn = async (
     email: string,
@@ -201,7 +264,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.user) {
         // Get profile data
-        await fetchProfile(data.user.id, true);
+        const profileSuccess = await fetchProfile(data.user.id, true);
+
+        // If we successfully authenticated but can't get a profile, sign out
+        if (!profileSuccess) {
+          console.error(
+            "Auth successful but profile fetch failed, signing out"
+          );
+          await signOut(true);
+          throw new Error(
+            "Unable to fetch your profile. Please try again later."
+          );
+        }
 
         // Capture basic fingerprint in a non-blocking way
         setTimeout(async () => {
@@ -284,6 +358,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!response.ok) {
             console.error("Error creating profile:", await response.text());
+            // If profile creation fails, attempt to clean up by signing out
+            await signOut(true);
+            throw new Error("Error creating user profile");
           }
 
           // Add security metadata in the background
@@ -304,6 +381,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }, 500);
         } catch (profileError) {
           console.error("Error creating profile:", profileError);
+          await signOut(true);
+          throw profileError;
         }
       }
 
@@ -354,13 +433,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setProfile(null);
-    router.push("/sign-in");
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -370,7 +442,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signUp,
-        signOut,
+        signOut: () => signOut(false),
         checkPasswordStrength,
       }}
     >

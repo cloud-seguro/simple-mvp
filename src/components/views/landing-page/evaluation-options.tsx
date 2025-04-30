@@ -13,7 +13,6 @@ export default function EvaluationOptions() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
 
-
   useEffect(() => {
     async function checkAuthStatus() {
       try {
@@ -194,7 +193,7 @@ export default function EvaluationOptions() {
             <Button onClick={handleAdvancedEvaluation}>
               {isPremiumUser
                 ? "Realizar evaluación avanzada"
-                : "Ver planes premium"}
+                : "Actualizar a evaluación avanzada"}
             </Button>
           </motion.div>
         </motion.div>
