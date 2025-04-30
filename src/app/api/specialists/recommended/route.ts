@@ -49,11 +49,9 @@ export async function GET(req: NextRequest) {
 
     console.log(`API: Total specialists in database: ${allSpecialists.length}`);
 
-    // Query conditions
+    // Query conditions - Removed minMaturityLevel and maxMaturityLevel
     const whereCondition = {
       active: true,
-      minMaturityLevel: { lte: maturityLevel },
-      maxMaturityLevel: { gte: maturityLevel },
       ...(expertiseCategories.length > 0
         ? {
             expertiseAreas: {
@@ -65,12 +63,14 @@ export async function GET(req: NextRequest) {
 
     console.log(`API: Query where condition:`, JSON.stringify(whereCondition));
 
-    // Find specialists matching the maturity level
+    // Find specialists matching criteria
     const specialists = await prisma.specialist.findMany({
       where: whereCondition,
       orderBy: {
         createdAt: "desc",
       },
+      // Limit to 5 specialists
+      take: 5,
     });
 
     console.log(`API: Found ${specialists.length} matching specialists`);

@@ -176,37 +176,69 @@ export function ResultsReady({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0, transition: { delay: 0.5 } }}
-            className="mt-8 p-6 border-2 border-yellow-400 rounded-xl bg-yellow-50"
+            className="mt-8 p-6 border-2 border-yellow-400 rounded-xl bg-gradient-to-r from-yellow-50 to-amber-50 shadow-md relative overflow-hidden"
           >
-            <h3 className="text-xl font-bold mb-2">
-              🚀 Mejore su seguridad con una evaluación avanzada
-            </h3>
-            <p className="text-gray-700 mb-4">
-              Esta evaluación inicial le ofrece una visión básica de su
-              seguridad. Obtenga un análisis completo, recomendaciones
-              detalladas y un plan personalizado con nuestra evaluación
-              avanzada.
-            </p>
-            <ul className="mb-4 space-y-2">
-              <li className="flex items-start">
-                <span className="text-yellow-600 mr-2 font-bold">✓</span>
-                <span>Evaluación completa de 25 preguntas</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-yellow-600 mr-2 font-bold">✓</span>
-                <span>Análisis basado en marcos de referencia</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-yellow-600 mr-2 font-bold">✓</span>
-                <span>Plan de acción detallado</span>
-              </li>
-            </ul>
-            <Button
-              onClick={() => (window.location.href = "/pricing")}
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black rounded-full py-6 text-lg"
-            >
-              Actualizar a evaluación avanzada
-            </Button>
+            <div className="absolute -right-8 -top-8 w-40 h-40 bg-yellow-300 opacity-20 rounded-full"></div>
+            <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-yellow-300 opacity-10 rounded-full"></div>
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-yellow-400 p-2 rounded-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-black"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold">
+                  ⚠️ Advertencia: Evaluación Limitada
+                </h3>
+              </div>
+
+              <p className="text-gray-700 mb-4">
+                <strong className="text-yellow-700">IMPORTANTE:</strong> Los
+                resultados que está viendo son de una evaluación básica e
+                inicial. Para un diagnóstico completo y profesional de su
+                ciberseguridad, necesita la evaluación avanzada.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                <div className="bg-white bg-opacity-70 border border-yellow-300 rounded-lg p-3 flex items-start">
+                  <span className="text-xl text-yellow-600 mr-2">✓</span>
+                  <span className="text-sm">25 preguntas especializadas</span>
+                </div>
+                <div className="bg-white bg-opacity-70 border border-yellow-300 rounded-lg p-3 flex items-start">
+                  <span className="text-xl text-yellow-600 mr-2">✓</span>
+                  <span className="text-sm">Análisis basado en ISO 27001</span>
+                </div>
+                <div className="bg-white bg-opacity-70 border border-yellow-300 rounded-lg p-3 flex items-start">
+                  <span className="text-xl text-yellow-600 mr-2">✓</span>
+                  <span className="text-sm">Plan de acción detallado</span>
+                </div>
+                <div className="bg-white bg-opacity-70 border border-yellow-300 rounded-lg p-3 flex items-start">
+                  <span className="text-xl text-yellow-600 mr-2">✓</span>
+                  <span className="text-sm">Dashboard de seguridad</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => (window.location.href = "/pricing")}
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black rounded-full py-6 text-lg font-semibold shadow-md"
+              >
+                Actualizar a evaluación avanzada
+              </Button>
+            </div>
           </motion.div>
         </motion.div>
       </div>

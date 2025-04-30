@@ -482,23 +482,26 @@ export function CybersecurityResults({
 
         const url = `/api/specialists/recommended?level=${finalMaturityLevelNumber}${categoriesParam}`;
         console.log("Checking specialists availability at URL:", url);
-        const response = await fetch(url);
 
-        if (!response.ok) {
-          console.error(
-            "Failed to fetch specialists availability:",
-            response.status
-          );
+        try {
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            console.log("Specialists API returned status:", response.status);
+            setSpecialistsAvailable(false);
+            return;
+          }
+
+          const responseData = await response.json();
+          console.log("Specialists availability check response:", responseData);
+          console.log("Specialists length:", responseData.length);
+          setSpecialistsAvailable(responseData && responseData.length > 0);
+        } catch (fetchError) {
+          console.log("Error fetching specialists:", fetchError);
           setSpecialistsAvailable(false);
-          return;
         }
-
-        const responseData = await response.json();
-        console.log("Specialists availability check response:", responseData);
-        console.log("Specialists length:", responseData.length);
-        setSpecialistsAvailable(responseData && responseData.length > 0);
       } catch (err) {
-        console.error("Error checking specialists availability:", err);
+        console.log("Error in specialists availability check:", err);
         setSpecialistsAvailable(false);
       } finally {
         setLoadingSpecialists(false);
@@ -610,9 +613,11 @@ export function CybersecurityResults({
             )}
             {/* Advanced Evaluation CTA for initial evaluation */}
             {quizData.id === "evaluacion-inicial" && (
-              <div className="mt-8 bg-yellow-50 p-8 rounded-xl shadow-sm border-2 border-yellow-400">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="flex-shrink-0 bg-yellow-400 rounded-full p-4 w-20 h-20 flex items-center justify-center">
+              <div className="mt-8 bg-gradient-to-r from-yellow-50 to-amber-50 p-8 rounded-xl shadow-md border-2 border-yellow-400 relative overflow-hidden">
+                <div className="absolute -right-8 -top-8 w-40 h-40 bg-yellow-300 opacity-20 rounded-full"></div>
+                <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-yellow-300 opacity-10 rounded-full"></div>
+                <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                  <div className="flex-shrink-0 bg-yellow-400 rounded-full p-4 w-20 h-20 flex items-center justify-center shadow-md">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="32"
@@ -623,38 +628,43 @@ export function CybersecurityResults({
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      className="text-black"
                     >
-                      <rect width="18" height="18" x="3" y="3" rx="2" />
-                      <path d="M12 8v8" />
-                      <path d="m8.5 12 7 0" />
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                     </svg>
                   </div>
                   <div className="flex-grow text-center md:text-left">
                     <h3 className="text-2xl font-bold mb-2">
-                      ¡Mejora tu diagnóstico con la evaluación avanzada!
+                      ⚠️ Esto es solo un diagnóstico básico ⚠️
                     </h3>
-                    <p className="text-gray-700 mb-4">
-                      Esta evaluación inicial ofrece una visión básica de tu
-                      seguridad. Para un análisis más completo y recomendaciones
-                      detalladas, realiza nuestra evaluación avanzada.
+                    <p className="text-gray-700 mb-3">
+                      <strong className="text-yellow-700">IMPORTANTE:</strong>{" "}
+                      Esta evaluación inicial muestra solo una visión parcial y
+                      limitada de su seguridad. Para obtener una evaluación
+                      completa y profesional, recomendamos nuestra evaluación
+                      avanzada que incluye:
                     </p>
-                    <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
-                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                        25 preguntas detalladas
-                      </span>
-                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                        Análisis con estándares ISO 27001
-                      </span>
-                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                        Plan de acción personalizado
-                      </span>
-                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                        Dashboard de seguridad
-                      </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                      <div className="bg-white bg-opacity-70 text-yellow-800 px-4 py-3 rounded-lg text-sm flex items-start border border-yellow-300">
+                        <span className="text-xl mr-2">✓</span>
+                        <span>25 preguntas completas y profundizadas</span>
+                      </div>
+                      <div className="bg-white bg-opacity-70 text-yellow-800 px-4 py-3 rounded-lg text-sm flex items-start border border-yellow-300">
+                        <span className="text-xl mr-2">✓</span>
+                        <span>Análisis basado en ISO 27001 y NIST</span>
+                      </div>
+                      <div className="bg-white bg-opacity-70 text-yellow-800 px-4 py-3 rounded-lg text-sm flex items-start border border-yellow-300">
+                        <span className="text-xl mr-2">✓</span>
+                        <span>Plan de acción detallado y personalizado</span>
+                      </div>
+                      <div className="bg-white bg-opacity-70 text-yellow-800 px-4 py-3 rounded-lg text-sm flex items-start border border-yellow-300">
+                        <span className="text-xl mr-2">✓</span>
+                        <span>Acceso al dashboard de seguridad</span>
+                      </div>
                     </div>
                     <Link href="/pricing">
-                      <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-6 px-8 rounded-full">
-                        Ver planes premium
+                      <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-6 px-8 rounded-full shadow-md">
+                        Actualizar a evaluación avanzada
                       </Button>
                     </Link>
                   </div>
@@ -1310,8 +1320,6 @@ export function CybersecurityResults({
                 />
               </div>
             )}
-
-            
 
             {!isSharedView && onRestart && (
               <div className="flex justify-center mt-8">
