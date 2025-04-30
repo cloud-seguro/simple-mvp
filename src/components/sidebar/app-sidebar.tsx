@@ -47,6 +47,7 @@ export function AppSidebar({
         title: "CONTRATA",
         url: "/contrata",
         icon: Shield,
+        
       });
     }
 

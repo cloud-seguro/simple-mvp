@@ -5,11 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { UserRole, EngagementStatus } from "@prisma/client";
 import Link from "next/link";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import Image from "next/image";
 
 export const metadata = {
-  title: "My Engagements | CONTRATA | SIMPLE",
-  description: "Manage your specialist engagements",
+  title: "Mis Contratos | CONTRATA | SIMPLE",
+  description: "Gestiona tus contratos con especialistas",
 };
 
 // Add dynamic export to handle the cookies usage
@@ -32,6 +33,26 @@ const getStatusBadgeClass = (status: EngagementStatus) => {
       return "bg-muted text-muted-foreground";
     default:
       return "bg-muted text-muted-foreground";
+  }
+};
+
+// Helper function to translate status
+const translateStatus = (status: EngagementStatus) => {
+  switch (status) {
+    case "PENDING":
+      return "PENDIENTE";
+    case "ACCEPTED":
+      return "ACEPTADO";
+    case "REJECTED":
+      return "RECHAZADO";
+    case "IN_PROGRESS":
+      return "EN PROGRESO";
+    case "COMPLETED":
+      return "COMPLETADO";
+    case "CANCELLED":
+      return "CANCELADO";
+    default:
+      return status;
   }
 };
 
@@ -119,20 +140,23 @@ export default async function EngagementsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold mb-2">My Specialist Engagements</h1>
+        <h1 className="text-2xl font-bold mb-2">
+          Mis Contratos con Especialistas
+        </h1>
         <p className="text-muted-foreground">
-          Manage and track your engagements with cybersecurity specialists.
+          Gestiona y realiza seguimiento de tus contratos con especialistas en
+          ciberseguridad.
         </p>
       </div>
 
       <div className="bg-card rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">All Engagements</h2>
+          <h2 className="text-xl font-semibold">Todos los Contratos</h2>
           <Link
             href="/contrata"
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
           >
-            Hire New Specialist
+            Contratar Nuevo Especialista
           </Link>
         </div>
 
@@ -152,17 +176,17 @@ export default async function EngagementsPage() {
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            <h3 className="mt-4 text-lg font-medium">No engagements yet</h3>
+            <h3 className="mt-4 text-lg font-medium">Sin contratos todavía</h3>
             <p className="mt-1 text-muted-foreground">
-              You haven&apos;t hired any specialists yet. Start by hiring a
-              specialist.
+              Aún no has contratado a ningún especialista. Comienza contratando
+              un especialista.
             </p>
             <div className="mt-6">
               <Link
                 href="/contrata"
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
               >
-                Find a Specialist
+                Buscar un Especialista
               </Link>
             </div>
           </div>
@@ -178,7 +202,7 @@ export default async function EngagementsPage() {
               return (
                 <div key={status} className="space-y-4">
                   <h3 className="text-lg font-medium border-b pb-2">
-                    {status.replace(/_/g, " ")} (
+                    {translateStatus(status)} (
                     {groupedEngagements[status].length})
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
@@ -205,7 +229,7 @@ export default async function EngagementsPage() {
                           <div>
                             <h4 className="font-medium">{engagement.title}</h4>
                             <p className="text-sm text-muted-foreground">
-                              With: {engagement.specialist.name}
+                              Con: {engagement.specialist.name}
                             </p>
                           </div>
                         </div>
@@ -213,18 +237,19 @@ export default async function EngagementsPage() {
                           <span
                             className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(engagement.status)}`}
                           >
-                            {engagement.status.replace(/_/g, " ")}
+                            {translateStatus(engagement.status)}
                           </span>
                           <p className="text-sm text-muted-foreground">
-                            Created:{" "}
+                            Creado:{" "}
                             {format(
                               new Date(engagement.createdAt),
-                              "MMM d, yyyy"
+                              "d 'de' MMM, yyyy",
+                              { locale: es }
                             )}
                           </p>
                           {engagement.budget && (
                             <p className="text-sm font-medium">
-                              Budget: ${engagement.budget}
+                              Presupuesto: ${engagement.budget}
                             </p>
                           )}
                         </div>

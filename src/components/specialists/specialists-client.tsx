@@ -65,14 +65,14 @@ export function SpecialistsClient({
       setSpecialists((prev) => [newSpecialist, ...prev]);
       setIsDialogOpen(false);
       toast({
-        title: "Success",
-        description: "Specialist created successfully",
+        title: "Éxito",
+        description: "Especialista creado correctamente",
       });
     } catch (error) {
       console.error("Error creating specialist:", error);
       toast({
         title: "Error",
-        description: "Failed to create specialist",
+        description: "Error al crear el especialista",
         variant: "destructive",
       });
     }
@@ -103,14 +103,14 @@ export function SpecialistsClient({
       setEditingSpecialist(null);
       setIsDialogOpen(false);
       toast({
-        title: "Success",
-        description: "Specialist updated successfully",
+        title: "Éxito",
+        description: "Especialista actualizado correctamente",
       });
     } catch (error) {
       console.error("Error updating specialist:", error);
       toast({
         title: "Error",
-        description: "Failed to update specialist",
+        description: "Error al actualizar el especialista",
         variant: "destructive",
       });
     }
@@ -131,14 +131,14 @@ export function SpecialistsClient({
 
       setSpecialists((prev) => prev.filter((spec) => spec.id !== id));
       toast({
-        title: "Success",
-        description: "Specialist deleted successfully",
+        title: "Éxito",
+        description: "Especialista eliminado correctamente",
       });
     } catch (error) {
       console.error("Error deleting specialist:", error);
       toast({
         title: "Error",
-        description: "Failed to delete specialist",
+        description: "Error al eliminar el especialista",
         variant: "destructive",
       });
     } finally {
@@ -150,7 +150,7 @@ export function SpecialistsClient({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Your Specialists</h2>
+        <h2 className="text-xl font-semibold">Tus Especialistas</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
@@ -158,18 +158,20 @@ export function SpecialistsClient({
                 setEditingSpecialist(null);
               }}
             >
-              <Plus className="mr-2 h-4 w-4" /> Add Specialist
+              <Plus className="mr-2 h-4 w-4" /> Añadir Especialista
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>
-                {editingSpecialist ? "Edit Specialist" : "Add New Specialist"}
+                {editingSpecialist
+                  ? "Editar Especialista"
+                  : "Añadir Nuevo Especialista"}
               </DialogTitle>
               <DialogDescription>
                 {editingSpecialist
-                  ? "Update specialist information"
-                  : "Add a new cybersecurity specialist to recommend to users"}
+                  ? "Actualizar información del especialista"
+                  : "Añade un nuevo especialista en ciberseguridad para recomendar a los usuarios"}
               </DialogDescription>
             </DialogHeader>
             <SpecialistForm
@@ -192,18 +194,18 @@ export function SpecialistsClient({
         <div className="text-center py-12 border rounded-lg bg-gray-50">
           <User className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-4 font-medium text-gray-900">
-            No specialists added yet
+            No hay especialistas añadidos aún
           </h3>
           <p className="mt-2 text-sm text-gray-500">
-            Add specialists to recommend to users based on their evaluation
-            results.
+            Añade especialistas para recomendar a los usuarios en base a sus
+            resultados de evaluación.
           </p>
           <Button
             onClick={() => setIsDialogOpen(true)}
             variant="outline"
             className="mt-4"
           >
-            <Plus className="mr-2 h-4 w-4" /> Add your first specialist
+            <Plus className="mr-2 h-4 w-4" /> Añade tu primer especialista
           </Button>
         </div>
       ) : (
@@ -215,8 +217,10 @@ export function SpecialistsClient({
                   <div>
                     <CardTitle>{specialist.name}</CardTitle>
                     <CardDescription>
-                      Maturity Level: {specialist.minMaturityLevel}-
-                      {specialist.maxMaturityLevel}
+                      {specialist.hourlyRate &&
+                        `$${specialist.hourlyRate}/hora`}
+                      {specialist.location && specialist.hourlyRate && " • "}
+                      {specialist.location && specialist.location}
                     </CardDescription>
                   </div>
                   {specialist.imageUrl && (
@@ -234,7 +238,7 @@ export function SpecialistsClient({
               </CardHeader>
               <CardContent>
                 <div className="mb-2">
-                  <p className="text-sm text-gray-500 mb-1">Expertise:</p>
+                  <p className="text-sm text-gray-500 mb-1">Especialidad:</p>
                   <div className="flex flex-wrap gap-2">
                     {specialist.expertiseAreas.map((area) => (
                       <Badge key={area} variant="secondary">
@@ -243,7 +247,32 @@ export function SpecialistsClient({
                     ))}
                   </div>
                 </div>
+
+                {specialist.skills && specialist.skills.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-sm text-gray-500 mb-1">Habilidades:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {specialist.skills.map((skill) => (
+                        <Badge key={skill} variant="outline">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-sm mt-2 line-clamp-3">{specialist.bio}</p>
+
+                {specialist.linkedinProfileUrl && (
+                  <a
+                    href={specialist.linkedinProfileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline mt-2 flex items-center"
+                  >
+                    <span className="mr-1">Perfil de LinkedIn</span>
+                  </a>
+                )}
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button
@@ -254,7 +283,7 @@ export function SpecialistsClient({
                     setIsDialogOpen(true);
                   }}
                 >
-                  <Edit className="mr-2 h-4 w-4" /> Edit
+                  <Edit className="mr-2 h-4 w-4" /> Editar
                 </Button>
                 <Button
                   variant="destructive"
@@ -263,10 +292,10 @@ export function SpecialistsClient({
                   disabled={isDeleting && deleteId === specialist.id}
                 >
                   {isDeleting && deleteId === specialist.id ? (
-                    "Deleting..."
+                    "Eliminando..."
                   ) : (
                     <>
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                     </>
                   )}
                 </Button>

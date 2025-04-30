@@ -57,11 +57,10 @@ model Specialist {
   bio              String
   expertiseAreas   ExpertiseArea[]
   contactEmail     String
-  contactPhone     String?
-  website          String?
   imageUrl         String?
-  minMaturityLevel Int
-  maxMaturityLevel Int
+  hourlyRate       Float?
+  linkedinProfileUrl String?
+  skills           String[]
   location         String?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -110,6 +109,8 @@ model Engagement {
   specialistId String
   dealId       String?
   messages     Message[]
+  attachments  Attachment[]
+  statusHistory StatusChange[]
   deal         SpecialistDeal?  @relation(fields: [dealId], references: [id])
   profile      Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
   specialist   Specialist       @relation(fields: [specialistId], references: [id])
@@ -150,6 +151,33 @@ model SpecialistDeal {
   @@index([specialistId])
   @@index([createdById])
   @@map("specialist_deals")
+}
+
+model Attachment {
+  id           String     @id @default(cuid())
+  fileName     String
+  fileUrl      String
+  fileType     String
+  fileSize     Int
+  uploadedAt   DateTime   @default(now())
+  engagementId String
+  engagement   Engagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@map("engagement_attachments")
+}
+
+model StatusChange {
+  id           String          @id @default(cuid())
+  previousStatus EngagementStatus
+  newStatus    EngagementStatus
+  reason       String?
+  changedAt    DateTime        @default(now())
+  engagementId String
+  engagement   Engagement      @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@map("engagement_status_history")
 }
 
 enum UserRole {

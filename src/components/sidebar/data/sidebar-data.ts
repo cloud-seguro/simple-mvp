@@ -1,4 +1,12 @@
-import { LayoutDashboard, FileBarChart, Settings, Command } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileBarChart,
+  Settings,
+  Command,
+  UserCircle,
+  FileCheck,
+  ListChecks,
+} from "lucide-react";
 import type { SidebarData } from "../types";
 
 export const sidebarData: SidebarData = {
@@ -27,6 +35,28 @@ export const sidebarData: SidebarData = {
           title: "Evaluaciones",
           url: "/evaluations",
           icon: FileBarChart,
+        },
+        {
+          title: "Contrata",
+          url: "/contrata",
+          icon: UserCircle,
+          items: [
+            {
+              title: "Especialistas",
+              url: "/contrata/specialists",
+              icon: UserCircle,
+            },
+            {
+              title: "Contratos",
+              url: "/contrata/engagements",
+              icon: FileCheck,
+            },
+            {
+              title: "Contratar",
+              url: "/contrata/hire",
+              icon: ListChecks,
+            },
+          ],
         },
       ],
     },

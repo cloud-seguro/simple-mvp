@@ -147,8 +147,15 @@ export async function GET(
       },
     });
 
+    // Format dates properly for the frontend
+    const formattedMessages = messages.map((message) => ({
+      ...message,
+      // Ensure sentAt is properly formatted as an ISO string
+      sentAt: message.sentAt.toISOString(),
+    }));
+
     // Return the messages
-    return NextResponse.json(messages);
+    return NextResponse.json(formattedMessages);
   } catch (error) {
     console.error("Error fetching messages:", error);
     return NextResponse.json(

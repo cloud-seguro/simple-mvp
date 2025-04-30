@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Image from "next/image";
@@ -12,35 +11,37 @@ import Image from "next/image";
 type Message = {
   id: string;
   content: string;
-  sentAt: string;
+  sentAt: string; // Using sentAt instead of createdAt to match Prisma schema
   senderIsUser: boolean;
   senderName?: string;
-  senderId?: string;
   senderAvatar?: string;
-  engagementId: string;
 };
 
-export default function MessageThread({
+export function MessageThread({
   engagementId,
   profileId,
+  adminMode = false,
 }: {
   engagementId: string;
   profileId: string;
+  adminMode?: boolean;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
 
   // Function to load messages
   const loadMessages = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/contrata/engagements/${engagementId}/messages`
-      );
+      // Use the appropriate API route based on whether this is admin mode or not
+      const apiRoute = adminMode
+        ? `/api/specialists/engagements/${engagementId}/messages`
+        : `/api/contrata/engagements/${engagementId}/messages`;
+
+      const response = await fetch(apiRoute);
       if (!response.ok) {
         throw new Error("Error al cargar mensajes");
       }
@@ -70,7 +71,7 @@ export default function MessageThread({
     } finally {
       setIsLoading(false);
     }
-  }, [engagementId, toast]);
+  }, [engagementId, toast, adminMode]);
 
   // Load messages on component mount
   useEffect(() => {
@@ -86,19 +87,22 @@ export default function MessageThread({
 
     setIsSending(true);
     try {
-      const response = await fetch(
-        `/api/contrata/engagements/${engagementId}/messages`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content: newMessage,
-            profileId,
-          }),
-        }
-      );
+      // Use the appropriate API route based on whether this is admin mode or not
+      const apiRoute = adminMode
+        ? `/api/specialists/engagements/${engagementId}/messages`
+        : `/api/contrata/engagements/${engagementId}/messages`;
+
+      const response = await fetch(apiRoute, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: newMessage,
+          profileId,
+          adminMode,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Error al enviar mensaje");
@@ -163,12 +167,14 @@ export default function MessageThread({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold">Mensajes</h2>
-        <p className="text-muted-foreground">
-          Comunícate directamente con todos los involucrados en este proyecto.
-        </p>
-      </div>
+      {!adminMode && (
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">Mensajes</h2>
+          <p className="text-muted-foreground">
+            Comunícate directamente con todos los involucrados en este proyecto.
+          </p>
+        </div>
+      )}
 
       {/* Message Thread */}
       <div className="flex-1 overflow-y-auto mb-4 border rounded-lg p-4 bg-background max-h-[400px]">
@@ -193,7 +199,11 @@ export default function MessageThread({
               </div>
 
               {groupedMessages[date].map((message) => {
-                const isCurrentUser = user?.id === message.senderId;
+                // In admin mode, the current user is always the admin, so only messages
+                // where senderIsUser is false are from the admin
+                const isCurrentUser = adminMode
+                  ? !message.senderIsUser
+                  : message.senderIsUser;
                 return (
                   <div
                     key={message.id}
@@ -214,7 +224,10 @@ export default function MessageThread({
                         {message.senderAvatar ? (
                           <Image
                             src={message.senderAvatar}
-                            alt={message.senderName || "Usuario"}
+                            alt={
+                              message.senderName ||
+                              (isCurrentUser ? "Admin" : "Usuario")
+                            }
                             width={32}
                             height={32}
                             className="h-full w-full object-cover"
@@ -225,8 +238,8 @@ export default function MessageThread({
                               {message.senderName
                                 ? message.senderName.charAt(0).toUpperCase()
                                 : isCurrentUser
-                                  ? "U"
-                                  : "E"}
+                                  ? "A"
+                                  : "U"}
                             </span>
                           </div>
                         )}
@@ -241,7 +254,7 @@ export default function MessageThread({
                         >
                           <div className="mb-1 text-xs font-medium">
                             {message.senderName ||
-                              (isCurrentUser ? "Usuario" : "Especialista")}{" "}
+                              (isCurrentUser ? "Admin" : "Usuario")}{" "}
                             <span className="text-xs opacity-70">
                               {safeFormatDate(message.sentAt, "HH:mm")}
                             </span>
@@ -266,7 +279,11 @@ export default function MessageThread({
           <Textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Escribe un mensaje..."
+            placeholder={
+              adminMode
+                ? "Responder como administrador..."
+                : "Escribe un mensaje..."
+            }
             className="flex-1 resize-none"
             rows={3}
             onKeyDown={(e) => {

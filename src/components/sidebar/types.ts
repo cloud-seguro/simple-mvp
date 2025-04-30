@@ -20,7 +20,7 @@ interface BaseNavItem {
 
 export interface NavLink extends BaseNavItem {
   url: string;
-  items?: never;
+  items?: NavLink[];
 }
 
 export interface NavCollapsible extends BaseNavItem {

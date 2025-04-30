@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { secureSupabaseClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { X, Upload, File, Paperclip } from "lucide-react";
 
 // Types for the component props
 type SpecialistInfo = {
@@ -85,6 +86,14 @@ const engagementFormSchema = z.object({
 
 type EngagementFormValues = z.infer<typeof engagementFormSchema>;
 
+// File upload related types
+type FileUpload = {
+  file: File;
+  preview: string;
+  uploading: boolean;
+  error?: string;
+};
+
 export const EngagementForm = ({
   specialist,
   profileId,
@@ -97,6 +106,7 @@ export const EngagementForm = ({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [files, setFiles] = useState<FileUpload[]>([]);
 
   const form = useForm<EngagementFormValues>({
     resolver: zodResolver(engagementFormSchema),
@@ -126,6 +136,87 @@ export const EngagementForm = ({
     }
   }, [watchDealId, specialist.deals, setValue]);
 
+  // Clean up file preview URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      files.forEach((fileUpload) => {
+        if (fileUpload.preview) {
+          URL.revokeObjectURL(fileUpload.preview);
+        }
+      });
+    };
+  }, [files]);
+
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const newFiles = Array.from(e.target.files).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      uploading: false,
+    }));
+
+    setFiles([...files, ...newFiles]);
+    e.target.value = "";
+  };
+
+  // Remove a file from the list
+  const removeFile = (index: number) => {
+    const newFiles = [...files];
+    if (newFiles[index].preview) {
+      URL.revokeObjectURL(newFiles[index].preview);
+    }
+    newFiles.splice(index, 1);
+    setFiles(newFiles);
+  };
+
+  // Upload files to Supabase storage
+  const uploadFiles = async (): Promise<
+    { fileName: string; fileUrl: string; fileType: string; fileSize: number }[]
+  > => {
+    if (files.length === 0) return [];
+
+    const uploadPromises = files.map(async (fileUpload, index) => {
+      try {
+        const newFiles = [...files];
+        newFiles[index].uploading = true;
+        setFiles(newFiles);
+
+        const file = fileUpload.file;
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `engagements/${profileId}/${fileName}`;
+
+        const { data, error } = await secureSupabaseClient.storage
+          .from("attachments")
+          .upload(filePath, file);
+
+        if (error) throw error;
+
+        const { data: urlData } = secureSupabaseClient.storage
+          .from("attachments")
+          .getPublicUrl(filePath);
+
+        return {
+          fileName: file.name,
+          fileUrl: urlData.publicUrl,
+          fileType: file.type,
+          fileSize: file.size,
+        };
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        const newFiles = [...files];
+        newFiles[index].error = "Failed to upload";
+        newFiles[index].uploading = false;
+        setFiles(newFiles);
+        throw error;
+      }
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
   const onSubmit = async (data: EngagementFormValues) => {
     setIsSubmitting(true);
 
@@ -139,6 +230,9 @@ export const EngagementForm = ({
         return;
       }
 
+      // Upload any attached files
+      const attachments = await uploadFiles();
+
       // Format the data for submission
       const formattedData = {
         title: data.title,
@@ -148,6 +242,7 @@ export const EngagementForm = ({
         specialistId: specialist.id,
         profileId: profileId,
         dealId: data.dealId || null,
+        attachments: attachments,
       };
 
       // Submit the engagement request
@@ -331,6 +426,85 @@ export const EngagementForm = ({
             )}
           />
 
+          {/* File Attachments */}
+          <div>
+            <FormLabel>Archivos Adjuntos</FormLabel>
+            <div className="mt-2 border-2 border-dashed rounded-md p-6">
+              <div className="flex flex-col items-center justify-center">
+                <Paperclip className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm font-medium mb-1">
+                  Arrastra o selecciona archivos
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Puedes subir hasta 5 archivos (máx. 10MB cada uno)
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    document.getElementById("file-upload")?.click()
+                  }
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Seleccionar Archivos
+                </Button>
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.zip"
+                  disabled={files.length >= 5}
+                />
+              </div>
+            </div>
+
+            {files.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <p className="text-sm font-medium">Archivos seleccionados:</p>
+                {files.map((fileUpload, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-2 border rounded-md"
+                  >
+                    <div className="flex items-center">
+                      <File className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-sm truncate max-w-[200px]">
+                        {fileUpload.file.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ({Math.round(fileUpload.file.size / 1024)} KB)
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      {fileUpload.uploading ? (
+                        <div className="h-4 w-4 border-2 border-t-transparent border-primary animate-spin rounded-full mr-2"></div>
+                      ) : fileUpload.error ? (
+                        <span className="text-xs text-destructive mr-2">
+                          {fileUpload.error}
+                        </span>
+                      ) : null}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-2">
+              Formatos permitidos: PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, JPEG,
+              ZIP
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
@@ -365,19 +539,16 @@ export const EngagementForm = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="URGENT">Urgente (1-2 días)</SelectItem>
-                      <SelectItem value="SHORT">Corto (1 semana)</SelectItem>
-                      <SelectItem value="MEDIUM">
-                        Medio (2-4 semanas)
-                      </SelectItem>
-                      <SelectItem value="LONG">Largo (1-3 meses)</SelectItem>
-                      <SelectItem value="FLEXIBLE">
-                        Flexible / No definido
-                      </SelectItem>
+                      <SelectItem value="7">1 semana</SelectItem>
+                      <SelectItem value="14">2 semanas</SelectItem>
+                      <SelectItem value="30">1 mes</SelectItem>
+                      <SelectItem value="60">2 meses</SelectItem>
+                      <SelectItem value="90">3 meses</SelectItem>
+                      <SelectItem value="180">6 meses</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Indica cuándo necesitas que se complete este proyecto.
+                    El tiempo que esperas que dure el proyecto.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -385,11 +556,9 @@ export const EngagementForm = ({
             />
           </div>
 
-          <div className="pt-4">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
-            </Button>
-          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
+          </Button>
         </form>
       </Form>
     </div>

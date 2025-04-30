@@ -99,19 +99,14 @@ export async function PATCH(
         bio: data.bio !== undefined ? data.bio : undefined,
         expertiseAreas:
           data.expertiseAreas !== undefined ? data.expertiseAreas : undefined,
+        skills: data.skills !== undefined ? data.skills : undefined,
         contactEmail:
           data.contactEmail !== undefined ? data.contactEmail : undefined,
-        contactPhone:
-          data.contactPhone !== undefined ? data.contactPhone : undefined,
-        website: data.website !== undefined ? data.website : undefined,
         imageUrl: data.imageUrl !== undefined ? data.imageUrl : undefined,
-        minMaturityLevel:
-          data.minMaturityLevel !== undefined
-            ? data.minMaturityLevel
-            : undefined,
-        maxMaturityLevel:
-          data.maxMaturityLevel !== undefined
-            ? data.maxMaturityLevel
+        hourlyRate: data.hourlyRate !== undefined ? data.hourlyRate : undefined,
+        linkedinProfileUrl:
+          data.linkedinProfileUrl !== undefined
+            ? data.linkedinProfileUrl
             : undefined,
         location: data.location !== undefined ? data.location : undefined,
         active: data.active !== undefined ? data.active : undefined,

@@ -4,78 +4,60 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { prisma } from "@/lib/prisma";
 import { UserRole, EngagementStatus } from "@prisma/client";
 import Link from "next/link";
-import MessageThread from "@/components/contrata/message-thread";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import Image from "next/image";
-
-export const metadata = {
-  title: "Detalles del Contrato | CONTRATA | SIMPLE",
-  description: "Ver detalles de tu contrato con especialista",
-};
+import { format } from "date-fns";
+import { ArrowLeft } from "lucide-react";
+import { MessageThread } from "@/components/message-thread";
+import { UpdateEngagementForm } from "@/components/specialists/update-engagement-form";
 
 // Add dynamic export to handle the cookies usage
 export const dynamic = "force-dynamic";
 
-// Helper function to get status badge styling
+export const metadata = {
+  title: "Detalle de Solicitud | SIMPLE",
+  description: "Detalles de solicitud de contratación de especialista",
+};
+
+// Helper function to get badge color based on status
 const getStatusBadgeClass = (status: EngagementStatus) => {
   switch (status) {
     case "PENDING":
-      return "bg-accent text-accent-foreground";
+      return "bg-yellow-100 text-yellow-800";
     case "ACCEPTED":
-      return "bg-accent text-accent-foreground";
+      return "bg-blue-100 text-blue-800";
     case "REJECTED":
-      return "bg-destructive/10 text-destructive";
+      return "bg-red-100 text-red-800";
     case "IN_PROGRESS":
-      return "bg-primary/10 text-primary";
+      return "bg-green-100 text-green-800";
     case "COMPLETED":
-      return "bg-[hsl(var(--chart-2))] text-white";
+      return "bg-purple-100 text-purple-800";
     case "CANCELLED":
-      return "bg-muted text-muted-foreground";
+      return "bg-gray-100 text-gray-800";
     default:
-      return "bg-muted text-muted-foreground";
+      return "bg-gray-100 text-gray-800";
   }
 };
 
-// Helper function to translate status
-const translateStatus = (status: EngagementStatus) => {
+const getStatusText = (status: EngagementStatus) => {
   switch (status) {
     case "PENDING":
-      return "PENDIENTE";
+      return "Pendiente";
     case "ACCEPTED":
-      return "ACEPTADO";
+      return "Aceptada";
     case "REJECTED":
-      return "RECHAZADO";
+      return "Rechazada";
     case "IN_PROGRESS":
-      return "EN PROGRESO";
+      return "En Progreso";
     case "COMPLETED":
-      return "COMPLETADO";
+      return "Completada";
     case "CANCELLED":
-      return "CANCELADO";
+      return "Cancelada";
     default:
       return status;
   }
 };
 
-// Helper function to translate expertise areas to Spanish
-function translateExpertiseArea(area: string): string {
-  const translations: Record<string, string> = {
-    NETWORK_SECURITY: "Seguridad de Redes",
-    APPLICATION_SECURITY: "Seguridad de Aplicaciones",
-    CLOUD_SECURITY: "Seguridad en la Nube",
-    INCIDENT_RESPONSE: "Respuesta a Incidentes",
-    SECURITY_ASSESSMENT: "Evaluación de Seguridad",
-    COMPLIANCE: "Cumplimiento Normativo",
-    SECURITY_TRAINING: "Formación en Seguridad",
-    SECURITY_ARCHITECTURE: "Arquitectura de Seguridad",
-    DATA_PROTECTION: "Protección de Datos",
-    GENERAL: "General",
-  };
-
-  return translations[area] || area.replace(/_/g, " ");
-}
-
-export default async function EngagementDetailPage({
+export default async function SpecialistEngagementDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -97,11 +79,8 @@ export default async function EngagementDetailPage({
     select: { id: true, role: true },
   });
 
-  // If not a PREMIUM or SUPERADMIN user, redirect to dashboard
-  if (
-    !profile ||
-    (profile.role !== UserRole.PREMIUM && profile.role !== UserRole.SUPERADMIN)
-  ) {
+  // If not a SUPERADMIN, redirect to dashboard
+  if (!profile || profile.role !== UserRole.SUPERADMIN) {
     redirect("/dashboard");
   }
 
@@ -109,16 +88,35 @@ export default async function EngagementDetailPage({
   const engagement = await prisma.engagement.findUnique({
     where: {
       id: engagementId,
-      profileId: profile.id, // Ensure the engagement belongs to the user
     },
     include: {
-      specialist: true,
-      deal: true,
-      messages: {
-        orderBy: {
-          sentAt: "asc",
+      specialist: {
+        select: {
+          id: true,
+          name: true,
+          bio: true,
+          expertiseAreas: true,
+          imageUrl: true,
+          contactEmail: true,
+          location: true,
+          hourlyRate: true,
+          linkedinProfileUrl: true,
+          skills: true,
         },
       },
+      profile: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          avatarUrl: true,
+          company: true,
+          company_role: true,
+          phoneNumber: true,
+        },
+      },
+      deal: true,
     },
   });
 
@@ -127,24 +125,13 @@ export default async function EngagementDetailPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="space-y-8">
       <Link
-        href="/contrata/engagements"
+        href="/specialists/engagements"
         className="inline-flex items-center text-primary hover:text-primary/80 mb-6"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-1"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
-        Volver a todos los contratos
+        <ArrowLeft className="h-5 w-5 mr-1" />
+        Volver a todas las solicitudes
       </Link>
 
       <div className="bg-card rounded-lg shadow-md overflow-hidden mb-8">
@@ -156,39 +143,20 @@ export default async function EngagementDetailPage({
                 <span
                   className={`inline-block px-3 py-1 text-sm rounded-full ${getStatusBadgeClass(engagement.status)}`}
                 >
-                  {translateStatus(engagement.status)}
+                  {getStatusText(engagement.status)}
                 </span>
                 <span className="text-muted-foreground text-sm ml-4">
-                  Creado:{" "}
-                  {format(new Date(engagement.createdAt), "d 'de' MMM, yyyy", {
-                    locale: es,
-                  })}
+                  Creada: {format(new Date(engagement.createdAt), "dd/MM/yyyy")}
                 </span>
               </div>
             </div>
 
-            {/* Status actions based on current status */}
+            {/* Specialist admin actions */}
             <div className="mt-4 md:mt-0">
-              {engagement.status === "PENDING" && (
-                <button className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 transition">
-                  Cancelar Solicitud
-                </button>
-              )}
-              {engagement.status === "ACCEPTED" && (
-                <div className="space-y-2">
-                  <button className="w-full px-4 py-2 bg-[hsl(var(--chart-2))] text-white rounded-md hover:bg-[hsl(var(--chart-2))/90] transition">
-                    Realizar Pago
-                  </button>
-                  <button className="w-full px-4 py-2 border border-destructive text-destructive rounded-md hover:bg-destructive/10 transition">
-                    Cancelar
-                  </button>
-                </div>
-              )}
-              {engagement.status === "IN_PROGRESS" && (
-                <button className="px-4 py-2 bg-[hsl(var(--chart-2))] text-white rounded-md hover:bg-[hsl(var(--chart-2))/90] transition">
-                  Marcar como Completado
-                </button>
-              )}
+              <UpdateEngagementForm
+                engagementId={engagement.id}
+                currentStatus={engagement.status}
+              />
             </div>
           </div>
 
@@ -229,32 +197,83 @@ export default async function EngagementDetailPage({
                       Fecha de Inicio
                     </h3>
                     <p className="font-semibold">
-                      {format(
-                        new Date(engagement.startDate),
-                        "d 'de' MMM, yyyy",
-                        { locale: es }
-                      )}
+                      {format(new Date(engagement.startDate), "dd/MM/yyyy")}
                     </p>
                   </div>
                 )}
                 {engagement.endDate && (
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground">
-                      Fecha de Finalización
+                      Fecha de Fin
                     </h3>
                     <p className="font-semibold">
-                      {format(
-                        new Date(engagement.endDate),
-                        "d 'de' MMM, yyyy",
-                        { locale: es }
-                      )}
+                      {format(new Date(engagement.endDate), "dd/MM/yyyy")}
                     </p>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="md:w-1/3 mt-6 md:mt-0">
+            <div className="md:w-1/3 mt-6 md:mt-0 space-y-6">
+              <div className="border rounded-lg p-4">
+                <h2 className="text-lg font-semibold mb-3">Cliente</h2>
+                <div className="flex items-center mb-4">
+                  {engagement.profile.avatarUrl ? (
+                    <Image
+                      src={engagement.profile.avatarUrl}
+                      alt={`${engagement.profile.firstName} ${engagement.profile.lastName}`}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-full mr-4 object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-muted mr-4 flex items-center justify-center text-muted-foreground">
+                      <span className="text-xl">👤</span>
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-medium">
+                      {engagement.profile.firstName}{" "}
+                      {engagement.profile.lastName}
+                    </h3>
+                    {engagement.profile.company && (
+                      <p className="text-sm text-muted-foreground">
+                        {engagement.profile.company}{" "}
+                        {engagement.profile.company_role &&
+                          `• ${engagement.profile.company_role}`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="flex items-center text-sm">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2 text-muted-foreground"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                    <span>{engagement.profile.email}</span>
+                  </p>
+                  {engagement.profile.phoneNumber && (
+                    <p className="flex items-center text-sm">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2 text-muted-foreground"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                      </svg>
+                      <span>{engagement.profile.phoneNumber}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="border rounded-lg p-4">
                 <h2 className="text-lg font-semibold mb-3">Especialista</h2>
                 <div className="flex items-center mb-4">
@@ -288,7 +307,7 @@ export default async function EngagementDetailPage({
                       key={area}
                       className="px-2 py-1 bg-accent text-accent-foreground text-xs rounded-full"
                     >
-                      {translateExpertiseArea(area)}
+                      {area.replace(/_/g, " ")}
                     </span>
                   ))}
                 </div>
@@ -297,26 +316,21 @@ export default async function EngagementDetailPage({
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5 mr-2 text-muted-foreground"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                     </svg>
-                    {engagement.specialist.contactEmail}
+                    <span>{engagement.specialist.contactEmail}</span>
                   </p>
                 </div>
                 <div className="mt-4">
                   <Link
-                    href={`/contrata/specialists/${engagement.specialist.id}`}
-                    className="w-full px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition inline-block text-center"
+                    href={`/specialists`}
+                    className="text-primary hover:text-primary/80 text-sm font-medium"
                   >
-                    Ver Perfil Completo
+                    Ver todos los especialistas
                   </Link>
                 </div>
               </div>
@@ -325,9 +339,16 @@ export default async function EngagementDetailPage({
         </div>
       </div>
 
-      {/* Messages section */}
-      <div className="bg-card rounded-lg shadow-md overflow-hidden p-6">
-        <MessageThread engagementId={engagementId} profileId={profile.id} />
+      {/* Message Thread Component */}
+      <div className="bg-card rounded-lg shadow-md overflow-hidden">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-6">Mensajes</h2>
+          <MessageThread
+            engagementId={engagement.id}
+            profileId={profile.id}
+            adminMode={true}
+          />
+        </div>
       </div>
     </div>
   );

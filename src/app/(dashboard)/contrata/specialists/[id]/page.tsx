@@ -67,6 +67,15 @@ export default async function SpecialistDetailPage({
     notFound();
   }
 
+  // Type assertion to handle the new schema fields
+  type SpecialistWithDeals = typeof specialist & {
+    hourlyRate?: number | null;
+    linkedinProfileUrl?: string | null;
+    skills?: string[];
+  };
+
+  const specialistWithNewFields = specialist as SpecialistWithDeals;
+
   return (
     <div className="max-w-4xl mx-auto">
       <Link
@@ -92,10 +101,10 @@ export default async function SpecialistDetailPage({
         <div className="p-6">
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-              {specialist.imageUrl ? (
+              {specialistWithNewFields.imageUrl ? (
                 <Image
-                  src={specialist.imageUrl}
-                  alt={specialist.name}
+                  src={specialistWithNewFields.imageUrl}
+                  alt={specialistWithNewFields.name}
                   width={128}
                   height={128}
                   className="w-32 h-32 rounded-full object-cover"
@@ -107,14 +116,16 @@ export default async function SpecialistDetailPage({
               )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{specialist.name}</h1>
-              {specialist.location && (
+              <h1 className="text-2xl font-bold">
+                {specialistWithNewFields.name}
+              </h1>
+              {specialistWithNewFields.location && (
                 <p className="text-muted-foreground mb-2">
-                  {specialist.location}
+                  {specialistWithNewFields.location}
                 </p>
               )}
               <div className="flex flex-wrap gap-2 mt-2">
-                {specialist.expertiseAreas.map((area) => (
+                {specialistWithNewFields.expertiseAreas.map((area) => (
                   <span
                     key={area}
                     className="px-3 py-1 bg-accent text-accent-foreground text-sm rounded-full"
@@ -123,15 +134,37 @@ export default async function SpecialistDetailPage({
                   </span>
                 ))}
               </div>
+              {specialistWithNewFields.hourlyRate && (
+                <p className="mt-3 text-lg font-medium text-primary">
+                  ${specialistWithNewFields.hourlyRate}/hora
+                </p>
+              )}
             </div>
           </div>
 
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-4">Acerca de</h2>
             <p className="text-foreground whitespace-pre-line">
-              {specialist.bio}
+              {specialistWithNewFields.bio}
             </p>
           </div>
+
+          {specialistWithNewFields.skills &&
+            specialistWithNewFields.skills.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Habilidades</h2>
+                <div className="flex flex-wrap gap-2">
+                  {specialistWithNewFields.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-4">
@@ -148,59 +181,38 @@ export default async function SpecialistDetailPage({
                   <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
-                <span>{specialist.contactEmail}</span>
+                <span>{specialistWithNewFields.contactEmail}</span>
               </p>
-              {specialist.contactPhone && (
+              {specialistWithNewFields.linkedinProfileUrl && (
                 <p className="flex items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5 mr-2 text-muted-foreground"
-                    viewBox="0 0 20 20"
+                    viewBox="0 0 24 24"
                     fill="currentColor"
                   >
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                  </svg>
-                  <span>{specialist.contactPhone}</span>
-                </p>
-              )}
-              {specialist.website && (
-                <p className="flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-muted-foreground"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z"
-                      clipRule="evenodd"
-                    />
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                   </svg>
                   <a
-                    href={
-                      specialist.website.startsWith("http")
-                        ? specialist.website
-                        : `https://${specialist.website}`
-                    }
+                    href={specialistWithNewFields.linkedinProfileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary/80"
                   >
-                    {specialist.website}
+                    Perfil de LinkedIn
                   </a>
                 </p>
               )}
             </div>
           </div>
 
-          {specialist.deals.length > 0 && (
+          {specialistWithNewFields.deals.length > 0 && (
             <div className="mt-8">
               <h2 className="text-xl font-semibold mb-4">
                 Paquetes de Servicios
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {specialist.deals.map((deal) => (
+                {specialistWithNewFields.deals.map((deal) => (
                   <div
                     key={deal.id}
                     className="border rounded-lg p-6 hover:shadow-md transition"
@@ -219,7 +231,7 @@ export default async function SpecialistDetailPage({
                         </p>
                       </div>
                       <Link
-                        href={`/contrata/hire/${specialist.id}?dealId=${deal.id}`}
+                        href={`/contrata/hire/${specialistWithNewFields.id}?dealId=${deal.id}`}
                         className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
                       >
                         Seleccionar Paquete
@@ -233,7 +245,7 @@ export default async function SpecialistDetailPage({
 
           <div className="mt-8 flex justify-center">
             <Link
-              href={`/contrata/hire/${specialist.id}`}
+              href={`/contrata/hire/${specialistWithNewFields.id}`}
               className="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition text-center"
             >
               Contratar Este Especialista

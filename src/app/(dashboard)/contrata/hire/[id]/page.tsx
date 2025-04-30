@@ -7,8 +7,9 @@ import { EngagementForm } from "@/components/contrata/engagement-form";
 import Image from "next/image";
 
 export const metadata = {
-  title: "Hire Specialist | CONTRATA | SIMPLE",
-  description: "Hire a cybersecurity specialist for your security needs",
+  title: "Contrata Especialista | CONTRATA | SIMPLE",
+  description:
+    "Contrata un especialista en ciberseguridad para tus necesidades de seguridad",
 };
 
 // Define the deal type to use for proper typing
@@ -100,7 +101,7 @@ export default async function HireSpecialistPage({
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Hire {specialist.name}</h1>
+      <h1 className="text-2xl font-bold mb-6">Contratar a {specialist.name}</h1>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div className="p-6">
@@ -131,7 +132,7 @@ export default async function HireSpecialistPage({
                 key={area}
                 className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
               >
-                {area.replace(/_/g, " ")}
+                {translateExpertiseArea(area)}
               </span>
             ))}
           </div>
@@ -146,4 +147,22 @@ export default async function HireSpecialistPage({
       />
     </div>
   );
+}
+
+// Helper function to translate expertise areas to Spanish
+function translateExpertiseArea(area: string): string {
+  const translations: Record<string, string> = {
+    NETWORK_SECURITY: "Seguridad de Redes",
+    APPLICATION_SECURITY: "Seguridad de Aplicaciones",
+    CLOUD_SECURITY: "Seguridad en la Nube",
+    INCIDENT_RESPONSE: "Respuesta a Incidentes",
+    SECURITY_ASSESSMENT: "Evaluación de Seguridad",
+    COMPLIANCE: "Cumplimiento Normativo",
+    SECURITY_TRAINING: "Formación en Seguridad",
+    SECURITY_ARCHITECTURE: "Arquitectura de Seguridad",
+    DATA_PROTECTION: "Protección de Datos",
+    GENERAL: "General",
+  };
+
+  return translations[area] || area.replace(/_/g, " ");
 }

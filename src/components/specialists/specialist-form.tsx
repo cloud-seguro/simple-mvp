@@ -17,14 +17,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { XIcon } from "lucide-react";
 
 type SpecialistFormProps = {
   specialist: Specialist | null;
@@ -32,31 +27,44 @@ type SpecialistFormProps = {
   onCancel: () => void;
 };
 
-const expertiseAreaOptions = Object.values(ExpertiseArea).map((area) => ({
-  id: area,
-  label: area.replace(/_/g, " "),
-}));
+const expertiseAreaOptions = Object.values(ExpertiseArea).map((area) => {
+  const areaMap: Record<string, string> = {
+    NETWORK_SECURITY: "Seguridad de Red",
+    APPLICATION_SECURITY: "Seguridad de Aplicaciones",
+    CLOUD_SECURITY: "Seguridad en la Nube",
+    INCIDENT_RESPONSE: "Respuesta a Incidentes",
+    SECURITY_ASSESSMENT: "Evaluación de Seguridad",
+    COMPLIANCE: "Cumplimiento Normativo",
+    SECURITY_TRAINING: "Formación en Seguridad",
+    SECURITY_ARCHITECTURE: "Arquitectura de Seguridad",
+    DATA_PROTECTION: "Protección de Datos",
+    GENERAL: "General",
+  };
 
-export const formSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    bio: z.string().min(10, "Bio must be at least 10 characters"),
-    expertiseAreas: z
-      .array(z.nativeEnum(ExpertiseArea))
-      .min(1, "Select at least one expertise area"),
-    contactEmail: z.string().email("Invalid email address"),
-    contactPhone: z.string().nullable().optional(),
-    website: z.string().url("Must be a valid URL").nullable().optional(),
-    imageUrl: z.string().url("Must be a valid URL").nullable().optional(),
-    minMaturityLevel: z.coerce.number().int().min(1).max(5),
-    maxMaturityLevel: z.coerce.number().int().min(1).max(5),
-    location: z.string().nullable().optional(),
-    active: z.boolean().default(true),
-  })
-  .refine((data) => data.minMaturityLevel <= data.maxMaturityLevel, {
-    message: "Minimum maturity level cannot be greater than maximum",
-    path: ["minMaturityLevel"],
-  });
+  return {
+    id: area,
+    label: areaMap[area] || area.replace(/_/g, " "),
+  };
+});
+
+export const formSchema = z.object({
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  bio: z.string().min(10, "La biografía debe tener al menos 10 caracteres"),
+  expertiseAreas: z
+    .array(z.nativeEnum(ExpertiseArea))
+    .min(1, "Selecciona al menos un área de especialización"),
+  skills: z.array(z.string()).default([]),
+  contactEmail: z.string().email("Dirección de correo electrónico inválida"),
+  imageUrl: z.string().url("Debe ser una URL válida").nullable().optional(),
+  hourlyRate: z.coerce.number().nonnegative().nullable().optional(),
+  linkedinProfileUrl: z
+    .string()
+    .url("Debe ser una URL válida")
+    .nullable()
+    .optional(),
+  location: z.string().nullable().optional(),
+  active: z.boolean().default(true),
+});
 
 export function SpecialistForm({
   specialist,
@@ -70,12 +78,11 @@ export function SpecialistForm({
           name: specialist.name,
           bio: specialist.bio,
           expertiseAreas: specialist.expertiseAreas,
+          skills: specialist.skills || [],
           contactEmail: specialist.contactEmail,
-          contactPhone: specialist.contactPhone,
-          website: specialist.website,
           imageUrl: specialist.imageUrl,
-          minMaturityLevel: specialist.minMaturityLevel,
-          maxMaturityLevel: specialist.maxMaturityLevel,
+          hourlyRate: specialist.hourlyRate,
+          linkedinProfileUrl: specialist.linkedinProfileUrl,
           location: specialist.location,
           active: specialist.active,
         }
@@ -83,18 +90,18 @@ export function SpecialistForm({
           name: "",
           bio: "",
           expertiseAreas: [],
+          skills: [],
           contactEmail: "",
-          contactPhone: null,
-          website: null,
           imageUrl: null,
-          minMaturityLevel: 1,
-          maxMaturityLevel: 5,
+          hourlyRate: null,
+          linkedinProfileUrl: null,
           location: null,
           active: true,
         },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [skillInput, setSkillInput] = useState("");
 
   const handleFormSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -103,6 +110,25 @@ export function SpecialistForm({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const addSkill = () => {
+    if (
+      skillInput.trim() &&
+      !form.getValues().skills.includes(skillInput.trim())
+    ) {
+      const currentSkills = form.getValues().skills || [];
+      form.setValue("skills", [...currentSkills, skillInput.trim()]);
+      setSkillInput("");
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    const currentSkills = form.getValues().skills || [];
+    form.setValue(
+      "skills",
+      currentSkills.filter((s) => s !== skill)
+    );
   };
 
   return (
@@ -117,9 +143,9 @@ export function SpecialistForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name *</FormLabel>
+                <FormLabel>Nombre *</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="Juan Pérez" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,7 +159,7 @@ export function SpecialistForm({
               <FormItem>
                 <FormLabel>Email *</FormLabel>
                 <FormControl>
-                  <Input placeholder="john@example.com" {...field} />
+                  <Input placeholder="juan@ejemplo.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -144,13 +170,14 @@ export function SpecialistForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="contactPhone"
+            name="hourlyRate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel>Tarifa por Hora ($)</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="+1 123 456 7890"
+                    type="number"
+                    placeholder="150"
                     {...field}
                     value={field.value || ""}
                   />
@@ -160,15 +187,35 @@ export function SpecialistForm({
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="linkedinProfileUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL de Perfil de LinkedIn</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="https://linkedin.com/in/usuario"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div>
           <FormField
             control={form.control}
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Ubicación</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Mexico City, Mexico"
+                    placeholder="Ciudad de México, México"
                     {...field}
                     value={field.value || ""}
                   />
@@ -179,117 +226,65 @@ export function SpecialistForm({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="website"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Website</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://example.com"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profile Image URL</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://example.com/image.jpg"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div>
+          <FormLabel>Habilidades</FormLabel>
+          <div className="flex gap-2 mb-2">
+            <Input
+              placeholder="Añadir una habilidad"
+              value={skillInput}
+              onChange={(e) => setSkillInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addSkill();
+                }
+              }}
+            />
+            <Button type="button" onClick={addSkill} variant="outline">
+              Añadir
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {form.getValues().skills?.map((skill) => (
+              <Badge key={skill} variant="secondary" className="gap-1">
+                {skill}
+                <XIcon
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => removeSkill(skill)}
+                />
+              </Badge>
+            ))}
+          </div>
+          <FormMessage />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="minMaturityLevel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Min Maturity Level (1-5) *</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select minimum level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5].map((level) => (
-                      <SelectItem key={level} value={level.toString()}>
-                        Level {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Minimum security maturity level for recommendation
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="maxMaturityLevel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max Maturity Level (1-5) *</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value.toString()}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select maximum level" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5].map((level) => (
-                      <SelectItem key={level} value={level.toString()}>
-                        Level {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  Maximum security maturity level for recommendation
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL de Imagen de Perfil</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
           name="bio"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Bio/Description *</FormLabel>
+              <FormLabel>Biografía/Descripción *</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Professional description and qualifications..."
+                  placeholder="Descripción profesional y cualificaciones..."
                   className="min-h-[120px]"
                   {...field}
                 />
@@ -305,9 +300,9 @@ export function SpecialistForm({
           render={() => (
             <FormItem>
               <div className="mb-4">
-                <FormLabel>Areas of Expertise *</FormLabel>
+                <FormLabel>Áreas de Especialización *</FormLabel>
                 <FormDescription>
-                  Select all relevant areas of expertise
+                  Selecciona todas las áreas de especialización relevantes
                 </FormDescription>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2">
@@ -363,9 +358,10 @@ export function SpecialistForm({
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>Active</FormLabel>
+                <FormLabel>Activo</FormLabel>
                 <FormDescription>
-                  When active, this specialist will be recommended to users
+                  Cuando está activo, este especialista será recomendado a los
+                  usuarios
                 </FormDescription>
               </div>
             </FormItem>
@@ -379,14 +375,14 @@ export function SpecialistForm({
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting
-              ? "Saving..."
+              ? "Guardando..."
               : specialist
-                ? "Update Specialist"
-                : "Add Specialist"}
+                ? "Actualizar Especialista"
+                : "Añadir Especialista"}
           </Button>
         </div>
       </form>

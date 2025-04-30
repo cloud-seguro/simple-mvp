@@ -45,13 +45,7 @@ export default async function ContrataPage() {
     where: {
       active: true,
     },
-    select: {
-      id: true,
-      name: true,
-      bio: true,
-      expertiseAreas: true,
-      imageUrl: true,
-      location: true,
+    include: {
       deals: {
         where: {
           active: true,
@@ -69,6 +63,15 @@ export default async function ContrataPage() {
       name: "asc",
     },
   });
+
+  // Type assertion to handle new schema fields
+  type SpecialistWithDeals = (typeof specialists)[0] & {
+    skills?: string[];
+    hourlyRate?: number | null;
+    linkedinProfileUrl?: string | null;
+  };
+
+  const specialistsWithNewFields = specialists as SpecialistWithDeals[];
 
   // Fetch user's existing engagements
   const engagements = await prisma.engagement.findMany({
@@ -118,9 +121,7 @@ export default async function ContrataPage() {
                 className="block p-4 border rounded-lg hover:shadow-md transition"
               >
                 <div className="flex items-center">
-                  {engagement.specialist.imageUrl && (
-                    <User/>
-                  )}
+                  {engagement.specialist.imageUrl && <User />}
                   <div>
                     <h3 className="font-medium">{engagement.title}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -149,7 +150,7 @@ export default async function ContrataPage() {
           Especialistas Disponibles
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {specialists.map((specialist) => (
+          {specialistsWithNewFields.map((specialist) => (
             <div
               key={specialist.id}
               className="border rounded-lg p-6 hover:shadow-md transition"
@@ -194,6 +195,27 @@ export default async function ContrataPage() {
                   ))}
                 </div>
               </div>
+
+              {specialist.skills && specialist.skills.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex flex-wrap gap-2">
+                    {specialist.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {specialist.hourlyRate && (
+                <div className="mb-4 text-primary font-medium">
+                  ${specialist.hourlyRate}/hora
+                </div>
+              )}
 
               {specialist.deals.length > 0 && (
                 <div className="mb-4">
