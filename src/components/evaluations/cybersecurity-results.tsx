@@ -608,6 +608,59 @@ export function CybersecurityResults({
                 </p>
               </div>
             )}
+            {/* Advanced Evaluation CTA for initial evaluation */}
+            {quizData.id === "evaluacion-inicial" && (
+              <div className="mt-8 bg-yellow-50 p-8 rounded-xl shadow-sm border-2 border-yellow-400">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="flex-shrink-0 bg-yellow-400 rounded-full p-4 w-20 h-20 flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect width="18" height="18" x="3" y="3" rx="2" />
+                      <path d="M12 8v8" />
+                      <path d="m8.5 12 7 0" />
+                    </svg>
+                  </div>
+                  <div className="flex-grow text-center md:text-left">
+                    <h3 className="text-2xl font-bold mb-2">
+                      ¡Mejora tu diagnóstico con la evaluación avanzada!
+                    </h3>
+                    <p className="text-gray-700 mb-4">
+                      Esta evaluación inicial ofrece una visión básica de tu
+                      seguridad. Para un análisis más completo y recomendaciones
+                      detalladas, realiza nuestra evaluación avanzada.
+                    </p>
+                    <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
+                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                        25 preguntas detalladas
+                      </span>
+                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                        Análisis con estándares ISO 27001
+                      </span>
+                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                        Plan de acción personalizado
+                      </span>
+                      <span className="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                        Dashboard de seguridad
+                      </span>
+                    </div>
+                    <Link href="/pricing">
+                      <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-6 px-8 rounded-full">
+                        Ver planes premium
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-2xl font-semibold mb-8 text-gray-800">
@@ -1257,6 +1310,8 @@ export function CybersecurityResults({
                 />
               </div>
             )}
+
+            
 
             {!isSharedView && onRestart && (
               <div className="flex justify-center mt-8">

@@ -130,7 +130,7 @@ export default function SimplifiedPricing() {
             </div>
 
             <div className="mb-6 relative z-10">
-              <span className="text-4xl font-bold text-white">$25</span>
+              <span className="text-4xl font-bold text-white">$49.99</span>
               <span className="text-white/80 ml-2">/mes</span>
             </div>
 

@@ -171,6 +171,43 @@ export function ResultsReady({
               </div>
             </div>
           )}
+
+          {/* Advanced Evaluation CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: 0.5 } }}
+            className="mt-8 p-6 border-2 border-yellow-400 rounded-xl bg-yellow-50"
+          >
+            <h3 className="text-xl font-bold mb-2">
+              🚀 Mejore su seguridad con una evaluación avanzada
+            </h3>
+            <p className="text-gray-700 mb-4">
+              Esta evaluación inicial le ofrece una visión básica de su
+              seguridad. Obtenga un análisis completo, recomendaciones
+              detalladas y un plan personalizado con nuestra evaluación
+              avanzada.
+            </p>
+            <ul className="mb-4 space-y-2">
+              <li className="flex items-start">
+                <span className="text-yellow-600 mr-2 font-bold">✓</span>
+                <span>Evaluación completa de 25 preguntas</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-yellow-600 mr-2 font-bold">✓</span>
+                <span>Análisis basado en marcos de referencia</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-yellow-600 mr-2 font-bold">✓</span>
+                <span>Plan de acción detallado</span>
+              </li>
+            </ul>
+            <Button
+              onClick={() => (window.location.href = "/pricing")}
+              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black rounded-full py-6 text-lg"
+            >
+              Actualizar a evaluación avanzada
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     </div>
