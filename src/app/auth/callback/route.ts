@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {
@@ -8,36 +8,26 @@ export async function GET(req: NextRequest) {
   const next = searchParams.get("next") ?? "/dashboard";
 
   if (code) {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-          set(
-            name: string,
-            value: string,
-            options: {
-              expires?: Date;
-              path?: string;
-              domain?: string;
-              secure?: boolean;
-              sameSite?: "strict" | "lax" | "none";
-            }
-          ) {
-            cookieStore.set({ name, value, ...options });
-          },
-          remove(name: string, options: { path?: string; domain?: string }) {
-            cookieStore.set({ name, value: "", ...options });
-          },
-        },
-      }
-    );
-
     try {
+      // Get cookie store for auth
+      const cookieStore = cookies();
+
+      // Create supabase client with proper error handling
+      let supabase;
+      try {
+        supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+      } catch (cookieError) {
+        console.error("Cookie parsing error:", cookieError);
+        return NextResponse.redirect(
+          new URL("/sign-in?error=cookie_error", req.url)
+        );
+      }
+
+      console.log(
+        "Processing auth callback with code:",
+        code.substring(0, 5) + "..."
+      );
+
       const { error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
@@ -47,6 +37,10 @@ export async function GET(req: NextRequest) {
         );
       }
 
+      console.log(
+        "Successfully exchanged code for session, redirecting to:",
+        next
+      );
       return NextResponse.redirect(new URL(next, req.url));
     } catch (error) {
       console.error("Unexpected error during auth callback:", error);
