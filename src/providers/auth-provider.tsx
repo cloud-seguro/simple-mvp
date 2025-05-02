@@ -279,7 +279,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
         options: {
-          emailRedirectTo: getURL() + "auth/callback",
+          emailRedirectTo: getURL() + "auth/callback?next=/dashboard",
           data: {
             first_name: profileData.firstName || "",
             last_name: profileData.lastName || "",
