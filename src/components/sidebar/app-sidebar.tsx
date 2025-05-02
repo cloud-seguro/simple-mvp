@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
 import { useMemo } from "react";
-import { Users, FileText, Shield } from "lucide-react";
+import { Users, FileText, Shield, LineChart } from "lucide-react";
 
 export function AppSidebar({
   className,
@@ -47,7 +47,6 @@ export function AppSidebar({
         title: "CONTRATA",
         url: "/contrata",
         icon: Shield,
-        
       });
     }
 
@@ -63,6 +62,13 @@ export function AppSidebar({
         };
         groups.push(adminGroup);
       }
+
+      // Add admin evaluations link
+      adminGroup.items.push({
+        title: "Todas las Evaluaciones",
+        url: "/admin/evaluations",
+        icon: LineChart,
+      });
 
       // Add specialists management link
       adminGroup.items.push({
