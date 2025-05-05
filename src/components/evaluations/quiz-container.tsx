@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { QuizIntro } from "./quiz-intro";
 import { QuizQuestion } from "./quiz-question";
@@ -54,6 +54,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     null
   );
 
+  // Add state to track if interaction is allowed
+  const [isInteractionDisabled, setIsInteractionDisabled] = useState(false);
+
   // Clear any stored results when the component mounts
   useEffect(() => {
     try {
@@ -78,74 +81,117 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     setStage("questions");
   };
 
+  // This function handles the option selection
   const handleSelect = (value: number) => {
+    if (isInteractionDisabled) return;
+
+    // Disable interactions to prevent rapid selections
+    setIsInteractionDisabled(true);
+
+    // Record the answer
     const questionId = quizData.questions[currentQuestionIndex].id;
     setResults((prev) => ({
       ...prev,
       [questionId]: value,
     }));
+
+    // The QuizQuestion component will call handleNext after selection
   };
 
+  // Function to move to the next question
   const handleNext = async () => {
-    if (currentQuestionIndex < quizData.questions.length - 1) {
+    if (
+      isInteractionDisabled &&
+      currentQuestionIndex < quizData.questions.length - 1
+    ) {
+      // If we're just moving to the next question, we don't need to check again
       setCurrentQuestionIndex((prev) => prev + 1);
-    } else {
-      // Set submitting state
-      setIsSubmitting(true);
-      setLoadingMessage("Preparando siguiente paso...");
 
-      try {
-        // Check if this is an initial or advanced evaluation
-        const isInitialEvaluation = quizData.id === "evaluacion-inicial";
+      // Re-enable interactions after animation completes
+      setTimeout(() => {
+        setIsInteractionDisabled(false);
+      }, 500);
+      return;
+    }
 
-        // For advanced evaluations, skip the interest stage completely
-        if (!isInitialEvaluation) {
-          console.log("Advanced evaluation - skipping interest stage");
-          setIsSubmitting(false);
+    if (isInteractionDisabled) return;
+    setIsInteractionDisabled(true);
 
-          // If user is logged in, save results with default interest
-          if (user && profile) {
-            const defaultInterestData = {
-              reason: "advanced",
-              otherReason: "Evaluación avanzada de ciberseguridad",
-            };
-            await handleSaveResults(defaultInterestData);
-          } else {
-            // For non-logged in users, go to email collection
-            setStage("email-collection");
-          }
-          return; // Exit early to avoid executing the code below
-        }
+    try {
+      if (currentQuestionIndex < quizData.questions.length - 1) {
+        setCurrentQuestionIndex((prev) => prev + 1);
 
-        // Only for initial evaluations - show interest stage
-        setIsSubmitting(false);
-        setStage("interest");
-      } catch (error) {
-        console.error("Error preparing next step:", error);
-        setIsSubmitting(false);
+        // Re-enable interactions after a delay to allow animations to complete
+        setTimeout(() => {
+          setIsInteractionDisabled(false);
+        }, 500);
+      } else {
+        // Set submitting state
+        setIsSubmitting(true);
+        setLoadingMessage("Preparando siguiente paso...");
 
-        // Even in case of error, maintain the same flow rules
-        if (quizData.id === "evaluacion-inicial") {
-          setStage("interest");
-        } else {
-          // For advanced evaluations, go to email collection if not logged in
-          if (!user || !profile) {
-            setStage("email-collection");
-          } else {
-            // Try to save with default interest data as a fallback
-            try {
+        try {
+          // Check if this is an initial or advanced evaluation
+          const isInitialEvaluation = quizData.id === "evaluacion-inicial";
+
+          // For advanced evaluations, skip the interest stage completely
+          if (!isInitialEvaluation) {
+            console.log("Advanced evaluation - skipping interest stage");
+            setIsSubmitting(false);
+
+            // If user is logged in, save results with default interest
+            if (user && profile) {
               const defaultInterestData = {
                 reason: "advanced",
                 otherReason: "Evaluación avanzada de ciberseguridad",
               };
               await handleSaveResults(defaultInterestData);
-            } catch (innerError) {
-              console.error("Error saving with default interest:", innerError);
+            } else {
+              // For non-logged in users, go to email collection
               setStage("email-collection");
+              setIsInteractionDisabled(false);
+            }
+            return; // Exit early to avoid executing the code below
+          }
+
+          // Only for initial evaluations - show interest stage
+          setIsSubmitting(false);
+          setStage("interest");
+          setIsInteractionDisabled(false);
+        } catch (error) {
+          console.error("Error preparing next step:", error);
+          setIsSubmitting(false);
+          setIsInteractionDisabled(false);
+
+          // Even in case of error, maintain the same flow rules
+          if (quizData.id === "evaluacion-inicial") {
+            setStage("interest");
+          } else {
+            // For advanced evaluations, go to email collection if not logged in
+            if (!user || !profile) {
+              setStage("email-collection");
+            } else {
+              // Try to save with default interest data as a fallback
+              try {
+                const defaultInterestData = {
+                  reason: "advanced",
+                  otherReason: "Evaluación avanzada de ciberseguridad",
+                };
+                await handleSaveResults(defaultInterestData);
+              } catch (innerError) {
+                console.error(
+                  "Error saving with default interest:",
+                  innerError
+                );
+                setStage("email-collection");
+              }
             }
           }
         }
       }
+    } catch (error) {
+      console.error("Error in handleNext:", error);
+      setIsInteractionDisabled(false);
     }
   };
 
@@ -153,6 +199,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     reason: InterestOption,
     otherReason?: string
   ) => {
+    if (isInteractionDisabled) return;
+    setIsInteractionDisabled(true);
+
     setIsSubmitting(true);
     setLoadingMessage("Guardando información...");
 
@@ -173,10 +222,12 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         // Otherwise, go to email collection first
         setIsSubmitting(false);
         setStage("email-collection");
+        setIsInteractionDisabled(false);
       }
     } catch (error) {
       console.error("Error in handleInterestSubmit:", error);
       setIsSubmitting(false);
+      setIsInteractionDisabled(false);
 
       // If error is related to user not being logged in, go to email collection
       setStage("email-collection");
@@ -184,6 +235,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
   };
 
   const handleEmailSubmit = async (email: string) => {
+    if (isInteractionDisabled) return;
+    setIsInteractionDisabled(true);
+
     try {
       setIsSubmitting(true);
       setLoadingMessage("Guardando resultados...");
@@ -270,6 +324,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       // Remove loading state after a short delay
       setTimeout(() => {
         setIsSubmitting(false);
+        setIsInteractionDisabled(false);
       }, 500);
     } catch (error) {
       console.error("Error submitting guest evaluation:", error);
@@ -282,6 +337,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         variant: "destructive",
       });
       setIsSubmitting(false);
+      setIsInteractionDisabled(false);
     }
   };
 
@@ -311,6 +367,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             variant: "destructive",
           });
           setIsSubmitting(false);
+          setIsInteractionDisabled(false);
           return;
         }
       }
@@ -395,6 +452,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       // Only remove loading state after a short delay to ensure smooth transition
       setTimeout(() => {
         setIsSubmitting(false);
+        setIsInteractionDisabled(false);
       }, 500);
     } catch (error) {
       console.error("Error saving evaluation:", error);
@@ -407,13 +465,22 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         variant: "destructive",
       });
       setIsSubmitting(false);
+      setIsInteractionDisabled(false);
     }
   };
 
   const handlePrev = () => {
+    if (isInteractionDisabled) return;
+    setIsInteractionDisabled(true);
+
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
     }
+
+    // Re-enable interactions after a delay
+    setTimeout(() => {
+      setIsInteractionDisabled(false);
+    }, 500);
   };
 
   const handleSignUpComplete = (savedEvaluationId?: string) => {
@@ -421,9 +488,13 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       setEvaluationId(savedEvaluationId);
     }
     setStage("results-ready");
+    setIsInteractionDisabled(false);
   };
 
   const handleViewResults = () => {
+    if (isInteractionDisabled) return;
+    setIsInteractionDisabled(true);
+
     if (evaluationId) {
       // Redirect to the results page
       router.push(`/results/${evaluationId}`);
@@ -431,10 +502,14 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       // If we don't have an evaluation ID (e.g., when using localStorage results),
       // fall back to the old behavior
       setStage("results");
+      setIsInteractionDisabled(false);
     }
   };
 
   const handleRestart = () => {
+    if (isInteractionDisabled) return;
+    setIsInteractionDisabled(true);
+
     // Reset all states to their initial values
     setResults({});
     setCurrentQuestionIndex(0);
@@ -449,6 +524,11 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     } catch (error) {
       console.error("Error clearing local storage:", error);
     }
+
+    // Re-enable interactions after a delay
+    setTimeout(() => {
+      setIsInteractionDisabled(false);
+    }, 500);
   };
 
   // If auth is still loading, show the security loading screen
@@ -481,6 +561,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           onNext={handleNext}
           onPrev={handlePrev}
           showPrev={currentQuestionIndex > 0}
+          disabled={isInteractionDisabled}
         />
       )}
 
@@ -492,9 +573,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
 
       {stage === "email-collection" && (
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <EmailCollection
-            onEmailSubmit={handleEmailSubmit}
-          />
+          <EmailCollection onEmailSubmit={handleEmailSubmit} />
         </div>
       )}
 

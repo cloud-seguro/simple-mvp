@@ -15,6 +15,7 @@ interface QuizQuestionProps {
   onNext: () => void;
   onPrev: () => void;
   showPrev?: boolean;
+  disabled?: boolean;
 }
 
 export function QuizQuestion({
@@ -26,6 +27,7 @@ export function QuizQuestion({
   onNext,
   onPrev,
   showPrev = true,
+  disabled = false,
 }: QuizQuestionProps) {
   const questionRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +80,7 @@ export function QuizQuestion({
                       <button
                         type="button"
                         onClick={() => {
+                          if (disabled) return;
                           onSelect(option.value);
                           setTimeout(() => onNext(), 300);
                         }}
@@ -85,8 +88,9 @@ export function QuizQuestion({
                           selectedValue === option.value
                             ? "bg-black border-black"
                             : "bg-white"
-                        }`}
+                        } ${disabled ? "opacity-70 cursor-not-allowed" : ""}`}
                         aria-label={option.label}
+                        disabled={disabled}
                       >
                         {selectedValue === option.value && (
                           <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-white" />
@@ -117,9 +121,9 @@ export function QuizQuestion({
         <button
           type="button"
           onClick={onPrev}
-          disabled={currentIndex === 0}
+          disabled={currentIndex === 0 || disabled}
           className={`p-2 rounded-full border-2 ${
-            currentIndex === 0
+            currentIndex === 0 || disabled
               ? "border-muted text-muted"
               : "border-primary text-primary hover:bg-secondary"
           }`}
@@ -130,9 +134,9 @@ export function QuizQuestion({
         <button
           type="button"
           onClick={onNext}
-          disabled={selectedValue === null}
+          disabled={selectedValue === null || disabled}
           className={`p-2 rounded-full border-2 ${
-            selectedValue === null
+            selectedValue === null || disabled
               ? "border-muted text-muted"
               : "border-primary text-primary hover:bg-secondary"
           }`}
@@ -146,7 +150,7 @@ export function QuizQuestion({
       <div className="md:hidden fixed bottom-0 left-0 right-0 flex justify-between p-4 bg-white border-t">
         <Button
           onClick={onPrev}
-          disabled={!showPrev}
+          disabled={!showPrev || disabled}
           variant="outline"
           className="w-[45%]"
         >
@@ -154,7 +158,7 @@ export function QuizQuestion({
         </Button>
         <Button
           onClick={onNext}
-          disabled={selectedValue === null}
+          disabled={selectedValue === null || disabled}
           variant="outline"
           className="w-[45%]"
         >

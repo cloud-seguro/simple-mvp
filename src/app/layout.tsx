@@ -7,10 +7,9 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
 import { ErrorBoundary } from "@/components/error-boundary";
 import Script from "next/script";
-import Link from "next/link";
 
 const APP_NAME = "SIMPLE";
-const APP_DESCRIPTION = "Your Mind's Best Friend";
+const APP_DESCRIPTION = "Ciberseguridad Simple";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
@@ -68,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://supabase.co" />
         <link rel="dns-prefetch" href="https://supabase.co" />
@@ -82,19 +81,21 @@ export default function RootLayout({
             fallback={
               <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center p-8 max-w-md">
-                  <h2 className="text-2xl font-bold mb-4">
-                    Something went wrong
-                  </h2>
+                  <h2 className="text-2xl font-bold mb-4">Algo salió mal</h2>
                   <p className="mb-4">
-                    We&apos;ve encountered an unexpected error. Please try again
-                    or contact support if the issue persists.
+                    Hemos encontrado un error inesperado. Por favor, inténtalo
+                    de nuevo o contacta con soporte si el problema persiste.
                   </p>
-                  <Link
+                  <a
                     href="/"
                     className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+                    onClick={() => {
+                      window.location.href = "/";
+                      return false;
+                    }}
                   >
-                    Return to Home
-                  </Link>
+                    Volver al Inicio
+                  </a>
                 </div>
               </div>
             }
@@ -107,24 +108,6 @@ export default function RootLayout({
             </AuthProvider>
           </ErrorBoundary>
         </ThemeProvider>
-
-        <Script id="performance-metrics" strategy="afterInteractive">
-          {`
-            // Simple performance metrics
-            const observer = new PerformanceObserver((list) => {
-              const entries = list.getEntries();
-              entries.forEach((entry) => {
-                if (entry.entryType === 'largest-contentful-paint') {
-                  console.log('LCP:', entry.startTime);
-                }
-                if (entry.entryType === 'layout-shift') {
-                  console.log('CLS contribution:', entry.value);
-                }
-              });
-            });
-            observer.observe({ entryTypes: ['largest-contentful-paint', 'layout-shift'] });
-          `}
-        </Script>
       </body>
     </html>
   );
