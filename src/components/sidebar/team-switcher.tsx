@@ -20,7 +20,7 @@ export function TeamSwitcher({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Link href="/dashboard">
+        <Link href="/">
           <SidebarMenuButton
             size="lg"
             className={cn(
