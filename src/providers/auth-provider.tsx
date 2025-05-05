@@ -63,6 +63,7 @@ type AuthContextType = {
       special: boolean;
     };
   }>;
+  refreshProfile: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -83,6 +84,7 @@ const AuthContext = createContext<AuthContextType>({
       special: false,
     },
   }),
+  refreshProfile: async () => false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -101,7 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error("Error fetching profile:", await response.text());
         return false;
       }
-      const profileData = await response.json();
+      const data = await response.json();
+      // Extract the nested profile if it exists, otherwise use the data directly
+      const profileData = data.profile || data;
       setProfile(profileData);
       return true;
     } catch (error) {
@@ -400,6 +404,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signOut: () => signOut(false),
         checkPasswordStrength,
+        refreshProfile: async () => (user ? fetchProfile(user.id) : false),
       }}
     >
       {children}

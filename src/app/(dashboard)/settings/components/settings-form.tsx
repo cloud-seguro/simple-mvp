@@ -22,7 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useAuth } from "@/providers/auth-provider";
 import { UserRole } from "@prisma/client";
 import { useToast } from "@/components/ui/use-toast";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
@@ -47,7 +47,7 @@ const settingsFormSchema = z.object({
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
 export function SettingsForm() {
-  const { profile, user } = useCurrentUser();
+  const { profile, user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState<string>("");
@@ -152,6 +152,9 @@ export function SettingsForm() {
           new Error("Failed to update profile after multiple attempts")
         );
       }
+
+      // Refresh the profile data in the auth context to update UI across the app
+      await refreshProfile();
 
       toast({
         title: "Configuración actualizada",

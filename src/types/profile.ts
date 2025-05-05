@@ -11,4 +11,8 @@ export interface Profile {
   firstName?: string;
   lastName?: string;
   role: UserRole;
-} 
+  email?: string;
+  phoneNumber?: string;
+  company?: string;
+  company_role?: string;
+}
