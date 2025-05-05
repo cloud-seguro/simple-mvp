@@ -35,7 +35,7 @@ export function TeamSwitcher({
                 SIMPLE
               </span>
               <span className="truncate text-xs text-white">
-                Cybersecurity Platform
+                Ecosistema de ciberseguridad
               </span>
             </div>
           </SidebarMenuButton>
