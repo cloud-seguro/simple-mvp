@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
 import { ErrorBoundary } from "@/components/error-boundary";
 import Script from "next/script";
+import Link from "next/link";
 
 const APP_NAME = "SIMPLE";
 const APP_DESCRIPTION = "Ciberseguridad Simple";
@@ -86,16 +87,12 @@ export default function RootLayout({
                     Hemos encontrado un error inesperado. Por favor, inténtalo
                     de nuevo o contacta con soporte si el problema persiste.
                   </p>
-                  <a
+                  <Link
                     href="/"
                     className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-                    onClick={() => {
-                      window.location.href = "/";
-                      return false;
-                    }}
                   >
                     Volver al Inicio
-                  </a>
+                  </Link>
                 </div>
               </div>
             }
