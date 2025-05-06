@@ -33,12 +33,7 @@ export const sidebarData: SidebarData = {
           title: "Evaluaciones",
           url: "/evaluations",
           icon: FileBarChart,
-        },
-        {
-          title: "Contrata",
-          url: "/contrata",
-          icon: UserCircle,
-        },
+        }
       ],
     },
     {
