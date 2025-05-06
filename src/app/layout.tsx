@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
@@ -13,13 +13,41 @@ const APP_NAME = "SIMPLE";
 const APP_DESCRIPTION = "Ciberseguridad Simple";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+// This viewport configuration will cascade to all pages
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: APP_NAME,
-    template: `%s | ${APP_NAME}`,
+    default:
+      "SIMPLE - Evaluación de Ciberseguridad para Pequeñas y Medianas Empresas",
+    template: "%s | SIMPLE",
   },
-  description: APP_DESCRIPTION,
+  description:
+    "Evaluación de seguridad informática para pequeñas y medianas empresas",
+  applicationName: APP_NAME,
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SIMPLE App",
+  },
+  formatDetection: {
+    telephone: true,
+    date: false,
+    address: false,
+    email: true,
+  },
   openGraph: {
     title: APP_NAME,
     description: APP_DESCRIPTION,
@@ -40,9 +68,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/icon.png",
-    shortcut: "/favicon.ico",
-    apple: "/apple-icon.png",
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
     other: {
       rel: "apple-touch-icon",
       url: "/apple-icon.png",
@@ -70,6 +98,8 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="preconnect" href="https://supabase.co" />
         <link rel="dns-prefetch" href="https://supabase.co" />
         <Script src="/sw-register.js" strategy="afterInteractive" />

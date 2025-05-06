@@ -1,23 +1,43 @@
-import { Brain } from "lucide-react"
-import Link from "next/link"
+"use client";
 
-interface Props {
-    children: React.ReactNode
-  }
-  
-  export default function AuthLayout({ children }: Props) {
-    return (
-      <div className="container grid h-svh flex-col items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[480px] lg:p-8">
-          <Link 
-            href="/"
-            className="mb-4 flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer"
-          >
-            <Brain className="mr-2 h-6 w-6" />
-            <h1 className="text-xl font-medium">SIMPLE</h1>
-          </Link>
+import { SimpleHeader } from "@/components/simple-header";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+
+interface AuthLayoutProps {
+  children: React.ReactNode;
+  showLogo?: boolean;
+  className?: string;
+}
+
+export default function AuthLayout({
+  children,
+  showLogo = true,
+  className,
+}: AuthLayoutProps) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <SimpleHeader />
+      <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-12">
+        <div className={cn("w-full max-w-md", className)}>
+          {showLogo && (
+            <div className="flex justify-center mb-8">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">S</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-800">SIMPLE</span>
+              </Link>
+            </div>
+          )}
           {children}
         </div>
-      </div>
-    );
-  }
+      </main>
+      <footer className="text-center py-4 text-sm text-gray-500">
+        <p>
+          © {new Date().getFullYear()} SIMPLE. Todos los derechos reservados.
+        </p>
+      </footer>
+    </div>
+  );
+}

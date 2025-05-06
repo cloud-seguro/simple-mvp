@@ -14,6 +14,7 @@ import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { generateClientFingerprint } from "@/lib/utils/session-utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -58,6 +59,7 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const supabase = createClientComponentClient();
   const { profile, isLoading } = useCurrentUser();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Handle initial loading with timeout
   useEffect(() => {
@@ -160,7 +162,7 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       }}
     >
       <SearchProvider>
-        <SidebarProvider defaultOpen={true}>
+        <SidebarProvider defaultOpen={!isMobile}>
           {isNavigating && (
             <SecurityLoadingScreen
               message="Cargando contenido..."
@@ -178,15 +180,21 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
               "transition-[width] duration-200 ease-linear",
               "flex min-h-screen flex-col",
               "group-data-[scroll-locked=1]/body:h-full",
-              "group-data-[scroll-locked=1]/body:has-[main.fixed-main]:min-h-screen"
+              "group-data-[scroll-locked=1]/body:has-[main.fixed-main]:min-h-screen",
+              // Better mobile handling
+              "sm:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]",
+              "sm:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
+              isMobile && "w-full"
             )}
           >
             <Header>
-              <div className="ml-auto flex items-center space-x-4">
+              <div className="ml-auto flex items-center space-x-2 sm:space-x-4">
                 <Search />
               </div>
             </Header>
-            <div className="flex-1 p-6">{children}</div>
+            <div className="flex-1 p-3 sm:p-6 overflow-x-hidden">
+              {children}
+            </div>
           </div>
         </SidebarProvider>
       </SearchProvider>

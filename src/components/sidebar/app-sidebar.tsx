@@ -13,7 +13,8 @@ import type { NavGroupProps } from "./types";
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { Users, FileText, Shield, LineChart } from "lucide-react";
 
 export function AppSidebar({
@@ -21,6 +22,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const { profile } = useCurrentUser();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Add specialists management link for SUPERADMIN users
   const navGroups = useMemo(() => {
@@ -88,10 +90,20 @@ export function AppSidebar({
     return groups;
   }, [profile?.role]);
 
+  // Initial sidebar state management based on screen size
+  useEffect(() => {
+    // This will be handled by the SidebarProvider via the collapsible prop
+    // The sidebar will start collapsed on mobile
+  }, [isMobile]);
+
   return (
     <Sidebar
       collapsible="icon"
-      className={cn("text-white", className)}
+      className={cn(
+        "text-white transition-all duration-300 ease-in-out",
+        isMobile ? "z-50" : "",
+        className
+      )}
       {...props}
     >
       <SidebarHeader className="bg-black">

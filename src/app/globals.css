@@ -5,34 +5,39 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 222.2 47.4% 11.2%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --popover-foreground: 222.2 47.4% 11.2%;
 
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
 
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
 
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 215 20.2% 65.1%;
 
     --radius: 0.5rem;
+
+    /* Sidebar specific */
+    --sidebar-width: 276px;
+    --sidebar-width-icon: 88px;
 
     /* Chart colors */
     --chart-1: 199 89% 48%;
@@ -43,33 +48,36 @@
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
 
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
 
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 215 20.2% 65.1%;
 
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
 
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
 
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 216 34% 17%;
+
+    --radius: 0.5rem;
 
     /* Chart colors for dark mode */
     --chart-1: 199 89% 58%;
@@ -86,6 +94,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
@@ -147,11 +158,47 @@
   animation: orangeYellowGradient 8s ease infinite;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+/* Mobile responsiveness utilities */
+@layer utilities {
+  .mobile-container {
+    @apply px-4 sm:px-6 md:px-8 max-w-full mx-auto;
   }
-  body {
-    @apply bg-background text-foreground;
+
+  .mobile-font {
+    @apply text-sm sm:text-base;
+  }
+
+  .mobile-text-truncate {
+    @apply truncate max-w-[200px] sm:max-w-full;
+  }
+
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Fix for inputs on mobile */
+  input,
+  select,
+  textarea {
+    @apply px-3 py-2 text-base;
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* Better spacing on mobile */
+  .form-row {
+    @apply flex flex-col sm:flex-row gap-3;
+  }
+}
+
+/* Handle mobile viewport issues */
+@media (max-width: 640px) {
+  .overflow-fix {
+    overflow-x: hidden;
+  }
+
+  /* Prevent overflow issues with dialogs on mobile */
+  .modal-mobile {
+    width: 95vw !important;
+    max-width: 95vw !important;
   }
 }

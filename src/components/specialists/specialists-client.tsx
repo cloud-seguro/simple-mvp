@@ -149,7 +149,7 @@ export function SpecialistsClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0">
         <h2 className="text-xl font-semibold">Tus Especialistas</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -157,11 +157,12 @@ export function SpecialistsClient({
               onClick={() => {
                 setEditingSpecialist(null);
               }}
+              className="w-full sm:w-auto"
             >
               <Plus className="mr-2 h-4 w-4" /> Añadir Especialista
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] w-[95vw] max-w-[95vw] sm:w-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingSpecialist
@@ -191,12 +192,12 @@ export function SpecialistsClient({
       </div>
 
       {specialists.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg bg-gray-50">
-          <User className="mx-auto h-12 w-12 text-gray-400" />
+        <div className="text-center py-8 sm:py-12 border rounded-lg bg-gray-50">
+          <User className="mx-auto h-10 sm:h-12 w-10 sm:w-12 text-gray-400" />
           <h3 className="mt-4 font-medium text-gray-900">
             No hay especialistas añadidos aún
           </h3>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 px-4">
             Añade especialistas para recomendar a los usuarios en base a sus
             resultados de evaluación.
           </p>
@@ -215,16 +216,22 @@ export function SpecialistsClient({
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle>{specialist.name}</CardTitle>
+                    <CardTitle className="break-words">
+                      {specialist.name}
+                    </CardTitle>
                     <CardDescription>
                       {specialist.hourlyRate &&
                         `$${specialist.hourlyRate}/hora`}
                       {specialist.location && specialist.hourlyRate && " • "}
-                      {specialist.location && specialist.location}
+                      {specialist.location && (
+                        <span className="inline-block">
+                          {specialist.location}
+                        </span>
+                      )}
                     </CardDescription>
                   </div>
                   {specialist.imageUrl && (
-                    <div className="w-12 h-12 rounded-full overflow-hidden">
+                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
                       <Image
                         src={specialist.imageUrl}
                         alt={specialist.name}
@@ -241,7 +248,7 @@ export function SpecialistsClient({
                   <p className="text-sm text-gray-500 mb-1">Especialidad:</p>
                   <div className="flex flex-wrap gap-2">
                     {specialist.expertiseAreas.map((area) => (
-                      <Badge key={area} variant="secondary">
+                      <Badge key={area} variant="secondary" className="text-xs">
                         {area.replace(/_/g, " ")}
                       </Badge>
                     ))}
@@ -253,7 +260,11 @@ export function SpecialistsClient({
                     <p className="text-sm text-gray-500 mb-1">Habilidades:</p>
                     <div className="flex flex-wrap gap-2">
                       {specialist.skills.map((skill) => (
-                        <Badge key={skill} variant="outline">
+                        <Badge
+                          key={skill}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {skill}
                         </Badge>
                       ))}
@@ -274,7 +285,7 @@ export function SpecialistsClient({
                   </a>
                 )}
               </CardContent>
-              <CardFooter className="flex justify-between">
+              <CardFooter className="flex flex-col sm:flex-row justify-between gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -282,6 +293,7 @@ export function SpecialistsClient({
                     setEditingSpecialist(specialist);
                     setIsDialogOpen(true);
                   }}
+                  className="w-full sm:w-auto"
                 >
                   <Edit className="mr-2 h-4 w-4" /> Editar
                 </Button>
@@ -290,6 +302,7 @@ export function SpecialistsClient({
                   size="sm"
                   onClick={() => handleDeleteSpecialist(specialist.id)}
                   disabled={isDeleting && deleteId === specialist.id}
+                  className="w-full sm:w-auto"
                 >
                   {isDeleting && deleteId === specialist.id ? (
                     "Eliminando..."
