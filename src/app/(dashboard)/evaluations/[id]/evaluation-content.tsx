@@ -87,7 +87,6 @@ export function EvaluationContent({
   return (
     <PDFExport evaluationId={id}>
       <CybersecurityResults
-        evaluationId={id}
         score={data.score}
         maxScore={data.maxScore}
         maturityDescription={data.maturityDescription}

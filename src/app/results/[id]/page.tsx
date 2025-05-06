@@ -615,7 +615,6 @@ export default async function ResultsPage({
               userInfo={userInfo}
               isSharedView={true}
               interest={interestData?.reason as InterestOption}
-              evaluationId={evaluation.id}
               score={
                 evaluation.type === "INITIAL"
                   ? cappedScore

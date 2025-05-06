@@ -19,20 +19,12 @@ import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
@@ -46,7 +38,6 @@ interface CybersecurityResultsProps {
   onRestart?: () => void;
   isSharedView?: boolean;
   interest?: InterestType | null | string;
-  evaluationId?: string;
   score?: number;
   maxScore?: number;
   maturityDescription?: string;
@@ -84,7 +75,6 @@ export function CybersecurityResults({
   onRestart,
   isSharedView = false,
   interest,
-  evaluationId,
   score,
   maxScore,
   maturityDescription,
@@ -538,9 +528,6 @@ export function CybersecurityResults({
       setLoadingSpecialists(false);
     }
   }, [finalMaturityLevelNumber, finalWeakestCategories, supabase]);
-
-  // Create the URL for the scheduling page with evaluation data
-  const scheduleUrl = `/schedule?level=${finalMaturityLevelNumber}&categories=${finalWeakestCategories.join(",")}${evaluationId ? `&evaluationId=${evaluationId}` : ""}`;
 
   // Calculate overall percentage early in the component
   // After maturity is defined, add an overall percentage calculation for use with colors
@@ -1028,9 +1015,9 @@ export function CybersecurityResults({
 
             <div className="mt-8 mb-10">
               <Collapsible className="w-full">
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden bg-white">
                   <motion.div
-                    className="p-4 bg-[hsl(var(--secondary)/0.7)] border-b border-[hsl(var(--border))]"
+                    className="p-4 bg-white border-b border-[hsl(var(--border))]"
                     whileHover={{
                       cursor: "pointer",
                       backgroundColor: "hsl(var(--secondary))",
@@ -1091,7 +1078,7 @@ export function CybersecurityResults({
                             </p>
                           </div>
                         </div>
-                        <div className="text-[hsl(var(--chart-1))] font-medium text-sm flex items-center">
+                        <div className="text-black font-medium text-sm flex items-center">
                           <span>Ver detalles</span>
                           <ChevronRight className="h-4 w-4 ml-1" />
                         </div>
@@ -1113,7 +1100,7 @@ export function CybersecurityResults({
                                 <TableHead className="font-medium w-[150px]">
                                   {quizData.id === "evaluacion-inicial"
                                     ? "Puntuación (Máx. 45 pts)"
-                                    : "Puntuación Total (Máx. 75 puntos)"}
+                                    : "Puntuación Total (Máx. 100 puntos)"}
                                 </TableHead>
                                 <TableHead className="font-medium w-[200px]">
                                   Nivel de Madurez ISO 27001
@@ -1309,12 +1296,12 @@ export function CybersecurityResults({
                                   <TableRow
                                     className={cn(
                                       overallScore >= 0 &&
-                                        overallScore <= 15 &&
+                                        overallScore <= 20 &&
                                         "bg-red-50"
                                     )}
                                   >
                                     <TableCell className="font-medium">
-                                      0 - 15
+                                      0 - 20
                                     </TableCell>
                                     <TableCell>
                                       <div className="flex items-center gap-2">
@@ -1344,13 +1331,13 @@ export function CybersecurityResults({
                                   </TableRow>
                                   <TableRow
                                     className={cn(
-                                      overallScore >= 16 &&
-                                        overallScore <= 34 &&
+                                      overallScore >= 21 &&
+                                        overallScore <= 40 &&
                                         "bg-orange-50"
                                     )}
                                   >
                                     <TableCell className="font-medium">
-                                      16 - 34
+                                      21 - 40
                                     </TableCell>
                                     <TableCell>
                                       <div className="flex items-center gap-2">
@@ -1383,13 +1370,13 @@ export function CybersecurityResults({
                                   </TableRow>
                                   <TableRow
                                     className={cn(
-                                      overallScore >= 35 &&
-                                        overallScore <= 51 &&
+                                      overallScore >= 41 &&
+                                        overallScore <= 60 &&
                                         "bg-yellow-50"
                                     )}
                                   >
                                     <TableCell className="font-medium">
-                                      35 - 51
+                                      41 - 60
                                     </TableCell>
                                     <TableCell>
                                       <div className="flex items-center gap-2">
@@ -1422,13 +1409,13 @@ export function CybersecurityResults({
                                   </TableRow>
                                   <TableRow
                                     className={cn(
-                                      overallScore >= 52 &&
-                                        overallScore <= 66 &&
+                                      overallScore >= 61 &&
+                                        overallScore <= 80 &&
                                         "bg-green-50"
                                     )}
                                   >
                                     <TableCell className="font-medium">
-                                      52 - 66
+                                      61 - 80
                                     </TableCell>
                                     <TableCell>
                                       <div className="flex items-center gap-2">
@@ -1461,13 +1448,13 @@ export function CybersecurityResults({
                                   </TableRow>
                                   <TableRow
                                     className={cn(
-                                      overallScore >= 67 &&
-                                        overallScore <= 74 &&
+                                      overallScore >= 81 &&
+                                        overallScore <= 99 &&
                                         "bg-blue-50"
                                     )}
                                   >
                                     <TableCell className="font-medium">
-                                      67 - 74
+                                      81 - 99
                                     </TableCell>
                                     <TableCell>
                                       <div className="flex items-center gap-2">
@@ -1502,11 +1489,11 @@ export function CybersecurityResults({
                                   </TableRow>
                                   <TableRow
                                     className={cn(
-                                      overallScore === 75 && "bg-blue-50"
+                                      overallScore === 100 && "bg-blue-50"
                                     )}
                                   >
                                     <TableCell className="font-medium">
-                                      75
+                                      100
                                     </TableCell>
                                     <TableCell>
                                       <div className="flex items-center gap-2">

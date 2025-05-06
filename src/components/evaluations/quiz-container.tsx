@@ -605,7 +605,6 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             userInfo={userInfo}
             onRestart={handleRestart}
             interest={interest?.reason as InterestOption}
-            evaluationId={evaluationId || undefined}
             isSharedView={false}
             score={Object.values(results).reduce(
               (sum, val) => sum + (val || 0),
