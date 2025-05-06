@@ -149,110 +149,129 @@ export default async function ContrataPage() {
         <h2 className="text-xl font-semibold mb-4">
           Especialistas Disponibles
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {specialistsWithNewFields.map((specialist) => (
-            <div
-              key={specialist.id}
-              className="border rounded-lg p-6 hover:shadow-md transition"
-            >
-              <div className="flex items-center mb-4">
-                {specialist.imageUrl ? (
-                  <Image
-                    src={specialist.imageUrl}
-                    alt={specialist.name}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-full mr-4 object-cover"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-muted mr-4 flex items-center justify-center text-muted-foreground">
-                    <span className="text-xl">👤</span>
-                  </div>
-                )}
-                <div>
-                  <h3 className="text-lg font-medium">{specialist.name}</h3>
-                  {specialist.location && (
-                    <p className="text-sm text-muted-foreground">
-                      {specialist.location}
-                    </p>
+
+        {specialistsWithNewFields.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {specialistsWithNewFields.map((specialist) => (
+              <div
+                key={specialist.id}
+                className="border rounded-lg p-6 hover:shadow-md transition"
+              >
+                <div className="flex items-center mb-4">
+                  {specialist.imageUrl ? (
+                    <Image
+                      src={specialist.imageUrl}
+                      alt={specialist.name}
+                      width={64}
+                      height={64}
+                      className="w-16 h-16 rounded-full mr-4 object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-muted mr-4 flex items-center justify-center text-muted-foreground">
+                      <span className="text-xl">👤</span>
+                    </div>
                   )}
+                  <div>
+                    <h3 className="text-lg font-medium">{specialist.name}</h3>
+                    {specialist.location && (
+                      <p className="text-sm text-muted-foreground">
+                        {specialist.location}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <p className="text-sm text-foreground mb-4 line-clamp-3">
-                {specialist.bio}
-              </p>
+                <p className="text-sm text-foreground mb-4 line-clamp-3">
+                  {specialist.bio}
+                </p>
 
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-2">
-                  {specialist.expertiseAreas.map((area) => (
-                    <span
-                      key={area}
-                      className="px-2 py-1 bg-accent text-accent-foreground text-xs rounded-full"
-                    >
-                      {translateExpertiseArea(area)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {specialist.skills && specialist.skills.length > 0 && (
                 <div className="mb-4">
                   <div className="flex flex-wrap gap-2">
-                    {specialist.skills.map((skill) => (
+                    {specialist.expertiseAreas.map((area) => (
                       <span
-                        key={skill}
-                        className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full"
+                        key={area}
+                        className="px-2 py-1 bg-accent text-accent-foreground text-xs rounded-full"
                       >
-                        {skill}
+                        {translateExpertiseArea(area)}
                       </span>
                     ))}
                   </div>
                 </div>
-              )}
 
-              {specialist.hourlyRate && (
-                <div className="mb-4 text-primary font-medium">
-                  ${specialist.hourlyRate}/hora
+                {specialist.skills && specialist.skills.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      {specialist.skills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {specialist.hourlyRate && (
+                  <div className="mb-4 text-primary font-medium">
+                    ${specialist.hourlyRate}/hora
+                  </div>
+                )}
+
+                {specialist.deals.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium mb-2">
+                      Paquetes Disponibles:
+                    </h4>
+                    <ul className="space-y-2">
+                      {specialist.deals.map((deal) => (
+                        <li
+                          key={deal.id}
+                          className="text-sm flex justify-between"
+                        >
+                          <span>{deal.title}</span>
+                          <span className="font-medium">${deal.price}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="flex justify-between mt-4">
+                  <Link
+                    href={`/contrata/specialists/${specialist.id}`}
+                    className="text-primary hover:text-primary/80 text-sm font-medium"
+                  >
+                    Ver Perfil
+                  </Link>
+                  <Link
+                    href={`/contrata/hire/${specialist.id}`}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition"
+                  >
+                    Contratar
+                  </Link>
                 </div>
-              )}
-
-              {specialist.deals.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium mb-2">
-                    Paquetes Disponibles:
-                  </h4>
-                  <ul className="space-y-2">
-                    {specialist.deals.map((deal) => (
-                      <li
-                        key={deal.id}
-                        className="text-sm flex justify-between"
-                      >
-                        <span>{deal.title}</span>
-                        <span className="font-medium">${deal.price}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <div className="flex justify-between mt-4">
-                <Link
-                  href={`/contrata/specialists/${specialist.id}`}
-                  className="text-primary hover:text-primary/80 text-sm font-medium"
-                >
-                  Ver Perfil
-                </Link>
-                <Link
-                  href={`/contrata/hire/${specialist.id}`}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 transition"
-                >
-                  Contratar
-                </Link>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-8 border rounded-lg text-center">
+            <p className="text-lg mb-2">
+              No hay especialistas disponibles en este momento.
+            </p>
+            <p className="text-muted-foreground">
+              Por favor, contacta con nosotros en{" "}
+              <a
+                href="mailto:contacto@ciberseguridadsimple.com"
+                className="text-primary hover:text-primary/80"
+              >
+                contacto@ciberseguridadsimple.com
+              </a>{" "}
+              para solicitar un especialista en ciberseguridad.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -3,9 +3,7 @@ import {
   FileBarChart,
   Settings,
   Command,
-  UserCircle,
-  FileCheck,
-  ListChecks,
+  UserCircle
 } from "lucide-react";
 import type { SidebarData } from "../types";
 
@@ -40,23 +38,6 @@ export const sidebarData: SidebarData = {
           title: "Contrata",
           url: "/contrata",
           icon: UserCircle,
-          items: [
-            {
-              title: "Especialistas",
-              url: "/contrata/specialists",
-              icon: UserCircle,
-            },
-            {
-              title: "Contratos",
-              url: "/contrata/engagements",
-              icon: FileCheck,
-            },
-            {
-              title: "Contratar",
-              url: "/contrata/hire",
-              icon: ListChecks,
-            },
-          ],
         },
       ],
     },

@@ -54,7 +54,7 @@ export function PDFExport({ evaluationId, children }: PDFExportProps) {
       <div className="absolute top-0 right-0 z-10">
         <Button
           variant="outline"
-          className="gap-2"
+          className="gap-2 bg-yellow-500 text-black"
           onClick={handleExportPDF}
           disabled={isExporting}
         >
