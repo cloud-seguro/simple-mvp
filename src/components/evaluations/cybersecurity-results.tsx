@@ -13,9 +13,31 @@ import { cn } from "@/lib/utils";
 import { getMaturityLevel } from "@/lib/maturity-utils";
 import { SpecialistsRecommendations } from "./specialists-recommendations";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronRight } from "lucide-react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface CybersecurityResultsProps {
   quizData: QuizData;
@@ -1004,6 +1026,533 @@ export function CybersecurityResults({
               </div>
             </div>
 
+            <div className="mt-8 mb-10">
+              <Collapsible className="w-full">
+                <Card className="overflow-hidden">
+                  <motion.div
+                    className="p-4 bg-[hsl(var(--secondary)/0.7)] border-b border-[hsl(var(--border))]"
+                    whileHover={{
+                      cursor: "pointer",
+                      backgroundColor: "hsl(var(--secondary))",
+                    }}
+                  >
+                    <CollapsibleTrigger asChild className="w-full">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center space-x-4">
+                          <div className="relative">
+                            <motion.div
+                              className="h-12 w-12 rounded-full bg-gradient-to-r from-[hsl(var(--chart-1))] to-[hsl(var(--chart-2))] flex items-center justify-center shadow-md animate-orange-yellow-gradient"
+                              animate={{
+                                scale: [1, 1.1, 1],
+                                boxShadow: [
+                                  "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                                  "0 4px 12px -1px rgba(0, 0, 0, 0.2)",
+                                  "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                                ],
+                              }}
+                              transition={{
+                                repeat: Infinity,
+                                duration: 2,
+                              }}
+                            >
+                              <motion.div
+                                animate={{
+                                  rotate: [0, 15, 0, -15, 0],
+                                }}
+                                transition={{
+                                  repeat: Infinity,
+                                  duration: 2,
+                                  repeatDelay: 0.5,
+                                }}
+                              >
+                                <ChevronDown className="h-6 w-6 text-white" />
+                              </motion.div>
+                            </motion.div>
+                            <motion.div
+                              className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[hsl(var(--chart-4))]"
+                              animate={{
+                                scale: [1, 1.2, 1],
+                                opacity: [1, 0.8, 1],
+                              }}
+                              transition={{
+                                repeat: Infinity,
+                                duration: 1.5,
+                                delay: 0.5,
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-[hsl(var(--foreground))] bg-gradient-to-r from-[hsl(var(--chart-3))] to-[hsl(var(--chart-4))] bg-clip-text text-transparent">
+                              ¿Qué niveles de madurez hay y qué significan?
+                            </h3>
+                            <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                              Haz clic para explorar los estándares de madurez
+                              según ISO 27001
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-[hsl(var(--chart-1))] font-medium text-sm flex items-center">
+                          <span>Ver detalles</span>
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </div>
+                      </div>
+                    </CollapsibleTrigger>
+                  </motion.div>
+                  <CollapsibleContent>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <CardContent className="p-6">
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                <TableHead className="font-medium w-[150px]">
+                                  {quizData.id === "evaluacion-inicial"
+                                    ? "Puntuación (Máx. 45 pts)"
+                                    : "Puntuación Total (Máx. 75 puntos)"}
+                                </TableHead>
+                                <TableHead className="font-medium w-[200px]">
+                                  Nivel de Madurez ISO 27001
+                                </TableHead>
+                                <TableHead className="font-medium">
+                                  Descripción
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {quizData.id === "evaluacion-inicial" ? (
+                                <>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 0 &&
+                                        overallScore <= 9 &&
+                                        "bg-red-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      0 - 9
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-red-600 flex-shrink-0"></div>
+                                        <span>Nivel 1 – Inicial / Ad-hoc</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        No hay un enfoque estructurado de
+                                        ciberseguridad. Los controles son
+                                        inexistentes o informales. Se requiere
+                                        establecer procesos y medidas de
+                                        seguridad básicas.
+                                      </p>
+                                      <p className="text-red-600 mt-1 text-sm">
+                                        Te podemos apoyar en subir este nivel de
+                                        madurez hacerlo solo toma más tiempo.
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 10 &&
+                                        overallScore <= 19 &&
+                                        "bg-orange-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      10 - 19
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-orange-600 flex-shrink-0"></div>
+                                        <span>
+                                          Nivel 2 – Repetible pero intuitivo
+                                        </span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      Existen algunos controles de
+                                      ciberseguridad, pero no están formalizados
+                                      ni aplicados de manera consistente. Aún se
+                                      depende de acciones individuales y no hay
+                                      gestión centralizada. Para validar tu
+                                      estado de seguridad, Ciberseguridad Simple
+                                      puede realizar una auditoría y
+                                      verificación de documentación, controles y
+                                      riesgos.
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 20 &&
+                                        overallScore <= 29 &&
+                                        "bg-yellow-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      20 - 29
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-yellow-600 flex-shrink-0"></div>
+                                        <span>Nivel 3 – Definido</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        La organización cuenta con políticas y
+                                        procesos documentados de ciberseguridad.
+                                        Hay roles definidos, pero aún falta
+                                        optimizar la aplicación y supervisión de
+                                        estos controles.
+                                      </p>
+                                      <p className="font-medium mt-1 text-sm">
+                                        Se recomienda una verificación con
+                                        Ciberseguridad Simple para revisar
+                                        documentación, procesos y riesgos clave.
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 30 &&
+                                        overallScore <= 39 &&
+                                        "bg-green-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      30 - 39
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-green-600 flex-shrink-0"></div>
+                                        <span>
+                                          Nivel 4 – Gestionado y Medido
+                                        </span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      La ciberseguridad se gestiona activamente
+                                      con métricas, auditorías y monitoreo
+                                      continuo. Se aplican mejoras constantes,
+                                      pero hay oportunidades de optimización en
+                                      procesos críticos. Se recomienda una
+                                      verificación con Ciberseguridad Simple
+                                      para revisar documentación, procesos y
+                                      riesgos clave.
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 40 &&
+                                        overallScore <= 44 &&
+                                        "bg-blue-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      40 - 44
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-blue-600 flex-shrink-0"></div>
+                                        <span>Nivel 5 – Optimizado</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      La ciberseguridad está en un nivel
+                                      avanzado con controles implementados y
+                                      revisados periódicamente. Se han adoptado
+                                      procesos de mejora continua, aunque aún
+                                      pueden fortalecerse ciertos aspectos
+                                      estratégicos. Se recomienda una
+                                      verificación con Ciberseguridad Simple
+                                      para evaluar la efectividad de los
+                                      controles, revisar la documentación de
+                                      seguridad y validar la gestión de riesgos.
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore === 45 && "bg-blue-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      45
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-blue-600 flex-shrink-0"></div>
+                                        <span>Nivel 5 – Óptimo</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      La ciberseguridad es robusta y
+                                      completamente integrada en la
+                                      organización. Se han automatizado
+                                      procesos, gestionado proactivamente los
+                                      riesgos y optimizado los controles. Sin
+                                      embargo, siempre hay margen de evolución
+                                      ante nuevas amenazas. Para validar tu
+                                      estado de seguridad, Ciberseguridad Simple
+                                      puede realizar una auditoría y
+                                      verificación de documentación, controles y
+                                      riesgos.
+                                    </TableCell>
+                                  </TableRow>
+                                </>
+                              ) : (
+                                <>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 0 &&
+                                        overallScore <= 15 &&
+                                        "bg-red-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      0 - 15
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-red-600 flex-shrink-0"></div>
+                                        <span>Nivel 1 – Inicial / Ad-hoc</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        La seguridad se maneja de forma
+                                        reactiva. No hay procesos documentados
+                                        ni una estructura clara para gestionar
+                                        riesgos y proteger la información.
+                                      </p>
+                                      <p className="mt-1 text-sm">
+                                        <span className="text-red-600 font-medium">
+                                          🛑 Consejo:
+                                        </span>{" "}
+                                        Trabaja en establecer una estrategia
+                                        inicial de seguridad, enfocada en
+                                        definir políticas, roles y procesos
+                                        básicos para proteger la información.
+                                        ISO 27001 y NIST recomiendan empezar con
+                                        la identificación de activos y riesgos.
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 16 &&
+                                        overallScore <= 34 &&
+                                        "bg-orange-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      16 - 34
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-orange-600 flex-shrink-0"></div>
+                                        <span>
+                                          Nivel 2 – Repetible pero intuitivo
+                                        </span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        ⚠️ Existen controles básicos, pero su
+                                        aplicación no es uniforme. La seguridad
+                                        depende de esfuerzos individuales y
+                                        acciones aisladas en lugar de procesos
+                                        bien definidos.
+                                      </p>
+                                      <p className="mt-1 text-sm">
+                                        <span className="text-orange-600 font-medium">
+                                          🔄 Consejo:
+                                        </span>{" "}
+                                        Estandariza y documenta las políticas de
+                                        seguridad, asegurando que sean aplicadas
+                                        en toda la organización. Trabaja en la
+                                        gestión de riesgos y en el uso de
+                                        controles técnicos recomendados por CIS
+                                        Controls y NIST CSF.
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 35 &&
+                                        overallScore <= 51 &&
+                                        "bg-yellow-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      35 - 51
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-yellow-600 flex-shrink-0"></div>
+                                        <span>Nivel 3 – Definido</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        📋 Los procesos de ciberseguridad están
+                                        estructurados y alineados con estándares
+                                        como ISO 27001, NIST y CIS. Se han
+                                        implementado controles en la nube,
+                                        gestión de vulnerabilidades y
+                                        auditorías.
+                                      </p>
+                                      <p className="mt-1 text-sm">
+                                        <span className="text-yellow-600 font-medium">
+                                          📊 Consejo:
+                                        </span>{" "}
+                                        Profundiza en la medición y optimización
+                                        de los controles, con el uso de
+                                        monitoreo continuo y métricas de
+                                        seguridad. Explora herramientas de Zero
+                                        Trust, segmentación de red y pruebas de
+                                        seguridad en aplicaciones (DevSecOps,
+                                        OWASP ASVS).
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 52 &&
+                                        overallScore <= 66 &&
+                                        "bg-green-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      52 - 66
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-green-600 flex-shrink-0"></div>
+                                        <span>
+                                          Nivel 4 – Gestionado y Medido
+                                        </span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        🏢 La ciberseguridad es gestionada con
+                                        métricas, auditorías y monitoreo activo.
+                                        Se han implementado SOC, SIEM, análisis
+                                        de amenazas y simulaciones de incidentes
+                                        (Red Team, Blue Team).
+                                      </p>
+                                      <p className="mt-1 text-sm">
+                                        <span className="text-green-600 font-medium">
+                                          📈 Consejo:
+                                        </span>{" "}
+                                        Asegura la mejora continua en la gestión
+                                        de incidentes y la resiliencia
+                                        organizacional. Refuerza el uso de
+                                        inteligencia de amenazas (OSINT, Dark
+                                        Web Monitoring) y la automatización de
+                                        respuestas a incidentes (SOAR, XDR).
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore >= 67 &&
+                                        overallScore <= 74 &&
+                                        "bg-blue-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      67 - 74
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-blue-600 flex-shrink-0"></div>
+                                        <span>Nivel 5 – Optimizado</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        🤖 Ciberseguridad avanzada con procesos
+                                        automatizados y monitoreo en tiempo
+                                        real. Se han adoptado estrategias como
+                                        Zero Trust, detección de amenazas con IA
+                                        y seguridad en la nube con cumplimiento
+                                        de marcos como AWS Well-Architected,
+                                        Google Cloud Security y Azure Security
+                                        Center.
+                                      </p>
+                                      <p className="mt-1 text-sm">
+                                        <span className="text-blue-600 font-medium">
+                                          🔐 Consejo:
+                                        </span>{" "}
+                                        Sigue fortaleciendo la estrategia de
+                                        seguridad con ciberinteligencia y
+                                        automatización. Evalúa constantemente
+                                        nuevas tecnologías, mejora la gestión de
+                                        crisis y resiliencia y optimiza los
+                                        procesos de respuesta a incidentes con
+                                        IA.
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                  <TableRow
+                                    className={cn(
+                                      overallScore === 75 && "bg-blue-50"
+                                    )}
+                                  >
+                                    <TableCell className="font-medium">
+                                      75
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-blue-600 flex-shrink-0"></div>
+                                        <span>Nivel 5 – Óptimo</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>
+                                      <p>
+                                        🏅 Ciberseguridad completamente
+                                        integrada en la cultura organizacional.
+                                        Se han implementado detección de
+                                        amenazas con IA, automatización total de
+                                        respuesta a incidentes, monitoreo
+                                        continuo de la Dark Web y cumplimiento
+                                        avanzado de seguridad en entornos
+                                        híbridos y en la nube.
+                                      </p>
+                                      <p className="mt-1 text-sm">
+                                        <span className="text-blue-600 font-medium">
+                                          💡 Consejo:
+                                        </span>{" "}
+                                        Se nota que has trabajado en
+                                        ciberseguridad y dominas los estándares.
+                                        Mantén un enfoque en innovación y
+                                        evolución, asegurando que el equipo y la
+                                        organización estén preparados para
+                                        amenazas emergentes. Continúa reforzando
+                                        la estrategia con simulaciones avanzadas
+                                        y escenarios de crisis en entornos
+                                        reales.
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                </>
+                              )}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </CardContent>
+                    </motion.div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            </div>
+
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-2xl font-semibold mb-8 text-gray-800">
                 Desglose por Categoría y Recomendaciones
@@ -1276,7 +1825,10 @@ export function CybersecurityResults({
                   </div>
                 </div>
                 <div className="flex-shrink-0">
-                  <Link href={scheduleUrl} className="inline-block">
+                  <a
+                    href="mailto:contacto@ciberseguridadsimple.com"
+                    className="inline-block"
+                  >
                     <Button
                       className={cn(
                         "bg-white px-6 py-6 shadow-md font-bold rounded-full flex gap-2 items-center",
@@ -1291,7 +1843,7 @@ export function CybersecurityResults({
                                 : "text-blue-600 hover:bg-blue-50"
                       )}
                     >
-                      Agendar Especialista
+                      Contactar Especialista
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
@@ -1307,7 +1859,7 @@ export function CybersecurityResults({
                         <path d="m12 5 7 7-7 7"></path>
                       </svg>
                     </Button>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
