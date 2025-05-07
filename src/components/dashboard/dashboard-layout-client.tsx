@@ -130,8 +130,15 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
 
   // Add listener for custom navigation events
   useEffect(() => {
-    const handleNavigationStart = () => setIsNavigating(true);
-    const handleNavigationEnd = () => setIsNavigating(false);
+    const handleNavigationStart = () => {
+      setIsNavigating(true);
+      document.body.setAttribute("data-navigation-active", "true");
+    };
+
+    const handleNavigationEnd = () => {
+      setIsNavigating(false);
+      document.body.setAttribute("data-navigation-active", "false");
+    };
 
     window.addEventListener("navigationStart", handleNavigationStart);
     window.addEventListener("navigationEnd", handleNavigationEnd);
@@ -139,11 +146,13 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
     // Timeout to prevent infinite loading
     const timer = setTimeout(() => {
       setIsNavigating(false);
-    }, 10000);
+      document.body.setAttribute("data-navigation-active", "false");
+    }, 8000);
 
     return () => {
       window.removeEventListener("navigationStart", handleNavigationStart);
       window.removeEventListener("navigationEnd", handleNavigationEnd);
+      document.body.removeAttribute("data-navigation-active");
       clearTimeout(timer);
     };
   }, []);
@@ -164,10 +173,9 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
       <SearchProvider>
         <SidebarProvider defaultOpen={!isMobile}>
           {isNavigating && (
-            <SecurityLoadingScreen
-              message="Cargando contenido..."
-              variant="overlay"
-            />
+            <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-black">
+              <div className="h-full w-full animate-progress bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 bg-[length:200%_100%]"></div>
+            </div>
           )}
           <SkipToMain />
           <AppSidebar className="fixed inset-y-0 left-0 z-20" />
@@ -177,14 +185,15 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
               "ml-auto w-full max-w-full",
               "peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]",
               "peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
-              "transition-[width] duration-200 ease-linear",
+              "transition-all duration-200 ease-linear",
               "flex min-h-screen flex-col",
               "group-data-[scroll-locked=1]/body:h-full",
               "group-data-[scroll-locked=1]/body:has-[main.fixed-main]:min-h-screen",
               // Better mobile handling
               "sm:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]",
               "sm:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
-              isMobile && "w-full"
+              isMobile && "w-full",
+              isNavigating ? "opacity-70" : "opacity-100"
             )}
           >
             <Header>
