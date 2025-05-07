@@ -2,8 +2,7 @@ import {
   LayoutDashboard,
   FileBarChart,
   Settings,
-  Command,
-  UserCircle
+  Command
 } from "lucide-react";
 import type { SidebarData } from "../types";
 

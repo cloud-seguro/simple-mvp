@@ -1,6 +1,5 @@
 "use client";
 
-import { SimpleHeader } from "@/components/simple-header";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 

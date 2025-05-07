@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Copy, Mail } from "lucide-react";
+import { Copy } from "lucide-react";
 import type { UserInfo } from "./types";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg";
 import { SimpleHeader } from "@/components/ui/simple-header";
@@ -114,17 +114,6 @@ export function ResultsReady({
         title: "Enlace copiado",
         description: "El enlace ha sido copiado al portapapeles.",
       });
-    }
-  };
-
-  const handleSendEmail = () => {
-    // If we have an evaluation ID, use that for the share URL
-    const linkToShare = evaluationId
-      ? `${window.location.origin}/results/${evaluationId}`
-      : shareUrl || window.location.href;
-
-    if (linkToShare) {
-      window.location.href = `mailto:?subject=Resultados de Evaluación de Ciberseguridad&body=Consulte mis resultados aquí: ${linkToShare}`;
     }
   };
 

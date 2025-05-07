@@ -26,8 +26,13 @@ interface EvaluationData {
   }>;
 }
 
+interface Evaluation {
+  id: string;
+  // Add other properties of the evaluation object as needed
+}
+
 interface EvaluationContentProps {
-  evaluation: any; // Using any temporarily for the evaluation object
+  evaluation: Evaluation; // Replaced 'any' with a defined interface
   quizData: QuizData;
   answers: Record<string, number>;
   userInfo: UserInfo;

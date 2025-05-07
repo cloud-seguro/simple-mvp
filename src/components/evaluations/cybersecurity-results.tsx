@@ -3,12 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import type {
-  QuizData,
-  QuizResults,
-  UserInfo,
-  CybersecurityInterest as InterestType,
-} from "./types";
+import type { QuizData, QuizResults, UserInfo, InterestOption } from "./types";
 import { cn } from "@/lib/utils";
 import { getMaturityLevel } from "@/lib/maturity-utils";
 import { SpecialistsRecommendations } from "./specialists-recommendations";
@@ -37,7 +32,8 @@ interface CybersecurityResultsProps {
   userInfo: UserInfo;
   onRestart?: () => void;
   isSharedView?: boolean;
-  interest?: InterestType | null | string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interest?: InterestOption | null | string;
   score?: number;
   maxScore?: number;
   maturityDescription?: string;
@@ -74,6 +70,7 @@ export function CybersecurityResults({
   userInfo,
   onRestart,
   isSharedView = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interest,
   score,
   maxScore,
