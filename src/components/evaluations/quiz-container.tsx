@@ -18,7 +18,6 @@ import type {
   CybersecurityInterest as CybersecurityInterestType,
 } from "./types";
 import { toast } from "@/components/ui/use-toast";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { useRouter } from "next/navigation";
 
 interface QuizContainerProps {
@@ -531,19 +530,54 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     }, 500);
   };
 
-  // If auth is still loading, show the security loading screen
+  // Quiz loading skeleton
+  const QuizLoadingSkeleton = () => (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="w-full max-w-4xl p-6 space-y-4">
+        <div className="h-8 w-64 bg-gray-200 animate-pulse rounded mb-4"></div>
+        <div className="h-4 w-full bg-gray-200 animate-pulse rounded"></div>
+        <div className="h-32 w-full bg-gray-200 animate-pulse rounded my-8"></div>
+        <div className="flex justify-between items-center mt-8">
+          <div className="h-10 w-24 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-10 w-24 bg-gray-200 animate-pulse rounded"></div>
+        </div>
+        {loadingMessage && (
+          <div className="text-center text-sm text-muted-foreground mt-4">
+            {loadingMessage}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Quiz processing overlay
+  const QuizProcessingOverlay = () => (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg space-y-4">
+        <div className="flex justify-center mb-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <div className="text-center">
+          <div className="h-6 w-3/4 bg-gray-200 animate-pulse rounded mx-auto mb-2"></div>
+          <div className="h-4 w-1/2 bg-gray-200 animate-pulse rounded mx-auto"></div>
+        </div>
+        {loadingMessage && (
+          <div className="text-center text-sm text-muted-foreground mt-2">
+            {loadingMessage}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // If auth is still loading, show the loading skeleton
   if (isLoading) {
-    return <SecurityLoadingScreen message="Verificando sesión..." />;
+    return <QuizLoadingSkeleton />;
   }
 
   return (
     <div className="w-full min-h-screen bg-background">
-      {isSubmitting && (
-        <SecurityLoadingScreen
-          variant="overlay"
-          message={loadingMessage || "Procesando..."}
-        />
-      )}
+      {isSubmitting && <QuizProcessingOverlay />}
 
       {stage === "intro" && (
         <QuizIntro quizData={quizData} onStart={handleStart} />

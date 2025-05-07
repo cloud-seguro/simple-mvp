@@ -1,54 +1,59 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function SpecialistsLoading() {
   return (
     <div className="container py-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="h-8 w-48 bg-gray-200 animate-pulse rounded mb-2"></div>
-          <div className="h-5 w-64 bg-gray-200 animate-pulse rounded"></div>
-        </div>
-        <Button disabled variant="default" size="sm" className="gap-2">
-          <PlusCircle className="h-4 w-4" />
-          <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
-        </Button>
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-5 w-full max-w-2xl" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Specialist Card Skeletons */}
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Card key={i} className="overflow-hidden">
-            <div className="h-40 w-full bg-gray-200 animate-pulse"></div>
-            <CardHeader className="p-4">
-              <CardTitle className="text-lg">
-                <div className="h-6 w-36 bg-gray-200 animate-pulse rounded"></div>
-              </CardTitle>
-              <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
-            </CardHeader>
-            <CardContent className="p-4 pt-0 space-y-4">
-              <div className="h-16 w-full bg-gray-200 animate-pulse rounded"></div>
-              <div className="flex gap-2">
-                <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
-                <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid grid-cols-3 w-[400px] mb-6">
+          <TabsTrigger value="all">Todos</TabsTrigger>
+          <TabsTrigger value="active" disabled>
+            Activos
+          </TabsTrigger>
+          <TabsTrigger value="pending" disabled>
+            Pendientes
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Pagination Skeleton */}
-      <div className="flex items-center justify-center gap-1 pt-4">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div
-            key={i}
-            className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"
-          ></div>
-        ))}
-      </div>
+        <TabsContent value="all" className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <Avatar className="h-24 w-24">
+                      <AvatarFallback>
+                        <Skeleton className="h-full w-full rounded-full" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-2">
+                      <Skeleton className="h-6 w-40 mx-auto" />
+                      <Skeleton className="h-4 w-28 mx-auto" />
+                    </div>
+                    <div className="space-y-1 w-full">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4 mx-auto" />
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <Skeleton className="h-8 w-[70px]" />
+                      <Skeleton className="h-8 w-[70px]" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

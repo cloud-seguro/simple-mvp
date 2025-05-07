@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { prisma } from "@/lib/prisma";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { AdminEvaluationsList } from "./components/admin-evaluations-list";
 import { EvaluationAnalytics } from "./components/evaluation-analytics";
 import { UserRole } from "@prisma/client";
@@ -105,13 +104,7 @@ async function AdminEvaluationsContent() {
 export default function AdminEvaluationsPage() {
   return (
     <div className="container py-8">
-      <Suspense
-        fallback={
-          <div className="flex flex-col items-center justify-center gap-4">
-            <SecurityLoadingScreen message="Cargando panel de administración..." />
-          </div>
-        }
-      >
+      <Suspense>
         <AdminEvaluationsContent />
       </Suspense>
     </div>

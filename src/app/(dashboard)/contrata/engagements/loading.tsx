@@ -1,87 +1,77 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingTable } from "@/components/table/loading-table";
 
-export default function EngagementsLoading() {
+export default function ContrataEngagementsLoading() {
   return (
     <div className="container py-8 space-y-8">
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <div className="h-8 w-64 bg-gray-200 animate-pulse rounded"></div>
-          <div className="h-5 w-96 bg-gray-200 animate-pulse rounded"></div>
-        </div>
-        <Button disabled variant="default" size="sm" className="gap-2">
-          <PlusCircle className="h-4 w-4" />
-          <div className="h-4 w-32 bg-gray-200 animate-pulse rounded"></div>
-        </Button>
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-5 w-full max-w-2xl" />
       </div>
 
-      <Tabs defaultValue="active">
-        <TabsList className="mb-6">
-          <TabsTrigger value="active">Activos</TabsTrigger>
-          <TabsTrigger value="completed">Completados</TabsTrigger>
-          <TabsTrigger value="archived">Archivados</TabsTrigger>
-        </TabsList>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <Skeleton className="h-6 w-[200px]" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-10 w-[120px]" />
+              <Skeleton className="h-10 w-10 rounded" />
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LoadingTable columnCount={5} rowCount={4} />
+        </CardContent>
+      </Card>
 
-        <TabsContent value="active" className="space-y-6">
-          {/* Engagement Cards */}
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex justify-between items-center">
-                  <div className="h-6 w-48 bg-gray-200 animate-pulse rounded"></div>
-                  <div className="h-6 w-24 bg-gray-200 animate-pulse rounded"></div>
-                </CardTitle>
-                <CardDescription>
-                  <div className="h-4 w-32 bg-gray-200 animate-pulse rounded"></div>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Progress Bar */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-6 w-48" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 border rounded-md"
+              >
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-12 w-12 rounded-full" />
                   <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <div className="h-4 w-16 bg-gray-200 animate-pulse rounded"></div>
-                      <div className="h-4 w-12 bg-gray-200 animate-pulse rounded"></div>
-                    </div>
-                    <div className="h-2 w-full bg-gray-200 animate-pulse rounded-full">
-                      <div
-                        className="h-2 bg-gray-300 rounded-full"
-                        style={{ width: `${20 + Math.random() * 60}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Details Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map((j) => (
-                      <div key={j} className="space-y-1">
-                        <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
-                        <div className="h-5 w-16 bg-gray-200 animate-pulse rounded"></div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex justify-end gap-2">
-                    <div className="h-9 w-24 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-9 w-24 bg-gray-200 animate-pulse rounded"></div>
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-24" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
+                <Skeleton className="h-9 w-24" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-6 w-48" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-4/5" />
+              <Skeleton className="h-5 w-3/5" />
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Skeleton className="h-10 w-[100px]" />
+              <Skeleton className="h-10 w-[100px]" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

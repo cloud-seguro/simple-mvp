@@ -25,7 +25,6 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 import { UserRole } from "@prisma/client";
 import { useToast } from "@/components/ui/use-toast";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
 const settingsFormSchema = z.object({
   firstName: z
@@ -183,10 +182,16 @@ export function SettingsForm() {
       transition={{ duration: 0.5 }}
     >
       {isSubmitting && (
-        <SecurityLoadingScreen
-          variant="overlay"
-          message={loadingMessage || "Procesando..."}
-        />
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 max-w-md w-full space-y-4">
+            <div className="flex items-center justify-center">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-center text-muted-foreground">
+              {loadingMessage || "Procesando..."}
+            </p>
+          </div>
+        </div>
       )}
 
       <Form {...form}>

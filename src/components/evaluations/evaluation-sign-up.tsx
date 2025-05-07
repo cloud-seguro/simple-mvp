@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import type { QuizResults, CybersecurityInterest } from "./types";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
 interface EvaluationSignUpProps {
   results: QuizResults;
@@ -190,18 +189,33 @@ export function EvaluationSignUp({
     setLoadingMessage("Creando perfil...");
   };
 
+  // Form skeleton loader
+  const FormSkeleton = () => (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg space-y-4">
+        <div className="flex justify-center mb-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <div className="text-center">
+          <div className="h-6 w-3/4 bg-gray-200 animate-pulse rounded mx-auto mb-2"></div>
+          <div className="h-4 w-1/2 bg-gray-200 animate-pulse rounded mx-auto"></div>
+        </div>
+        {loadingMessage && (
+          <div className="text-center text-sm text-muted-foreground mt-2">
+            {loadingMessage}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       className="max-w-md mx-auto p-6"
     >
-      {isSubmitting && (
-        <SecurityLoadingScreen
-          variant="overlay"
-          message={loadingMessage || "Procesando..."}
-        />
-      )}
+      {isSubmitting && <FormSkeleton />}
 
       <h1 className="text-3xl font-bold mb-4">¡Felicitaciones!</h1>
       <p className="mb-6">

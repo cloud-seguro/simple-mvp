@@ -20,7 +20,7 @@ import type { SignUpFormProps, SignUpFormData } from "@/types/auth/sign-up";
 import { signUpFormSchema } from "@/types/auth/sign-up";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { validateCorporateEmail } from "@/lib/utils/email-validation";
 
 // Extended props to include evaluation results
@@ -354,13 +354,21 @@ export function SignUpForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={isLoading || !!emailError || isCheckingEmail}
+            disabled={
+              isLoading ||
+              passwordStrength < 3 ||
+              !!emailError ||
+              isCheckingEmail
+            }
           >
-            {isLoading
-              ? loadingMessage || "Procesando..."
-              : isCheckingEmail
-                ? "Verificando correo..."
-                : "Crear Cuenta"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {loadingMessage || "Registrando..."}
+              </>
+            ) : (
+              "Crear cuenta"
+            )}
           </Button>
         </form>
       </Form>

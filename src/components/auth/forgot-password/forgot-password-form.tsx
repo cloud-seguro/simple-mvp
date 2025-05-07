@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z
@@ -109,7 +110,14 @@ export function ForgotPasswordForm({
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send magic link"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enviando enlace...
+                </>
+              ) : (
+                "Enviar enlace mágico"
+              )}
             </Button>
           </form>
         </Form>

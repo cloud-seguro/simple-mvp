@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { forwardRef, useEffect } from "react";
 
 interface NavigationLinkProps
@@ -19,6 +19,7 @@ interface NavigationLinkProps
 const NavigationLink = forwardRef<HTMLAnchorElement, NavigationLinkProps>(
   ({ href, onClick, prefetch = true, replace, scroll, ...props }, ref) => {
     const router = useRouter();
+    const pathname = usePathname();
 
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
       // Don't override if ctrl/cmd key is pressed (new tab behavior)
@@ -27,10 +28,18 @@ const NavigationLink = forwardRef<HTMLAnchorElement, NavigationLinkProps>(
         return;
       }
 
+      // If navigating to the same route, don't do anything special
+      if (href === pathname) {
+        if (onClick) onClick(e);
+        return;
+      }
+
       e.preventDefault();
 
       // Trigger loading state immediately
-      window.dispatchEvent(new CustomEvent("navigationStart"));
+      window.dispatchEvent(
+        new CustomEvent("navigationStart", { detail: { href } })
+      );
 
       // Call the original onClick if it exists
       if (onClick) onClick(e);
@@ -38,11 +47,11 @@ const NavigationLink = forwardRef<HTMLAnchorElement, NavigationLinkProps>(
       // Start a fade-out animation and navigate immediately
       document.body.setAttribute("data-navigation-active", "true");
 
-      // Use a minimal timeout to allow the visual feedback to register
-      // This makes navigation feel more responsive while still showing the loading indicator
+      // Navigate after a minimal delay to improve perceived responsiveness
+      // by showing visual feedback
       setTimeout(() => {
         router.push(href);
-      }, 10);
+      }, 5);
     };
 
     // Prefetch the link for instant navigation
@@ -56,7 +65,11 @@ const NavigationLink = forwardRef<HTMLAnchorElement, NavigationLinkProps>(
     useEffect(() => {
       // This will handle the case where navigation completes
       const handleRouteChangeComplete = () => {
-        window.dispatchEvent(new CustomEvent("navigationEnd"));
+        // Use a small delay to allow rendering to complete before removing transition
+        setTimeout(() => {
+          document.body.setAttribute("data-navigation-active", "false");
+          window.dispatchEvent(new CustomEvent("navigationEnd"));
+        }, 50);
       };
 
       // This will be used for our timeout fallback
@@ -71,7 +84,7 @@ const NavigationLink = forwardRef<HTMLAnchorElement, NavigationLinkProps>(
         navigationTimeout = setTimeout(() => {
           document.body.setAttribute("data-navigation-active", "false");
           window.dispatchEvent(new CustomEvent("navigationEnd"));
-        }, 5000); // Maximum 5 seconds for navigation
+        }, 3000); // Maximum 3 seconds for navigation
       };
 
       // Listen for our custom navigation start event
@@ -88,7 +101,6 @@ const NavigationLink = forwardRef<HTMLAnchorElement, NavigationLinkProps>(
           );
 
           if (navigationFinished) {
-            document.body.setAttribute("data-navigation-active", "false");
             handleRouteChangeComplete();
           }
         }

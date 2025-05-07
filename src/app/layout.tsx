@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { NavigationProgress } from "@/components/ui/navigation-progress";
 import Script from "next/script";
 import Link from "next/link";
 
@@ -129,6 +130,7 @@ export default function RootLayout({
           >
             <AuthProvider>
               <QueryProvider>
+                <NavigationProgress />
                 {children}
                 <Toaster />
               </QueryProvider>

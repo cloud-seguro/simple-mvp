@@ -15,6 +15,7 @@ import { generateClientFingerprint } from "@/lib/utils/session-utils";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { NavigationProgress } from "@/components/ui/navigation-progress";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -51,7 +52,6 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 }
 
 export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
-  const [isNavigating, setIsNavigating] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hasError, setHasError] = useState(false);
@@ -123,40 +123,6 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
     }
   }, [supabase, profile, isLoading]);
 
-  useEffect(() => {
-    // Reset navigation state when path changes
-    setIsNavigating(false);
-  }, [pathname]);
-
-  // Add listener for custom navigation events
-  useEffect(() => {
-    const handleNavigationStart = () => {
-      setIsNavigating(true);
-      document.body.setAttribute("data-navigation-active", "true");
-    };
-
-    const handleNavigationEnd = () => {
-      setIsNavigating(false);
-      document.body.setAttribute("data-navigation-active", "false");
-    };
-
-    window.addEventListener("navigationStart", handleNavigationStart);
-    window.addEventListener("navigationEnd", handleNavigationEnd);
-
-    // Timeout to prevent infinite loading
-    const timer = setTimeout(() => {
-      setIsNavigating(false);
-      document.body.setAttribute("data-navigation-active", "false");
-    }, 8000);
-
-    return () => {
-      window.removeEventListener("navigationStart", handleNavigationStart);
-      window.removeEventListener("navigationEnd", handleNavigationEnd);
-      document.body.removeAttribute("data-navigation-active");
-      clearTimeout(timer);
-    };
-  }, []);
-
   // If the component is still in initial loading state or we're waiting for user data, show a loading screen
   if (isInitialLoading || isLoading) {
     return <SecurityLoadingScreen message="Cargando dashboard..." />;
@@ -172,15 +138,11 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
     >
       <SearchProvider>
         <SidebarProvider defaultOpen={!isMobile}>
-          {isNavigating && (
-            <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-black">
-              <div className="h-full w-full animate-progress bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 bg-[length:200%_100%]"></div>
-            </div>
-          )}
+          <NavigationProgress />
           <SkipToMain />
           <AppSidebar className="fixed inset-y-0 left-0 z-20" />
           <div
-            id="content"
+            id="main-content"
             className={cn(
               "ml-auto w-full max-w-full",
               "peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]",
@@ -192,8 +154,7 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
               // Better mobile handling
               "sm:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]",
               "sm:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]",
-              isMobile && "w-full",
-              isNavigating ? "opacity-70" : "opacity-100"
+              isMobile && "w-full"
             )}
           >
             <Header>
@@ -201,9 +162,9 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
                 <Search />
               </div>
             </Header>
-            <div className="flex-1 p-3 sm:p-6 overflow-x-hidden">
+            <main className="px-2 sm:px-4 py-4 h-[calc(100vh-4rem)] overflow-y-auto">
               {children}
-            </div>
+            </main>
           </div>
         </SidebarProvider>
       </SearchProvider>

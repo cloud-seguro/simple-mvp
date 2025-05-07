@@ -1,74 +1,59 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 
 export default function SettingsLoading() {
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6">
-        <div className="h-8 w-36 bg-gray-200 animate-pulse rounded mb-2"></div>
-        <div className="h-5 w-64 bg-gray-200 animate-pulse rounded"></div>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <Skeleton className="h-8 w-[150px]" />
+        <Skeleton className="h-5 w-[350px]" />
       </div>
 
-      <Tabs defaultValue="loading" className="space-y-6">
-        <TabsList className="w-full md:w-auto">
-          <TabsTrigger value="loading" disabled>
-            <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
-          </TabsTrigger>
-          <TabsTrigger value="loading2" disabled>
-            <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
-          </TabsTrigger>
-          <TabsTrigger value="loading3" disabled>
-            <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
-          </TabsTrigger>
-        </TabsList>
+      <Separator />
 
-        <TabsContent value="loading" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <div className="h-6 w-48 bg-gray-200 animate-pulse rounded"></div>
-              </CardTitle>
-              <CardDescription>
-                <div className="h-4 w-72 bg-gray-200 animate-pulse rounded"></div>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="space-y-2">
-                  <div className="h-5 w-32 bg-gray-200 animate-pulse rounded"></div>
-                  <div className="h-10 w-full bg-gray-200 animate-pulse rounded"></div>
-                </div>
-              ))}
-              <div className="pt-4">
-                <div className="h-10 w-32 bg-gray-200 animate-pulse rounded"></div>
+      <Card>
+        <CardContent className="space-y-6 p-6">
+          <div className="space-y-4">
+            <Skeleton className="h-5 w-[100px]" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-[120px]" />
+                <Skeleton className="h-10 w-full" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-[120px]" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <div className="h-6 w-48 bg-gray-200 animate-pulse rounded"></div>
-              </CardTitle>
-              <CardDescription>
-                <div className="h-4 w-72 bg-gray-200 animate-pulse rounded"></div>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="h-10 w-full bg-gray-200 animate-pulse rounded"></div>
-              <div className="h-10 w-32 bg-gray-200 animate-pulse rounded"></div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <Separator />
+
+          <div className="space-y-4">
+            <Skeleton className="h-5 w-[150px]" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-[120px]" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-[120px]" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="flex justify-end gap-2">
+            <Skeleton className="h-10 w-[100px]" />
+            <Skeleton className="h-10 w-[100px]" />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { DashboardLayoutClient } from "@/components/dashboard/dashboard-layout-client";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { Suspense } from "react";
 import { RedirectToUpgrade } from "@/components/redirect-to-upgrade";
 
@@ -55,9 +54,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Suspense
-      fallback={<SecurityLoadingScreen message="Cargando dashboard..." />}
-    >
+    <Suspense fallback={null}>
       <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </Suspense>
   );

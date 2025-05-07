@@ -25,7 +25,6 @@ import { formatDistance } from "date-fns";
 import { es } from "date-fns/locale";
 import { Pencil, Trash2, MoreHorizontal, PlusCircle, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 
 interface BlogPost {
   id: string;
@@ -122,6 +121,62 @@ export function BlogManagement() {
     }
   };
 
+  // Blog content skeleton loader
+  const BlogSkeleton = () => (
+    <>
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>
+                <div className="h-5 w-16 bg-gray-200 animate-pulse rounded"></div>
+              </TableHead>
+              <TableHead>
+                <div className="h-5 w-16 bg-gray-200 animate-pulse rounded"></div>
+              </TableHead>
+              <TableHead>
+                <div className="h-5 w-36 bg-gray-200 animate-pulse rounded"></div>
+              </TableHead>
+              <TableHead className="text-right">
+                <div className="h-5 w-16 bg-gray-200 animate-pulse rounded ml-auto"></div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <TableRow key={i}>
+                <TableCell>
+                  <div className="h-6 w-72 bg-gray-200 animate-pulse rounded"></div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="opacity-50">
+                    <div className="h-4 w-16 bg-gray-200 animate-pulse rounded"></div>
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="h-5 w-32 bg-gray-200 animate-pulse rounded"></div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-md ml-auto"></div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination skeleton */}
+      <div className="flex justify-end gap-1 py-2 mt-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-8 w-8 bg-gray-200 animate-pulse rounded"
+          ></div>
+        ))}
+      </div>
+    </>
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between">
@@ -133,7 +188,7 @@ export function BlogManagement() {
       </div>
 
       {loading ? (
-        <SecurityLoadingScreen />
+        <BlogSkeleton />
       ) : error ? (
         <div className="bg-red-50 p-4 rounded-md">
           <p className="text-red-600">{error}</p>

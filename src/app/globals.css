@@ -45,6 +45,9 @@
     --chart-3: 43 96% 56%;
     --chart-4: 0 84% 60%;
     --chart-5: 262 83% 58%;
+
+    /* Navigation transition */
+    --navigation-transition-duration: 0.2s;
   }
 
   .dark {
@@ -97,6 +100,23 @@
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
+  }
+
+  /* Navigation transition styles */
+  body[data-navigation-active="true"] #main-content {
+    opacity: 0.75;
+    filter: blur(0.5px);
+    transition:
+      opacity var(--navigation-transition-duration) ease,
+      filter var(--navigation-transition-duration) ease;
+  }
+
+  body #main-content {
+    opacity: 1;
+    filter: blur(0);
+    transition:
+      opacity var(--navigation-transition-duration) ease,
+      filter var(--navigation-transition-duration) ease;
   }
 }
 
@@ -158,6 +178,55 @@
   animation: orangeYellowGradient 8s ease infinite;
 }
 
+/* Navigation loader animation */
+@keyframes navigationProgress {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(-10%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.navigation-progress-bar {
+  animation: navigationProgress 2s ease-in-out;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.05) 25%,
+    rgba(0, 0, 0, 0.1) 37%,
+    rgba(0, 0, 0, 0.05) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 37%,
+    rgba(255, 255, 255, 0.05) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
 /* Mobile responsiveness utilities */
 @layer utilities {
   .mobile-container {
@@ -201,4 +270,67 @@
     width: 95vw !important;
     max-width: 95vw !important;
   }
+}
+
+/* Page transition effects */
+body[data-navigation-active="true"] main,
+body[data-navigation-active="true"] .content-wrapper {
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+}
+
+body:not([data-navigation-active="true"]) main,
+body:not([data-navigation-active="true"]) .content-wrapper {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Loading bar animation */
+.nprogress-bar {
+  background: hsl(var(--primary)) !important;
+  height: 3px !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2000;
+}
+
+.nprogress-peg {
+  box-shadow:
+    0 0 10px hsl(var(--primary)),
+    0 0 5px hsl(var(--primary)) !important;
+}
+
+/* Skeleton loading animations */
+@keyframes skeleton-pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse {
+  animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth page transitions */
+.page-transition-enter {
+  opacity: 0;
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+.page-transition-exit {
+  opacity: 1;
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s;
 }
