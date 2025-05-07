@@ -10,6 +10,10 @@ import React from "react";
 // Initialize Resend with the API key from environment variables
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Simple in-memory cache to track recently sent emails (in production, use Redis or similar)
+const recentlySentEmails = new Map<string, number>();
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 export async function POST(request: Request) {
   try {
     // Parse the request body
@@ -21,6 +25,21 @@ export async function POST(request: Request) {
         { error: "Missing required fields: userInfo, evaluationId, or email" },
         { status: 400 }
       );
+    }
+
+    // Check if this email was recently sent to prevent duplicates
+    const cacheKey = `${email}:${evaluationId}`;
+    const lastSentTime = recentlySentEmails.get(cacheKey);
+    const now = Date.now();
+
+    if (lastSentTime && now - lastSentTime < CACHE_EXPIRY) {
+      console.log(
+        `Email to ${email} for evaluation ${evaluationId} was already sent recently`
+      );
+      return NextResponse.json({
+        data: { id: "duplicate-prevented" },
+        message: "Email already sent recently",
+      });
     }
 
     // Get the evaluation data
@@ -257,35 +276,60 @@ export async function POST(request: Request) {
     // Calculate maxScore based on evaluation type
     const maxScore = evaluation.type === "INITIAL" ? 45 : 75;
 
-    // Send the email with the actual results
-    const { data, error } = await resend.emails.send({
-      from: "Evaluación de Ciberseguridad <onboarding@resend.dev>",
-      to: [email],
-      subject: "Sus resultados de evaluación de ciberseguridad están listos",
-      react: React.createElement(ResultsEmail, {
-        userInfo,
-        evaluationId,
-        baseUrl,
-        score: evaluation.score || 0,
-        maxScore,
-        maturityLevel: maturityInfo.level,
-        maturityDescription: maturityInfo.description,
-        categories: categoryScores,
-        recommendations: recommendations,
-        evaluationType: evaluation.type || "ADVANCED",
-      }),
-    });
+    try {
+      // Send the email with the actual results
+      console.log(`Sending email to ${email} for evaluation ${evaluationId}`);
+      const { data, error } = await resend.emails.send({
+        from: "Evaluación de Ciberseguridad <info@ciberseguridadsimple.com>",
+        to: [email],
+        subject: "Sus resultados de evaluación de ciberseguridad están listos",
+        react: React.createElement(ResultsEmail, {
+          userInfo,
+          evaluationId,
+          baseUrl,
+          score: evaluation.score || 0,
+          maxScore,
+          maturityLevel: maturityInfo.level,
+          maturityDescription: maturityInfo.description,
+          categories: categoryScores,
+          recommendations: recommendations,
+          evaluationType: evaluation.type || "ADVANCED",
+        }),
+      });
 
-    if (error) {
-      console.error("Error sending email:", error);
-      return NextResponse.json({ error }, { status: 400 });
+      if (error) {
+        console.error("Error sending email with Resend:", error);
+        return NextResponse.json({ error }, { status: 400 });
+      }
+
+      // If successful, update our cache
+      recentlySentEmails.set(cacheKey, now);
+      console.log(
+        `Email successfully sent to ${email} - ID: ${data?.id || "unknown"}`
+      );
+
+      // Clean up expired cache entries periodically
+      if (Math.random() < 0.1) {
+        // 10% chance to run cleanup on each request
+        for (const [key, timestamp] of recentlySentEmails.entries()) {
+          if (now - timestamp > CACHE_EXPIRY) {
+            recentlySentEmails.delete(key);
+          }
+        }
+      }
+
+      return NextResponse.json({ data });
+    } catch (resendError) {
+      console.error("Caught error with Resend service:", resendError);
+      return NextResponse.json(
+        { error: "Email service error: " + (resendError as Error).message },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json({ data });
   } catch (error) {
     console.error("Error in send-results API:", error);
     return NextResponse.json(
-      { error: "Failed to send email" },
+      { error: "Failed to send email: " + (error as Error).message },
       { status: 500 }
     );
   }

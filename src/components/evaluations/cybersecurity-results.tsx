@@ -105,22 +105,6 @@ export function CybersecurityResults({
     checkAuth();
   }, [supabase]);
 
-  // Log the input data for debugging
-  console.log(
-    "CybersecurityResults - quizData:",
-    quizData.id,
-    quizData.questions.length
-  );
-  console.log("CybersecurityResults - results:", JSON.stringify(results));
-  console.log(
-    "CybersecurityResults - results count:",
-    Object.keys(results).length
-  );
-  console.log("CybersecurityResults - interest data:", interest);
-  console.log("CybersecurityResults - provided score:", score);
-  console.log("CybersecurityResults - provided maxScore:", maxScore);
-  console.log("CybersecurityResults - provided categories:", categories);
-
   // Map the keys from the results to the keys in the evaluation data
   const mapResultsToQuizData = (
     results: QuizResults,

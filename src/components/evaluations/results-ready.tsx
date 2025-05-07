@@ -23,18 +23,36 @@ export function ResultsReady({
   evaluationId,
 }: ResultsReadyProps) {
   const [emailSent, setEmailSent] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
-  const emailSentRef = useRef(false);
+  const hasInitiatedSendRef = useRef(false);
 
   useEffect(() => {
-    // Only send email if we have the required information and it hasn't been sent yet
-    if (userInfo?.email && evaluationId && !emailSentRef.current) {
-      emailSentRef.current = true; // Set flag immediately to prevent duplicate sends
-      sendResultsEmail();
+    // Use this function to ensure we only send once
+    async function sendEmailOnce() {
+      // Only proceed if we haven't already started sending and have the required data
+      if (
+        !hasInitiatedSendRef.current &&
+        userInfo?.email &&
+        evaluationId &&
+        !isLoading
+      ) {
+        // Set the flag immediately before doing anything else
+        hasInitiatedSendRef.current = true;
+        await sendResultsEmail();
+      }
     }
+
+    // Call the function immediately
+    sendEmailOnce();
+
+    // Cleanup function
+    return () => {
+      // This ensures if the component unmounts during send, we still mark it as initiated
+      hasInitiatedSendRef.current = true;
+    };
+    // intentionally empty dependency array - we only want this to run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userInfo?.email, evaluationId]); // Added required dependencies
+  }, []);
 
   const sendResultsEmail = async () => {
     if (!userInfo?.email || !evaluationId) {
@@ -44,6 +62,8 @@ export function ResultsReady({
 
     try {
       setIsLoading(true);
+
+      console.log("Sending email request to API...");
       const response = await fetch("/api/send-results", {
         method: "POST",
         headers: {
@@ -63,6 +83,7 @@ export function ResultsReady({
       }
 
       setEmailSent(true);
+      console.log("Email sent successfully");
       toast({
         title: "Email enviado",
         description:

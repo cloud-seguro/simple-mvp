@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRandomString } from "@/lib/utils/string-utils";
 import { validateCorporateEmail } from "@/lib/utils/email-validation";
-import { sendEvaluationResults } from "@/lib/email/send-evaluation-results";
 import { EvaluationType } from "@prisma/client";
 
 // Interface for request body
@@ -61,21 +60,6 @@ export async function POST(req: NextRequest) {
         metadata: interest ? { interest } : undefined,
       },
     });
-
-    // Send email with evaluation results
-    try {
-      await sendEvaluationResults({
-        to: email,
-        evaluationId: evaluation.id,
-        accessCode,
-        type: type as "INITIAL" | "ADVANCED",
-        score: evaluation.score || 0,
-        firstName: "Usuario",
-      });
-    } catch (emailError) {
-      console.error("Error sending evaluation results email:", emailError);
-      // Continue execution even if email fails
-    }
 
     return NextResponse.json({
       message: "Evaluation saved successfully",
