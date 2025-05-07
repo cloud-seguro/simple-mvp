@@ -8,7 +8,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

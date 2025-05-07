@@ -32,7 +32,6 @@ interface CybersecurityResultsProps {
   userInfo: UserInfo;
   onRestart?: () => void;
   isSharedView?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interest?: InterestOption | null | string;
   score?: number;
   maxScore?: number;
