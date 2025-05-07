@@ -8,7 +8,6 @@ import SkipToMain from "@/components/skip-to-main";
 import { Header } from "@/components/sidebar/header";
 import { Search } from "@/components/sidebar/search";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { generateClientFingerprint } from "@/lib/utils/session-utils";
@@ -16,6 +15,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { NavigationProgress } from "@/components/ui/navigation-progress";
+import { useRouter } from "next/navigation";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -55,7 +55,6 @@ export function DashboardLayoutClient({ children }: DashboardLayoutProps) {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hasError, setHasError] = useState(false);
-  const pathname = usePathname();
   const router = useRouter();
   const supabase = createClientComponentClient();
   const { profile, isLoading } = useCurrentUser();
