@@ -181,14 +181,6 @@ export function ResultsReady({
                   <Copy size={20} />
                   <span>Copiar enlace</span>
                 </Button>
-                <Button
-                  onClick={handleSendEmail}
-                  variant="outline"
-                  className="flex-1 flex items-center justify-center gap-2 border-2 border-black text-black hover:bg-gray-100 rounded-full py-6"
-                >
-                  <Mail size={20} />
-                  <span>Enviar por correo</span>
-                </Button>
               </div>
             </div>
           )}
