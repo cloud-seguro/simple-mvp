@@ -6,10 +6,11 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Eye } from "lucide-react";
+import { Calendar, Eye, Loader2 } from "lucide-react";
 import { DataTable } from "@/components/table/data-table";
 import { Card, CardFooter } from "@/components/ui/card";
 import type { Column } from "@/components/table/types";
+import { useState } from "react";
 
 interface Evaluation {
   id: string;
@@ -26,6 +27,7 @@ interface RecentEvaluationsProps {
 
 export function RecentEvaluations({ evaluations }: RecentEvaluationsProps) {
   const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   // Function to get badge color based on score
   const getScoreBadgeColor = (score: number | null) => {
@@ -34,6 +36,11 @@ export function RecentEvaluations({ evaluations }: RecentEvaluationsProps) {
     if (score < 60) return "bg-orange-100 text-orange-800";
     if (score < 80) return "bg-yellow-100 text-yellow-800";
     return "bg-green-100 text-green-800";
+  };
+
+  const handleViewEvaluation = (id: string) => {
+    setLoadingId(id);
+    router.push(`/evaluations/${id}`);
   };
 
   const columns: Column<Evaluation>[] = [
@@ -84,13 +91,18 @@ export function RecentEvaluations({ evaluations }: RecentEvaluationsProps) {
           <Button
             variant="ghost"
             size="sm"
+            disabled={loadingId === row.id}
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/evaluations/${row.id}`);
+              handleViewEvaluation(row.id);
             }}
           >
-            <Eye className="mr-2 h-4 w-4" />
-            Ver
+            {loadingId === row.id ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Eye className="mr-2 h-4 w-4" />
+            )}
+            {loadingId === row.id ? "Cargando" : "Ver"}
           </Button>
         </div>
       ),
@@ -109,7 +121,7 @@ export function RecentEvaluations({ evaluations }: RecentEvaluationsProps) {
         pageSize={5}
         pageSizeOptions={[]}
         hidePagination={true}
-        onRowClick={(row) => router.push(`/evaluations/${row.id}`)}
+        onRowClick={(row) => handleViewEvaluation(row.id)}
       />
       <CardFooter className="px-0 pt-4">
         <Link href="/evaluations" className="w-full">

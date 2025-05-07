@@ -1,8 +1,6 @@
-import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { prisma } from "@/lib/prisma";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { EvaluationsList } from "./components/evaluations-list";
 import { CompareEvaluationsButton } from "./components/compare-evaluations-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +13,7 @@ export const metadata = {
     "Visualiza y compara tus evaluaciones de ciberseguridad anteriores",
 };
 
-async function EvaluationsContent() {
+export default async function EvaluationsPage() {
   const supabase = createServerComponentClient({ cookies });
   const {
     data: { session },
@@ -23,11 +21,13 @@ async function EvaluationsContent() {
 
   if (!session) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <h2 className="text-2xl font-bold">Sesión no encontrada</h2>
-        <p className="text-muted-foreground">
-          Por favor inicia sesión para ver tus evaluaciones
-        </p>
+      <div className="container py-8">
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <h2 className="text-2xl font-bold">Sesión no encontrada</h2>
+          <p className="text-muted-foreground">
+            Por favor inicia sesión para ver tus evaluaciones
+          </p>
+        </div>
       </div>
     );
   }
@@ -40,11 +40,13 @@ async function EvaluationsContent() {
 
   if (!profile) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <h2 className="text-2xl font-bold">Perfil no encontrado</h2>
-        <p className="text-muted-foreground">
-          No se pudo encontrar tu perfil de usuario
-        </p>
+      <div className="container py-8">
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <h2 className="text-2xl font-bold">Perfil no encontrado</h2>
+          <p className="text-muted-foreground">
+            No se pudo encontrar tu perfil de usuario
+          </p>
+        </div>
       </div>
     );
   }
@@ -60,41 +62,27 @@ async function EvaluationsContent() {
   const advancedEvaluations = evaluations.filter((e) => e.type === "ADVANCED");
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-4">
-        <CompareEvaluationsButton evaluations={evaluations} />
-      </div>
-
-      <Tabs defaultValue="initial" className="w-full">
-        <TabsList className="grid grid-cols-2 w-[400px] mb-6">
-          <TabsTrigger value="initial">Evaluaciones Iniciales</TabsTrigger>
-          <TabsTrigger value="advanced">Evaluaciones Avanzadas</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="initial">
-          <EvaluationsList evaluations={initialEvaluations} />
-        </TabsContent>
-
-        <TabsContent value="advanced">
-          <EvaluationsList evaluations={advancedEvaluations} />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
-
-export default function EvaluationsPage() {
-  return (
     <div className="container py-8">
-      <Suspense
-        fallback={
-          <div className="flex flex-col items-center justify-center gap-4">
-            <SecurityLoadingScreen message="Cargando evaluaciones..." />
+      <div className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <CompareEvaluationsButton evaluations={evaluations} />
         </div>
-        }
-      >
-        <EvaluationsContent />
-      </Suspense>
+
+        <Tabs defaultValue="initial" className="w-full">
+          <TabsList className="grid grid-cols-2 w-[400px] mb-6">
+            <TabsTrigger value="initial">Evaluaciones Iniciales</TabsTrigger>
+            <TabsTrigger value="advanced">Evaluaciones Avanzadas</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="initial">
+            <EvaluationsList evaluations={initialEvaluations} />
+          </TabsContent>
+
+          <TabsContent value="advanced">
+            <EvaluationsList evaluations={advancedEvaluations} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

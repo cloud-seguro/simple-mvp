@@ -1,17 +1,188 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SecurityLoadingScreen } from "@/components/ui/security-loading-screen";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { EvaluationContent } from "./evaluation-content";
 import { getEvaluationData } from "./evaluation-data";
+import { prisma } from "@/lib/prisma";
+import { getMaturityLevel } from "@/lib/maturity-utils";
+import { getQuizData } from "@/lib/quiz-data";
 
 // Update the interface to match Next.js expected types for dynamic routes
 interface EvaluationPageProps {
   params: Promise<{ id: string }>;
+}
+
+// Fetch detailed evaluation data directly from database instead of API
+async function getDetailedEvaluationData(id: string) {
+  try {
+    // Get the evaluation
+    const evaluation = await prisma.evaluation.findUnique({
+      where: { id },
+      include: {
+        profile: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!evaluation) {
+      return null;
+    }
+
+    // Get the quiz data based on evaluation type
+    const quizId =
+      evaluation.type === "INITIAL"
+        ? "evaluacion-inicial"
+        : "evaluacion-avanzada";
+    const quizData = getQuizData(quizId);
+
+    if (!quizData) {
+      throw new Error("Quiz data not found");
+    }
+
+    // Parse the answers
+    let answers: Record<string, number> = {};
+    if (evaluation.answers) {
+      if (typeof evaluation.answers === "string") {
+        try {
+          answers = JSON.parse(evaluation.answers);
+        } catch (err) {
+          console.error("Error parsing answers:", err);
+        }
+      } else if (typeof evaluation.answers === "object") {
+        answers = evaluation.answers as Record<string, number>;
+      }
+    }
+
+    // Calculate max possible score based on evaluation type
+    const maxScore = evaluation.type === "INITIAL" ? 45 : 100;
+
+    // Ensure score doesn't exceed max possible score for initial evaluations
+    const score =
+      evaluation.type === "INITIAL" && (evaluation.score || 0) > maxScore
+        ? maxScore
+        : evaluation.score || 0;
+
+    // Calculate maturity level based on capped score
+    const maturity = getMaturityLevel(quizId, score);
+
+    // Calculate scores by category
+    const categoryScores = Object.entries(
+      quizData.questions.reduce(
+        (acc, q) => {
+          const category = q.category || "General";
+          if (!acc[category]) acc[category] = { score: 0, maxScore: 0 };
+          acc[category].score += answers[q.id] || 0;
+          acc[category].maxScore += Math.max(...q.options.map((o) => o.value));
+          return acc;
+        },
+        {} as Record<string, { score: number; maxScore: number }>
+      )
+    ).map(([name, { score, maxScore }]) => {
+      // For initial evaluations, ensure category scores don't exceed their maximum
+      if (evaluation.type === "INITIAL" && score > maxScore) {
+        score = maxScore;
+      }
+      return { name, score, maxScore };
+    });
+
+    // Calculate the weakest categories
+    const categoryPercentages = categoryScores.map(
+      ({ name, score, maxScore }) => ({
+        category: name,
+        percentage: maxScore > 0 ? Math.round((score / maxScore) * 100) : 0,
+      })
+    );
+
+    // Get the two lowest scoring categories
+    const weakestCategories = [...categoryPercentages]
+      .sort((a, b) => a.percentage - b.percentage)
+      .slice(0, 2)
+      .map((item) => item.category);
+
+    // Generate recommendations for each question
+    const recommendations = quizData.questions.map((question) => {
+      const category = question.category || "General";
+      const questionScore = answers[question.id] || 0;
+      const maxScore = Math.max(...question.options.map((o) => o.value));
+      const selectedOption = question.options.find(
+        (o) => o.value === questionScore
+      );
+
+      const percentage = (questionScore / maxScore) * 100;
+      let recommendation = "";
+
+      if (quizId === "evaluacion-inicial") {
+        if (percentage <= 20) {
+          recommendation =
+            "Requiere atención inmediata. Establezca controles básicos y políticas fundamentales.";
+        } else if (percentage <= 40) {
+          recommendation =
+            "Necesita mejoras significativas. Formalice y documente los procesos existentes.";
+        } else if (percentage <= 60) {
+          recommendation =
+            "En desarrollo. Optimice la aplicación de controles y mejore la supervisión.";
+        } else if (percentage <= 80) {
+          recommendation =
+            "Bien establecido. Continue monitoreando y mejorando los procesos.";
+        } else {
+          recommendation =
+            "Excelente. Mantenga el nivel y actualice según nuevas amenazas.";
+        }
+      } else {
+        if (percentage <= 20) {
+          recommendation =
+            "Crítico: Implemente controles básicos siguiendo ISO 27001 y NIST.";
+        } else if (percentage <= 40) {
+          recommendation =
+            "Importante: Estandarice procesos y documente políticas de seguridad.";
+        } else if (percentage <= 60) {
+          recommendation =
+            "Moderado: Mejore la medición y optimización de controles existentes.";
+        } else if (percentage <= 80) {
+          recommendation =
+            "Bueno: Implemente monitoreo avanzado y automatización de respuestas.";
+        } else {
+          recommendation =
+            "Excelente: Mantenga la innovación y preparación ante amenazas emergentes.";
+        }
+      }
+
+      return {
+        score: questionScore,
+        maxScore,
+        text: question.text,
+        selectedOption: selectedOption
+          ? selectedOption.text ||
+            selectedOption.label ||
+            `Opción ${questionScore}`
+          : `Opción ${questionScore}`,
+        category,
+        recommendation,
+      };
+    });
+
+    return {
+      id: evaluation.id,
+      score,
+      maxScore,
+      maturityDescription: maturity.description,
+      maturityLevelNumber: parseInt(maturity.level.replace("Nivel ", "")),
+      weakestCategories,
+      recommendations,
+      categories: categoryScores,
+    };
+  } catch (error) {
+    console.error("Error getting detailed evaluation data:", error);
+    throw error;
+  }
 }
 
 export default async function EvaluationPage({ params }: EvaluationPageProps) {
@@ -21,6 +192,13 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
 
     if (!data) {
       notFound();
+    }
+
+    // Get detailed data directly from the database
+    const detailedData = await getDetailedEvaluationData(id);
+
+    if (!detailedData) {
+      throw new Error("Could not load detailed evaluation data");
     }
 
     const { evaluation } = data;
@@ -52,11 +230,7 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
           </div>
         </div>
 
-        <Suspense
-          fallback={<SecurityLoadingScreen message="Cargando resultados..." />}
-        >
-          <EvaluationContent {...data} />
-        </Suspense>
+        <EvaluationContent {...data} evaluationData={detailedData} />
       </div>
     );
   } catch (error) {

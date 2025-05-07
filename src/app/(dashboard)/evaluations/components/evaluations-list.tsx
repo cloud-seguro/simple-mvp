@@ -6,9 +6,10 @@ import { es } from "date-fns/locale";
 import type { Evaluation } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Eye } from "lucide-react";
+import { Calendar, Eye, Loader2 } from "lucide-react";
 import { DataTable } from "@/components/table/data-table";
 import type { Column } from "@/components/table/types";
+import { useState } from "react";
 
 interface EvaluationsListProps {
   evaluations: Evaluation[];
@@ -16,6 +17,7 @@ interface EvaluationsListProps {
 
 export function EvaluationsList({ evaluations }: EvaluationsListProps) {
   const router = useRouter();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
   // Function to get badge color based on score
   const getScoreBadgeColor = (score: number | null) => {
@@ -24,6 +26,11 @@ export function EvaluationsList({ evaluations }: EvaluationsListProps) {
     if (score < 60) return "bg-orange-100 text-orange-800";
     if (score < 80) return "bg-yellow-100 text-yellow-800";
     return "bg-green-100 text-green-800";
+  };
+
+  const handleViewEvaluation = (id: string) => {
+    setLoadingId(id);
+    router.push(`/evaluations/${id}`);
   };
 
   const columns: Column<Evaluation>[] = [
@@ -74,13 +81,18 @@ export function EvaluationsList({ evaluations }: EvaluationsListProps) {
           <Button
             variant="ghost"
             size="sm"
+            disabled={loadingId === row.id}
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/evaluations/${row.id}`);
+              handleViewEvaluation(row.id);
             }}
           >
-            <Eye className="mr-2 h-4 w-4" />
-            Ver
+            {loadingId === row.id ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Eye className="mr-2 h-4 w-4" />
+            )}
+            {loadingId === row.id ? "Cargando" : "Ver"}
           </Button>
         </div>
       ),
@@ -107,7 +119,7 @@ export function EvaluationsList({ evaluations }: EvaluationsListProps) {
       defaultSort={{ field: "createdAt", direction: "desc" }}
       rowSelection={false}
       pageSize={10}
-      onRowClick={(row) => router.push(`/evaluations/${row.id}`)}
+      onRowClick={(row) => handleViewEvaluation(row.id)}
       customActions={[
         {
           label: `Promedio: ${averageScore !== null ? `${averageScore}%` : "N/A"}`,
