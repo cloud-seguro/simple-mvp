@@ -195,7 +195,7 @@ export default function Navbar() {
                   handleNavClick(
                     e as React.MouseEvent<HTMLButtonElement>,
                     isHomePage ? "#evaluacion" : "/#evaluacion"
-                )
+                  )
                 }
               >
                 Evaluar Ahora
