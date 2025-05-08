@@ -151,36 +151,13 @@ export default function Pricing() {
               <span className="text-gray-500 ml-2">/siempre</span>
             </div>
 
-            <div className="mb-8 flex-grow">
-              <p className="text-gray-700 mb-4">
+            <div className="mb-6 flex-grow">
+              <p className="text-gray-600 mb-6">
                 Comienza tu viaje hacia una mejor ciberseguridad con nuestro
                 plan gratuito.
               </p>
 
               <div className="space-y-4">
-                <motion.div
-                  className="flex items-start"
-                  variants={featureAnimation}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  custom={0}
-                >
-                  <motion.div
-                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
-                    <Shield className="h-5 w-5 text-black" />
-                  </motion.div>
-                  <div>
-                    <h4 className="font-medium">Evaluación inicial</h4>
-                    <p className="text-gray-600">
-                      Accede a nuestra evaluación de seguridad básica con 15
-                      preguntas
-                    </p>
-                  </div>
-                </motion.div>
-
                 <motion.div
                   className="flex items-start"
                   variants={featureAnimation}
@@ -193,12 +170,13 @@ export default function Pricing() {
                     className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Database className="h-5 w-5 text-black" />
+                    <Shield className="h-5 w-5 text-black" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium">Dashboard básico</h4>
+                    <h4 className="font-medium">Evaluación inicial</h4>
                     <p className="text-gray-600">
-                      Acceso a visualización básica de tu nivel de seguridad
+                      Accede a nuestra evaluación de seguridad básica con 15
+                      preguntas
                     </p>
                   </div>
                 </motion.div>
@@ -601,7 +579,9 @@ export default function Pricing() {
                   <td className="py-4 px-2 md:px-4 font-medium">
                     Dashboard interactivo
                   </td>
-                  <td className="text-center py-4 px-2 md:px-4">Básico</td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
                   <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
                     Básico con comparativa
                   </td>

@@ -65,18 +65,6 @@ export default function UpgradePricing() {
                     </p>
                   </div>
                 </div>
-
-                <div className="flex items-start">
-                  <div className="bg-yellow-400 p-2 rounded-full mr-3 mt-1">
-                    <Database className="h-5 w-5 text-black" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Dashboard básico</h4>
-                    <p className="text-gray-600">
-                      Visualización básica de tu nivel de seguridad
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -236,7 +224,9 @@ export default function UpgradePricing() {
                   <td className="py-4 px-2 md:px-4 font-medium">
                     Dashboard interactivo
                   </td>
-                  <td className="text-center py-4 px-2 md:px-4">Básico</td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
                   <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
                     Básico con comparativa
                   </td>

@@ -171,28 +171,6 @@ export default function SimplifiedPricing() {
                     className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Database className="h-5 w-5 text-yellow-600" />
-                  </motion.div>
-                  <div>
-                    <h4 className="font-medium">Dashboard básico</h4>
-                    <p className="text-gray-600">
-                      Visualización básica de tu nivel de seguridad
-                    </p>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-start"
-                  variants={featureAnimation}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true }}
-                  custom={2}
-                >
-                  <motion.div
-                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
                     <CheckCircle className="h-5 w-5 text-yellow-600" />
                   </motion.div>
                   <div>
