@@ -16,6 +16,7 @@ import {
   CheckCircle,
   FileDigit,
   ExternalLink,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -596,59 +597,141 @@ export default function SimplifiedPricing() {
             Personaliza tu plan con módulos especializados según tus necesidades
           </p>
 
+          <div className="overflow-x-auto mb-10">
+            <table className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-md">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="py-4 px-4 text-left">Módulo</th>
+                  <th className="py-4 px-4 text-left">Función</th>
+                  <th className="py-4 px-4 text-left">Precio individual</th>
+                  <th className="py-4 px-4 text-center">
+                    Incluido en Plan Pro
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="py-4 px-4 font-medium">Simple Evalúa</td>
+                  <td className="py-4 px-4">
+                    Diagnóstico alineado con ISO/NIST + plan de mejora.
+                  </td>
+                  <td className="py-4 px-4">$39.00/mes</td>
+                  <td className="py-4 px-4 text-center">
+                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-4 px-4 font-medium">Simple Breach</td>
+                  <td className="py-4 px-4">
+                    Revisa si tus correos o dominios han sido filtrados (10
+                    consultas).
+                  </td>
+                  <td className="py-4 px-4">$49.00/mes</td>
+                  <td className="py-4 px-4 text-center">
+                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-4 px-4 font-medium">Simple Scan</td>
+                  <td className="py-4 px-4">
+                    Escaneo técnico de vulnerabilidades en sitios web o apps.
+                  </td>
+                  <td className="py-4 px-4">$79.00/mes</td>
+                  <td className="py-4 px-4 text-center">
+                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-4 px-4 font-medium">Simple API</td>
+                  <td className="py-4 px-4">
+                    Análisis de seguridad en tus APIs con enfoque técnico.
+                  </td>
+                  <td className="py-4 px-4">$89.00/mes</td>
+                  <td className="py-4 px-4 text-center">
+                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="py-4 px-4 font-medium">Simple Contrata</td>
+                  <td className="py-4 px-4">
+                    1 hora de acompañamiento con especialista (valor real desde
+                    $150 USD). En simple pro tienes una hora con un experto.
+                  </td>
+                  <td className="py-4 px-4">
+                    Incluido en Pro (valor $150 USD)
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    <Check className="h-5 w-5 text-green-500 mx-auto" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <div className="grid md:grid-cols-5 gap-4 max-w-5xl mx-auto mb-12">
             <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
-              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <Shield className="h-5 w-5 text-orange-500" />
+              <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 mx-auto mb-4 flex items-center justify-center">
+                <Shield className="h-6 w-6 text-black" />
               </div>
               <h4 className="font-bold mb-2">Simple Evalúa</h4>
               <p className="text-sm text-gray-600">
-                Diagnóstico del estado actual de ciberseguridad y plan de
-                mejora.
+                Diagnóstico alineado con ISO/NIST + plan de mejora.
+              </p>
+              <p className="text-sm font-medium text-orange-600 mt-2">
+                $39.00/mes
               </p>
             </div>
 
             <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
-              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <Bell className="h-5 w-5 text-orange-500" />
+              <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 mx-auto mb-4 flex items-center justify-center">
+                <Bell className="h-6 w-6 text-black" />
               </div>
               <h4 className="font-bold mb-2">Simple Breach</h4>
               <p className="text-sm text-gray-600">
-                Revisa si los datos de tu empresa han sido comprometidos o
-                filtrados.
+                Revisa si tus correos o dominios han sido filtrados (10
+                consultas).
+              </p>
+              <p className="text-sm font-medium text-orange-600 mt-2">
+                $49.00/mes
               </p>
             </div>
 
             <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
-              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <Layers className="h-5 w-5 text-orange-500" />
+              <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 mx-auto mb-4 flex items-center justify-center">
+                <Layers className="h-6 w-6 text-black" />
               </div>
               <h4 className="font-bold mb-2">Simple Scan</h4>
               <p className="text-sm text-gray-600">
-                Escanea tu sitio web o aplicaciones en busca de
-                vulnerabilidades.
+                Escaneo técnico de vulnerabilidades en sitios web o apps.
+              </p>
+              <p className="text-sm font-medium text-orange-600 mt-2">
+                $79.00/mes
               </p>
             </div>
 
             <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
-              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <Database className="h-5 w-5 text-orange-500" />
+              <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 mx-auto mb-4 flex items-center justify-center">
+                <Database className="h-6 w-6 text-black" />
               </div>
               <h4 className="font-bold mb-2">Simple API</h4>
               <p className="text-sm text-gray-600">
-                Analiza la seguridad de tus APIs. Las APIs son el principal
-                riesgo en fintech.
+                Análisis de seguridad en tus APIs con enfoque técnico.
+              </p>
+              <p className="text-sm font-medium text-orange-600 mt-2">
+                $89.00/mes
               </p>
             </div>
 
             <div className="bg-white rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300">
-              <div className="bg-orange-100 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <Users className="h-5 w-5 text-orange-500" />
+              <div className="bg-yellow-400 p-3 rounded-full w-14 h-14 mx-auto mb-4 flex items-center justify-center">
+                <Users className="h-6 w-6 text-black" />
               </div>
               <h4 className="font-bold mb-2">Simple Contrata</h4>
               <p className="text-sm text-gray-600">
-                Accede al mejor equipo de profesionales de ciberseguridad en
-                LATAM.
+                1 hora de acompañamiento con especialista incluido en Plan Pro.
+              </p>
+              <p className="text-sm font-medium text-orange-600 mt-2">
+                Incluido en Pro (valor $150 USD)
               </p>
             </div>
           </div>
