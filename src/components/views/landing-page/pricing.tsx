@@ -8,15 +8,10 @@ import {
   Lock,
   Check,
   X,
-  Layers,
   Search,
   Users,
   FileText,
   BarChart4,
-  CheckCircle,
-  FileDigit,
-  Clock,
-  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

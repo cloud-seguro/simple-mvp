@@ -10,7 +10,6 @@ import {
   X,
   BarChart4,
   FileText,
-  Search,
   Users,
   Layers,
 } from "lucide-react";

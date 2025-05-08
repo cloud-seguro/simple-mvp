@@ -113,8 +113,9 @@ export default function TermsPage() {
               cuya divulgación resulte perjudicial; y
             </p>
             <p className="mb-4">
-              b) esté marcado como "Confidencial", "Privado", "Restringido" o se
-              deba asumir razonablemente como confidencial.
+              b) esté marcado como &quot;Confidencial&quot;,
+              &quot;Privado&quot;, &quot;Restringido&quot; o se deba asumir
+              razonablemente como confidencial.
             </p>
             <p className="mb-4">
               Ciberseguridad Simple no recopila ni maneja este tipo de
@@ -148,8 +149,8 @@ export default function TermsPage() {
             </p>
             <h3 className="text-lg font-medium mt-4 mb-2">Modelos y Add-ons</h3>
             <p className="mb-6">
-              Los modelos adicionales o "add-ons" de la plataforma están
-              diseñados para complementar los diagnósticos generales (por
+              Los modelos adicionales o &quot;add-ons&quot; de la plataforma
+              están diseñados para complementar los diagnósticos generales (por
               ejemplo, seguridad en nube, phishing o SaaS). Cada uno de estos
               debe interpretarse de forma contextual y validarse
               profesionalmente antes de tomar decisiones técnicas o legales.
@@ -211,7 +212,10 @@ export default function TermsPage() {
             </p>
             <p className="mb-4">Recomendamos:</p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
-              <li>No usar contraseñas simples como "123456" o "admin",</li>
+              <li>
+                No usar contraseñas simples como &quot;123456&quot; o
+                &quot;admin&quot;,
+              </li>
               <li>Aplicar autenticación multifactor,</li>
               <li>Cambiar claves regularmente y mantenerlas seguras.</li>
             </ul>

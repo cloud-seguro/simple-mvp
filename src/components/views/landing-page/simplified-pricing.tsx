@@ -7,15 +7,12 @@ import {
   Database,
   Bell,
   Users,
-  Clock,
   Layers,
-  Zap,
   Search,
   FileText,
   BarChart4,
   CheckCircle,
   FileDigit,
-  ExternalLink,
   Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
