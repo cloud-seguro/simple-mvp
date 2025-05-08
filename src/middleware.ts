@@ -2,10 +2,14 @@ import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { generateClientFingerprint } from "@/lib/utils/session-utils";
+import { secureCookies } from "@/lib/middleware/cookie-security";
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const pathname = req.nextUrl.pathname;
+
+  // Apply cookie security middleware to enhance all auth cookies
+  const secureRes = secureCookies(req, res);
 
   // Skip middleware for public routes and static files
   if (
@@ -17,7 +21,7 @@ export async function middleware(req: NextRequest) {
     pathname === "/" ||
     pathname.match(/\.(ico|png|jpg|jpeg|svg|css|js|json)$/)
   ) {
-    return res;
+    return secureRes;
   }
 
   try {
@@ -92,6 +96,12 @@ export async function middleware(req: NextRequest) {
     res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     res.headers.set("X-XSS-Protection", "1; mode=block");
 
+    // Add Content Security Policy to prevent XSS attacks
+    res.headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none';"
+    );
+
     // Handle preflight OPTIONS requests
     if (req.method === "OPTIONS") {
       return new NextResponse(null, {
@@ -102,7 +112,7 @@ export async function middleware(req: NextRequest) {
 
     // Skip auth check for the auth callback route
     if (pathname.startsWith("/auth/callback")) {
-      return res;
+      return secureRes;
     }
 
     // For better security, set secure cookies in the response
@@ -209,7 +219,7 @@ export async function middleware(req: NextRequest) {
       res.cookies.set("session_secure", "true", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "strict",
         maxAge: 60 * 60 * 24, // 1 day
         path: "/",
       });
@@ -217,13 +227,13 @@ export async function middleware(req: NextRequest) {
 
     // Auth routes for all auth-related flows should never be redirected
     if (pathname.startsWith("/auth/")) {
-      return res;
+      return secureRes;
     }
 
     // Reset password page is no longer necessary as we're using magic links,
     // but keep it accessible for backward compatibility
     if (pathname === "/reset-password") {
-      return res;
+      return secureRes;
     }
 
     // Forgot password page should be accessible without a session
@@ -234,7 +244,7 @@ export async function middleware(req: NextRequest) {
         redirectUrl.pathname = "/dashboard";
         return NextResponse.redirect(redirectUrl);
       }
-      return res;
+      return secureRes;
     }
 
     // If there's no session and the user is trying to access a protected route
@@ -255,7 +265,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    return res;
+    return secureRes;
   } catch (error) {
     console.error("Unexpected middleware error:", error);
     const redirectUrl = new URL("/sign-in?error=auth_error", req.url);
