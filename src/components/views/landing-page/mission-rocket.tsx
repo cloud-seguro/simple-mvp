@@ -76,8 +76,11 @@ const MissionRocket = () => {
         </div>
       </div>
 
-      <div className="min-h-[600px] relative" ref={containerRef}>
-        <div className="relative" ref={rocketPathRef}>
+      <div
+        className="min-h-[800px] md:min-h-[600px] relative"
+        ref={containerRef}
+      >
+        <div className="relative h-full" ref={rocketPathRef}>
           {/* Rocket Path - centered */}
           <motion.div
             className="absolute w-1 h-full left-1/2 -translate-x-1/2 -z-10"
@@ -92,8 +95,12 @@ const MissionRocket = () => {
           <motion.div
             className="absolute left-1/2 -translate-x-1/2 z-20"
             style={{
-              y: rocketY,
-              scale: 2,
+              y: useTransform(
+                scrollYProgress,
+                [0, 0.3, 0.6, 1],
+                ["95%", "60%", "20%", "-10%"]
+              ),
+              scale: useTransform(scrollYProgress, [0, 0.5], [1.5, 2]),
             }}
           >
             <div className="relative w-20 h-20 animate-float">
@@ -101,17 +108,19 @@ const MissionRocket = () => {
                 className="text-orange-500 w-full h-full"
                 strokeWidth={1.5}
               />
-
             </div>
           </motion.div>
 
-          {/* Mission Cards - rearranged in a circular pattern */}
-          <div className="flex flex-col items-center pt-16 pb-6" ref={cardsRef}>
-            {/* Grid for cards - arranged around the rocket */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto relative">
+          {/* Mission Cards - with more space on mobile */}
+          <div
+            className="flex flex-col items-center pt-44 md:pt-16 pb-6"
+            ref={cardsRef}
+          >
+            {/* Grid for cards - arranged around the rocket with more vertical spacing on mobile */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6 max-w-6xl mx-auto relative">
               {/* Simplify Card */}
               <motion.div
-                className="bg-orange-500 text-white rounded-xl shadow-lg p-6 relative z-10"
+                className="bg-orange-500 text-white rounded-xl shadow-lg p-6 min-h-[180px] flex flex-col relative z-10"
                 initial={{ opacity: 0, y: 50 }}
                 animate={controls}
                 variants={{
@@ -136,7 +145,7 @@ const MissionRocket = () => {
                 >
                   Simplificamos
                 </motion.h3>
-                <p className="text-white/90">
+                <p className="text-white/90 flex-grow">
                   Transformamos conceptos complejos de ciberseguridad en
                   soluciones prácticas y comprensibles para todo tipo de
                   empresas.
@@ -144,11 +153,11 @@ const MissionRocket = () => {
               </motion.div>
 
               {/* Center column for spacing - this gives room for the rocket */}
-              <div className="hidden md:block min-h-[160px]"></div>
+              <div className="hidden md:block min-h-[180px]"></div>
 
               {/* Protect Card */}
               <motion.div
-                className="bg-black text-white rounded-xl shadow-lg p-6 relative z-10"
+                className="bg-black text-white rounded-xl shadow-lg p-6 min-h-[180px] flex flex-col relative z-10"
                 initial={{ opacity: 0, y: 50 }}
                 animate={controls}
                 variants={{
@@ -173,7 +182,7 @@ const MissionRocket = () => {
                 >
                   Protegemos
                 </motion.h3>
-                <p className="text-white/90">
+                <p className="text-white/90 flex-grow">
                   Defendemos tus activos digitales con soluciones diseñadas
                   específicamente para tus necesidades.
                 </p>
@@ -181,7 +190,7 @@ const MissionRocket = () => {
 
               {/* Empower Card - centered below */}
               <motion.div
-                className="bg-yellow-400 rounded-xl shadow-lg p-6 col-span-1 md:col-span-3 max-w-md mx-auto mt-10 relative z-10"
+                className="bg-yellow-400 rounded-xl shadow-lg p-6 min-h-[180px] flex flex-col relative z-10"
                 initial={{ opacity: 0, y: 50 }}
                 animate={controls}
                 variants={{
@@ -206,7 +215,7 @@ const MissionRocket = () => {
                 >
                   Empoderamos
                 </motion.h3>
-                <p className="text-black/80">
+                <p className="text-black/80 flex-grow">
                   Te brindamos las herramientas y el conocimiento para gestionar
                   tu seguridad con confianza y autonomía.
                 </p>

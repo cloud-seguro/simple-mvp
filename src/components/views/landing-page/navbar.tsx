@@ -99,13 +99,18 @@ export default function Navbar() {
       >
         <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold z-50 relative">
+          <Link
+            href="/"
+            className={`text-2xl font-bold relative transition-opacity duration-150 ${
+              isMenuOpen ? "opacity-0 md:opacity-100" : "opacity-100"
+            }`}
+          >
             <span className="text-black">SIMPLE</span>
           </Link>
 
           {/* Mobile menu button */}
           <Button
-            className="md:hidden z-50"
+            className={`md:hidden z-50 ${isMenuOpen ? "opacity-0" : "opacity-100"}`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
           >
@@ -190,7 +195,7 @@ export default function Navbar() {
                   handleNavClick(
                     e as React.MouseEvent<HTMLButtonElement>,
                     isHomePage ? "#evaluacion" : "/#evaluacion"
-                  )
+                )
                 }
               >
                 Evaluar Ahora
@@ -214,11 +219,24 @@ export default function Navbar() {
 
         {/* Mobile Menu Panel */}
         <div
-          className={`fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl transition-transform duration-300 ease-in-out transform md:hidden ${
+          className={`fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl transition-transform duration-300 ease-in-out transform md:hidden z-[60] ${
             isMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="flex flex-col h-full pt-20 pb-6 px-6">
+          <div className="flex flex-col h-full pt-4 pb-6 px-6">
+            {/* Add header to mobile menu */}
+            <div className="flex items-center justify-between mb-8 mt-2 pb-4 border-b">
+              <div className="text-2xl font-bold">
+                <span className="text-black">SIMPLE</span>
+              </div>
+              <Button
+                className="p-2"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Cerrar menú"
+              >
+                <X size={24} />
+              </Button>
+            </div>
             <div className="flex-1 flex flex-col space-y-2">
               {isHomePage
                 ? // Mobile navigation for home page
