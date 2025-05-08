@@ -11,6 +11,12 @@ import {
   Layers,
   Search,
   Users,
+  FileText,
+  BarChart4,
+  CheckCircle,
+  FileDigit,
+  Clock,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -118,7 +124,7 @@ export default function Pricing() {
         </motion.div>
 
         <motion.div
-          className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16"
+          className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16"
           variants={container}
           initial="hidden"
           whileInView="show"
@@ -135,7 +141,7 @@ export default function Pricing() {
             }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold">Plan Básico</h3>
+              <h3 className="text-2xl font-bold">Plan Gratis</h3>
               <motion.div
                 className="bg-yellow-400 text-black rounded-full px-4 py-1 text-sm font-medium"
                 initial={pulse.initial}
@@ -237,7 +243,7 @@ export default function Pricing() {
             </p>
           </motion.div>
 
-          {/* Premium Card */}
+          {/* Basic Card (formerly Premium) */}
           <motion.div
             className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-8 flex flex-col h-full relative overflow-hidden"
             variants={item}
@@ -256,7 +262,7 @@ export default function Pricing() {
             />
 
             <div className="flex justify-between items-center mb-6 relative z-10">
-              <h3 className="text-2xl font-bold text-white">Plan Premium</h3>
+              <h3 className="text-2xl font-bold text-white">Plan Basic</h3>
               <motion.div
                 className="bg-black text-white rounded-full px-4 py-1 text-sm font-medium"
                 initial={pulse.initial}
@@ -267,14 +273,14 @@ export default function Pricing() {
             </div>
 
             <div className="mb-6 relative z-10">
-              <span className="text-4xl font-bold text-white">$25</span>
+              <span className="text-4xl font-bold text-white">$30</span>
               <span className="text-white/80 ml-2">/mes</span>
             </div>
 
             <div className="mb-8 flex-grow relative z-10">
               <p className="text-white/90 mb-4">
-                Protección completa con todas las funciones y módulos para
-                mantener tu empresa segura.
+                La forma más directa de empezar a gestionar la ciberseguridad de
+                tu empresa con herramientas simples y efectivas.
               </p>
 
               <div className="space-y-4">
@@ -294,10 +300,11 @@ export default function Pricing() {
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Evaluación avanzada
+                      Evaluación especializada
                     </h4>
                     <p className="text-white/80">
-                      Evaluación completa con 25+ preguntas y análisis detallado
+                      25 preguntas clave alineadas a estándares como ISO 27001 y
+                      NIST
                     </p>
                   </div>
                 </motion.div>
@@ -314,15 +321,12 @@ export default function Pricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Database className="h-5 w-5 text-white" />
+                    <BarChart4 className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium text-white">
-                      Dashboard completo
-                    </h4>
+                    <h4 className="font-medium text-white">Comparación</h4>
                     <p className="text-white/80">
-                      Acceso a todas las funciones y visualizaciones del
-                      dashboard
+                      Compara tu nivel de madurez y revisa tus avances
                     </p>
                   </div>
                 </motion.div>
@@ -339,14 +343,12 @@ export default function Pricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Bell className="h-5 w-5 text-white" />
+                    <Database className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium text-white">
-                      Alertas de seguridad
-                    </h4>
+                    <h4 className="font-medium text-white">Dashboard básico</h4>
                     <p className="text-white/80">
-                      Notificaciones en tiempo real sobre vulnerabilidades
+                      Visualiza tu nivel de madurez y haz seguimiento
                     </p>
                   </div>
                 </motion.div>
@@ -363,15 +365,12 @@ export default function Pricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Search className="h-5 w-5 text-white" />
+                    <Bell className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium text-white">
-                      Verificación de brechas
-                    </h4>
+                    <h4 className="font-medium text-white">Simple Breach</h4>
                     <p className="text-white/80">
-                      Incluye tres consultas para verificar brechas de la
-                      empresa
+                      10 consultas mensuales para verificar brechas
                     </p>
                   </div>
                 </motion.div>
@@ -388,14 +387,14 @@ export default function Pricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Layers className="h-5 w-5 text-white" />
+                    <FileText className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Módulos especializados
+                      Exporta tu informe
                     </h4>
                     <p className="text-white/80">
-                      Acceso a todos los módulos de seguridad disponibles
+                      Descarga y comparte tu reporte de evaluación en PDF
                     </p>
                   </div>
                 </motion.div>
@@ -413,7 +412,147 @@ export default function Pricing() {
             </motion.div>
 
             <p className="text-center text-sm text-white/70 mt-4 relative z-10">
-              Cancelación en cualquier momento
+              Ideal para startups y empresas en crecimiento
+            </p>
+          </motion.div>
+
+          {/* Pro Plan Card - Coming Soon */}
+          <motion.div
+            className="bg-white rounded-xl p-8 flex flex-col h-full border-2 border-black shadow-md"
+            variants={item}
+            initial={float.initial}
+            animate={float.animate}
+            whileHover={{
+              scale: 1.03,
+            }}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold">Plan Pro</h3>
+              <motion.div
+                className="bg-yellow-400 text-black rounded-full px-4 py-1 text-sm font-medium"
+                initial={pulse.initial}
+                animate={pulse.animate}
+              >
+                Muy pronto
+              </motion.div>
+            </div>
+
+            <div className="mb-6">
+              <span className="text-4xl font-bold">$300</span>
+              <span className="text-gray-500 ml-2">/mes</span>
+            </div>
+
+            <div className="mb-8 flex-grow">
+              <p className="text-gray-700 mb-4">
+                Avanza en la madurez de tu ciberseguridad con herramientas más
+                profundas y apoyo experto.
+              </p>
+
+              <div className="space-y-4">
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={0}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Search className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Simple Scan</h4>
+                    <p className="text-gray-600">
+                      Evalúa vulnerabilidades en tus plataformas web,
+                      aplicaciones y APIs
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={1}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Bell className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">20 consultas Simple Breach</h4>
+                    <p className="text-gray-600">
+                      Verifica correos y dominios comprometidos con mayor
+                      alcance
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={2}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Database className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Dashboard completo</h4>
+                    <p className="text-gray-600">
+                      Métricas avanzadas, evolución histórica y tendencias
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={3}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Users className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">1 hora con especialista</h4>
+                    <p className="text-gray-600">
+                      Un experto te ayuda a interpretar resultados y mejorar tu
+                      nivel
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                className="w-full py-6 bg-yellow-400 text-black hover:bg-yellow-500"
+                disabled
+              >
+                Próximamente
+              </Button>
+            </motion.div>
+
+            <p className="text-center text-sm text-gray-500 mt-4">
+              Ideal para empresas en procesos de certificación
             </p>
           </motion.div>
         </motion.div>
@@ -436,12 +575,15 @@ export default function Pricing() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 px-2 md:px-4 w-1/2">
+                  <th className="text-left py-4 px-2 md:px-4 w-1/3">
                     Funcionalidad
                   </th>
-                  <th className="text-center py-4 px-2 md:px-4">Plan Básico</th>
-                  <th className="text-center py-4 px-2 md:px-4 bg-white">
-                    Plan Premium
+                  <th className="text-center py-4 px-2 md:px-4">Plan Gratis</th>
+                  <th className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    Plan Basic
+                  </th>
+                  <th className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    Plan Pro
                   </th>
                 </tr>
               </thead>
@@ -453,7 +595,10 @@ export default function Pricing() {
                   <td className="text-center py-4 px-2 md:px-4">
                     Básica (15 preguntas)
                   </td>
-                  <td className="text-center py-4 px-2 md:px-4 bg-white font-medium">
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50 font-medium">
+                    Especializada (25 preguntas)
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5 font-medium">
                     Completa (50+ puntos)
                   </td>
                 </tr>
@@ -462,19 +607,49 @@ export default function Pricing() {
                     Dashboard interactivo
                   </td>
                   <td className="text-center py-4 px-2 md:px-4">Básico</td>
-                  <td className="text-center py-4 px-2 md:px-4 bg-white">
-                    Avanzado
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    Básico con comparativa
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    Completo y comparativo
                   </td>
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="py-4 px-2 md:px-4 font-medium">
-                    Módulos adicionales
+                    Simple Breach
                   </td>
                   <td className="text-center py-4 px-2 md:px-4">
                     <X className="h-5 w-5 text-gray-400 mx-auto" />
                   </td>
-                  <td className="text-center py-4 px-2 md:px-4 bg-white">
-                    <Check className="h-5 w-5 text-orange-500 mx-auto" />
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    10 consultas/mes
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    20 consultas/mes
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">Simple Scan</td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    <Check className="h-5 w-5 text-yellow-600 mx-auto" />
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">Simple API</td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    <Check className="h-5 w-5 text-yellow-600 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-200">
@@ -484,17 +659,39 @@ export default function Pricing() {
                   <td className="text-center py-4 px-2 md:px-4">
                     <X className="h-5 w-5 text-gray-400 mx-auto" />
                   </td>
-                  <td className="text-center py-4 px-2 md:px-4 bg-white">
-                    <Check className="h-5 w-5 text-orange-500 mx-auto" />
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    <Check className="h-5 w-5 text-yellow-600 mx-auto" />
                   </td>
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="py-4 px-2 md:px-4 font-medium">
-                    Detección de vulnerabilidades
+                    Informes exportables
                   </td>
-                  <td className="text-center py-4 px-2 md:px-4">Limitada</td>
-                  <td className="text-center py-4 px-2 md:px-4 bg-white font-medium">
-                    Completa
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    PDF Básico
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    PDF Detallado
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-200">
+                  <td className="py-4 px-2 md:px-4 font-medium">
+                    Acceso a Simple Contrata
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4">
+                    <X className="h-5 w-5 text-gray-400 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    <Check className="h-5 w-5 text-yellow-600 mx-auto" />
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    Acceso completo
                   </td>
                 </tr>
                 <tr>
@@ -502,8 +699,11 @@ export default function Pricing() {
                     Soporte técnico
                   </td>
                   <td className="text-center py-4 px-2 md:px-4">Email</td>
-                  <td className="text-center py-4 px-2 md:px-4 bg-white font-medium">
-                    Email + Chat prioritario
+                  <td className="text-center py-4 px-2 md:px-4 bg-yellow-50">
+                    Email
+                  </td>
+                  <td className="text-center py-4 px-2 md:px-4 bg-black/5">
+                    Email + Chat + 1 hora especialista
                   </td>
                 </tr>
               </tbody>

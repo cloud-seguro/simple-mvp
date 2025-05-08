@@ -10,6 +10,12 @@ import {
   Clock,
   Layers,
   Zap,
+  Search,
+  FileText,
+  BarChart4,
+  CheckCircle,
+  FileDigit,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -85,13 +91,140 @@ export default function SimplifiedPricing() {
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
           variants={container}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
         >
-          {/* Premium Subscription Card */}
+          {/* Free Plan Card */}
+          <motion.div
+            className="bg-white rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200"
+            variants={item}
+            initial={float.initial}
+            animate={float.animate}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            }}
+          >
+            <div className="flex justify-between items-start mb-6 relative z-10">
+              <h3 className="text-2xl font-bold">Plan Gratuito</h3>
+              <motion.div
+                className="bg-yellow-400 text-black rounded-full px-4 py-1 text-sm font-medium"
+                initial={{ scale: 1 }}
+                animate={{
+                  scale: [1, 1.05, 1],
+                  transition: {
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "mirror",
+                  },
+                }}
+              >
+                Gratis
+              </motion.div>
+            </div>
+
+            <div className="mb-6 relative z-10">
+              <span className="text-4xl font-bold">$0</span>
+              <span className="text-gray-500 ml-2">/siempre</span>
+            </div>
+
+            <div className="mb-8 flex-grow relative z-10">
+              <p className="text-gray-700 mb-4">
+                Comienza tu viaje hacia una mejor ciberseguridad con nuestro
+                plan gratuito.
+              </p>
+
+              <div className="space-y-4">
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={0}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Shield className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Evaluación inicial</h4>
+                    <p className="text-gray-600">
+                      Accede a nuestra evaluación de seguridad básica con 15
+                      preguntas
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={1}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Database className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Dashboard básico</h4>
+                    <p className="text-gray-600">
+                      Visualización básica de tu nivel de seguridad
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={2}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <CheckCircle className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">Recomendaciones iniciales</h4>
+                    <p className="text-gray-600">
+                      Sugerencias básicas para mejorar tu seguridad
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative z-10"
+            >
+              <Link href="/pricing">
+                <Button className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10">
+                  <span className="relative z-10">Comenzar gratis</span>
+                </Button>
+              </Link>
+            </motion.div>
+
+            <p className="text-center text-sm text-gray-500 mt-4 relative z-10">
+              No requiere tarjeta de crédito
+            </p>
+          </motion.div>
+
+          {/* Basic Plan Card (formerly Premium) */}
           <motion.div
             className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden"
             variants={item}
@@ -111,7 +244,7 @@ export default function SimplifiedPricing() {
             />
 
             <div className="flex justify-between items-start mb-6 relative z-10">
-              <h3 className="text-2xl font-bold text-white">Plan Premium</h3>
+              <h3 className="text-2xl font-bold text-white">Plan Basic</h3>
               <motion.div
                 className="bg-white text-black rounded-full px-4 py-1 text-sm font-medium"
                 initial={{ scale: 1 }}
@@ -129,14 +262,14 @@ export default function SimplifiedPricing() {
             </div>
 
             <div className="mb-6 relative z-10">
-              <span className="text-4xl font-bold text-white">$25</span>
+              <span className="text-4xl font-bold text-white">$30</span>
               <span className="text-white/80 ml-2">/mes</span>
             </div>
 
             <div className="mb-8 flex-grow relative z-10">
               <p className="text-white/90 mb-4">
-                Accede a recursos exclusivos con nuestra suscripción mensual y
-                mantén tu empresa protegida contra ciberataques.
+                La forma más directa de empezar a gestionar la ciberseguridad de
+                tu empresa con herramientas simples y efectivas.
               </p>
 
               <div className="space-y-4">
@@ -156,11 +289,10 @@ export default function SimplifiedPricing() {
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Evaluación completa
+                      Evaluación especializada
                     </h4>
                     <p className="text-white/80">
-                      Evaluación exhaustiva de seguridad con 50+ puntos de
-                      verificación
+                      25 preguntas clave alineadas a estándares ISO 27001 y NIST
                     </p>
                   </div>
                 </motion.div>
@@ -177,15 +309,12 @@ export default function SimplifiedPricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Database className="h-5 w-5 text-white" />
+                    <BarChart4 className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium text-white">
-                      Dashboard avanzado
-                    </h4>
+                    <h4 className="font-medium text-white">Comparación</h4>
                     <p className="text-white/80">
-                      Visualiza tu estado de seguridad con métricas detalladas y
-                      personalizadas
+                      Compara tu nivel de madurez y revisa tus avances
                     </p>
                   </div>
                 </motion.div>
@@ -202,14 +331,14 @@ export default function SimplifiedPricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Bell className="h-5 w-5 text-white" />
+                    <Database className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Alertas en tiempo real
+                      Acceso al dashboard
                     </h4>
                     <p className="text-white/80">
-                      Monitoreo continuo de datos filtrados y vulnerabilidades
+                      Visualiza tu nivel de madurez y haz seguimiento
                     </p>
                   </div>
                 </motion.div>
@@ -226,15 +355,12 @@ export default function SimplifiedPricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Layers className="h-5 w-5 text-white" />
+                    <Bell className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium text-white">
-                      Verificación de brechas
-                    </h4>
+                    <h4 className="font-medium text-white">Simple Breach</h4>
                     <p className="text-white/80">
-                      Incluye tres consultas para verificar brechas de la
-                      empresa
+                      10 consultas mensuales para verificar brechas de datos
                     </p>
                   </div>
                 </motion.div>
@@ -251,14 +377,14 @@ export default function SimplifiedPricing() {
                     className="bg-white/20 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Layers className="h-5 w-5 text-white" />
+                    <FileText className="h-5 w-5 text-white" />
                   </motion.div>
                   <div>
                     <h4 className="font-medium text-white">
-                      Módulos adicionales
+                      Exporta tu informe
                     </h4>
                     <p className="text-white/80">
-                      Acceso a módulos especializados según tus necesidades
+                      Descarga y comparte tu informe de evaluación en PDF
                     </p>
                   </div>
                 </motion.div>
@@ -278,11 +404,11 @@ export default function SimplifiedPricing() {
             </motion.div>
 
             <p className="text-center text-sm text-white/70 mt-4 relative z-10">
-              Cancelación en cualquier momento
+              Ideal para startups y empresas en crecimiento
             </p>
           </motion.div>
 
-          {/* Specialist Subscription Card */}
+          {/* Pro Plan Card */}
           <motion.div
             className="bg-white text-black rounded-xl p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden border-2 border-black"
             variants={item}
@@ -292,7 +418,7 @@ export default function SimplifiedPricing() {
             }}
           >
             <div className="flex justify-between items-start mb-6 relative z-10">
-              <h3 className="text-2xl font-bold">Especialistas</h3>
+              <h3 className="text-2xl font-bold">Plan Pro</h3>
               <motion.div
                 className="bg-yellow-400 text-black rounded-full px-4 py-1 text-sm font-medium"
                 initial={{ scale: 1 }}
@@ -305,19 +431,19 @@ export default function SimplifiedPricing() {
                   },
                 }}
               >
-                Personalizado
+                Muy pronto
               </motion.div>
             </div>
 
             <div className="mb-6 relative z-10">
-              <span className="text-4xl font-bold">Desde $490</span>
+              <span className="text-4xl font-bold">$300</span>
               <span className="text-gray-500 ml-2">/mes</span>
             </div>
 
             <div className="mb-8 flex-grow relative z-10">
               <p className="text-gray-700 mb-4">
-                Contrata a nuestro equipo de especialistas por hora según tus
-                necesidades específicas de ciberseguridad.
+                Avanza en la madurez de tu ciberseguridad con herramientas más
+                profundas y apoyo experto.
               </p>
 
               <div className="space-y-4">
@@ -330,15 +456,16 @@ export default function SimplifiedPricing() {
                   custom={0}
                 >
                   <motion.div
-                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Clock className="h-5 w-5 text-black" />
+                    <Search className="h-5 w-5 text-yellow-600" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium">Horas flexibles</h4>
+                    <h4 className="font-medium">Simple Scan</h4>
                     <p className="text-gray-600">
-                      10, 24 o 48 horas mensuales según tus necesidades
+                      Evalúa vulnerabilidades en plataformas web, aplicaciones y
+                      APIs
                     </p>
                   </div>
                 </motion.div>
@@ -352,15 +479,15 @@ export default function SimplifiedPricing() {
                   custom={1}
                 >
                   <motion.div
-                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Users className="h-5 w-5 text-black" />
+                    <BarChart4 className="h-5 w-5 text-yellow-600" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium">Equipo dedicado</h4>
+                    <h4 className="font-medium">Dashboard completo</h4>
                     <p className="text-gray-600">
-                      Especialistas y coordinador de seguridad asignados
+                      Acceso total a métricas, evolución histórica y tendencias
                     </p>
                   </div>
                 </motion.div>
@@ -374,15 +501,15 @@ export default function SimplifiedPricing() {
                   custom={2}
                 >
                   <motion.div
-                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Shield className="h-5 w-5 text-black" />
+                    <Bell className="h-5 w-5 text-yellow-600" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium">Soluciones específicas</h4>
+                    <h4 className="font-medium">20 consultas Simple Breach</h4>
                     <p className="text-gray-600">
-                      Servicios a medida para los desafíos de tu empresa
+                      Verifica correos y dominios comprometidos con más alcance
                     </p>
                   </div>
                 </motion.div>
@@ -396,16 +523,37 @@ export default function SimplifiedPricing() {
                   custom={3}
                 >
                   <motion.div
-                    className="bg-yellow-400 p-2 rounded-full mr-3 mt-1"
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
-                    <Zap className="h-5 w-5 text-black" />
+                    <FileDigit className="h-5 w-5 text-yellow-600" />
                   </motion.div>
                   <div>
-                    <h4 className="font-medium">Implementación acelerada</h4>
+                    <h4 className="font-medium">Informe detallado</h4>
                     <p className="text-gray-600">
-                      Configuración rápida de tu dashboard y módulos
-                      personalizados
+                      Recomendaciones priorizadas para tu negocio en PDF
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-start"
+                  variants={featureAnimation}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  custom={4}
+                >
+                  <motion.div
+                    className="bg-yellow-100 p-2 rounded-full mr-3 mt-1"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
+                    <Users className="h-5 w-5 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <h4 className="font-medium">1 hora con especialista</h4>
+                    <p className="text-gray-600">
+                      Experto te acompaña para interpretar resultados
                     </p>
                   </div>
                 </motion.div>
@@ -417,15 +565,18 @@ export default function SimplifiedPricing() {
               whileTap={{ scale: 0.95 }}
               className="relative z-10"
             >
-              <Link href="/pricing#hourly">
-                <Button className="w-full py-6 bg-yellow-400 text-black hover:bg-yellow-500 relative z-10">
-                  <span className="relative z-10">Ver planes por hora</span>
+              <Link href="/pricing">
+                <Button
+                  className="w-full py-6 bg-yellow-400 text-black hover:bg-yellow-500 relative z-10"
+                  disabled
+                >
+                  <span className="relative z-10">Próximamente</span>
                 </Button>
               </Link>
             </motion.div>
 
             <p className="text-center text-sm text-gray-500 mt-4 relative z-10">
-              Sin compromisos a largo plazo
+              Ideal para empresas en procesos de certificación
             </p>
           </motion.div>
         </motion.div>
