@@ -25,9 +25,6 @@ const MissionRocket = () => {
     offset: ["start end", "end start"],
   });
 
-  // Rocket trajectory path - straight up with size changes
-  const rocketY = useTransform(scrollYProgress, [0, 1], ["90%", "-20%"]);
-
   useEffect(() => {
     if (isInView) {
       controls.start("visible");

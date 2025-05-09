@@ -78,29 +78,48 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     setResults({});
     setCurrentQuestionIndex(0);
 
-    // For advanced evaluations, skip email collection and interest steps
-    if (quizData.id !== "evaluacion-inicial") {
-      // Set default interest data for advanced evaluations
-      const defaultInterestData = {
-        reason: "advanced" as InterestOption,
-        otherReason: "Evaluación avanzada de ciberseguridad",
-      };
-      setInterest(defaultInterestData);
+    // If user is authenticated, skip email collection and interest questions
+    if (user && user.email) {
+      // Set user info from profile
+      setUserInfo((prev) => ({
+        ...prev,
+        email: user.email || "",
+      }));
 
-      // If user is logged in, we already have their email
-      if (user && user.email) {
-        setUserInfo((prev) => ({
-          ...prev,
-          email: user.email || "",
-        }));
-        setStage("questions");
+      // For advanced evaluations, set default interest data
+      if (quizData.id !== "evaluacion-inicial") {
+        const defaultInterestData = {
+          reason: "advanced" as InterestOption,
+          otherReason: "Evaluación avanzada de ciberseguridad",
+        };
+        setInterest(defaultInterestData);
       } else {
-        // If not logged in, we still need to collect email
+        // For initial evaluations, set a default interest if not provided
+        const defaultInterestData = {
+          reason: "general" as InterestOption,
+          otherReason: "Evaluación inicial de ciberseguridad",
+        };
+        setInterest(defaultInterestData);
+      }
+
+      // Go directly to questions for authenticated users
+      setStage("questions");
+    } else {
+      // For unauthenticated users
+      // For advanced evaluations, skip interest steps
+      if (quizData.id !== "evaluacion-inicial") {
+        // Set default interest data for advanced evaluations
+        const defaultInterestData = {
+          reason: "advanced" as InterestOption,
+          otherReason: "Evaluación avanzada de ciberseguridad",
+        };
+        setInterest(defaultInterestData);
+        // Still need to collect email
+        setStage("email-collection");
+      } else {
+        // For initial evaluations, follow the new flow: email -> interest -> questions
         setStage("email-collection");
       }
-    } else {
-      // For initial evaluations, follow the new flow: email -> interest -> questions
-      setStage("email-collection");
     }
   };
 
@@ -177,14 +196,25 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           const evaluationType =
             quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
 
-          // Ensure we have interest data
+          // Ensure we have interest data for all types of evaluations
           if (!interest) {
-            throw new Error("Falta información de interés");
+            // If no interest data exists, create default values based on evaluation type
+            if (evaluationType === "ADVANCED") {
+              setInterest({
+                reason: "advanced" as InterestOption,
+                otherReason: "Evaluación avanzada de ciberseguridad",
+              });
+            } else {
+              setInterest({
+                reason: "general" as InterestOption,
+                otherReason: "Evaluación inicial de ciberseguridad",
+              });
+            }
           }
 
           // If user is logged in, save results
           if (user && profile) {
-            await handleSaveResults(interest);
+            await handleSaveResults(interest || undefined);
           } else {
             // For users who provided email but aren't logged in
             if (userInfo.email) {
@@ -402,13 +432,23 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       setLoadingMessage("Guardando resultados de evaluación...");
 
       // Use the passed interest data or fall back to the state
-      const finalInterestData = interestData || interest;
+      let finalInterestData = interestData || interest;
 
       // Ensure we have interest data
       if (!finalInterestData) {
-        throw new Error(
-          "Se requiere información sobre el interés en la evaluación"
-        );
+        // Create default interest data based on evaluation type
+        if (evaluationType === "ADVANCED") {
+          finalInterestData = {
+            reason: "advanced" as InterestOption,
+            otherReason: "Evaluación avanzada de ciberseguridad",
+          };
+        } else {
+          finalInterestData = {
+            reason: "general" as InterestOption,
+            otherReason: "Evaluación inicial de ciberseguridad",
+          };
+        }
+        setInterest(finalInterestData);
       }
 
       const response = await fetch("/api/evaluations", {

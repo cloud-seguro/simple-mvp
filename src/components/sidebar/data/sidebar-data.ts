@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   FileBarChart,
-  Settings,
   Command
 } from "lucide-react";
 import type { SidebarData } from "../types";
