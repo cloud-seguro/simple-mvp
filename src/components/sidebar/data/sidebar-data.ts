@@ -35,15 +35,5 @@ export const sidebarData: SidebarData = {
         }
       ],
     },
-    {
-      title: "Configuración",
-      items: [
-        {
-          title: "Ajustes",
-          url: "/settings",
-          icon: Settings,
-        },
-      ],
-    },
   ],
 };
