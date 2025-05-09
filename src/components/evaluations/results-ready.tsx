@@ -120,9 +120,9 @@ export function ResultsReady({
   return (
     <div className="flex flex-col min-h-screen md:flex-row">
       {/* Left sidebar */}
-      <div className="bg-[#FFD700] w-full md:w-2/5 p-2 md:p-4 flex flex-col min-h-screen md:min-h-0">
+      <div className="bg-[#FFD700] w-full md:w-2/5 p-2 md:p-4 flex flex-col">
         <div className="flex justify-start">
-          <SimpleHeader />
+          <SimpleHeader className="hover:opacity-80 transition-opacity" />
         </div>
         <div className="flex-grow flex items-center justify-center py-8 md:py-0">
           <AnimatedSecuritySVG />
@@ -131,12 +131,8 @@ export function ResultsReady({
 
       {/* Right content */}
       <div className="w-full md:w-3/5 p-4 md:p-16 flex flex-col justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-lg mx-auto space-y-8"
-        >
-          <h1 className="text-2xl md:text-4xl font-bold">
+        <div className="max-w-lg mx-auto space-y-8">
+          <h1 className="text-3xl md:text-4xl font-bold">
             {userInfo.firstName}, ¡Sus resultados están listos!
           </h1>
           <p className="text-base md:text-lg text-gray-700">
@@ -153,7 +149,7 @@ export function ResultsReady({
 
           <Button
             onClick={onViewResults}
-            className="w-full bg-black text-white hover:bg-gray-800 rounded-full py-6 text-lg"
+            className="w-full md:w-auto bg-black text-white hover:bg-gray-800 rounded-full px-8 py-2"
           >
             Ver Resultados
           </Button>
@@ -165,7 +161,7 @@ export function ResultsReady({
                 <Button
                   onClick={handleCopyLink}
                   variant="outline"
-                  className="flex-1 flex items-center justify-center gap-2 border-2 border-black text-black hover:bg-gray-100 rounded-full py-6"
+                  className="flex-1 flex items-center justify-center gap-2 border-2 border-black text-black hover:bg-gray-100 rounded-full py-2"
                 >
                   <Copy size={20} />
                   <span>Copiar enlace</span>
@@ -236,13 +232,13 @@ export function ResultsReady({
 
               <Button
                 onClick={() => (window.location.href = "/pricing")}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black rounded-full py-6 text-lg font-semibold shadow-md"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-black rounded-full py-2 text-lg font-semibold shadow-md"
               >
                 Actualizar a evaluación avanzada
               </Button>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
