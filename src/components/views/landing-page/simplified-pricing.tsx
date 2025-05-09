@@ -188,7 +188,7 @@ export default function SimplifiedPricing() {
               whileTap={{ scale: 0.95 }}
               className="relative z-10"
             >
-              <Link href="/pricing">
+              <Link href="/evaluation/initial">
                 <Button className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10">
                   <span className="relative z-10">Comenzar gratis</span>
                 </Button>

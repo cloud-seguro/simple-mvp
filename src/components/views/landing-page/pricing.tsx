@@ -14,6 +14,7 @@ import {
   BarChart4,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Pricing() {
   const container = {
@@ -206,9 +207,11 @@ export default function Pricing() {
             </div>
 
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button className="w-full py-6 bg-black text-white hover:bg-gray-800">
-                Comenzar gratis
-              </Button>
+              <Link href="/evaluation/initial">
+                <Button className="w-full py-6 bg-black text-white hover:bg-gray-800">
+                  Comenzar gratis
+                </Button>
+              </Link>
             </motion.div>
 
             <p className="text-center text-sm text-gray-500 mt-4">

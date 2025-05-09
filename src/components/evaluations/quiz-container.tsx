@@ -628,6 +628,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
           onViewResults={handleViewResults}
           shareUrl={window.location.href}
           evaluationId={evaluationId || undefined}
+          evaluationType={
+            quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED"
+          }
         />
       )}
 
