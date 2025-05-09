@@ -29,7 +29,7 @@ const getMaturityLevelInfo = (
   const score =
     evaluationType === "INITIAL"
       ? Math.round((percentage / 100) * 45) // Initial eval (45 points)
-      : Math.round((percentage / 100) * 75); // Advanced eval (75 points)
+      : Math.round((percentage / 100) * 100); // Advanced eval (100 points)
 
   if (evaluationType === "INITIAL") {
     // Initial evaluation scoring
@@ -86,7 +86,7 @@ const getMaturityLevelInfo = (
     }
   } else {
     // Advanced evaluation scoring
-    if (score <= 15) {
+    if (score <= 20) {
       return {
         level: 1,
         title: "Nivel 1 - Inicial / Ad-hoc",
@@ -96,7 +96,7 @@ const getMaturityLevelInfo = (
           "Trabaja en establecer una estrategia inicial de seguridad, enfocada en definir políticas, roles y procesos básicos para proteger la información. ISO 27001 y NIST recomiendan empezar con la identificación de activos y riesgos.",
         actionText: "Comenzar Estrategia",
       };
-    } else if (score <= 34) {
+    } else if (score <= 45) {
       return {
         level: 2,
         title: "Nivel 2 - Repetible pero intuitivo",
@@ -106,7 +106,7 @@ const getMaturityLevelInfo = (
           "Estandariza y documenta las políticas de seguridad, asegurando que sean aplicadas en toda la organización. Trabaja en la gestión de riesgos y en el uso de controles técnicos recomendados por CIS Controls y NIST CSF.",
         actionText: "Estandarizar Procesos",
       };
-    } else if (score <= 51) {
+    } else if (score <= 70) {
       return {
         level: 3,
         title: "Nivel 3 - Definido",
@@ -116,7 +116,7 @@ const getMaturityLevelInfo = (
           "Profundiza en la medición y optimización de los controles, con el uso de monitoreo continuo y métricas de seguridad. Explora herramientas de Zero Trust, segmentación de red y pruebas de seguridad en aplicaciones (DevSecOps, OWASP ASVS).",
         actionText: "Optimizar Controles",
       };
-    } else if (score <= 66) {
+    } else if (score <= 90) {
       return {
         level: 4,
         title: "Nivel 4 - Gestionado y Medido",
@@ -126,7 +126,7 @@ const getMaturityLevelInfo = (
           "Asegura la mejora continua en la gestión de incidentes y la resiliencia organizacional. Refuerza el uso de inteligencia de amenazas (OSINT, Dark Web Monitoring) y la automatización de respuestas a incidentes (SOAR, XDR).",
         actionText: "Fortalecer Resiliencia",
       };
-    } else if (score <= 74) {
+    } else {
       return {
         level: 5,
         title: "Nivel 5 - Optimizado",
@@ -135,16 +135,6 @@ const getMaturityLevelInfo = (
         advice:
           "Sigue fortaleciendo la estrategia de seguridad con ciberinteligencia y automatización. Evalúa constantemente nuevas tecnologías, mejora la gestión de crisis y resiliencia y optimiza los procesos de respuesta a incidentes con IA.",
         actionText: "Innovar Seguridad",
-      };
-    } else {
-      return {
-        level: 5,
-        title: "Nivel 5 - Óptimo",
-        description:
-          "Ciberseguridad completamente integrada en la cultura organizacional. Se han implementado detección de amenazas con IA, automatización total de respuesta a incidentes, monitoreo continuo de la Dark Web y cumplimiento avanzado de seguridad en entornos híbridos y en la nube.",
-        advice:
-          "Se nota que has trabajado en ciberseguridad y dominas los estándares. Mantén un enfoque en innovación y evolución, asegurando que el equipo y la organización estén preparados para amenazas emergentes. Continúa reforzando la estrategia con simulaciones avanzadas y escenarios de crisis en entornos reales.",
-        actionText: "Mantener Excelencia",
       };
     }
   }

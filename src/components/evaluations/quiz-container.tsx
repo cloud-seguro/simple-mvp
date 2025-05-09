@@ -77,7 +77,31 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     // Clear any existing results when starting
     setResults({});
     setCurrentQuestionIndex(0);
-    setStage("questions");
+
+    // For advanced evaluations, skip email collection and interest steps
+    if (quizData.id !== "evaluacion-inicial") {
+      // Set default interest data for advanced evaluations
+      const defaultInterestData = {
+        reason: "advanced" as InterestOption,
+        otherReason: "Evaluación avanzada de ciberseguridad",
+      };
+      setInterest(defaultInterestData);
+
+      // If user is logged in, we already have their email
+      if (user && user.email) {
+        setUserInfo((prev) => ({
+          ...prev,
+          email: user.email || "",
+        }));
+        setStage("questions");
+      } else {
+        // If not logged in, we still need to collect email
+        setStage("email-collection");
+      }
+    } else {
+      // For initial evaluations, follow the new flow: email -> interest -> questions
+      setStage("email-collection");
+    }
   };
 
   // This function handles the option selection
@@ -127,64 +151,120 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       } else {
         // Set submitting state
         setIsSubmitting(true);
-        setLoadingMessage("Preparando siguiente paso...");
+        setLoadingMessage("Preparando resultados...");
 
         try {
-          // Check if this is an initial or advanced evaluation
-          const isInitialEvaluation = quizData.id === "evaluacion-inicial";
+          // Create a complete set of answers with default values for any missing answers
+          const completeAnswers = { ...results };
+          const existingValues = Object.values(completeAnswers).filter(
+            (v) => typeof v === "number"
+          ) as number[];
+          const averageValue =
+            existingValues.length > 0
+              ? Math.round(
+                  existingValues.reduce((sum, val) => sum + val, 0) /
+                    existingValues.length
+                )
+              : 2;
 
-          // For advanced evaluations, skip the interest stage completely
-          if (!isInitialEvaluation) {
-            console.log("Advanced evaluation - skipping interest stage");
-            setIsSubmitting(false);
-
-            // If user is logged in, save results with default interest
-            if (user && profile) {
-              const defaultInterestData = {
-                reason: "advanced",
-                otherReason: "Evaluación avanzada de ciberseguridad",
-              };
-              await handleSaveResults(defaultInterestData);
-            } else {
-              // For non-logged in users, go to email collection
-              setStage("email-collection");
-              setIsInteractionDisabled(false);
+          quizData.questions.forEach((question) => {
+            if (completeAnswers[question.id] === undefined) {
+              completeAnswers[question.id] = averageValue;
             }
-            return; // Exit early to avoid executing the code below
+          });
+
+          // Determine evaluation type
+          const evaluationType =
+            quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
+
+          // Ensure we have interest data
+          if (!interest) {
+            throw new Error("Falta información de interés");
           }
 
-          // Only for initial evaluations - show interest stage
-          setIsSubmitting(false);
-          setStage("interest");
-          setIsInteractionDisabled(false);
+          // If user is logged in, save results
+          if (user && profile) {
+            await handleSaveResults(interest);
+          } else {
+            // For users who provided email but aren't logged in
+            if (userInfo.email) {
+              // Send the data to the guest evaluation endpoint
+              const response = await fetch("/api/evaluations/guest", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  email: userInfo.email,
+                  type: evaluationType,
+                  title:
+                    evaluationType === "INITIAL"
+                      ? "Evaluación Inicial"
+                      : "Evaluación Avanzada",
+                  answers: completeAnswers,
+                  interest: interest,
+                }),
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                  errorData.message || "Error al guardar los resultados"
+                );
+              }
+
+              const data = await response.json();
+              setEvaluationId(data.evaluation.id);
+
+              // Clear local storage after successful save
+              try {
+                localStorage.removeItem(`quiz_results_${quizData.id}`);
+              } catch (error) {
+                console.error("Error clearing local storage:", error);
+              }
+
+              toast({
+                title: "Éxito",
+                description:
+                  "Los resultados se han enviado a tu correo electrónico.",
+              });
+
+              // Transition to results-ready stage
+              setStage("results-ready");
+            } else {
+              throw new Error("Falta información de email");
+            }
+          }
+
+          // Remove loading state after a short delay
+          setTimeout(() => {
+            setIsSubmitting(false);
+            setIsInteractionDisabled(false);
+          }, 500);
         } catch (error) {
-          console.error("Error preparing next step:", error);
+          console.error("Error preparing results:", error);
           setIsSubmitting(false);
           setIsInteractionDisabled(false);
 
-          // Even in case of error, maintain the same flow rules
-          if (quizData.id === "evaluacion-inicial") {
+          // In case of error, transition to results-ready if we have minimum data
+          if (userInfo.email && interest) {
+            setStage("results-ready");
+          } else if (!userInfo.email) {
+            // If missing email, go back to email collection
+            setStage("email-collection");
+            toast({
+              title: "Información faltante",
+              description: "Necesitamos su correo electrónico para continuar.",
+              variant: "destructive",
+            });
+          } else if (!interest) {
+            // If missing interest data, go back to interest stage
             setStage("interest");
-          } else {
-            // For advanced evaluations, go to email collection if not logged in
-            if (!user || !profile) {
-              setStage("email-collection");
-            } else {
-              // Try to save with default interest data as a fallback
-              try {
-                const defaultInterestData = {
-                  reason: "advanced",
-                  otherReason: "Evaluación avanzada de ciberseguridad",
-                };
-                await handleSaveResults(defaultInterestData);
-              } catch (innerError) {
-                console.error(
-                  "Error saving with default interest:",
-                  innerError
-                );
-                setStage("email-collection");
-              }
-            }
+            toast({
+              title: "Información faltante",
+              description: "Por favor, indíquenos su interés para continuar.",
+              variant: "destructive",
+            });
           }
         }
       }
@@ -213,24 +293,10 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     // Update the state
     setInterest(interestData);
 
-    try {
-      // If user is logged in, continue with saving
-      if (user && profile) {
-        await handleSaveResults(interestData);
-      } else {
-        // Otherwise, go to email collection first
-        setIsSubmitting(false);
-        setStage("email-collection");
-        setIsInteractionDisabled(false);
-      }
-    } catch (error) {
-      console.error("Error in handleInterestSubmit:", error);
-      setIsSubmitting(false);
-      setIsInteractionDisabled(false);
-
-      // If error is related to user not being logged in, go to email collection
-      setStage("email-collection");
-    }
+    // Now move to questions stage after collecting interest
+    setIsSubmitting(false);
+    setStage("questions");
+    setIsInteractionDisabled(false);
   };
 
   const handleEmailSubmit = async (email: string) => {
@@ -239,7 +305,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
 
     try {
       setIsSubmitting(true);
-      setLoadingMessage("Guardando resultados...");
+      setLoadingMessage("Guardando información...");
 
       // Update the user info with the provided email
       setUserInfo((prev) => ({
@@ -247,92 +313,31 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         email,
       }));
 
-      // Create a complete set of answers with default values for any missing answers
-      const completeAnswers = { ...results };
-      const existingValues = Object.values(completeAnswers).filter(
-        (v) => typeof v === "number"
-      ) as number[];
-      const averageValue =
-        existingValues.length > 0
-          ? Math.round(
-              existingValues.reduce((sum, val) => sum + val, 0) /
-                existingValues.length
-            )
-          : 2;
+      // For advanced evaluations, we can skip the interest step
+      if (quizData.id !== "evaluacion-inicial") {
+        // Set default interest data
+        const defaultInterestData = {
+          reason: "advanced" as InterestOption,
+          otherReason: "Evaluación avanzada de ciberseguridad",
+        };
+        setInterest(defaultInterestData);
 
-      quizData.questions.forEach((question) => {
-        if (completeAnswers[question.id] === undefined) {
-          completeAnswers[question.id] = averageValue;
-        }
-      });
-
-      // Determine evaluation type
-      const evaluationType =
-        quizData.id === "evaluacion-inicial" ? "INITIAL" : "ADVANCED";
-
-      // Ensure we have interest data (or create default)
-      const finalInterestData = interest || {
-        reason: evaluationType === "INITIAL" ? "general" : "advanced",
-        otherReason:
-          evaluationType === "INITIAL"
-            ? "Evaluación inicial de ciberseguridad"
-            : "Evaluación avanzada de ciberseguridad",
-      };
-
-      // Send the data to the guest evaluation endpoint
-      const response = await fetch("/api/evaluations/guest", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          type: evaluationType,
-          title:
-            evaluationType === "INITIAL"
-              ? "Evaluación Inicial"
-              : "Evaluación Avanzada",
-          answers: completeAnswers,
-          interest: finalInterestData,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Error al guardar los resultados");
-      }
-
-      const data = await response.json();
-      setEvaluationId(data.evaluation.id);
-
-      // Clear local storage after successful save
-      try {
-        localStorage.removeItem(`quiz_results_${quizData.id}`);
-      } catch (error) {
-        console.error("Error clearing local storage:", error);
-      }
-
-      toast({
-        title: "Éxito",
-        description: "Los resultados se han enviado a tu correo electrónico.",
-      });
-
-      // Transition to results-ready stage
-      setStage("results-ready");
-
-      // Remove loading state after a short delay
-      setTimeout(() => {
+        // Go directly to questions
         setIsSubmitting(false);
+        setStage("questions");
         setIsInteractionDisabled(false);
-      }, 500);
+      } else {
+        // For initial evaluations, go to interest collection
+        setIsSubmitting(false);
+        setStage("interest");
+        setIsInteractionDisabled(false);
+      }
     } catch (error) {
-      console.error("Error submitting guest evaluation:", error);
+      console.error("Error submitting email:", error);
       toast({
         title: "Error",
         description:
-          error instanceof Error
-            ? error.message
-            : "Error al guardar los resultados",
+          "No pudimos procesar tu email. Por favor, intenta nuevamente.",
         variant: "destructive",
       });
       setIsSubmitting(false);
@@ -446,8 +451,9 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         description: "Los resultados se han guardado correctamente.",
       });
 
-      // Keep loading state until we transition to results-ready
+      // Always transition to results-ready stage
       setStage("results-ready");
+
       // Only remove loading state after a short delay to ensure smooth transition
       setTimeout(() => {
         setIsSubmitting(false);
@@ -599,16 +605,12 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         />
       )}
 
-      {stage === "interest" && quizData.id === "evaluacion-inicial" && (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <CybersecurityInterest onSubmit={handleInterestSubmit} />
-        </div>
+      {stage === "interest" && (
+        <CybersecurityInterest onSubmit={handleInterestSubmit} />
       )}
 
       {stage === "email-collection" && (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <EmailCollection onEmailSubmit={handleEmailSubmit} />
-        </div>
+        <EmailCollection onEmailSubmit={handleEmailSubmit} />
       )}
 
       {stage === "sign-up" && (
@@ -650,7 +652,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
             maxScore={
               quizData.id === "evaluacion-inicial"
                 ? 45 // Initial eval is out of 45
-                : 75 // Advanced eval is out of 75
+                : 100 // Advanced eval is out of 100
             }
             maturityDescription={
               getMaturityLevel(

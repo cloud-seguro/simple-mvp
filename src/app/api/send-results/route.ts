@@ -17,7 +17,8 @@ const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { userInfo, evaluationId, email } = await request.json();
+    const { userInfo, evaluationId, email, evaluationType } =
+      await request.json();
 
     // Validate the required fields
     if (!userInfo || !evaluationId || !email) {
@@ -51,9 +52,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Use provided evaluationType if available, otherwise fall back to the evaluation's type
+    const effectiveEvaluationType =
+      evaluationType || evaluation.type || "INITIAL";
+
     // Get the quiz data based on the evaluation type
     const quizId =
-      evaluation.type === "INITIAL"
+      effectiveEvaluationType === "INITIAL"
         ? "evaluacion-inicial"
         : "evaluacion-avanzada";
 
@@ -61,11 +66,11 @@ export async function POST(request: Request) {
     let quizData = getQuizData(quizId);
     if (!quizData) {
       console.warn(
-        `Quiz data not found for type: ${evaluation.type}, using fallback data`
+        `Quiz data not found for type: ${effectiveEvaluationType}, using fallback data`
       );
       // Use fallback data based on the evaluation type
       quizData =
-        evaluation.type === "INITIAL"
+        effectiveEvaluationType === "INITIAL"
           ? initialEvaluationData
           : advancedEvaluationData;
     }
@@ -252,17 +257,17 @@ export async function POST(request: Request) {
           return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
         return { level: "Nivel 5", description: "Nivel Optimizado" };
       } else {
-        // Advanced evaluation (max 75 points)
-        if (score <= 15)
+        // Advanced evaluation (max 100 points)
+        if (score <= 20)
           return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-        if (score <= 34)
+        if (score <= 45)
           return {
             level: "Nivel 2",
             description: "Nivel Repetible pero intuitivo",
           };
-        if (score <= 51)
+        if (score <= 70)
           return { level: "Nivel 3", description: "Nivel Definido" };
-        if (score <= 66)
+        if (score <= 90)
           return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
         return { level: "Nivel 5", description: "Nivel Optimizado" };
       }
@@ -270,11 +275,11 @@ export async function POST(request: Request) {
 
     const maturityInfo = getMaturityLevelBasedOnScore(
       evaluation.score || 0,
-      evaluation.type || "ADVANCED"
+      effectiveEvaluationType
     );
 
     // Calculate maxScore based on evaluation type
-    const maxScore = evaluation.type === "INITIAL" ? 45 : 75;
+    const maxScore = effectiveEvaluationType === "INITIAL" ? 45 : 100;
 
     try {
       // Send the email with the actual results
@@ -293,7 +298,7 @@ export async function POST(request: Request) {
           maturityDescription: maturityInfo.description,
           categories: categoryScores,
           recommendations: recommendations,
-          evaluationType: evaluation.type || "ADVANCED",
+          evaluationType: effectiveEvaluationType,
         }),
       });
 
