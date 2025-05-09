@@ -20,25 +20,40 @@ import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg";
 import { SimpleHeader } from "@/components/ui/simple-header";
 import { AlertTriangle } from "lucide-react";
 
-const emailSchema = z.object({
+// Define schema for user info with validation
+const userInfoSchema = z.object({
+  firstName: z.string().min(1, "El nombre es requerido"),
+  lastName: z.string().min(1, "El apellido es requerido"),
   email: z.string().email("Email inválido").min(1, "El email es requerido"),
+  company: z.string().min(1, "La empresa es requerida"),
+  phoneNumber: z.string().optional(),
 });
 
-type EmailFormData = z.infer<typeof emailSchema>;
+type UserInfoFormData = z.infer<typeof userInfoSchema>;
 
-interface EmailCollectionProps {
-  onEmailSubmit: (email: string) => Promise<void>;
+interface UserInfoCollectionProps {
+  onUserInfoSubmit: (userInfo: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    company?: string;
+    phoneNumber?: string;
+  }) => Promise<void>;
 }
 
-export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
+export function EmailCollection({ onUserInfoSubmit }: UserInfoCollectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
-  const form = useForm<EmailFormData>({
-    resolver: zodResolver(emailSchema),
+  const form = useForm<UserInfoFormData>({
+    resolver: zodResolver(userInfoSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
+      company: "",
+      phoneNumber: "",
     },
   });
 
@@ -95,18 +110,24 @@ export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
     };
   }, [emailValue]);
 
-  const onSubmit = async (data: EmailFormData) => {
+  const onSubmit = async (data: UserInfoFormData) => {
     if (emailError) return;
 
     try {
       setIsSubmitting(true);
-      await onEmailSubmit(data.email);
+      await onUserInfoSubmit({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        company: data.company,
+        phoneNumber: data.phoneNumber,
+      });
     } catch (error) {
-      console.error("Error submitting email:", error);
+      console.error("Error submitting user info:", error);
       toast({
         title: "Error",
         description:
-          "No pudimos procesar tu email. Por favor, intenta nuevamente.",
+          "No pudimos procesar su información. Por favor, intente nuevamente.",
         variant: "destructive",
       });
     } finally {
@@ -133,8 +154,8 @@ export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
             Bienvenido a la Evaluación
           </h1>
           <p className="text-base md:text-lg text-gray-700">
-            Antes de comenzar, necesitamos su correo electrónico corporativo
-            para enviarle los resultados y recomendaciones personalizadas.
+            Antes de comenzar, necesitamos algunos datos para personalizar su
+            evaluación y enviarle los resultados y recomendaciones adecuadas.
           </p>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
@@ -143,6 +164,36 @@ export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Juan" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Apellido</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Pérez" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -151,7 +202,7 @@ export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
                       <FormLabel>Correo Electrónico Corporativo</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="tu@empresa.com"
+                          placeholder="juan.perez@empresa.com"
                           {...field}
                           className={emailError ? "border-red-500" : ""}
                         />
@@ -171,6 +222,34 @@ export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="company"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Empresa</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nombre de su empresa" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Teléfono (opcional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+34 612 345 678" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <Button
                   type="submit"
                   className="w-full bg-black text-white hover:bg-gray-800 rounded-full"
@@ -179,12 +258,12 @@ export function EmailCollection({ onEmailSubmit }: EmailCollectionProps) {
                   {isSubmitting
                     ? "Enviando..."
                     : isCheckingEmail
-                      ? "Verificando correo..."
+                      ? "Verificando..."
                       : "Continuar"}
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center mt-2">
-                  Usamos su correo corporativo para garantizar que la
+                  Usamos sus datos corporativos para garantizar que la
                   información llegue a su organización. No compartimos sus datos
                   con terceros.
                 </p>

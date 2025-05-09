@@ -1,8 +1,9 @@
 export interface UserInfo {
   firstName: string;
-  lastName?: string;
+  lastName: string;
   email: string;
   company?: string;
+  phoneNumber?: string;
   company_role?: string;
 }
 

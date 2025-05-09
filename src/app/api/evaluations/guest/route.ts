@@ -7,6 +7,10 @@ import { EvaluationType } from "@prisma/client";
 // Interface for request body
 interface GuestEvaluationRequest {
   email: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
+  phoneNumber?: string;
   type: string;
   title?: string;
   answers: Record<string, number>;
@@ -20,11 +24,29 @@ export async function POST(req: NextRequest) {
   try {
     const body: GuestEvaluationRequest = await req.json();
 
-    // Validate email
-    const { email, type: typeString, title, answers, interest } = body;
+    // Validate required fields
+    const {
+      email,
+      firstName,
+      lastName,
+      company,
+      phoneNumber,
+      type: typeString,
+      title,
+      answers,
+      interest,
+    } = body;
+
     if (!email) {
       return NextResponse.json(
         { message: "Email is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!firstName || !lastName) {
+      return NextResponse.json(
+        { message: "First name and last name are required" },
         { status: 400 }
       );
     }
@@ -57,7 +79,16 @@ export async function POST(req: NextRequest) {
         score: Object.values(answers).reduce((sum, val) => sum + val, 0),
         accessCode,
         guestEmail: email,
-        metadata: interest ? { interest } : undefined,
+        // Store all guest information in metadata until Prisma client is fully regenerated
+        metadata: {
+          interest: interest || null,
+          guestInfo: {
+            firstName,
+            lastName,
+            company,
+            phoneNumber,
+          },
+        },
       },
     });
 

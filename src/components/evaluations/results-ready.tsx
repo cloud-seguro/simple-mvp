@@ -151,17 +151,18 @@ export function ResultsReady({
           </p>
 
           {isSendingEmail && (
-            <div className="flex items-center space-x-3 text-blue-600 bg-blue-50 p-3 rounded-md">
+            <div className="flex items-center space-x-3 text-blue-600 bg-blue-50 p-4 rounded-md border border-blue-200 shadow-sm">
               <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-sm">
+              <p className="text-sm font-medium">
                 Enviando resultados a su correo electrónico...
               </p>
             </div>
           )}
 
           {emailSent && (
-            <p className="text-sm text-green-600 font-medium">
-              Los resultados también han sido enviados a su correo electrónico.
+            <p className="text-sm text-green-600 font-medium bg-green-50 p-3 rounded-md border border-green-200">
+              ✅ Los resultados han sido enviados a su correo electrónico{" "}
+              {userInfo.email}.
             </p>
           )}
 

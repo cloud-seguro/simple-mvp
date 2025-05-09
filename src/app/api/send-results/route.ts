@@ -52,6 +52,43 @@ export async function POST(request: Request) {
       );
     }
 
+    // Enhance userInfo with guest fields if available
+    if (
+      evaluation.guestEmail &&
+      (!userInfo.email || userInfo.email === evaluation.guestEmail)
+    ) {
+      userInfo.email = evaluation.guestEmail;
+
+      // Try to get guest info from metadata
+      if (evaluation.metadata && typeof evaluation.metadata === "object") {
+        const metadata = evaluation.metadata as {
+          guestInfo?: {
+            firstName?: string;
+            lastName?: string;
+            company?: string;
+            phoneNumber?: string;
+          };
+        };
+
+        // Use guest info from metadata
+        if (metadata?.guestInfo?.firstName) {
+          userInfo.firstName = metadata.guestInfo.firstName;
+        }
+
+        if (metadata?.guestInfo?.lastName) {
+          userInfo.lastName = metadata.guestInfo.lastName;
+        }
+
+        if (metadata?.guestInfo?.company) {
+          userInfo.company = metadata.guestInfo.company;
+        }
+
+        if (metadata?.guestInfo?.phoneNumber) {
+          userInfo.phoneNumber = metadata.guestInfo.phoneNumber;
+        }
+      }
+    }
+
     // Use provided evaluationType if available, otherwise fall back to the evaluation's type
     const effectiveEvaluationType =
       evaluationType || evaluation.type || "INITIAL";

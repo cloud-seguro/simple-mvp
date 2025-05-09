@@ -105,21 +105,8 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       // Go directly to questions for authenticated users
       setStage("questions");
     } else {
-      // For unauthenticated users
-      // For advanced evaluations, skip interest steps
-      if (quizData.id !== "evaluacion-inicial") {
-        // Set default interest data for advanced evaluations
-        const defaultInterestData = {
-          reason: "advanced" as InterestOption,
-          otherReason: "Evaluación avanzada de ciberseguridad",
-        };
-        setInterest(defaultInterestData);
-        // Still need to collect email
-        setStage("email-collection");
-      } else {
-        // For initial evaluations, follow the new flow: email -> interest -> questions
-        setStage("email-collection");
-      }
+      // For unauthenticated users - always start with email collection first
+      setStage("email-collection");
     }
   };
 
@@ -226,6 +213,10 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
                 },
                 body: JSON.stringify({
                   email: userInfo.email,
+                  firstName: userInfo.firstName || "Usuario",
+                  lastName: userInfo.lastName || "",
+                  company: userInfo.company || "",
+                  phoneNumber: userInfo.phoneNumber || "",
                   type: evaluationType,
                   title:
                     evaluationType === "INITIAL"
@@ -329,7 +320,13 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
     setIsInteractionDisabled(false);
   };
 
-  const handleEmailSubmit = async (email: string) => {
+  const handleUserInfoSubmit = async (userInfo: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    company?: string;
+    phoneNumber?: string;
+  }) => {
     if (isInteractionDisabled) return;
     setIsInteractionDisabled(true);
 
@@ -337,10 +334,15 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       setIsSubmitting(true);
       setLoadingMessage("Guardando información...");
 
-      // Update the user info with the provided email
+      // Update the user info with the provided data
       setUserInfo((prev) => ({
         ...prev,
-        email,
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        email: userInfo.email,
+        company: userInfo.company,
+        company_role: prev.company_role, // Preserve existing company_role if any
+        phoneNumber: userInfo.phoneNumber,
       }));
 
       // For advanced evaluations, we can skip the interest step
@@ -363,11 +365,11 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
         setIsInteractionDisabled(false);
       }
     } catch (error) {
-      console.error("Error submitting email:", error);
+      console.error("Error submitting user info:", error);
       toast({
         title: "Error",
         description:
-          "No pudimos procesar tu email. Por favor, intenta nuevamente.",
+          "No pudimos procesar sus datos. Por favor, intente nuevamente.",
         variant: "destructive",
       });
       setIsSubmitting(false);
@@ -650,7 +652,7 @@ export function QuizContainer({ quizData }: QuizContainerProps) {
       )}
 
       {stage === "email-collection" && (
-        <EmailCollection onEmailSubmit={handleEmailSubmit} />
+        <EmailCollection onUserInfoSubmit={handleUserInfoSubmit} />
       )}
 
       {stage === "sign-up" && (

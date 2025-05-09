@@ -44,6 +44,10 @@ model Evaluation {
   metadata    Json?
   accessCode  String?
   guestEmail  String?
+  guestFirstName String?
+  guestLastName  String?
+  guestCompany   String?
+  guestPhoneNumber String?
   profile     Profile?       @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId])

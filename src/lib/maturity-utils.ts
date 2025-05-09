@@ -1,4 +1,3 @@
-
 // Determine maturity level based on quiz type and score
 export function getMaturityLevel(
   evaluationType: string,

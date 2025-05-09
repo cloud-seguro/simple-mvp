@@ -214,6 +214,43 @@ export async function getEvaluationById(id: string) {
           ? Boolean((evaluation.metadata as EvaluationMetadata)?.interest)
           : false,
       });
+
+      // Create a "fake" profile if this is a guest evaluation without a profile
+      if (!evaluation.profile && evaluation.guestEmail) {
+        // Get guest info from metadata
+        let guestFirstName = "Usuario";
+        let guestLastName = "";
+        let guestCompany = "";
+        let guestPhoneNumber = undefined;
+
+        // Check if guest info exists in metadata
+        if (evaluation.metadata && typeof evaluation.metadata === "object") {
+          const metadata = evaluation.metadata as EvaluationMetadata & {
+            guestInfo?: {
+              firstName?: string;
+              lastName?: string;
+              company?: string;
+              phoneNumber?: string;
+            };
+          };
+
+          if (metadata.guestInfo) {
+            guestFirstName = metadata.guestInfo.firstName || guestFirstName;
+            guestLastName = metadata.guestInfo.lastName || guestLastName;
+            guestCompany = metadata.guestInfo.company || guestCompany;
+            guestPhoneNumber = metadata.guestInfo.phoneNumber;
+          }
+        }
+
+        // Add a synthetic profile using metadata
+        evaluation.profile = {
+          firstName: guestFirstName,
+          lastName: guestLastName,
+          email: evaluation.guestEmail,
+          company: guestCompany,
+          company_role: "",
+        };
+      }
     } else {
       console.log(`No evaluation found with ID ${id}`);
     }
@@ -259,47 +296,56 @@ export async function getEvaluationByAccessCode(
       },
     });
 
-    // Then check the access code (which should be stored in metadata)
-    if (
-      evaluation &&
-      evaluation.metadata &&
-      typeof evaluation.metadata === "object" &&
-      "accessCode" in evaluation.metadata &&
-      evaluation.metadata.accessCode === accessCode
-    ) {
+    // Then check if the access code matches
+    if (evaluation && evaluation.accessCode === accessCode) {
       console.log(
         `Successfully accessed evaluation with access code: ${accessCode}`
       );
 
       // Create a "fake" profile if this is a guest evaluation without a profile
-      if (
-        !evaluation.profile &&
-        evaluation.metadata &&
-        typeof evaluation.metadata === "object" &&
-        "guestEmail" in evaluation.metadata
-      ) {
-        // Add a synthetic profile for guest users with proper type checking
-        const guestEmail =
-          typeof evaluation.metadata.guestEmail === "string"
-            ? evaluation.metadata.guestEmail
-            : "guest@example.com";
+      if (!evaluation.profile && evaluation.guestEmail) {
+        // Get guest info from metadata
+        let guestFirstName = "Usuario";
+        let guestLastName = "";
+        let guestCompany = "";
+        let guestPhoneNumber = undefined;
 
+        // Check if guest info exists in metadata
+        if (evaluation.metadata && typeof evaluation.metadata === "object") {
+          const metadata = evaluation.metadata as EvaluationMetadata & {
+            guestInfo?: {
+              firstName?: string;
+              lastName?: string;
+              company?: string;
+              phoneNumber?: string;
+            };
+          };
+
+          if (metadata.guestInfo) {
+            guestFirstName = metadata.guestInfo.firstName || guestFirstName;
+            guestLastName = metadata.guestInfo.lastName || guestLastName;
+            guestCompany = metadata.guestInfo.company || guestCompany;
+            guestPhoneNumber = metadata.guestInfo.phoneNumber;
+          }
+        }
+
+        // Add a synthetic profile using metadata
         evaluation.profile = {
-          firstName: "Usuario",
-          lastName: "",
-          email: guestEmail,
-          company: "",
+          firstName: guestFirstName,
+          lastName: guestLastName,
+          email: evaluation.guestEmail,
+          company: guestCompany,
           company_role: "",
         };
       }
+
+      return evaluation;
     } else {
       console.log(
         `No evaluation found with ID ${id} and access code ${accessCode}`
       );
       return null;
     }
-
-    return evaluation;
   } catch (error) {
     console.error(`Error fetching evaluation with access code:`, error);
     throw error;
