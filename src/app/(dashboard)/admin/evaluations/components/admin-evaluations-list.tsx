@@ -6,7 +6,7 @@ import { es } from "date-fns/locale";
 import type { Evaluation } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Eye, User, Mail, Building, Info } from "lucide-react";
+import { Calendar, Eye, User, Mail, Building } from "lucide-react";
 import { DataTable } from "@/components/table/data-table";
 import type { Column } from "@/components/table/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,20 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+// Add a proper type for the metadata object
+interface GuestMetadata {
+  guestInfo?: {
+    firstName?: string;
+    lastName?: string;
+    company?: string;
+    phoneNumber?: string;
+  };
+  interest?: {
+    reason?: string;
+    otherReason?: string;
+  };
+}
+
 interface EvaluationWithProfile extends Evaluation {
   profile?: {
     id: string;
@@ -25,11 +39,10 @@ interface EvaluationWithProfile extends Evaluation {
     email: string | null;
     company: string | null;
   } | null;
-  guestFirstName?: string | null;
-  guestLastName?: string | null;
-  guestEmail?: string | null;
-  guestCompany?: string | null;
-  guestPhoneNumber?: string | null;
+  guestFirstName: string | null;
+  guestLastName: string | null;
+  guestCompany: string | null;
+  guestPhoneNumber: string | null;
 }
 
 interface AdminEvaluationsListProps {
@@ -86,7 +99,7 @@ export function AdminEvaluationsList({
 
     // Fall back to checking metadata
     if (evaluation.metadata && typeof evaluation.metadata === "object") {
-      const metadata = evaluation.metadata as any;
+      const metadata = evaluation.metadata as GuestMetadata;
       if (metadata.guestInfo?.firstName || metadata.guestInfo?.lastName) {
         const firstName = metadata.guestInfo.firstName || "";
         const lastName = metadata.guestInfo.lastName || "";
@@ -118,7 +131,7 @@ export function AdminEvaluationsList({
 
     // Fall back to checking metadata
     if (evaluation.metadata && typeof evaluation.metadata === "object") {
-      const metadata = evaluation.metadata as any;
+      const metadata = evaluation.metadata as GuestMetadata;
       if (metadata.guestInfo?.company) {
         return metadata.guestInfo.company;
       }
@@ -136,7 +149,7 @@ export function AdminEvaluationsList({
 
     // Fall back to checking metadata
     if (evaluation.metadata && typeof evaluation.metadata === "object") {
-      const metadata = evaluation.metadata as any;
+      const metadata = evaluation.metadata as GuestMetadata;
       if (metadata.guestInfo?.phoneNumber) {
         return metadata.guestInfo.phoneNumber;
       }
@@ -227,25 +240,7 @@ export function AdminEvaluationsList({
     },
     {
       id: "score",
-      header: () => (
-        <div className="flex items-center gap-1">
-          <span>Puntuación</span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-3.5 w-3.5 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs text-xs">
-                  Las evaluaciones iniciales (45 puntos máximo) y avanzadas (100
-                  puntos máximo) han sido normalizadas a una escala de 0-100%
-                  para facilitar la comparación.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      ),
+      header: "Puntuación",
       accessorKey: "score",
       cell: ({ row }) => {
         const normalizedScore = normalizeScore(row);
@@ -332,7 +327,7 @@ export function AdminEvaluationsList({
         let interestReason = "N/A";
 
         if (row.metadata && typeof row.metadata === "object") {
-          const metadata = row.metadata as any;
+          const metadata = row.metadata as GuestMetadata;
           if (metadata.interest?.reason) {
             interestReason = metadata.interest.reason;
             if (metadata.interest.otherReason && interestReason === "other") {
@@ -373,30 +368,6 @@ export function AdminEvaluationsList({
           columns={columns}
           searchable={true}
           searchField="title"
-          searchPlaceholder="Buscar por título, email o empresa..."
-          searchFunction={(row, searchQuery) => {
-            const query = searchQuery.toLowerCase();
-
-            // Search in standard fields
-            if (row.title?.toLowerCase().includes(query)) return true;
-
-            // Search in profile data
-            if (row.profile?.email?.toLowerCase().includes(query)) return true;
-            if (row.profile?.firstName?.toLowerCase().includes(query))
-              return true;
-            if (row.profile?.lastName?.toLowerCase().includes(query))
-              return true;
-            if (row.profile?.company?.toLowerCase().includes(query))
-              return true;
-
-            // Search in guest data
-            if (row.guestEmail?.toLowerCase().includes(query)) return true;
-            if (row.guestFirstName?.toLowerCase().includes(query)) return true;
-            if (row.guestLastName?.toLowerCase().includes(query)) return true;
-            if (row.guestCompany?.toLowerCase().includes(query)) return true;
-
-            return false;
-          }}
           defaultSort={{ field: "createdAt", direction: "desc" }}
           rowSelection={false}
           pageSize={15}
@@ -412,30 +383,6 @@ export function AdminEvaluationsList({
           columns={columns}
           searchable={true}
           searchField="title"
-          searchPlaceholder="Buscar por título, email o empresa..."
-          searchFunction={(row, searchQuery) => {
-            const query = searchQuery.toLowerCase();
-
-            // Search in standard fields
-            if (row.title?.toLowerCase().includes(query)) return true;
-
-            // Search in profile data
-            if (row.profile?.email?.toLowerCase().includes(query)) return true;
-            if (row.profile?.firstName?.toLowerCase().includes(query))
-              return true;
-            if (row.profile?.lastName?.toLowerCase().includes(query))
-              return true;
-            if (row.profile?.company?.toLowerCase().includes(query))
-              return true;
-
-            // Search in guest data
-            if (row.guestEmail?.toLowerCase().includes(query)) return true;
-            if (row.guestFirstName?.toLowerCase().includes(query)) return true;
-            if (row.guestLastName?.toLowerCase().includes(query)) return true;
-            if (row.guestCompany?.toLowerCase().includes(query)) return true;
-
-            return false;
-          }}
           defaultSort={{ field: "createdAt", direction: "desc" }}
           rowSelection={false}
           pageSize={15}
@@ -451,30 +398,7 @@ export function AdminEvaluationsList({
           columns={columns}
           searchable={true}
           searchField="title"
-          searchPlaceholder="Buscar por título, email o empresa..."
-          searchFunction={(row, searchQuery) => {
-            const query = searchQuery.toLowerCase();
 
-            // Search in standard fields
-            if (row.title?.toLowerCase().includes(query)) return true;
-
-            // Search in profile data
-            if (row.profile?.email?.toLowerCase().includes(query)) return true;
-            if (row.profile?.firstName?.toLowerCase().includes(query))
-              return true;
-            if (row.profile?.lastName?.toLowerCase().includes(query))
-              return true;
-            if (row.profile?.company?.toLowerCase().includes(query))
-              return true;
-
-            // Search in guest data
-            if (row.guestEmail?.toLowerCase().includes(query)) return true;
-            if (row.guestFirstName?.toLowerCase().includes(query)) return true;
-            if (row.guestLastName?.toLowerCase().includes(query)) return true;
-            if (row.guestCompany?.toLowerCase().includes(query)) return true;
-
-            return false;
-          }}
           defaultSort={{ field: "createdAt", direction: "desc" }}
           rowSelection={false}
           pageSize={15}
@@ -490,26 +414,6 @@ export function AdminEvaluationsList({
           columns={guestColumns}
           searchable={true}
           searchField="title"
-          searchPlaceholder="Buscar por título, email o empresa..."
-          searchFunction={(row, searchQuery) => {
-            const query = searchQuery.toLowerCase();
-
-            // Search in standard fields
-            if (row.title?.toLowerCase().includes(query)) return true;
-
-            // Search in guest data
-            if (row.guestEmail?.toLowerCase().includes(query)) return true;
-            if (row.guestFirstName?.toLowerCase().includes(query)) return true;
-            if (row.guestLastName?.toLowerCase().includes(query)) return true;
-            if (row.guestCompany?.toLowerCase().includes(query)) return true;
-            if (row.guestPhoneNumber?.toLowerCase().includes(query))
-              return true;
-
-            // Also search in access code
-            if (row.accessCode?.toLowerCase().includes(query)) return true;
-
-            return false;
-          }}
           defaultSort={{ field: "createdAt", direction: "desc" }}
           rowSelection={false}
           pageSize={15}

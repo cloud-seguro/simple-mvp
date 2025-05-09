@@ -1,4 +1,4 @@
-export type SortDirection = 'asc' | 'desc' | undefined
+export type SortDirection = "asc" | "desc" | undefined;
 
 export interface Column<T> {
   id: string;
@@ -18,28 +18,28 @@ export interface Column<T> {
 }
 
 export interface TableProps<T> {
-  title: string
+  title: string;
   description?: string;
-  data: T[]
-  columns: Column<T>[]
-  searchable?: boolean
-  searchField?: keyof T
+  data: T[];
+  columns: Column<T>[];
+  searchable?: boolean;
+  searchField?: keyof T;
   defaultSort?: {
-    field: keyof T
-    direction: SortDirection
-  }
-  rowSelection?: boolean
-  pageSize?: number
-  pageSizeOptions?: number[]
-  onEdit?: (row: T) => void
-  onDelete?: (row: T) => void
-  onAdd?: () => void
-  onRowClick?: (row: T) => void
+    field: keyof T;
+    direction: SortDirection;
+  };
+  rowSelection?: boolean;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
+  onAdd?: () => void;
+  onRowClick?: (row: T) => void;
 }
 
 export interface PaginationState {
-  pageIndex: number
-  pageSize: number
+  pageIndex: number;
+  pageSize: number;
 }
 
 export interface DataTableProps<TData> {
@@ -49,6 +49,8 @@ export interface DataTableProps<TData> {
   columns: Column<TData>[];
   searchable?: boolean;
   searchField?: string;
+  searchPlaceholder?: string;
+  searchFunction?: (row: TData, searchQuery: string) => boolean;
   defaultSort?: { field: string; direction: "asc" | "desc" };
   onAdd?: () => void;
   onEdit?: (record: TData) => void;
@@ -58,5 +60,7 @@ export interface DataTableProps<TData> {
     label: string;
     onClick: (record: TData) => void;
   }>;
+  rowSelection?: boolean;
+  pageSize?: number;
+  pageSizeOptions?: number[];
 }
-

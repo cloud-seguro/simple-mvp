@@ -17,6 +17,20 @@ import {
 } from "recharts";
 import { Info } from "lucide-react";
 
+// Type for metadata structure
+interface GuestMetadata {
+  guestInfo?: {
+    firstName?: string;
+    lastName?: string;
+    company?: string;
+    phoneNumber?: string;
+  };
+  interest?: {
+    reason?: string;
+    otherReason?: string;
+  };
+}
+
 interface EvaluationWithProfile extends Evaluation {
   profile?: {
     id: string;
@@ -25,11 +39,11 @@ interface EvaluationWithProfile extends Evaluation {
     email: string | null;
     company: string | null;
   } | null;
-  guestFirstName?: string | null;
-  guestLastName?: string | null;
-  guestEmail?: string | null;
-  guestCompany?: string | null;
-  guestPhoneNumber?: string | null;
+  guestFirstName: string | null;
+  guestLastName: string | null;
+  guestEmail: string | null;
+  guestCompany: string | null;
+  guestPhoneNumber: string | null;
 }
 
 interface EvaluationAnalyticsProps {
@@ -153,7 +167,7 @@ export function EvaluationAnalytics({ evaluations }: EvaluationAnalyticsProps) {
         const company =
           curr.guestCompany ||
           (curr.metadata && typeof curr.metadata === "object"
-            ? (curr.metadata as any)?.guestInfo?.company
+            ? (curr.metadata as GuestMetadata)?.guestInfo?.company
             : null) ||
           "No especificada";
 
