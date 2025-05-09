@@ -87,6 +87,34 @@ async function AdminEvaluationsContent() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="font-medium text-lg">Evaluaciones de Invitados</h3>
+          <p className="text-3xl font-bold">{guestEvaluations.length}</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Usuarios que han completado evaluaciones sin registro en la
+            plataforma
+          </p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <h3 className="font-medium text-lg">Conversión de Invitados</h3>
+          <p className="text-3xl font-bold">
+            {guestEvaluations.length
+              ? Math.round(
+                  (guestEvaluations.filter((e) => e.profileId).length /
+                    guestEvaluations.length) *
+                    100
+                )
+              : 0}
+            %
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Porcentaje de invitados que se han registrado después de la
+            evaluación
+          </p>
+        </div>
+      </div>
+
       <div className="mb-10">
         <EvaluationAnalytics evaluations={evaluations} />
       </div>
