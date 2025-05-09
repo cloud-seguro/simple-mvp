@@ -79,7 +79,12 @@ export async function POST(req: NextRequest) {
         score: Object.values(answers).reduce((sum, val) => sum + val, 0),
         accessCode,
         guestEmail: email,
-        // Store all guest information in metadata until Prisma client is fully regenerated
+        // Store guest information in both dedicated fields and metadata
+        guestFirstName: firstName,
+        guestLastName: lastName,
+        guestCompany: company,
+        guestPhoneNumber: phoneNumber,
+        // Keep metadata for backward compatibility and additional data
         metadata: {
           interest: interest || null,
           guestInfo: {

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, EvaluationType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -9,6 +9,32 @@ interface EvaluationMetadata {
     [key: string]: unknown;
   };
   [key: string]: unknown;
+}
+
+// Define an extended Evaluation type that includes guest fields
+interface EvaluationWithGuest {
+  id: string;
+  type: EvaluationType;
+  title: string;
+  score: number | null;
+  profileId: string | null;
+  answers: Record<string, number>;
+  createdAt: Date;
+  completedAt: Date | null;
+  metadata: EvaluationMetadata | null;
+  accessCode: string | null;
+  guestEmail: string | null;
+  guestFirstName: string | null;
+  guestLastName: string | null;
+  guestCompany: string | null;
+  guestPhoneNumber: string | null | undefined;
+  profile?: {
+    firstName: string | null;
+    lastName: string | null;
+    email: string | null;
+    company: string | null;
+    company_role: string | null;
+  } | null;
 }
 
 /**
@@ -217,14 +243,22 @@ export async function getEvaluationById(id: string) {
 
       // Create a "fake" profile if this is a guest evaluation without a profile
       if (!evaluation.profile && evaluation.guestEmail) {
-        // Get guest info from metadata
-        let guestFirstName = "Usuario";
-        let guestLastName = "";
-        let guestCompany = "";
-        let guestPhoneNumber = undefined;
+        // First try to get guest info from dedicated fields
+        // Use a proper type definition instead of 'any'
+        const evaluationWithGuest =
+          evaluation as unknown as EvaluationWithGuest;
+        let guestFirstName = evaluationWithGuest.guestFirstName || "Usuario";
+        let guestLastName = evaluationWithGuest.guestLastName || "";
+        let guestCompany = evaluationWithGuest.guestCompany || "";
+        let guestPhoneNumber = evaluationWithGuest.guestPhoneNumber;
+        console.debug("Guest phone:", guestPhoneNumber);
 
-        // Check if guest info exists in metadata
-        if (evaluation.metadata && typeof evaluation.metadata === "object") {
+        // Fall back to metadata if direct fields are empty
+        if (
+          (!guestFirstName || guestFirstName === "Usuario") &&
+          evaluation.metadata &&
+          typeof evaluation.metadata === "object"
+        ) {
           const metadata = evaluation.metadata as EvaluationMetadata & {
             guestInfo?: {
               firstName?: string;
@@ -239,10 +273,11 @@ export async function getEvaluationById(id: string) {
             guestLastName = metadata.guestInfo.lastName || guestLastName;
             guestCompany = metadata.guestInfo.company || guestCompany;
             guestPhoneNumber = metadata.guestInfo.phoneNumber;
+            console.debug("Updated guest phone:", guestPhoneNumber);
           }
         }
 
-        // Add a synthetic profile using metadata
+        // Add a synthetic profile using the guest information
         evaluation.profile = {
           firstName: guestFirstName,
           lastName: guestLastName,
@@ -304,14 +339,22 @@ export async function getEvaluationByAccessCode(
 
       // Create a "fake" profile if this is a guest evaluation without a profile
       if (!evaluation.profile && evaluation.guestEmail) {
-        // Get guest info from metadata
-        let guestFirstName = "Usuario";
-        let guestLastName = "";
-        let guestCompany = "";
-        let guestPhoneNumber = undefined;
+        // First try to get guest info from dedicated fields
+        // Use a proper type definition instead of 'any'
+        const evaluationWithGuest =
+          evaluation as unknown as EvaluationWithGuest;
+        let guestFirstName = evaluationWithGuest.guestFirstName || "Usuario";
+        let guestLastName = evaluationWithGuest.guestLastName || "";
+        let guestCompany = evaluationWithGuest.guestCompany || "";
+        let guestPhoneNumber = evaluationWithGuest.guestPhoneNumber;
+        console.debug("Guest phone (access code):", guestPhoneNumber);
 
-        // Check if guest info exists in metadata
-        if (evaluation.metadata && typeof evaluation.metadata === "object") {
+        // Fall back to metadata if direct fields are empty
+        if (
+          (!guestFirstName || guestFirstName === "Usuario") &&
+          evaluation.metadata &&
+          typeof evaluation.metadata === "object"
+        ) {
           const metadata = evaluation.metadata as EvaluationMetadata & {
             guestInfo?: {
               firstName?: string;
@@ -326,10 +369,14 @@ export async function getEvaluationByAccessCode(
             guestLastName = metadata.guestInfo.lastName || guestLastName;
             guestCompany = metadata.guestInfo.company || guestCompany;
             guestPhoneNumber = metadata.guestInfo.phoneNumber;
+            console.debug(
+              "Updated guest phone (access code):",
+              guestPhoneNumber
+            );
           }
         }
 
-        // Add a synthetic profile using metadata
+        // Add a synthetic profile using the guest information
         evaluation.profile = {
           firstName: guestFirstName,
           lastName: guestLastName,
