@@ -42,10 +42,12 @@ export function SubscriptionButton({
 
       // Use the priceId or default from environment variable
       await createCheckoutSession(priceId);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error handling subscription:", error);
       setError(
-        error.message || "An error occurred while processing your subscription"
+        error instanceof Error
+          ? error.message
+          : "An error occurred while processing your subscription"
       );
     } finally {
       setIsLoading(false);

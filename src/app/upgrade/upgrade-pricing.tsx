@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import {
   Shield,
   Database,
@@ -12,7 +11,6 @@ import {
   FileText,
   Users,
   Layers,
-  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 import { SubscriptionButton } from "@/components/payment/subscription-button";
@@ -23,8 +21,7 @@ const SUBSCRIPTION_PRICE_ID =
   "price_1RMxsbF2MXFhAfNVcJUhp2DL";
 
 export default function UpgradePricing() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
 
   return (
     <div className="py-12 bg-white">

@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       amount: formatAmountForStripe(amount),
       currency,
       customer: customer.id,
-      payment_method_types: [paymentMethodType] as any,
+      payment_method_types: [paymentMethodType] as string[],
       metadata: {
         userId: userId,
       },

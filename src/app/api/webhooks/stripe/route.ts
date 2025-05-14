@@ -5,6 +5,11 @@ import { db } from "@/lib/db";
 import Stripe from "stripe";
 import { UserRole } from "@prisma/client";
 
+// Define a proper interface that extends Stripe.Subscription
+interface StripeSubscriptionWithPeriod extends Stripe.Subscription {
+  current_period_end: number;
+}
+
 /**
  * API route to handle Stripe webhooks
  * POST /api/webhooks/stripe
@@ -12,7 +17,7 @@ import { UserRole } from "@prisma/client";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
-    const headersList = headers();
+    const headersList = await headers();
     const signature = headersList.get("stripe-signature") || "";
 
     let event: Stripe.Event;
@@ -23,10 +28,11 @@ export async function POST(req: NextRequest) {
         signature,
         process.env.STRIPE_WEBHOOK_SECRET!
       );
-    } catch (err: any) {
-      console.error(`Webhook signature verification failed: ${err.message}`);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      console.error(`Webhook signature verification failed: ${errorMessage}`);
       return NextResponse.json(
-        { error: `Webhook signature verification failed: ${err.message}` },
+        { error: `Webhook signature verification failed: ${errorMessage}` },
         { status: 400 }
       );
     }
@@ -116,7 +122,7 @@ async function handleCheckoutSessionCompleted(
             stripe_customer_id = ${subscription.customer as string},
             stripe_subscription_id = ${subscriptionId},
             stripe_price_id = ${subscription.items.data[0]?.price.id || null},
-            stripe_current_period_end = ${new Date(subscription.current_period_end * 1000)}
+            stripe_current_period_end = ${new Date((subscription as unknown as StripeSubscriptionWithPeriod).current_period_end * 1000)}
           WHERE 
             "userId" = ${userId}
         `;
@@ -162,7 +168,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
           stripe_customer_id = ${customerId},
           stripe_subscription_id = ${subscription.id},
           stripe_price_id = ${subscription.items.data[0]?.price.id || null},
-          stripe_current_period_end = ${new Date(subscription.current_period_end * 1000)}
+          stripe_current_period_end = ${new Date((subscription as unknown as StripeSubscriptionWithPeriod).current_period_end * 1000)}
         WHERE 
           "userId" = ${userId}
       `;
@@ -205,7 +211,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
           SET 
             stripe_subscription_id = ${subscription.id},
             stripe_price_id = ${subscription.items.data[0]?.price.id || null},
-            stripe_current_period_end = ${new Date(subscription.current_period_end * 1000)}
+            stripe_current_period_end = ${new Date((subscription as unknown as StripeSubscriptionWithPeriod).current_period_end * 1000)}
           WHERE 
             "userId" = ${userId}
         `;

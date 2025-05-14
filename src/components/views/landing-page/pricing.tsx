@@ -139,7 +139,6 @@ export default function Pricing() {
     return (
       <SubscriptionButton
         priceId="price_1RMxsbF2MXFhAfNVcJUhp2DL"
-        productId="prod_SHWwxyFrMHoXKr"
         className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10"
       >
         <span className="relative z-10">Suscríbete ahora</span>

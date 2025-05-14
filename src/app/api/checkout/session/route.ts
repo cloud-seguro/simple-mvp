@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { stripe, formatAmountForStripe } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 
 // Default subscription price ID from environment variable

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   useStripe,
   useElements,
@@ -29,16 +29,11 @@ interface PaymentFormWrapperProps {
  */
 export function PaymentFormWrapper({
   clientSecret,
-  returnUrl,
-  amount,
   children,
 }: PaymentFormWrapperProps) {
   // Configure Elements with the correct amount
   const options = {
     clientSecret,
-    mode: "payment" as const,
-    currency: "usd",
-    amount: Math.round(amount * 100), // Convert dollars to cents
     appearance: {
       theme: "stripe" as const,
     },
