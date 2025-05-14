@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { type User } from "@supabase/auth-helpers-nextjs";
-import { Profile } from "@prisma/client";
+import { type Profile } from "@/types/profile";
 
 type CurrentUserData = {
   user: User | null;

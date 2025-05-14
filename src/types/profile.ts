@@ -15,4 +15,8 @@ export interface Profile {
   phoneNumber?: string;
   company?: string;
   company_role?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripePriceId?: string;
+  stripeCurrentPeriodEnd?: Date;
 }

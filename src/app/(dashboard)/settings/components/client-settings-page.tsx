@@ -13,6 +13,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SubscriptionDetails } from "@/components/settings/subscription-details";
 
 export function ClientSettingsPage() {
   const { profile, isLoading } = useCurrentUser();
@@ -109,7 +110,20 @@ export function ClientSettingsPage() {
         </Card>
       )}
 
-      <SettingsForm />
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="w-full md:w-auto">
+          <TabsTrigger value="profile">Perfil</TabsTrigger>
+          <TabsTrigger value="subscription">Suscripción</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-6">
+          <SettingsForm />
+        </TabsContent>
+
+        <TabsContent value="subscription" className="space-y-6">
+          <SubscriptionDetails />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

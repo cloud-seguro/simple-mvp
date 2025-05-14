@@ -20,15 +20,24 @@ type StripeContextType = {
   isLoading: boolean;
   createCheckoutSession: (priceId?: string) => Promise<void>;
   createSubscription: (priceId?: string) => Promise<void>;
+  openCustomerPortal: () => Promise<void>;
 };
 
-// Create Stripe Context
-const StripeContext = createContext<StripeContextType | undefined>(undefined);
+// Create Stripe Context with default values
+const StripeContext = createContext<StripeContextType>({
+  isLoading: false,
+  createCheckoutSession: async () => {},
+  createSubscription: async () => {},
+  openCustomerPortal: async () => {},
+});
 
-// Stripe Provider Props
-interface StripeProviderProps {
+// Custom hook to use Stripe Context
+export const useStripe = () => useContext(StripeContext);
+
+// Props type for Stripe Provider
+type StripeProviderProps = {
   children: React.ReactNode;
-}
+};
 
 /**
  * Stripe Provider Component
@@ -113,6 +122,41 @@ export function StripeProvider({ children }: StripeProviderProps) {
     }
   };
 
+  // Open Stripe Customer Portal for subscription management
+  const openCustomerPortal = async () => {
+    try {
+      console.log("Opening customer portal");
+      setIsLoading(true);
+
+      const response = await fetch("/api/customer-portal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        console.error("Error response from server:", responseData);
+        throw new Error(responseData.error || "Failed to open customer portal");
+      }
+
+      console.log("Customer portal session created:", responseData);
+
+      if (responseData.url) {
+        window.location.href = responseData.url;
+      } else {
+        throw new Error("No redirect URL returned from server");
+      }
+    } catch (error) {
+      console.error("Error opening customer portal:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Default Stripe Elements options
   const options: StripeElementsOptions = {
     mode: "setup",
@@ -126,6 +170,7 @@ export function StripeProvider({ children }: StripeProviderProps) {
     isLoading,
     createCheckoutSession,
     createSubscription,
+    openCustomerPortal,
   };
 
   return (
@@ -136,14 +181,3 @@ export function StripeProvider({ children }: StripeProviderProps) {
     </StripeContext.Provider>
   );
 }
-
-/**
- * Hook to use Stripe context
- */
-export const useStripe = () => {
-  const context = useContext(StripeContext);
-  if (context === undefined) {
-    throw new Error("useStripe must be used within a StripeProvider");
-  }
-  return context;
-};
