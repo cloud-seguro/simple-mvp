@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/context/theme-context";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { NavigationProgress } from "@/components/ui/navigation-progress";
+import { StripeProvider } from "@/providers/stripe-provider";
 import Script from "next/script";
 import Link from "next/link";
 
@@ -130,9 +131,11 @@ export default function RootLayout({
           >
             <AuthProvider>
               <QueryProvider>
-                <NavigationProgress />
-                {children}
-                <Toaster />
+                <StripeProvider>
+                  <NavigationProgress />
+                  {children}
+                  <Toaster />
+                </StripeProvider>
               </QueryProvider>
             </AuthProvider>
           </ErrorBoundary>

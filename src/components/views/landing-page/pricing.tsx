@@ -12,11 +12,41 @@ import {
   Users,
   FileText,
   BarChart4,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { SubscriptionButton } from "@/components/payment/subscription-button";
+import { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 
 export default function Pricing() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    async function checkUserSession() {
+      try {
+        setIsCheckingAuth(true);
+        const { data } = await supabase.auth.getSession();
+        setIsLoggedIn(!!data.session);
+      } catch (error) {
+        console.error("Error checking auth status:", error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    }
+
+    checkUserSession();
+  }, [supabase]);
+
+  const handleLogin = () => {
+    router.push("/sign-in");
+  };
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -80,6 +110,41 @@ export default function Pricing() {
         ease: "easeOut",
       },
     },
+  };
+
+  const renderSubscriptionButton = () => {
+    if (isCheckingAuth) {
+      return (
+        <Button
+          className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10"
+          disabled
+        >
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Loading...
+        </Button>
+      );
+    }
+
+    if (!isLoggedIn) {
+      return (
+        <Button
+          className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10"
+          onClick={handleLogin}
+        >
+          <span className="relative z-10">Inicia sesion para subscribirte</span>
+        </Button>
+      );
+    }
+
+    return (
+      <SubscriptionButton
+        priceId="price_1RMxsbF2MXFhAfNVcJUhp2DL"
+        productId="prod_SHWwxyFrMHoXKr"
+        className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10"
+      >
+        <span className="relative z-10">Suscríbete ahora</span>
+      </SubscriptionButton>
+    );
   };
 
   return (
@@ -382,9 +447,7 @@ export default function Pricing() {
               whileTap={{ scale: 0.95 }}
               className="relative z-10"
             >
-              <Button className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10">
-                <span className="relative z-10">Suscríbete ahora</span>
-              </Button>
+              {renderSubscriptionButton()}
             </motion.div>
 
             <p className="text-center text-sm text-white/70 mt-4 relative z-10">

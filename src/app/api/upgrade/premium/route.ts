@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // This would normally integrate with a payment processor like Stripe
-    // For now, we'll just upgrade the user directly
+    // Now that we're using Stripe, we'll redirect to the upgrade page
+    // with the pricing options instead of directly upgrading the user
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
@@ -24,35 +23,15 @@ export async function GET() {
       );
     }
 
-    // Get the user's profile
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-    });
-
-    if (!profile) {
-      return NextResponse.redirect(
-        new URL(
-          "/sign-in",
-          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-        )
-      );
-    }
-
-    // Upgrade the user to PREMIUM
-    await prisma.profile.update({
-      where: { id: profile.id },
-      data: { role: "PREMIUM" },
-    });
-
-    // Redirect to the dashboard
+    // Redirect to the upgrade page
     return NextResponse.redirect(
       new URL(
-        "/dashboard",
+        "/upgrade",
         process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
       )
     );
   } catch (error) {
-    console.error("Error upgrading user:", error);
+    console.error("Error in upgrade route:", error);
     return NextResponse.redirect(
       new URL(
         "/upgrade?error=true",

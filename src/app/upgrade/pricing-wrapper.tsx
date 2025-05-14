@@ -1,6 +1,7 @@
 "use client";
 
 import { lazy, Suspense } from "react";
+import { StripeProvider } from "@/providers/stripe-provider";
 
 // Use our simplified pricing component to avoid hydration issues
 const UpgradePricing = lazy(() => import("./upgrade-pricing"));
@@ -15,9 +16,11 @@ const LoadingSection = () => (
 export default function PricingWrapper() {
   return (
     <div className="flex flex-col">
-      <Suspense fallback={<LoadingSection />}>
-        <UpgradePricing />
-      </Suspense>
+      <StripeProvider>
+        <Suspense fallback={<LoadingSection />}>
+          <UpgradePricing />
+        </Suspense>
+      </StripeProvider>
     </div>
   );
 }

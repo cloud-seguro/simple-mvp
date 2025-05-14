@@ -22,6 +22,10 @@ model Profile {
   company_role    String?
   email           String?          @unique
   phoneNumber     String?          @map("phone_number")
+  stripeCustomerId String?         @map("stripe_customer_id")
+  stripeSubscriptionId String?     @map("stripe_subscription_id")
+  stripePriceId   String?          @map("stripe_price_id")
+  stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
   blogPosts       BlogPost[]
   engagements     Engagement[]
   evaluations     Evaluation[]

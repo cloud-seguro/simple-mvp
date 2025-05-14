@@ -12,9 +12,20 @@ import {
   FileText,
   Users,
   Layers,
+  Loader2,
 } from "lucide-react";
+import { useState } from "react";
+import { SubscriptionButton } from "@/components/payment/subscription-button";
+
+// Default subscription price ID from environment variable
+const SUBSCRIPTION_PRICE_ID =
+  process.env.NEXT_PUBLIC_STRIPE_SUBSCRIPTION_PRICE_ID ||
+  "price_1RMxsbF2MXFhAfNVcJUhp2DL";
 
 export default function UpgradePricing() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   return (
     <div className="py-12 bg-white">
       <div className="max-w-6xl mx-auto px-4">
@@ -169,11 +180,19 @@ export default function UpgradePricing() {
               </div>
             </div>
 
-            <Link href="/api/upgrade/premium">
-              <Button className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10">
+            <div className="relative z-10">
+              <SubscriptionButton
+                priceId={SUBSCRIPTION_PRICE_ID}
+                className="w-full py-6 bg-black text-white hover:bg-gray-800 relative z-10"
+              >
                 <span className="relative z-10">Actualizar Ahora</span>
-              </Button>
-            </Link>
+              </SubscriptionButton>
+              {error && (
+                <div className="mt-2 text-sm text-red-200 bg-red-900/20 p-2 rounded">
+                  {error}
+                </div>
+              )}
+            </div>
 
             <p className="text-center text-sm text-white/70 mt-4 relative z-10">
               Ideal para startups y empresas en crecimiento
