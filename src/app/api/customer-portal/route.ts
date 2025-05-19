@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = authSession.user.id;
+    console.log(`Accessing customer portal for user: ${userId}`);
 
     // Get user profile with Stripe customer ID
     const userProfile = await db.profile.findUnique({
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!userProfile) {
+      console.error(`User profile not found for user: ${userId}`);
       return NextResponse.json(
         { error: "User profile not found" },
         { status: 400 }
@@ -51,20 +53,27 @@ export async function POST(req: NextRequest) {
 
     // Check if user has a Stripe customer ID
     if (!userProfile.stripeCustomerId) {
-      return NextResponse.json(
-        { error: "No Stripe customer ID found for this user" },
-        { status: 400 }
+      console.log(
+        `No Stripe customer ID found for user: ${userId}, redirecting to upgrade page`
       );
+      // Return a redirect URL to the upgrade page instead of an error
+      return NextResponse.json({ url: "/upgrade", needsUpgrade: true });
     }
 
     // Create a Stripe customer portal session
     const returnUrl = req.headers.get("Referer") || "/settings";
+    console.log(
+      `Creating portal session for customer: ${userProfile.stripeCustomerId}`
+    );
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: userProfile.stripeCustomerId,
       return_url: returnUrl,
     });
 
+    console.log(
+      `Portal session created: ${portalSession.id}, URL: ${portalSession.url}`
+    );
     return NextResponse.json({ url: portalSession.url });
   } catch (error) {
     console.error("Error creating customer portal session:", error);

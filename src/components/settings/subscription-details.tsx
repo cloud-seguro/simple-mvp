@@ -41,11 +41,26 @@ export function SubscriptionDetails() {
       await openCustomerPortal();
     } catch (error) {
       console.error("Error opening customer portal:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Error opening subscription management"
-      );
+
+      // Create a more user-friendly error message
+      let errorMessage =
+        "Error al abrir el portal de administración de suscripción.";
+
+      if (error instanceof Error) {
+        // If the error mentions customer ID or subscription, it's likely because the user doesn't have an active subscription
+        if (
+          error.message.includes("No Stripe customer ID") ||
+          error.message.includes("customer") ||
+          error.message.includes("subscription")
+        ) {
+          errorMessage =
+            "No tienes una suscripción activa. Por favor, actualiza a premium primero.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      setError(errorMessage);
     }
   };
 

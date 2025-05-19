@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 
 // Default subscription price ID from environment variable
 const DEFAULT_PRICE_ID =
-  process.env.STRIPE_SUBSCRIPTION_PRICE_ID || "price_1RMxsbF2MXFhAfNVcJUhp2DL";
+  process.env.STRIPE_SUBSCRIPTION_PRICE_ID;
 
 /**
  * API route to create a subscription
@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    console.log("creando subscripcion");
     // Create a subscription checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customer.id,
