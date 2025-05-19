@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CheckCircle, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { Confetti, ConfettiRef } from "@/components/magicui/confetti";
 
 export function SubscriptionSuccessAlert() {
   const [isVisible, setIsVisible] = useState(false);
   const searchParams = useSearchParams();
+  const confettiRef = useRef<ConfettiRef>(null);
 
   useEffect(() => {
     // Check for subscription_success parameter
@@ -18,6 +20,49 @@ export function SubscriptionSuccessAlert() {
 
     if (hasSubscriptionSuccess) {
       setIsVisible(true);
+
+      // Create a more impressive confetti celebration
+      // First burst - from top center
+      setTimeout(() => {
+        confettiRef.current?.fire({
+          particleCount: 80,
+          spread: 100,
+          origin: { y: 0.1, x: 0.5 },
+          colors: [
+            "#4ade80",
+            "#22c55e",
+            "#16a34a",
+            "#15803d",
+            "#facc15",
+            "#eab308",
+          ],
+          startVelocity: 30,
+          gravity: 1.2,
+          shapes: ["circle", "square"],
+        });
+      }, 300);
+
+      // Second burst - from left
+      setTimeout(() => {
+        confettiRef.current?.fire({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.5, x: 0.1 },
+          colors: ["#60a5fa", "#3b82f6", "#2563eb", "#facc15", "#eab308"],
+          startVelocity: 25,
+        });
+      }, 600);
+
+      // Third burst - from right
+      setTimeout(() => {
+        confettiRef.current?.fire({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.5, x: 0.9 },
+          colors: ["#f87171", "#ef4444", "#dc2626", "#facc15", "#eab308"],
+          startVelocity: 25,
+        });
+      }, 900);
 
       // Auto-hide after 10 seconds
       const timer = setTimeout(() => {
@@ -38,8 +83,15 @@ export function SubscriptionSuccessAlert() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="mb-6"
+          className="mb-6 relative"
         >
+          {/* Confetti canvas positioned absolutely */}
+          <Confetti
+            ref={confettiRef}
+            manualstart={true}
+            className="fixed inset-0 pointer-events-none z-50"
+          />
+
           <Alert className="bg-green-50 border-green-200">
             <CheckCircle className="h-5 w-5 text-green-600" />
             <div className="flex justify-between w-full items-center">

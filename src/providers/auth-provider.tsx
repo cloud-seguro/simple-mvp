@@ -13,6 +13,7 @@ import type { Profile } from "@/types/profile";
 import { secureSupabaseClient } from "@/lib/supabase/client";
 import { generateClientFingerprint } from "@/lib/utils/session-utils";
 import { validateCorporateEmail } from "@/lib/utils/email-validation";
+import { UserRole } from "@prisma/client";
 
 // URL helper function
 const getURL = () => {
@@ -98,7 +99,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Add a function to check and update subscription status if needed
   const checkSubscriptionStatus = useCallback(async (userProfile: Profile) => {
     // Skip check if user is not PREMIUM or has no expiration date
-    if (userProfile.role !== "PREMIUM" || !userProfile.stripeCurrentPeriodEnd) {
+    if (
+      userProfile.role !== UserRole.PREMIUM ||
+      !userProfile.stripeCurrentPeriodEnd
+    ) {
       return userProfile;
     }
 
@@ -142,10 +146,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Return updated profile with FREE role
         return {
           ...userProfile,
-          role: "FREE",
-          stripeSubscriptionId: null,
-          stripePriceId: null,
-          stripeCurrentPeriodEnd: null,
+          role: UserRole.FREE,
+          stripeSubscriptionId: undefined,
+          stripePriceId: undefined,
+          stripeCurrentPeriodEnd: undefined,
         };
       } catch (error) {
         console.error("Error updating subscription status:", error);
@@ -172,7 +176,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check if subscription has expired
         const updatedProfile = await checkSubscriptionStatus(profileData);
 
-        setProfile(updatedProfile);
+        // Ensure updatedProfile is properly typed as Profile before setting state
+        setProfile(updatedProfile as Profile);
         return true;
       } catch (error) {
         console.error("Error fetching profile:", error);
