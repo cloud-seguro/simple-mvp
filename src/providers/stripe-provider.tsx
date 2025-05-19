@@ -11,8 +11,7 @@ const stripePromise = loadStripe(
 );
 
 // Default subscription price ID from environment variable
-const DEFAULT_PRICE_ID =
-  process.env.NEXT_PUBLIC_STRIPE_SUBSCRIPTION_PRICE_ID;
+const DEFAULT_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_SUBSCRIPTION_PRICE_ID;
 
 // Stripe Context types
 type StripeContextType = {
@@ -142,6 +141,13 @@ export function StripeProvider({ children }: StripeProviderProps) {
       }
 
       console.log("Customer portal session created:", responseData);
+
+      // Check if the user needs to upgrade (doesn't have a Stripe customer ID yet)
+      if (responseData.needsUpgrade) {
+        console.log("User needs to upgrade before accessing customer portal");
+        window.location.href = responseData.url;
+        return;
+      }
 
       if (responseData.url) {
         window.location.href = responseData.url;
