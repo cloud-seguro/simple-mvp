@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { UserRole, Prisma } from "@prisma/client";
-import { redirect } from "next/navigation";
 
 // Interface for the update data to fix TypeScript errors
 interface ProfileStripeUpdate {
@@ -11,6 +10,19 @@ interface ProfileStripeUpdate {
   stripeSubscriptionId?: string | null;
   stripePriceId?: string | null;
   stripeCurrentPeriodEnd?: Date | null;
+}
+
+// Define type for Stripe subscription data with needed properties
+interface StripeSubscription {
+  id: string;
+  current_period_end: number;
+  items: {
+    data: Array<{
+      price: {
+        id: string;
+      };
+    }>;
+  };
 }
 
 // Helper function to safely convert Stripe timestamp to Date
@@ -103,18 +115,24 @@ export async function GET(req: NextRequest) {
       console.log(`📝 Found subscription ID: ${subscriptionId}`);
 
       try {
-        // Retrieve subscription details
-        const subscription =
+        // Retrieve subscription details with proper type conversion
+        const rawSubscription =
           await stripe.subscriptions.retrieve(subscriptionId);
+        // Cast to unknown first, then to our interface to avoid TypeScript errors
+        const subscriptionData =
+          rawSubscription as unknown as StripeSubscription;
+
+        // Get the current period end timestamp from the subscription
+        const currentPeriodEndTimestamp = subscriptionData.current_period_end;
 
         console.log(
           `🕒 Subscription retrieved with current_period_end:`,
-          subscription.current_period_end
+          currentPeriodEndTimestamp
         );
 
         // Validate and safely convert the period end timestamp
         const periodEnd = safelyConvertTimestampToDate(
-          subscription.current_period_end
+          currentPeriodEndTimestamp
         );
 
         // Create a fallback date 1 month from now
@@ -142,7 +160,7 @@ export async function GET(req: NextRequest) {
             role: UserRole.PREMIUM,
             stripeCustomerId: customerId,
             stripeSubscriptionId: subscriptionId,
-            stripePriceId: subscription.items.data[0]?.price.id || null,
+            stripePriceId: subscriptionData.items.data[0]?.price.id || null,
             // Use the period end from Stripe or fall back to one month from now
             stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
           };
