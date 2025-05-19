@@ -1,8 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
-import { UserRole } from "@prisma/client";
+import { UserRole, Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
+
+// Interface for the update data to fix TypeScript errors
+interface ProfileStripeUpdate {
+  role: UserRole;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripePriceId?: string | null;
+  stripeCurrentPeriodEnd?: Date | null;
+}
+
+// Helper function to safely convert Stripe timestamp to Date
+function safelyConvertTimestampToDate(
+  timestamp: number | undefined
+): Date | null {
+  try {
+    if (!timestamp) return null;
+
+    // Stripe returns timestamps in seconds, convert to milliseconds
+    const timestampMs = timestamp * 1000;
+    const date = new Date(timestampMs);
+
+    // Validate the date is valid
+    if (isNaN(date.getTime())) {
+      console.error(`❌ Invalid date created from timestamp: ${timestamp}`);
+      return null;
+    }
+
+    return date;
+  } catch (error) {
+    console.error(`❌ Error converting timestamp to Date:`, error);
+    return null;
+  }
+}
 
 /**
  * This route handles the success redirect from Stripe Checkout
@@ -74,38 +107,75 @@ export async function GET(req: NextRequest) {
         const subscription =
           await stripe.subscriptions.retrieve(subscriptionId);
 
+        console.log(
+          `🕒 Subscription retrieved with current_period_end:`,
+          subscription.current_period_end
+        );
+
+        // Validate and safely convert the period end timestamp
+        const periodEnd = safelyConvertTimestampToDate(
+          subscription.current_period_end
+        );
+
+        // Create a fallback date 1 month from now
+        const oneMonthFromNow = new Date();
+        oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+        if (periodEnd) {
+          console.log(
+            `✅ Valid period end date created: ${periodEnd.toISOString()}`
+          );
+        } else {
+          console.log(
+            `⚠️ Could not create a valid period end date from Stripe, using fallback: ${oneMonthFromNow.toISOString()}`
+          );
+        }
+
         // Upgrade user to PREMIUM
         console.log(
           `⬆️ Upgrading user ${userId} to PREMIUM role directly via success URL`
         );
 
         try {
-          // Update the user role
+          // Create update data object with the correct camelCase field names
+          const updateData: ProfileStripeUpdate = {
+            role: UserRole.PREMIUM,
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: subscriptionId,
+            stripePriceId: subscription.items.data[0]?.price.id || null,
+            // Use the period end from Stripe or fall back to one month from now
+            stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
+          };
+
           await db.profile.update({
             where: { userId },
-            data: {
-              role: UserRole.PREMIUM,
-            },
+            data: updateData as unknown as Prisma.ProfileUpdateInput,
           });
-          console.log(`✅ User role updated to PREMIUM`);
-
-          // Update Stripe-related fields in the profile
-          await db.$queryRaw`
-            UPDATE profiles 
-            SET 
-              stripe_customer_id = ${customerId},
-              stripe_subscription_id = ${subscriptionId},
-              stripe_price_id = ${subscription.items.data[0]?.price.id || null},
-              stripe_current_period_end = ${new Date(subscription.current_period_end * 1000)}
-            WHERE 
-              "userId" = ${userId}
-          `;
-          console.log(`✅ Stripe subscription details saved to profile`);
+          console.log(
+            `✅ User profile updated to PREMIUM with subscription details`
+          );
         } catch (error) {
           console.error(`❌ Error upgrading user:`, error);
-          return NextResponse.redirect(
-            new URL("/dashboard?error=upgrade_failed", req.url)
-          );
+          // Try updating just the role if the full update failed
+          try {
+            await db.profile.update({
+              where: { userId },
+              data: {
+                role: UserRole.PREMIUM,
+              },
+            });
+            console.log(
+              `⚠️ Only updated user role, stripe details update failed`
+            );
+          } catch (secondError) {
+            console.error(
+              `❌ Error updating role after stripe details failed:`,
+              secondError
+            );
+            return NextResponse.redirect(
+              new URL("/dashboard?error=upgrade_failed", req.url)
+            );
+          }
         }
       } catch (error) {
         console.error(`❌ Error retrieving subscription details:`, error);

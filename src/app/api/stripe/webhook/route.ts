@@ -3,11 +3,51 @@ import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import Stripe from "stripe";
-import { UserRole } from "@prisma/client";
+import { UserRole, Prisma } from "@prisma/client";
 
 // Define a proper interface that extends Stripe.Subscription
 interface StripeSubscriptionWithPeriod extends Stripe.Subscription {
   current_period_end: number;
+}
+
+// Define an interface for the update data to fix TypeScript errors
+interface ProfileStripeUpdate {
+  role: UserRole;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripePriceId?: string | null;
+  stripeCurrentPeriodEnd?: Date | null;
+}
+
+// Helper function to safely convert Stripe timestamp to Date
+function safelyConvertTimestampToDate(
+  timestamp: number | undefined
+): Date | null {
+  try {
+    if (!timestamp) return null;
+
+    // Stripe returns timestamps in seconds, convert to milliseconds
+    const timestampMs = timestamp * 1000;
+    const date = new Date(timestampMs);
+
+    // Validate the date is valid
+    if (isNaN(date.getTime())) {
+      console.error(`❌ Invalid date created from timestamp: ${timestamp}`);
+      return null;
+    }
+
+    return date;
+  } catch (error) {
+    console.error(`❌ Error converting timestamp to Date:`, error);
+    return null;
+  }
+}
+
+// Helper function to get a date 1 month from now
+function getOneMonthFromNow(): Date {
+  const date = new Date();
+  date.setMonth(date.getMonth() + 1);
+  return date;
 }
 
 /**
@@ -157,49 +197,63 @@ async function handleCheckoutSessionCompleted(
         );
 
         try {
-          // First try to update the role using Prisma
-          console.log(`🔄 Updating user role to PREMIUM`);
-          await db.profile.update({
-            where: { userId },
-            data: {
-              role: UserRole.PREMIUM,
-            },
-          });
-          console.log(`✅ User role updated successfully`);
-        } catch (error) {
-          console.error(`❌ Error updating user role:`, error);
-        }
-
-        try {
-          // Then update stripe fields using raw query
-          console.log(`🔄 Updating Stripe fields in profile`);
+          // Update both role and Stripe fields in a single operation
           const customerId = subscription.customer as string;
           const priceId = subscription.items.data[0]?.price.id || null;
-          const periodEnd = new Date(
-            (subscription as unknown as StripeSubscriptionWithPeriod)
-              .current_period_end * 1000
+
+          // Safely convert the period_end to Date
+          const periodEndTimestamp = (
+            subscription as unknown as StripeSubscriptionWithPeriod
+          ).current_period_end;
+          console.log(
+            `🕒 Subscription period_end timestamp: ${periodEndTimestamp}`
           );
+          const periodEnd = safelyConvertTimestampToDate(periodEndTimestamp);
+
+          // Create a fallback date 1 month from now
+          const oneMonthFromNow = getOneMonthFromNow();
 
           console.log(`📊 Stripe data to save:
             - Customer ID: ${customerId}
             - Subscription ID: ${subscriptionId}
             - Price ID: ${priceId}
-            - Period End: ${periodEnd}
+            - Period End: ${periodEnd ? periodEnd.toISOString() : "using fallback: " + oneMonthFromNow.toISOString()}
           `);
 
-          await db.$queryRaw`
-            UPDATE profiles 
-            SET 
-              stripe_customer_id = ${customerId},
-              stripe_subscription_id = ${subscriptionId},
-              stripe_price_id = ${priceId},
-              stripe_current_period_end = ${periodEnd}
-            WHERE 
-              "userId" = ${userId}
-          `;
-          console.log(`✅ Stripe fields updated successfully`);
+          // Create update data object with correct camelCase field names
+          const updateData: ProfileStripeUpdate = {
+            role: UserRole.PREMIUM,
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: subscriptionId,
+            stripePriceId: priceId,
+            // Use the period end from Stripe or fall back to one month from now
+            stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
+          };
+
+          await db.profile.update({
+            where: { userId },
+            data: updateData as unknown as Prisma.ProfileUpdateInput,
+          });
+          console.log(
+            `✅ User profile updated to PREMIUM with subscription details`
+          );
         } catch (error) {
-          console.error(`❌ Error updating Stripe fields:`, error);
+          console.error(`❌ Error updating user profile:`, error);
+
+          // Try updating just the role if the full update failed
+          try {
+            await db.profile.update({
+              where: { userId },
+              data: {
+                role: UserRole.PREMIUM,
+              } as unknown as Prisma.ProfileUpdateInput,
+            });
+            console.log(
+              `⚠️ Only updated user role, stripe details update failed`
+            );
+          } catch (secondError) {
+            console.error(`❌ Error updating role:`, secondError);
+          }
         }
       } catch (error) {
         console.error("❌ Error retrieving subscription details:", error);
@@ -242,48 +296,60 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       );
 
       try {
-        // First update the role (safe with Prisma schema)
-        console.log(`🔄 Updating user role to PREMIUM`);
-        await db.profile.update({
-          where: { userId },
-          data: {
-            role: UserRole.PREMIUM,
-          },
-        });
-        console.log(`✅ User role updated successfully`);
-      } catch (error) {
-        console.error(`❌ Error updating user role:`, error);
-      }
-
-      try {
-        // Then update stripe fields using raw query to bypass validation
-        console.log(`🔄 Updating Stripe fields in profile`);
-        const priceId = subscription.items.data[0]?.price.id || null;
-        const periodEnd = new Date(
-          (subscription as unknown as StripeSubscriptionWithPeriod)
-            .current_period_end * 1000
+        // Safely convert the period_end to Date
+        const periodEndTimestamp = (
+          subscription as unknown as StripeSubscriptionWithPeriod
+        ).current_period_end;
+        console.log(
+          `🕒 Subscription period_end timestamp: ${periodEndTimestamp}`
         );
+        const periodEnd = safelyConvertTimestampToDate(periodEndTimestamp);
+        const priceId = subscription.items.data[0]?.price.id || null;
+
+        // Create a fallback date 1 month from now
+        const oneMonthFromNow = getOneMonthFromNow();
 
         console.log(`📊 Stripe data to save:
           - Customer ID: ${customerId}
           - Subscription ID: ${subscription.id}
           - Price ID: ${priceId}
-          - Period End: ${periodEnd}
+          - Period End: ${periodEnd ? periodEnd.toISOString() : "using fallback: " + oneMonthFromNow.toISOString()}
         `);
 
-        await db.$queryRaw`
-          UPDATE profiles 
-          SET 
-            stripe_customer_id = ${customerId},
-            stripe_subscription_id = ${subscription.id},
-            stripe_price_id = ${priceId},
-            stripe_current_period_end = ${periodEnd}
-          WHERE 
-            "userId" = ${userId}
-        `;
-        console.log(`✅ Stripe fields updated successfully`);
+        // Create update data object with correct camelCase field names
+        const updateData: ProfileStripeUpdate = {
+          role: UserRole.PREMIUM,
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscription.id,
+          stripePriceId: priceId,
+          // Use the period end from Stripe or fall back to one month from now
+          stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
+        };
+
+        await db.profile.update({
+          where: { userId },
+          data: updateData as unknown as Prisma.ProfileUpdateInput,
+        });
+        console.log(
+          `✅ User profile updated to PREMIUM with subscription details`
+        );
       } catch (error) {
-        console.error(`❌ Error updating Stripe fields:`, error);
+        console.error(`❌ Error updating user profile:`, error);
+
+        // Try updating just the role if the full update failed
+        try {
+          await db.profile.update({
+            where: { userId },
+            data: {
+              role: UserRole.PREMIUM,
+            } as unknown as Prisma.ProfileUpdateInput,
+          });
+          console.log(
+            `⚠️ Only updated user role, stripe details update failed`
+          );
+        } catch (secondError) {
+          console.error(`❌ Error updating role:`, secondError);
+        }
       }
     } else {
       console.error("❌ No userId found in customer metadata");
@@ -310,56 +376,65 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     if (userId) {
       // Check subscription status
       if (subscription.status === "active") {
-        // Update user profile role (safe with Prisma schema)
-        await db.profile.update({
-          where: { userId },
-          data: {
-            role: UserRole.PREMIUM,
-          },
-        });
+        // Safely convert the period_end to Date
+        const periodEndTimestamp = (
+          subscription as unknown as StripeSubscriptionWithPeriod
+        ).current_period_end;
+        const periodEnd = safelyConvertTimestampToDate(periodEndTimestamp);
+        const priceId = subscription.items.data[0]?.price.id || null;
 
-        // Update stripe fields using raw query
-        await db.$queryRaw`
-          UPDATE profiles 
-          SET 
-            stripe_subscription_id = ${subscription.id},
-            stripe_price_id = ${subscription.items.data[0]?.price.id || null},
-            stripe_current_period_end = ${new Date((subscription as unknown as StripeSubscriptionWithPeriod).current_period_end * 1000)}
-          WHERE 
-            "userId" = ${userId}
-        `;
+        // Create a fallback date 1 month from now
+        const oneMonthFromNow = getOneMonthFromNow();
+
+        try {
+          // Create update data object with correct camelCase field names
+          const updateData: ProfileStripeUpdate = {
+            role: UserRole.PREMIUM,
+            stripeSubscriptionId: subscription.id,
+            stripePriceId: priceId,
+            // Use the period end from Stripe or fall back to one month from now
+            stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
+          };
+
+          await db.profile.update({
+            where: { userId },
+            data: updateData as unknown as Prisma.ProfileUpdateInput,
+          });
+          console.log(`✅ User profile updated on subscription update`);
+        } catch (error) {
+          console.error(`❌ Error updating user profile:`, error);
+        }
       } else if (
         subscription.status === "past_due" ||
         subscription.status === "canceled" ||
         subscription.status === "unpaid"
       ) {
         // Downgrade user if subscription is no longer active
-        await db.profile.update({
-          where: { userId },
-          data: {
-            role: UserRole.FREE,
-          },
-        });
-
-        // Update stripe fields based on status
-        if (subscription.status === "canceled") {
-          await db.$queryRaw`
-            UPDATE profiles 
-            SET 
-              stripe_subscription_id = NULL,
-              stripe_price_id = NULL,
-              stripe_current_period_end = NULL
-            WHERE 
-              "userId" = ${userId}
-          `;
-        } else {
-          await db.$queryRaw`
-            UPDATE profiles 
-            SET 
-              stripe_subscription_id = ${subscription.id}
-            WHERE 
-              "userId" = ${userId}
-          `;
+        try {
+          if (subscription.status === "canceled") {
+            await db.profile.update({
+              where: { userId },
+              data: {
+                role: UserRole.FREE,
+                stripeSubscriptionId: null,
+                stripePriceId: null,
+                stripeCurrentPeriodEnd: null,
+              } as unknown as Prisma.ProfileUpdateInput,
+            });
+          } else {
+            await db.profile.update({
+              where: { userId },
+              data: {
+                role: UserRole.FREE,
+                stripeSubscriptionId: subscription.id,
+              } as unknown as Prisma.ProfileUpdateInput,
+            });
+          }
+          console.log(
+            `✅ User downgraded to FREE due to subscription status: ${subscription.status}`
+          );
+        } catch (error) {
+          console.error(`❌ Error downgrading user:`, error);
         }
       }
     } else {
@@ -385,24 +460,21 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     const userId = customer.metadata.userId;
 
     if (userId) {
-      // Downgrade user to FREE plan (safe with Prisma schema)
-      await db.profile.update({
-        where: { userId },
-        data: {
-          role: UserRole.FREE,
-        },
-      });
-
-      // Clear subscription details
-      await db.$queryRaw`
-        UPDATE profiles 
-        SET 
-          stripe_subscription_id = NULL,
-          stripe_price_id = NULL,
-          stripe_current_period_end = NULL
-        WHERE 
-          "userId" = ${userId}
-      `;
+      // Downgrade user to FREE plan and clear subscription details
+      try {
+        await db.profile.update({
+          where: { userId },
+          data: {
+            role: UserRole.FREE,
+            stripeSubscriptionId: null,
+            stripePriceId: null,
+            stripeCurrentPeriodEnd: null,
+          } as unknown as Prisma.ProfileUpdateInput,
+        });
+        console.log(`✅ User subscription details cleared on deletion`);
+      } catch (error) {
+        console.error(`❌ Error clearing user subscription details:`, error);
+      }
     } else {
       console.error("No userId found in customer metadata");
     }
