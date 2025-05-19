@@ -12,8 +12,7 @@ const stripePromise = loadStripe(
 
 // Default subscription price ID from environment variable
 const DEFAULT_PRICE_ID =
-  process.env.NEXT_PUBLIC_STRIPE_SUBSCRIPTION_PRICE_ID ||
-  "price_1RMxsbF2MXFhAfNVcJUhp2DL";
+  process.env.NEXT_PUBLIC_STRIPE_SUBSCRIPTION_PRICE_ID;
 
 // Stripe Context types
 type StripeContextType = {
