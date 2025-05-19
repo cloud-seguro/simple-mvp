@@ -95,24 +95,92 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const supabase = secureSupabaseClient;
 
-  // Wrap fetchProfile in useCallback to stabilize it for dependency array
-  const fetchProfile = useCallback(async (userId: string) => {
-    try {
-      const response = await fetch(`/api/profile/${userId}`);
-      if (!response.ok) {
-        console.error("Error fetching profile:", await response.text());
+  // Add a function to check and update subscription status if needed
+  const checkSubscriptionStatus = useCallback(async (userProfile: Profile) => {
+    // Skip check if user is not PREMIUM or has no expiration date
+    if (userProfile.role !== "PREMIUM" || !userProfile.stripeCurrentPeriodEnd) {
+      return userProfile;
+    }
+
+    const currentDate = new Date();
+    const expirationDate = new Date(userProfile.stripeCurrentPeriodEnd);
+
+    console.log(
+      `Checking subscription: Current date: ${currentDate.toISOString()}, Expiration: ${expirationDate.toISOString()}`
+    );
+
+    // If subscription has expired, downgrade to FREE
+    if (currentDate > expirationDate) {
+      console.log(
+        `User subscription expired on ${expirationDate.toISOString()}, downgrading to FREE`
+      );
+
+      try {
+        // Update profile on server
+        const response = await fetch(`/api/profile/subscription/expire`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: userProfile.userId,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error(
+            "Failed to update expired subscription status:",
+            await response.text()
+          );
+          return userProfile;
+        }
+
+        // Get updated profile
+        const result = await response.json();
+        console.log("Subscription status updated:", result);
+
+        // Return updated profile with FREE role
+        return {
+          ...userProfile,
+          role: "FREE",
+          stripeSubscriptionId: null,
+          stripePriceId: null,
+          stripeCurrentPeriodEnd: null,
+        };
+      } catch (error) {
+        console.error("Error updating subscription status:", error);
+        return userProfile;
+      }
+    }
+
+    return userProfile;
+  }, []);
+
+  // Modify fetchProfile to check subscription status
+  const fetchProfile = useCallback(
+    async (userId: string) => {
+      try {
+        const response = await fetch(`/api/profile/${userId}`);
+        if (!response.ok) {
+          console.error("Error fetching profile:", await response.text());
+          return false;
+        }
+        const data = await response.json();
+        // Extract the nested profile if it exists, otherwise use the data directly
+        const profileData = data.profile || data;
+
+        // Check if subscription has expired
+        const updatedProfile = await checkSubscriptionStatus(profileData);
+
+        setProfile(updatedProfile);
+        return true;
+      } catch (error) {
+        console.error("Error fetching profile:", error);
         return false;
       }
-      const data = await response.json();
-      // Extract the nested profile if it exists, otherwise use the data directly
-      const profileData = data.profile || data;
-      setProfile(profileData);
-      return true;
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      return false;
-    }
-  }, []);
+    },
+    [checkSubscriptionStatus]
+  );
 
   // Wrap signOut in useCallback to stabilize it for dependency array
   const signOut = useCallback(
