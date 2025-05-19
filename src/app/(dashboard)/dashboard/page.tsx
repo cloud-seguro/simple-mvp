@@ -7,6 +7,7 @@ import { DashboardCharts } from "./components/dashboard-charts";
 import { RecentEvaluations } from "./components/recent-evaluations";
 import { EvaluationType } from "@prisma/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SubscriptionSuccessAlert } from "@/components/dashboard/subscription-success-alert";
 
 // Add at the top of the file, below any imports
 export const dynamic = "force-dynamic";
@@ -148,6 +149,8 @@ export default async function DashboardPage() {
         userName={userName}
         hasMultipleEvaluations={hasMultipleEvaluations}
       />
+
+      <SubscriptionSuccessAlert />
 
       {hasEvaluations ? (
         <Tabs defaultValue={defaultTab} className="w-full">

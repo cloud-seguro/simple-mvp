@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    console.log("creando subscripcion");
     // Create a subscription checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customer.id,

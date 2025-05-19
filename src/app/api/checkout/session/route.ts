@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/dashboard?subscription_success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get("origin")}/api/stripe/success?session_id={CHECKOUT_SESSION_ID}&customer_id=${customerId}`,
       cancel_url: `${req.headers.get("origin")}/pricing?canceled=true`,
       metadata: {
         userId: userId, // Set metadata on both customer and session for redundancy
