@@ -8,6 +8,9 @@ import Hero from "@/components/views/landing-page/Hero";
 const EvaluationOptions = lazy(
   () => import("@/components/views/landing-page/evaluation-options")
 );
+const ModulesSection = lazy(
+  () => import("@/components/views/landing-page/modules-section")
+);
 const DashboardSection = lazy(
   () => import("@/components/views/landing-page/dashboard-section")
 );
@@ -38,6 +41,11 @@ export default function Home() {
       <Suspense fallback={<SectionLoading />}>
         <section id="evaluacion" className="py-24">
           <EvaluationOptions />
+        </section>
+      </Suspense>
+      <Suspense fallback={<SectionLoading />}>
+        <section id="modulos" className="py-24 bg-white">
+          <ModulesSection />
         </section>
       </Suspense>
       <Suspense fallback={<SectionLoading />}>

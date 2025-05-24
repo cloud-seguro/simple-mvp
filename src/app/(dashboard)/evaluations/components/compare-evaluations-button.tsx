@@ -22,8 +22,9 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { GitCompareIcon } from "lucide-react";
+import { GitCompareIcon, ArrowUpDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 
 interface CompareEvaluationsButtonProps {
   evaluations: Evaluation[];
@@ -40,6 +41,7 @@ export function CompareEvaluationsButton({
   const [evaluationType, setEvaluationType] = useState<"INITIAL" | "ADVANCED">(
     "INITIAL"
   );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Check if the compare query parameter is present
   useEffect(() => {
@@ -49,10 +51,14 @@ export function CompareEvaluationsButton({
     }
   }, [searchParams, evaluations.length]);
 
-  // Filter evaluations by type and selection
-  const evaluationsByType = evaluations.filter(
-    (evaluation) => evaluation.type === evaluationType
-  );
+  // Filter and sort evaluations by type and selected sort order
+  const evaluationsByType = evaluations
+    .filter((evaluation) => evaluation.type === evaluationType)
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
 
   const availableFirstEvaluations = evaluationsByType;
   const availableSecondEvaluations = evaluationsByType.filter(
@@ -62,7 +68,7 @@ export function CompareEvaluationsButton({
   const handleCompare = () => {
     if (firstEvaluationId && secondEvaluationId) {
       router.push(
-        `/evaluations/compare?first=${firstEvaluationId}&second=${secondEvaluationId}&type=${evaluationType}`
+        `/evaluations/compare?first=${firstEvaluationId}&second=${secondEvaluationId}&type=${evaluationType}&sortOrder=${sortOrder}`
       );
       setOpen(false);
     }
@@ -86,9 +92,15 @@ export function CompareEvaluationsButton({
   const isDisabled =
     initialEvaluationsCount < 2 && advancedEvaluationsCount < 2;
 
-  // Reset selection when changing evaluation type
+  // Reset selection when changing evaluation type or sort order
   const handleTypeChange = (type: "INITIAL" | "ADVANCED") => {
     setEvaluationType(type);
+    setFirstEvaluationId("");
+    setSecondEvaluationId("");
+  };
+
+  const handleSortOrderChange = (order: "asc" | "desc") => {
+    setSortOrder(order);
     setFirstEvaluationId("");
     setSecondEvaluationId("");
   };
@@ -101,15 +113,41 @@ export function CompareEvaluationsButton({
           Comparar Evaluaciones
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Comparar Evaluaciones</DialogTitle>
           <DialogDescription>
-            Selecciona el tipo de evaluación y dos evaluaciones para comparar
-            sus resultados
+            Selecciona el tipo de evaluación, el orden y dos evaluaciones para
+            comparar sus resultados
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          {/* Sort Order Selection */}
+          <div className="grid gap-2">
+            <Label htmlFor="sort-order" className="text-sm font-medium">
+              Orden de evaluaciones
+            </Label>
+            <Select value={sortOrder} onValueChange={handleSortOrderChange}>
+              <SelectTrigger id="sort-order">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">
+                  <div className="flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4" />
+                    Más reciente a más antigua
+                  </div>
+                </SelectItem>
+                <SelectItem value="asc">
+                  <div className="flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4" />
+                    Más antigua a más reciente
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Tabs
             defaultValue="INITIAL"
             className="w-full"
@@ -141,7 +179,8 @@ export function CompareEvaluationsButton({
                     htmlFor="first-evaluation"
                     className="text-sm font-medium"
                   >
-                    Primera Evaluación Inicial
+                    {sortOrder === "asc" ? "Primera" : "Primera"} Evaluación
+                    Inicial
                   </label>
                   <Select
                     value={firstEvaluationId}
@@ -170,7 +209,8 @@ export function CompareEvaluationsButton({
                     htmlFor="second-evaluation"
                     className="text-sm font-medium"
                   >
-                    Segunda Evaluación Inicial
+                    {sortOrder === "asc" ? "Segunda" : "Segunda"} Evaluación
+                    Inicial
                   </label>
                   <Select
                     value={secondEvaluationId}
@@ -199,7 +239,8 @@ export function CompareEvaluationsButton({
                     htmlFor="first-evaluation-advanced"
                     className="text-sm font-medium"
                   >
-                    Primera Evaluación Avanzada
+                    {sortOrder === "asc" ? "Primera" : "Primera"} Evaluación
+                    Avanzada
                   </label>
                   <Select
                     value={firstEvaluationId}
@@ -227,7 +268,8 @@ export function CompareEvaluationsButton({
                     htmlFor="second-evaluation-advanced"
                     className="text-sm font-medium"
                   >
-                    Segunda Evaluación Avanzada
+                    {sortOrder === "asc" ? "Segunda" : "Segunda"} Evaluación
+                    Avanzada
                   </label>
                   <Select
                     value={secondEvaluationId}

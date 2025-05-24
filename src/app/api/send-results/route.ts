@@ -278,33 +278,32 @@ export async function POST(request: Request) {
       score: number,
       evaluationType: string
     ) {
-      // Use appropriate ranges based on evaluation type
+      // Score is already a percentage (0-100), so use percentage ranges
       if (evaluationType === "INITIAL") {
-        // Initial evaluation (max 45 points)
-        if (score <= 9)
+        if (score <= 20)
           return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-        if (score <= 19)
+        if (score <= 40)
           return {
             level: "Nivel 2",
             description: "Nivel Repetible pero intuitivo",
           };
-        if (score <= 29)
+        if (score <= 60)
           return { level: "Nivel 3", description: "Nivel Definido" };
-        if (score <= 39)
+        if (score <= 80)
           return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
         return { level: "Nivel 5", description: "Nivel Optimizado" };
       } else {
-        // Advanced evaluation (max 100 points)
+        // Advanced evaluation uses same percentage ranges
         if (score <= 20)
           return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-        if (score <= 45)
+        if (score <= 40)
           return {
             level: "Nivel 2",
             description: "Nivel Repetible pero intuitivo",
           };
-        if (score <= 70)
+        if (score <= 60)
           return { level: "Nivel 3", description: "Nivel Definido" };
-        if (score <= 90)
+        if (score <= 80)
           return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
         return { level: "Nivel 5", description: "Nivel Optimizado" };
       }
@@ -315,8 +314,9 @@ export async function POST(request: Request) {
       effectiveEvaluationType
     );
 
-    // Calculate maxScore based on evaluation type
-    const maxScore = effectiveEvaluationType === "INITIAL" ? 45 : 100;
+    // Score is already calculated as a percentage (0-100) by calculateSecurityScore
+    // So maxScore should always be 100 for display purposes
+    const maxScore = 100;
 
     try {
       // Send the email with the actual results

@@ -123,8 +123,10 @@ export default function Navbar() {
               ? // Navigation for home page - section links
                 [
                   { href: "#evaluacion", label: "Evaluación" },
+                  { href: "#modulos", label: "Módulos" },
                   { href: "#beneficios", label: "Beneficios" },
                   { href: "#testimonios", label: "Testimonios" },
+                  { href: "/nosotros", label: "Nosotros", isLink: true },
                   { href: "/pricing", label: "Precios", isLink: true },
                   { href: "/blog", label: "Blog", isLink: true },
                 ].map((item) =>
@@ -160,8 +162,15 @@ export default function Navbar() {
               : // Navigation for other pages - direct links
                 [
                   { href: "/#evaluacion", label: "Evaluación", isLink: true },
+                  { href: "/#modulos", label: "Módulos", isLink: true },
                   { href: "/#beneficios", label: "Beneficios", isLink: true },
                   { href: "/#testimonios", label: "Testimonios", isLink: true },
+                  {
+                    href: "/nosotros",
+                    label: "Nosotros",
+                    isLink: true,
+                    current: pathname === "/nosotros",
+                  },
                   {
                     href: "/pricing",
                     label: "Precios",
@@ -242,8 +251,10 @@ export default function Navbar() {
                 ? // Mobile navigation for home page
                   [
                     { href: "#evaluacion", label: "Evaluación" },
+                    { href: "#modulos", label: "Módulos" },
                     { href: "#beneficios", label: "Beneficios" },
                     { href: "#testimonios", label: "Testimonios" },
+                    { href: "/nosotros", label: "Nosotros", isLink: true },
                     { href: "/pricing", label: "Precios", isLink: true },
                     { href: "/blog", label: "Blog", isLink: true },
                   ].map((item) =>
@@ -280,11 +291,18 @@ export default function Navbar() {
                 : // Mobile navigation for other pages
                   [
                     { href: "/#evaluacion", label: "Evaluación", isLink: true },
+                    { href: "/#modulos", label: "Módulos", isLink: true },
                     { href: "/#beneficios", label: "Beneficios", isLink: true },
                     {
                       href: "/#testimonios",
                       label: "Testimonios",
                       isLink: true,
+                    },
+                    {
+                      href: "/nosotros",
+                      label: "Nosotros",
+                      isLink: true,
+                      current: pathname === "/nosotros",
                     },
                     {
                       href: "/pricing",
