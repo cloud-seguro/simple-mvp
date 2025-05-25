@@ -17,6 +17,12 @@ export type BlogPost = {
   status?: BlogPostStatus;
   description?: string;
   featuredImage?: string;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string | null;
+  };
 };
 
 // Calculate reading time based on word count (average reading speed: 200 words per minute)

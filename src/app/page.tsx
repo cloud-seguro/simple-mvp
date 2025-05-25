@@ -39,23 +39,23 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Suspense fallback={<SectionLoading />}>
-        <section id="evaluacion" className="py-24">
-          <EvaluationOptions />
-        </section>
-      </Suspense>
-      <Suspense fallback={<SectionLoading />}>
         <section id="modulos" className="py-24 bg-white">
           <ModulesSection />
         </section>
       </Suspense>
       <Suspense fallback={<SectionLoading />}>
-        <section id="dashboard" className="py-24 bg-gray-50">
-          <DashboardSection />
+        <section id="evaluacion" className="py-24">
+          <EvaluationOptions />
         </section>
       </Suspense>
       <Suspense fallback={<SectionLoading />}>
         <section id="beneficios" className="py-24 bg-white">
           <Benefits />
+        </section>
+      </Suspense>
+      <Suspense fallback={<SectionLoading />}>
+        <section id="dashboard" className="py-24 bg-gray-50">
+          <DashboardSection />
         </section>
       </Suspense>
       <Suspense fallback={<SectionLoading />}>

@@ -82,38 +82,6 @@ export async function generateMetadata({ params }: ResultsPageProps) {
   }
 }
 
-// Helper function to get maturity level for results page
-function getMaturityLevelBasedOnScore(score: number, evaluationType: string) {
-  // Use appropriate ranges based on evaluation type
-  if (evaluationType === "INITIAL") {
-    // Initial evaluation (max 45 points)
-    if (score <= 9)
-      return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-    if (score <= 19)
-      return {
-        level: "Nivel 2",
-        description: "Nivel Repetible pero intuitivo",
-      };
-    if (score <= 29) return { level: "Nivel 3", description: "Nivel Definido" };
-    if (score <= 39)
-      return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
-    return { level: "Nivel 5", description: "Nivel Optimizado" };
-  } else {
-    // Advanced evaluation (max 100 points instead of 75)
-    if (score <= 20)
-      return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-    if (score <= 45)
-      return {
-        level: "Nivel 2",
-        description: "Nivel Repetible pero intuitivo",
-      };
-    if (score <= 68) return { level: "Nivel 3", description: "Nivel Definido" };
-    if (score <= 88)
-      return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
-    return { level: "Nivel 5", description: "Nivel Optimizado" };
-  }
-}
-
 export default async function ResultsPage({
   params,
   searchParams,
@@ -498,11 +466,7 @@ export default async function ResultsPage({
         ? calculatedMaxScore
         : totalScore;
 
-    // These variables are needed for calculation but not directly used
-    // Keeping calculation for documentation purposes
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const maxScore = calculatedMaxScore;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // Use the same maturity level calculation as the email
     const maturityInfo = getMaturityLevel(quizData.id, cappedScore);
 
     const categoryScores = Object.entries(
@@ -620,25 +584,12 @@ export default async function ResultsPage({
                   ? cappedScore
                   : evaluation.score || 0
               }
-              maxScore={evaluation.type === "INITIAL" ? 45 : 100}
-              maturityDescription={
-                getMaturityLevelBasedOnScore(
-                  evaluation.type === "INITIAL"
-                    ? cappedScore
-                    : evaluation.score || 0,
-                  evaluation.type || "ADVANCED"
-                ).description
+              maxScore={
+                evaluation.type === "INITIAL" ? calculatedMaxScore : 100
               }
+              maturityDescription={maturityInfo.description}
               maturityLevelNumber={parseInt(
-                getMaturityLevelBasedOnScore(
-                  evaluation.type === "INITIAL"
-                    ? cappedScore
-                    : evaluation.score || 0,
-                  evaluation.type || "ADVANCED"
-                )
-                  .level.split("–")[0]
-                  .replace("Nivel ", "")
-                  .trim(),
+                maturityInfo.level.replace("Nivel ", "").trim(),
                 10
               )}
               weakestCategories={weakestCategories}

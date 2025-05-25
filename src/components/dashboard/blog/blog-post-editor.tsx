@@ -52,6 +52,7 @@ const blogPostSchema = z.object({
   description: z.string().optional(),
   featuredImage: z.string().optional(),
   status: z.nativeEnum(BlogPostStatus),
+  categoryId: z.string().optional(),
 });
 
 type BlogPostFormValues = z.infer<typeof blogPostSchema>;
@@ -70,8 +71,16 @@ interface BlogPostEditorProps {
     description?: string;
     featuredImage?: string;
     status: BlogPostStatus | string;
+    categoryId?: string;
   } | null; // The post to edit, null if creating a new post
   authorId: string; // The ID of the current user
+}
+
+interface BlogCategory {
+  id: string;
+  name: string;
+  color: string;
+  active: boolean;
 }
 
 export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
@@ -83,6 +92,8 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
   const [content, setContent] = useState<string>(post?.content || "");
   const [isCopied, setIsCopied] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Generate a temporary ID for new posts (for image uploads)
   useEffect(() => {
@@ -90,6 +101,25 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
       setTempPostId(`temp-${Math.random().toString(36).substring(2)}`);
     }
   }, [post]);
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/blog/categories");
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Initialize form with existing post data or defaults
   const form = useForm<BlogPostFormValues>({
@@ -105,6 +135,7 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
       description: post?.description || "",
       featuredImage: post?.featuredImage || "",
       status: (post?.status as BlogPostStatus) || BlogPostStatus.DRAFT,
+      categoryId: post?.categoryId || "none",
     },
   });
 
@@ -151,6 +182,10 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
       const endpoint = post ? `/api/blog/${post.id}` : "/api/blog/create";
       const method = post ? "PUT" : "POST";
 
+      // Convert "none" back to null for categoryId
+      const categoryId =
+        values.categoryId === "none" ? null : values.categoryId;
+
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -158,6 +193,7 @@ export function BlogPostEditor({ post, authorId }: BlogPostEditorProps) {
         },
         body: JSON.stringify({
           ...values,
+          categoryId,
           authorId: post ? undefined : authorId, // Only needed for new posts
         }),
       });
@@ -379,6 +415,53 @@ flowchart LR
                         <SelectItem value={BlogPostStatus.ARCHIVED}>
                           Archivado
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Categoría (opcional)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger
+                          type="button"
+                          onClick={preventFormSubmission}
+                        >
+                          <SelectValue placeholder="Selecciona una categoría" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Sin categoría</SelectItem>
+                        {loadingCategories ? (
+                          <SelectItem value="loading" disabled>
+                            Cargando categorías...
+                          </SelectItem>
+                        ) : (
+                          categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-3 h-3 rounded-full border border-gray-300"
+                                  style={{
+                                    backgroundColor:
+                                      category.color || "#6B7280",
+                                  }}
+                                />
+                                {category.name}
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

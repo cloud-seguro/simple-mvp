@@ -69,6 +69,22 @@ export default function BlogPostClient({
                 <span>{post.formattedDate}</span>
                 <span>•</span>
                 <span>{post.readingTime} de lectura</span>
+                {post.category && (
+                  <>
+                    <span>•</span>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full border border-gray-300"
+                        style={{
+                          backgroundColor: post.category.color || "#6B7280",
+                        }}
+                      />
+                      <span className="text-sm font-medium">
+                        {post.category.name}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
               {post.coverImage && (
                 <div className="relative w-full h-[400px] mb-8 overflow-hidden rounded-lg">

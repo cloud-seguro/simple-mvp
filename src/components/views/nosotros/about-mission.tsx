@@ -53,9 +53,21 @@ export default function AboutMission() {
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
         >
-          Democratizar la ciberseguridad empresarial, eliminando las barreras
-          técnicas y económicas que impiden a las empresas protegerse
-          adecuadamente.
+          Nuestra misión es democratizar la ciberseguridad, haciendo que las
+          mejores prácticas y herramientas de protección estén al alcance de
+          todas las organizaciones, sin importar su tamaño o presupuesto.
+          Creemos que la seguridad no debe ser un privilegio de unos pocos, sino
+          un derecho fundamental en el mundo digital.
+        </motion.p>
+        <motion.p
+          className="text-xl text-gray-600 max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+        >
+          Trabajamos incansablemente para crear un ecosistema donde la
+          &ldquo;seguridad por diseño&rdquo; sea la norma, no la excepción.
         </motion.p>
       </BlurFade>
 
@@ -128,8 +140,8 @@ export default function AboutMission() {
           <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl p-8 text-black">
             <h4 className="text-2xl font-bold mb-4">Nuestro Compromiso</h4>
             <p className="text-lg leading-relaxed mb-6">
-              "Creemos que la seguridad digital debe ser tan natural como cerrar
-              la puerta de tu oficina al final del día."
+              &ldquo;Creemos que la seguridad digital debe ser tan natural como
+              cerrar la puerta de tu oficina al final del día.&rdquo;
             </p>
             <div className="text-right">
               <p className="font-semibold">— Equipo SIMPLE</p>

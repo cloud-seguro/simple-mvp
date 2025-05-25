@@ -3,14 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Shield,
-  Database,
-  Bell,
-  Search,
-  ArrowUpRight,
-  Users,
-} from "lucide-react";
+import { BarChart3, Shield, FileText, ArrowUpRight } from "lucide-react";
 
 export default function DashboardSection() {
   const container = {
@@ -73,7 +66,7 @@ export default function DashboardSection() {
 
             <motion.div variants={item} className="flex items-start">
               <div className="bg-orange-400 p-3 rounded-full mr-4 flex-shrink-0">
-                <Bell className="h-6 w-6 text-white" />
+                <BarChart3 className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">
@@ -88,7 +81,7 @@ export default function DashboardSection() {
 
             <motion.div variants={item} className="flex items-start">
               <div className="bg-orange-400 p-3 rounded-full mr-4 flex-shrink-0">
-                <Database className="h-6 w-6 text-white" />
+                <FileText className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h3 className="text-xl font-semibold mb-2">
