@@ -5,6 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 import { EngagementForm } from "@/components/contrata/engagement-form";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { MapPin, Mail, Star, CheckCircle, Shield, Users } from "lucide-react";
 
 export const metadata = {
   title: "Contrata Especialista | CONTRATA | SIMPLE",
@@ -12,27 +21,15 @@ export const metadata = {
     "Contrata un especialista en ciberseguridad para tus necesidades de seguridad",
 };
 
-// Define the deal type to use for proper typing
-type SpecialistDeal = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  durationDays: number;
-};
-
 // Add dynamic export to handle the cookies usage
 export const dynamic = "force-dynamic";
 
 export default async function HireSpecialistPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ dealId?: string }>;
 }) {
   const specialistId = (await params).id;
-  const dealId = (await searchParams).dealId;
 
   const supabase = createServerComponentClient({ cookies });
   const {
@@ -57,7 +54,7 @@ export default async function HireSpecialistPage({
     redirect("/dashboard");
   }
 
-  // Fetch specialist details
+  // Fetch specialist details with engagement count
   const specialist = await prisma.specialist.findUnique({
     where: {
       id: specialistId,
@@ -71,19 +68,15 @@ export default async function HireSpecialistPage({
       expertiseAreas: true,
       location: true,
       contactEmail: true,
-      deals: {
-        where: {
-          active: true,
-        },
+      skills: true,
+      linkedinProfileUrl: true,
+      _count: {
         select: {
-          id: true,
-          title: true,
-          description: true,
-          price: true,
-          durationDays: true,
-        },
-        orderBy: {
-          price: "asc",
+          engagements: {
+            where: {
+              status: "COMPLETED",
+            },
+          },
         },
       },
     },
@@ -93,58 +86,129 @@ export default async function HireSpecialistPage({
     notFound();
   }
 
-  // If dealId is provided, get that specific deal
-  let selectedDeal: SpecialistDeal | null = null;
-  if (dealId) {
-    selectedDeal = specialist.deals.find((deal) => deal.id === dealId) || null;
-  }
-
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Contratar a {specialist.name}</h1>
-
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-        <div className="p-6">
-          <div className="flex items-center mb-6">
-            {specialist.imageUrl ? (
-              <Image
-                src={specialist.imageUrl}
-                alt={specialist.name}
-                width={64}
-                height={64}
-                className="w-16 h-16 rounded-full mr-4 object-cover"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-gray-200 mr-4 flex items-center justify-center text-gray-500">
-                <span className="text-xl">👤</span>
-              </div>
-            )}
-            <div>
-              <h2 className="text-lg font-medium">{specialist.name}</h2>
-              {specialist.location && (
-                <p className="text-sm text-gray-600">{specialist.location}</p>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {specialist.expertiseAreas.map((area) => (
-              <span
-                key={area}
-                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-              >
-                {translateExpertiseArea(area)}
-              </span>
-            ))}
-          </div>
-          <p className="text-sm text-gray-700 line-clamp-3">{specialist.bio}</p>
-        </div>
+    <div className="max-w-6xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-2">Contratar Especialista</h1>
+        <p className="text-muted-foreground">
+          Conecta con un experto en ciberseguridad para proteger tu negocio
+        </p>
       </div>
 
-      <EngagementForm
-        specialist={specialist}
-        profileId={profile.id}
-        selectedDeal={selectedDeal}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Specialist Profile Card */}
+        <div className="lg:col-span-1">
+          <Card className="sticky top-6">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                {specialist.imageUrl ? (
+                  <Image
+                    src={specialist.imageUrl}
+                    alt={specialist.name}
+                    width={120}
+                    height={120}
+                    className="w-30 h-30 rounded-full object-cover border-4 border-primary/10"
+                  />
+                ) : (
+                  <div className="w-30 h-30 rounded-full bg-muted flex items-center justify-center border-4 border-primary/10">
+                    <Shield className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              <CardTitle className="text-xl">{specialist.name}</CardTitle>
+              <CardDescription className="flex items-center justify-center space-x-4 mt-2">
+                {specialist.location && (
+                  <span className="flex items-center text-sm">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {specialist.location}
+                  </span>
+                )}
+                <span className="flex items-center text-sm">
+                  <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                  {specialist._count.engagements} proyectos completados
+                </span>
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Bio */}
+              <div>
+                <h4 className="font-medium mb-2">Acerca del Especialista</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {specialist.bio}
+                </p>
+              </div>
+
+              {/* Expertise Areas */}
+              <div>
+                <h4 className="font-medium mb-3">Áreas de Especialización</h4>
+                <div className="flex flex-wrap gap-2">
+                  {specialist.expertiseAreas.map((area) => (
+                    <Badge key={area} variant="secondary" className="text-xs">
+                      {translateExpertiseArea(area)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skills */}
+              {specialist.skills && specialist.skills.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-3">Habilidades Técnicas</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {specialist.skills.map((skill) => (
+                      <Badge key={skill} variant="outline" className="text-xs">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Contact Info */}
+              <div className="pt-4 border-t">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4 mr-2" />
+                  <span className="truncate">{specialist.contactEmail}</span>
+                </div>
+                {specialist.linkedinProfileUrl && (
+                  <div className="flex items-center text-sm text-muted-foreground mt-2">
+                    <Users className="h-4 w-4 mr-2" />
+                    <a
+                      href={specialist.linkedinProfileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:text-primary/80 truncate"
+                    >
+                      Perfil de LinkedIn
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-1 text-green-500" />
+                    <span>Verificado</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Star className="h-4 w-4 mr-1 text-yellow-500" />
+                    <span>Certificado</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Engagement Form */}
+        <div className="lg:col-span-2">
+          <EngagementForm specialist={specialist} profileId={profile.id} />
+        </div>
+      </div>
     </div>
   );
 }

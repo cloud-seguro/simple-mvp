@@ -132,6 +132,8 @@ model Engagement {
   budget       Float?
   startDate    DateTime?
   endDate      DateTime?
+  servicePackage String?        // New field for service package ID
+  urgency      String?          // New field for urgency level (LOW, MEDIUM, HIGH)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   profileId    String

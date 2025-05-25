@@ -5,6 +5,27 @@ import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ArrowLeft,
+  MapPin,
+  Mail,
+  Star,
+  CheckCircle,
+  Shield,
+  Users,
+  Clock,
+  DollarSign,
+} from "lucide-react";
+import { SERVICE_PACKAGES } from "@/lib/constants/service-packages";
 
 export const metadata = {
   title: "Detalles del Especialista | CONTRATA | SIMPLE",
@@ -45,19 +66,29 @@ export default async function SpecialistDetailPage({
     redirect("/dashboard");
   }
 
-  // Fetch specialist details
+  // Fetch specialist details with engagement count
   const specialist = await prisma.specialist.findUnique({
     where: {
       id: specialistId,
       active: true,
     },
-    include: {
-      deals: {
-        where: {
-          active: true,
-        },
-        orderBy: {
-          price: "asc",
+    select: {
+      id: true,
+      name: true,
+      imageUrl: true,
+      bio: true,
+      expertiseAreas: true,
+      location: true,
+      contactEmail: true,
+      skills: true,
+      linkedinProfileUrl: true,
+      _count: {
+        select: {
+          engagements: {
+            where: {
+              status: "COMPLETED",
+            },
+          },
         },
       },
     },
@@ -67,195 +98,315 @@ export default async function SpecialistDetailPage({
     notFound();
   }
 
-  // Type assertion to handle the new schema fields
-  type SpecialistWithDeals = typeof specialist & {
-    hourlyRate?: number | null;
-    linkedinProfileUrl?: string | null;
-    skills?: string[];
-  };
-
-  const specialistWithNewFields = specialist as SpecialistWithDeals;
+  // Convert SERVICE_PACKAGES to array for easier mapping
+  const servicePackagesArray = Object.values(SERVICE_PACKAGES).filter(
+    (pkg) => pkg.id !== "custom"
+  );
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto space-y-8">
+      {/* Navigation */}
       <Link
         href="/contrata"
-        className="inline-flex items-center text-primary hover:text-primary/80 mb-6"
+        className="inline-flex items-center text-primary hover:text-primary/80"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-1"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
+        <ArrowLeft className="h-5 w-5 mr-1" />
         Volver a todos los especialistas
       </Link>
 
-      <div className="bg-card rounded-lg shadow-md overflow-hidden">
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center">
-            <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-              {specialistWithNewFields.imageUrl ? (
-                <Image
-                  src={specialistWithNewFields.imageUrl}
-                  alt={specialistWithNewFields.name}
-                  width={128}
-                  height={128}
-                  className="w-32 h-32 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                  <span className="text-4xl">👤</span>
-                </div>
-              )}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">
-                {specialistWithNewFields.name}
-              </h1>
-              {specialistWithNewFields.location && (
-                <p className="text-muted-foreground mb-2">
-                  {specialistWithNewFields.location}
-                </p>
-              )}
-              <div className="flex flex-wrap gap-2 mt-2">
-                {specialistWithNewFields.expertiseAreas.map((area) => (
-                  <span
-                    key={area}
-                    className="px-3 py-1 bg-accent text-accent-foreground text-sm rounded-full"
-                  >
-                    {translateExpertiseArea(area)}
-                  </span>
-                ))}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Specialist Profile */}
+        <div className="lg:col-span-1">
+          <Card className="sticky top-6">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                {specialist.imageUrl ? (
+                  <Image
+                    src={specialist.imageUrl}
+                    alt={specialist.name}
+                    width={120}
+                    height={120}
+                    className="w-30 h-30 rounded-full object-cover border-4 border-primary/10"
+                  />
+                ) : (
+                  <div className="w-30 h-30 rounded-full bg-muted flex items-center justify-center border-4 border-primary/10">
+                    <Shield className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
               </div>
-              {specialistWithNewFields.hourlyRate && (
-                <p className="mt-3 text-lg font-medium text-primary">
-                  ${specialistWithNewFields.hourlyRate}/hora
+              <CardTitle className="text-xl">{specialist.name}</CardTitle>
+              <CardDescription className="space-y-2">
+                {specialist.location && (
+                  <div className="flex items-center justify-center text-sm">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {specialist.location}
+                  </div>
+                )}
+                <div className="flex items-center justify-center text-sm">
+                  <CheckCircle className="h-3 w-3 mr-1 text-green-500" />
+                  {specialist._count.engagements} proyectos completados
+                </div>
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Bio */}
+              <div>
+                <h4 className="font-medium mb-2">Acerca del Especialista</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {specialist.bio}
                 </p>
-              )}
-            </div>
-          </div>
+              </div>
 
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Acerca de</h2>
-            <p className="text-foreground whitespace-pre-line">
-              {specialistWithNewFields.bio}
-            </p>
-          </div>
-
-          {specialistWithNewFields.skills &&
-            specialistWithNewFields.skills.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-4">Habilidades</h2>
+              {/* Expertise Areas */}
+              <div>
+                <h4 className="font-medium mb-3">Áreas de Especialización</h4>
                 <div className="flex flex-wrap gap-2">
-                  {specialistWithNewFields.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full"
-                    >
-                      {skill}
-                    </span>
+                  {specialist.expertiseAreas.map((area) => (
+                    <Badge key={area} variant="secondary" className="text-xs">
+                      {translateExpertiseArea(area)}
+                    </Badge>
                   ))}
                 </div>
               </div>
-            )}
 
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">
-              Información de Contacto
-            </h2>
-            <div className="space-y-2">
-              <p className="flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-muted-foreground"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-                <Link
-                  href={`/contrata/hire/${specialistWithNewFields.id}`}
-                  className="text-primary hover:text-primary/80"
-                >
-                  Contactar a través de SIMPLE
-                </Link>
-              </p>
-              {specialistWithNewFields.linkedinProfileUrl && (
-                <p className="flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-muted-foreground"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                  </svg>
-                  <a
-                    href={specialistWithNewFields.linkedinProfileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:text-primary/80"
-                  >
-                    Perfil de LinkedIn
-                  </a>
-                </p>
+              {/* Skills */}
+              {specialist.skills && specialist.skills.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-3">Habilidades Técnicas</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {specialist.skills.map((skill) => (
+                      <Badge key={skill} variant="outline" className="text-xs">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               )}
-            </div>
-          </div>
 
-          {specialistWithNewFields.deals.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">
-                Paquetes de Servicios
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {specialistWithNewFields.deals.map((deal) => (
-                  <div
-                    key={deal.id}
-                    className="border rounded-lg p-6 hover:shadow-md transition"
-                  >
-                    <h3 className="text-lg font-medium mb-2">{deal.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {deal.description}
-                    </p>
-                    <div className="flex items-center justify-between mt-4">
-                      <div>
-                        <p className="text-2xl font-bold text-primary">
-                          ${deal.price}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Duración: {deal.durationDays} días
+              {/* Contact Info */}
+              <div className="pt-4 border-t">
+                <div className="flex items-center text-sm text-muted-foreground mb-2">
+                  <Mail className="h-4 w-4 mr-2" />
+                  <span className="truncate">{specialist.contactEmail}</span>
+                </div>
+                {specialist.linkedinProfileUrl && (
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Users className="h-4 w-4 mr-2" />
+                    <a
+                      href={specialist.linkedinProfileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:text-primary/80 truncate"
+                    >
+                      Perfil de LinkedIn
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-1 text-green-500" />
+                    <span>Verificado</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Star className="h-4 w-4 mr-1 text-yellow-500" />
+                    <span>Certificado</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <div className="pt-4">
+                <Button asChild className="w-full">
+                  <Link href={`/contrata/hire/${specialist.id}`}>
+                    Contratar Especialista
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Services and Pricing */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Services Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <DollarSign className="h-5 w-5" />
+                <span>Servicios y Precios</span>
+              </CardTitle>
+              <CardDescription>
+                Todos nuestros especialistas ofrecen los mismos servicios con
+                precios estándar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {servicePackagesArray.map((service, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm mb-1">
+                          {service.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {service.description}
                         </p>
                       </div>
-                      <Link
-                        href={`/contrata/hire/${specialistWithNewFields.id}?dealId=${deal.id}`}
-                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
-                      >
-                        Seleccionar Paquete
-                      </Link>
+                      <div className="text-right ml-4">
+                        <Badge variant="secondary" className="mb-1">
+                          ${service.price}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {service.duration}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      {service.features.map((feature, featureIndex) => (
+                        <div
+                          key={featureIndex}
+                          className="flex items-center text-xs text-muted-foreground"
+                        >
+                          <CheckCircle className="h-3 w-3 mr-2 text-green-500" />
+                          {feature}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            </CardContent>
+          </Card>
 
-          <div className="mt-8 flex justify-center">
-            <Link
-              href={`/contrata/hire/${specialistWithNewFields.id}`}
-              className="px-6 py-3 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition text-center"
-            >
-              Contratar Este Especialista
-            </Link>
-          </div>
+          {/* Why Choose This Specialist */}
+          <Card>
+            <CardHeader>
+              <CardTitle>¿Por qué elegir a {specialist.name}?</CardTitle>
+              <CardDescription>
+                Ventajas de trabajar con este especialista certificado
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <Shield className="h-5 w-5 text-green-500 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-sm">
+                        Especialista Verificado
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Perfil verificado y certificaciones validadas por
+                        nuestro equipo
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-sm">
+                        Experiencia Comprobada
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {specialist._count.engagements} proyectos completados
+                        exitosamente
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <Star className="h-5 w-5 text-yellow-500 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-sm">
+                        Calidad Garantizada
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Servicios respaldados por nuestra garantía de
+                        satisfacción
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <Users className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-sm">Soporte Continuo</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Comunicación directa y soporte durante todo el proyecto
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Process */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Proceso de Contratación</CardTitle>
+              <CardDescription>
+                Cómo funciona el proceso desde la solicitud hasta la entrega
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">Solicitud</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Envía tu solicitud con los detalles del proyecto
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">Evaluación</h4>
+                    <p className="text-xs text-muted-foreground">
+                      El especialista revisa tu solicitud y confirma
+                      disponibilidad
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">Ejecución</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Trabajo colaborativo con comunicación constante
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                    4
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">Entrega</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Entrega de resultados y documentación completa
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
@@ -264,8 +415,8 @@ export default async function SpecialistDetailPage({
 
 // Helper function to translate expertise areas to Spanish
 function translateExpertiseArea(area: string): string {
-  const areaMap: Record<string, string> = {
-    NETWORK_SECURITY: "Seguridad de Red",
+  const translations: Record<string, string> = {
+    NETWORK_SECURITY: "Seguridad de Redes",
     APPLICATION_SECURITY: "Seguridad de Aplicaciones",
     CLOUD_SECURITY: "Seguridad en la Nube",
     INCIDENT_RESPONSE: "Respuesta a Incidentes",
@@ -277,5 +428,5 @@ function translateExpertiseArea(area: string): string {
     GENERAL: "General",
   };
 
-  return areaMap[area] || area.replace(/_/g, " ");
+  return translations[area] || area.replace(/_/g, " ");
 }

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Image from "next/image";
+import { SERVICE_PACKAGE_NAMES } from "@/lib/constants/service-packages";
 
 export const metadata = {
   title: "Mis Contratos | CONTRATA | SIMPLE",
@@ -93,19 +94,14 @@ export default async function EngagementsPage() {
       budget: true,
       startDate: true,
       createdAt: true,
+      servicePackage: true,
+      urgency: true,
       specialist: {
         select: {
           id: true,
           name: true,
           imageUrl: true,
           expertiseAreas: true,
-        },
-      },
-      deal: {
-        select: {
-          id: true,
-          title: true,
-          price: true,
         },
       },
     },
@@ -239,6 +235,14 @@ export default async function EngagementsPage() {
                           >
                             {translateStatus(engagement.status)}
                           </span>
+                          {engagement.servicePackage && (
+                            <p className="text-sm text-muted-foreground">
+                              Servicio:{" "}
+                              {SERVICE_PACKAGE_NAMES[
+                                engagement.servicePackage
+                              ] || engagement.servicePackage}
+                            </p>
+                          )}
                           <p className="text-sm text-muted-foreground">
                             Creado:{" "}
                             {format(
