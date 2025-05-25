@@ -9,6 +9,12 @@ import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import { MessageThread } from "@/components/message-thread";
 import { UpdateEngagementForm } from "@/components/specialists/update-engagement-form";
+import {
+  SERVICE_PACKAGES,
+  SERVICE_PACKAGE_NAMES,
+  URGENCY_LEVELS,
+  URGENCY_LEVEL_NAMES,
+} from "@/lib/constants/service-packages";
 
 // Add dynamic export to handle the cookies usage
 export const dynamic = "force-dynamic";
@@ -89,7 +95,17 @@ export default async function SpecialistEngagementDetailPage({
     where: {
       id: engagementId,
     },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      status: true,
+      budget: true,
+      startDate: true,
+      endDate: true,
+      createdAt: true,
+      servicePackage: true,
+      urgency: true,
       specialist: {
         select: {
           id: true,
@@ -99,7 +115,6 @@ export default async function SpecialistEngagementDetailPage({
           imageUrl: true,
           contactEmail: true,
           location: true,
-          hourlyRate: true,
           linkedinProfileUrl: true,
           skills: true,
         },
@@ -116,7 +131,6 @@ export default async function SpecialistEngagementDetailPage({
           phoneNumber: true,
         },
       },
-      deal: true,
     },
   });
 
@@ -167,17 +181,79 @@ export default async function SpecialistEngagementDetailPage({
                 {engagement.description}
               </p>
 
-              {engagement.deal && (
+              {engagement.servicePackage && (
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold mb-3">
-                    Paquete Seleccionado
+                    Servicio Seleccionado
                   </h2>
                   <div className="border rounded-lg p-4">
-                    <h3 className="font-medium">{engagement.deal.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Precio: ${engagement.deal.price} • Duración:{" "}
-                      {engagement.deal.durationDays} días
-                    </p>
+                    <h3 className="font-medium">
+                      {SERVICE_PACKAGE_NAMES[engagement.servicePackage] ||
+                        engagement.servicePackage}
+                    </h3>
+                    {SERVICE_PACKAGES[
+                      engagement.servicePackage as keyof typeof SERVICE_PACKAGES
+                    ] && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-muted-foreground">
+                          Precio: $
+                          {
+                            SERVICE_PACKAGES[
+                              engagement.servicePackage as keyof typeof SERVICE_PACKAGES
+                            ].price
+                          }{" "}
+                          • Duración:{" "}
+                          {
+                            SERVICE_PACKAGES[
+                              engagement.servicePackage as keyof typeof SERVICE_PACKAGES
+                            ].duration
+                          }
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {
+                            SERVICE_PACKAGES[
+                              engagement.servicePackage as keyof typeof SERVICE_PACKAGES
+                            ].description
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {engagement.urgency && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold mb-3">
+                    Nivel de Urgencia
+                  </h2>
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center">
+                      <div
+                        className={`w-3 h-3 rounded-full mr-2 ${
+                          engagement.urgency === "HIGH"
+                            ? "bg-red-500"
+                            : engagement.urgency === "MEDIUM"
+                              ? "bg-yellow-500"
+                              : "bg-green-500"
+                        }`}
+                      ></div>
+                      <span className="font-medium">
+                        {URGENCY_LEVEL_NAMES[engagement.urgency] ||
+                          engagement.urgency}
+                      </span>
+                    </div>
+                    {URGENCY_LEVELS[
+                      engagement.urgency as keyof typeof URGENCY_LEVELS
+                    ] && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {
+                          URGENCY_LEVELS[
+                            engagement.urgency as keyof typeof URGENCY_LEVELS
+                          ].description
+                        }
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

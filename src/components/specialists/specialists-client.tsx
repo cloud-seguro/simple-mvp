@@ -220,9 +220,6 @@ export function SpecialistsClient({
                       {specialist.name}
                     </CardTitle>
                     <CardDescription>
-                      {specialist.hourlyRate &&
-                        `$${specialist.hourlyRate}/hora`}
-                      {specialist.location && specialist.hourlyRate && " • "}
                       {specialist.location && (
                         <span className="inline-block">
                           {specialist.location}

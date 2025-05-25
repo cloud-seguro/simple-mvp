@@ -18,7 +18,7 @@ This directory contains email templates for Supabase authentication and other em
 - `magic-link.html` - Magic link login email
 - `change-email.html` - Email change confirmation
 - `reset-password.html` - Password reset email
-- `reauthentication.html` - Re-authentication email
+- `reauthentication.html` - Re-authentication verification code
 
 ### Notification Templates
 

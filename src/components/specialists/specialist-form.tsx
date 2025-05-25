@@ -56,7 +56,6 @@ export const formSchema = z.object({
   skills: z.array(z.string()).default([]),
   contactEmail: z.string().email("Dirección de correo electrónico inválida"),
   imageUrl: z.string().url("Debe ser una URL válida").nullable().optional(),
-  hourlyRate: z.coerce.number().nonnegative().nullable().optional(),
   linkedinProfileUrl: z
     .string()
     .url("Debe ser una URL válida")
@@ -81,7 +80,6 @@ export function SpecialistForm({
           skills: specialist.skills || [],
           contactEmail: specialist.contactEmail,
           imageUrl: specialist.imageUrl,
-          hourlyRate: specialist.hourlyRate,
           linkedinProfileUrl: specialist.linkedinProfileUrl,
           location: specialist.location,
           active: specialist.active,
@@ -93,7 +91,6 @@ export function SpecialistForm({
           skills: [],
           contactEmail: "",
           imageUrl: null,
-          hourlyRate: null,
           linkedinProfileUrl: null,
           location: null,
           active: true,
@@ -167,64 +164,41 @@ export function SpecialistForm({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="hourlyRate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tarifa por Hora ($)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="150"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="linkedinProfileUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL de Perfil de LinkedIn</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="https://linkedin.com/in/usuario"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="linkedinProfileUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL de Perfil de LinkedIn</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://linkedin.com/in/usuario"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div>
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ubicación</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ciudad de México, México"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ubicación</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Ciudad de México, México"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div>
           <FormLabel>Habilidades</FormLabel>

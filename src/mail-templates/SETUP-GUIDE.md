@@ -83,6 +83,19 @@ Variables disponibles: {{ .ConfirmationURL }}, {{ .SiteURL }}, {{ .Email }}
 3. Pégalo en el editor
 4. Personaliza el **Subject**: `Confirma tu nuevo email en SIMPLE 📧`
 
+#### Reauthentication (Reautenticación)
+
+```
+Archivo: reauthentication.html
+Uso: Cuando un usuario necesita reautenticarse con un código de verificación
+Variables disponibles: {{ .Token }}, {{ .SiteURL }}, {{ .Email }}
+```
+
+1. Selecciona **Reauthentication** en el dropdown
+2. Copia el contenido de `reauthentication.html`
+3. Pégalo en el editor
+4. Personaliza el **Subject**: `Código de verificación para SIMPLE 🔐`
+
 ### 3. Configurar SMTP (Opcional pero Recomendado)
 
 Para una mejor entregabilidad, configura tu propio servidor SMTP:

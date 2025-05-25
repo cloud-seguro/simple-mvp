@@ -92,7 +92,6 @@ export async function POST(req: NextRequest) {
         skills: data.skills || [],
         contactEmail: data.contactEmail,
         imageUrl: data.imageUrl || null,
-        hourlyRate: data.hourlyRate || null,
         linkedinProfileUrl: data.linkedinProfileUrl || null,
         location: data.location || null,
         active: data.active !== undefined ? data.active : true,
