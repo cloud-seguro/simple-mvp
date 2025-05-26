@@ -28,15 +28,25 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get("page") || "1");
     const pageSize = parseInt(searchParams.get("pageSize") || "10");
+    const categoryId = searchParams.get("categoryId");
     const skip = (page - 1) * pageSize;
 
-    // Regular users can only see published posts, using both published flag and status
-    const where = isSuperAdmin
+    // Build where clause
+    const where: {
+      status?: BlogPostStatus;
+      published?: boolean;
+      categoryId?: string;
+    } = isSuperAdmin
       ? {}
       : {
           status: BlogPostStatus.PUBLISHED,
           published: true,
         };
+
+    // Add category filter if provided
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
 
     const [posts, totalCount] = await Promise.all([
       prisma.blogPost.findMany({
@@ -46,6 +56,14 @@ export async function GET(request: NextRequest) {
             select: {
               firstName: true,
               lastName: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              color: true,
             },
           },
         },

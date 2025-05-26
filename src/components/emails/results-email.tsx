@@ -34,75 +34,80 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
   recommendations = [],
   evaluationType,
 }) => {
-  // Calculate percentage for the progress bar
-  const overallPercentage = Math.round((score / maxScore) * 100);
+  // Calculate percentage for the progress bar from actual scores
+  const overallPercentage =
+    maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
 
-  // Get color based on the score percentage and evaluation type
-  const getScoreColor = (percent: number, type: string) => {
-    const score =
-      type === "INITIAL"
-        ? Math.round((percent / 100) * 45) // Initial eval (45 points)
-        : Math.round((percent / 100) * 75); // Advanced eval (75 points)
+  // Get color based on the actual score and evaluation type (not percentage)
+  const getScoreColor = (
+    actualScore: number,
+    maxPossible: number,
+    type: string
+  ) => {
+    const percentage = maxPossible > 0 ? (actualScore / maxPossible) * 100 : 0;
 
     if (type === "INITIAL") {
-      if (score <= 9) return "#FF4136"; // Red
-      if (score <= 19) return "#FF851B"; // Orange
-      if (score <= 29) return "#FFDC00"; // Yellow
-      if (score <= 39) return "#2ECC40"; // Green
+      if (percentage <= 20) return "#FF4136"; // Red
+      if (percentage <= 40) return "#FF851B"; // Orange
+      if (percentage <= 60) return "#FFDC00"; // Yellow
+      if (percentage <= 80) return "#2ECC40"; // Green
       return "#0074D9"; // Blue
     } else {
-      if (score <= 15) return "#FF4136"; // Red
-      if (score <= 34) return "#FF851B"; // Orange
-      if (score <= 51) return "#FFDC00"; // Yellow
-      if (score <= 66) return "#2ECC40"; // Green
+      if (percentage <= 20) return "#FF4136"; // Red
+      if (percentage <= 40) return "#FF851B"; // Orange
+      if (percentage <= 60) return "#FFDC00"; // Yellow
+      if (percentage <= 80) return "#2ECC40"; // Green
       return "#0074D9"; // Blue
     }
   };
 
-  const getScoreBgColor = (percent: number, type: string) => {
-    const score =
-      type === "INITIAL"
-        ? Math.round((percent / 100) * 45) // Initial eval (45 points)
-        : Math.round((percent / 100) * 75); // Advanced eval (75 points)
+  const getScoreBgColor = (
+    actualScore: number,
+    maxPossible: number,
+    type: string
+  ) => {
+    const percentage = maxPossible > 0 ? (actualScore / maxPossible) * 100 : 0;
 
     if (type === "INITIAL") {
-      if (score <= 9) return "#FFEEEE"; // Light Red
-      if (score <= 19) return "#FFF5EE"; // Light Orange
-      if (score <= 29) return "#FFFCEE"; // Light Yellow
-      if (score <= 39) return "#F0FFF0"; // Light Green
+      if (percentage <= 20) return "#FFEEEE"; // Light Red
+      if (percentage <= 40) return "#FFF5EE"; // Light Orange
+      if (percentage <= 60) return "#FFFCEE"; // Light Yellow
+      if (percentage <= 80) return "#F0FFF0"; // Light Green
       return "#F0F8FF"; // Light Blue
     } else {
-      if (score <= 15) return "#FFEEEE"; // Light Red
-      if (score <= 34) return "#FFF5EE"; // Light Orange
-      if (score <= 51) return "#FFFCEE"; // Light Yellow
-      if (score <= 66) return "#F0FFF0"; // Light Green
+      if (percentage <= 20) return "#FFEEEE"; // Light Red
+      if (percentage <= 40) return "#FFF5EE"; // Light Orange
+      if (percentage <= 60) return "#FFFCEE"; // Light Yellow
+      if (percentage <= 80) return "#F0FFF0"; // Light Green
       return "#F0F8FF"; // Light Blue
     }
   };
 
-  const getScoreEmoji = (percent: number, type: string) => {
-    const score =
-      type === "INITIAL"
-        ? Math.round((percent / 100) * 45) // Initial eval (45 points)
-        : Math.round((percent / 100) * 75); // Advanced eval (75 points)
+  const getScoreEmoji = (
+    actualScore: number,
+    maxPossible: number,
+    type: string
+  ) => {
+    const percentage = maxPossible > 0 ? (actualScore / maxPossible) * 100 : 0;
 
     if (type === "INITIAL") {
-      if (score <= 9) return "🔴";
-      if (score <= 19) return "🟠";
-      if (score <= 29) return "🟡";
-      if (score <= 39) return "🟢";
+      if (percentage <= 20) return "🔴";
+      if (percentage <= 40) return "🟠";
+      if (percentage <= 60) return "🟡";
+      if (percentage <= 80) return "🟢";
       return "🔵";
     } else {
-      if (score <= 15) return "🔴";
-      if (score <= 34) return "🟠";
-      if (score <= 51) return "🟡";
-      if (score <= 66) return "🟢";
+      if (percentage <= 20) return "🔴";
+      if (percentage <= 40) return "🟠";
+      if (percentage <= 60) return "🟡";
+      if (percentage <= 80) return "🟢";
       return "🔵";
     }
   };
 
   const scoreColor = getScoreColor(
-    overallPercentage,
+    score,
+    maxScore,
     evaluationType || "ADVANCED"
   );
 
@@ -121,7 +126,7 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
 
   // Calculate scores by category
   const categoryMaturityLevels = categories.map(({ name, score, maxScore }) => {
-    const percentage = Math.round((score / maxScore) * 100);
+    const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
     return {
       category: name,
       total: score,
@@ -379,11 +384,13 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                       {categoryMaturityLevels.map(
                         ({ category, total, max, percentage }) => {
                           const categoryColor = getScoreColor(
-                            percentage,
+                            total,
+                            max,
                             evaluationType || "ADVANCED"
                           );
                           const categoryEmoji = getScoreEmoji(
-                            percentage,
+                            total,
+                            max,
                             evaluationType || "ADVANCED"
                           );
                           const categoryRecommendations =
@@ -495,11 +502,13 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                                       (rec.score / rec.maxScore) * 100
                                     );
                                     const questionColor = getScoreColor(
-                                      questionPercentage,
+                                      rec.score,
+                                      rec.maxScore,
                                       evaluationType || "ADVANCED"
                                     );
                                     const questionBgColor = getScoreBgColor(
-                                      questionPercentage,
+                                      rec.score,
+                                      rec.maxScore,
                                       evaluationType || "ADVANCED"
                                     );
 
@@ -677,131 +686,347 @@ export const ResultsEmail: React.FC<Readonly<ResultsEmailProps>> = ({
                   </tr>
                 </table>
 
-                {/* Call to Action */}
-                <table
-                  cellPadding="0"
-                  cellSpacing="0"
-                  border={0}
-                  width="100%"
-                  style={{
-                    width: "100%",
-                    backgroundColor:
-                      overallPercentage <= 20
-                        ? "#FF4136"
-                        : overallPercentage <= 40
-                          ? "#FF851B"
-                          : overallPercentage <= 60
-                            ? "#FFDC00"
-                            : overallPercentage <= 80
-                              ? "#2ECC40"
-                              : "#0074D9",
-                    color: "white",
-                    borderRadius: "12px",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <tr>
-                    <td style={{ padding: "20px" }}>
-                      <h3
-                        style={{
-                          fontSize: "18px",
-                          fontWeight: "bold",
-                          margin: "0 0 10px 0",
-                        }}
-                      >
-                        ¡Mejora tu nivel de ciberseguridad ahora!
-                      </h3>
-                      <p style={{ margin: "0 0 15px 0" }}>
-                        Nuestros especialistas pueden ayudarte a implementar las
-                        medidas necesarias para proteger tu organización de
-                        amenazas cibernéticas.
-                      </p>
-                      <table
-                        cellPadding="0"
-                        cellSpacing="0"
-                        border={0}
-                        width="100%"
-                        style={{ marginBottom: "10px" }}
-                      >
-                        <tr>
-                          <td>
-                            <table
-                              cellPadding="0"
-                              cellSpacing="0"
-                              border={0}
-                              style={{
-                                display: "inline-block",
-                                marginRight: "10px",
-                                marginBottom: "10px",
-                                backgroundColor: "rgba(255,255,255,0.2)",
-                                borderRadius: "20px",
-                              }}
-                            >
-                              <tr>
-                                <td
-                                  style={{
-                                    padding: "5px 12px",
-                                    fontSize: "13px",
-                                    fontWeight: "500",
-                                  }}
-                                >
-                                  Asesoría personalizada
-                                </td>
-                              </tr>
-                            </table>
-                            <table
-                              cellPadding="0"
-                              cellSpacing="0"
-                              border={0}
-                              style={{
-                                display: "inline-block",
-                                marginRight: "10px",
-                                marginBottom: "10px",
-                                backgroundColor: "rgba(255,255,255,0.2)",
-                                borderRadius: "20px",
-                              }}
-                            >
-                              <tr>
-                                <td
-                                  style={{
-                                    padding: "5px 12px",
-                                    fontSize: "13px",
-                                    fontWeight: "500",
-                                  }}
-                                >
-                                  Implementación de controles
-                                </td>
-                              </tr>
-                            </table>
-                            <table
-                              cellPadding="0"
-                              cellSpacing="0"
-                              border={0}
-                              style={{
-                                display: "inline-block",
-                                marginBottom: "10px",
-                                backgroundColor: "rgba(255,255,255,0.2)",
-                                borderRadius: "20px",
-                              }}
-                            >
-                              <tr>
-                                <td
-                                  style={{
-                                    padding: "5px 12px",
-                                    fontSize: "13px",
-                                    fontWeight: "500",
-                                  }}
-                                >
-                                  Análisis de vulnerabilidades
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
+                {/* Call to Action - Different for Initial vs Advanced evaluations */}
+                {evaluationType === "INITIAL" ? (
+                  // Subscription CTA for Initial Evaluations
+                  <table
+                    cellPadding="0"
+                    cellSpacing="0"
+                    border={0}
+                    width="100%"
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#FFD700",
+                      color: "#000000",
+                      borderRadius: "12px",
+                      marginBottom: "20px",
+                      border: "2px solid #FFA500",
+                    }}
+                  >
+                    <tr>
+                      <td style={{ padding: "25px" }}>
+                        <h3
+                          style={{
+                            fontSize: "20px",
+                            fontWeight: "bold",
+                            margin: "0 0 15px 0",
+                            textAlign: "center",
+                          }}
+                        >
+                          🚀 ¡Desbloquea el análisis completo de tu
+                          ciberseguridad!
+                        </h3>
+                        <p
+                          style={{
+                            margin: "0 0 20px 0",
+                            textAlign: "center",
+                            fontSize: "16px",
+                          }}
+                        >
+                          Has completado la evaluación básica. Para obtener un
+                          diagnóstico profesional y acceso a herramientas
+                          avanzadas, suscríbete al <strong>Plan Basic</strong>.
+                        </p>
+
+                        {/* Features Grid */}
+                        <table
+                          cellPadding="0"
+                          cellSpacing="0"
+                          border={0}
+                          width="100%"
+                          style={{ marginBottom: "20px" }}
+                        >
+                          <tr>
+                            <td width="50%" style={{ padding: "5px" }}>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{
+                                  backgroundColor: "rgba(0,0,0,0.1)",
+                                  borderRadius: "8px",
+                                  width: "100%",
+                                }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      fontSize: "14px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    ✅ Evaluación especializada (25 preguntas)
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                            <td width="50%" style={{ padding: "5px" }}>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{
+                                  backgroundColor: "rgba(0,0,0,0.1)",
+                                  borderRadius: "8px",
+                                  width: "100%",
+                                }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      fontSize: "14px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    ✅ Dashboard interactivo con comparativas
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td width="50%" style={{ padding: "5px" }}>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{
+                                  backgroundColor: "rgba(0,0,0,0.1)",
+                                  borderRadius: "8px",
+                                  width: "100%",
+                                }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      fontSize: "14px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    ✅ Simple Breach (10 consultas/mes)
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                            <td width="50%" style={{ padding: "5px" }}>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{
+                                  backgroundColor: "rgba(0,0,0,0.1)",
+                                  borderRadius: "8px",
+                                  width: "100%",
+                                }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "10px",
+                                      fontSize: "14px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    ✅ Acceso a Simple Contrata
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+
+                        {/* Pricing and CTA */}
+                        <table
+                          cellPadding="0"
+                          cellSpacing="0"
+                          border={0}
+                          width="100%"
+                          style={{ textAlign: "center" }}
+                        >
+                          <tr>
+                            <td style={{ paddingBottom: "15px" }}>
+                              <div
+                                style={{
+                                  fontSize: "24px",
+                                  fontWeight: "bold",
+                                  marginBottom: "5px",
+                                }}
+                              >
+                                Solo $30 USD/mes
+                              </div>
+                              <div style={{ fontSize: "14px", opacity: "0.8" }}>
+                                Cancela cuando quieras • Sin compromisos
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{ margin: "0 auto" }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      backgroundColor: "#000000",
+                                      color: "#ffffff",
+                                      padding: "15px 30px",
+                                      borderRadius: "25px",
+                                      fontSize: "16px",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    <a
+                                      href={`${baseUrl}/pricing`}
+                                      style={{
+                                        color: "#ffffff",
+                                        textDecoration: "none",
+                                        display: "inline-block",
+                                      }}
+                                    >
+                                      🚀 Suscríbete al Plan Basic
+                                    </a>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                ) : (
+                  // Original CTA for Advanced Evaluations
+                  <table
+                    cellPadding="0"
+                    cellSpacing="0"
+                    border={0}
+                    width="100%"
+                    style={{
+                      width: "100%",
+                      backgroundColor:
+                        overallPercentage <= 20
+                          ? "#FF4136"
+                          : overallPercentage <= 40
+                            ? "#FF851B"
+                            : overallPercentage <= 60
+                              ? "#FFDC00"
+                              : overallPercentage <= 80
+                                ? "#2ECC40"
+                                : "#0074D9",
+                      color: "white",
+                      borderRadius: "12px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <tr>
+                      <td style={{ padding: "20px" }}>
+                        <h3
+                          style={{
+                            fontSize: "18px",
+                            fontWeight: "bold",
+                            margin: "0 0 10px 0",
+                          }}
+                        >
+                          ¡Mejora tu nivel de ciberseguridad ahora!
+                        </h3>
+                        <p style={{ margin: "0 0 15px 0" }}>
+                          Nuestros especialistas pueden ayudarte a implementar
+                          las medidas necesarias para proteger tu organización
+                          de amenazas cibernéticas.
+                        </p>
+                        <table
+                          cellPadding="0"
+                          cellSpacing="0"
+                          border={0}
+                          width="100%"
+                          style={{ marginBottom: "10px" }}
+                        >
+                          <tr>
+                            <td>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{
+                                  display: "inline-block",
+                                  marginRight: "10px",
+                                  marginBottom: "10px",
+                                  backgroundColor: "rgba(255,255,255,0.2)",
+                                  borderRadius: "20px",
+                                }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "5px 12px",
+                                      fontSize: "13px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    Asesoría personalizada
+                                  </td>
+                                </tr>
+                              </table>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{
+                                  display: "inline-block",
+                                  marginRight: "10px",
+                                  marginBottom: "10px",
+                                  backgroundColor: "rgba(255,255,255,0.2)",
+                                  borderRadius: "20px",
+                                }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "5px 12px",
+                                      fontSize: "13px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    Implementación de controles
+                                  </td>
+                                </tr>
+                              </table>
+                              <table
+                                cellPadding="0"
+                                cellSpacing="0"
+                                border={0}
+                                style={{
+                                  display: "inline-block",
+                                  marginBottom: "10px",
+                                  backgroundColor: "rgba(255,255,255,0.2)",
+                                  borderRadius: "20px",
+                                }}
+                              >
+                                <tr>
+                                  <td
+                                    style={{
+                                      padding: "5px 12px",
+                                      fontSize: "13px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    Análisis de vulnerabilidades
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                )}
 
                 {/* Link to full results */}
                 <table

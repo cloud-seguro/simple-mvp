@@ -5,6 +5,7 @@ import { getEvaluationById } from "@/lib/evaluation-utils";
 import { getQuizData } from "@/lib/quiz-data";
 import { initialEvaluationData } from "@/data/initial-evaluation";
 import { advancedEvaluationData } from "@/data/advanced-evaluation";
+import { getMaturityLevel } from "@/lib/maturity-utils";
 import React from "react";
 
 // Initialize Resend with the API key from environment variables
@@ -176,7 +177,26 @@ export async function POST(request: Request) {
       }
     }
 
-    // Calculate category scores
+    // Calculate the actual total score and max score exactly like the results page
+    const totalScore = Object.values(finalAnswers).reduce(
+      (sum, value) => sum + value,
+      0
+    );
+    const calculatedMaxScore = quizData.questions.reduce(
+      (sum, q) => sum + Math.max(...q.options.map((o) => o.value)),
+      0
+    );
+
+    // Ensure score doesn't exceed max possible score for initial evaluations
+    const cappedScore =
+      effectiveEvaluationType === "INITIAL" && totalScore > calculatedMaxScore
+        ? calculatedMaxScore
+        : totalScore;
+
+    // Use the same maturity level calculation as the results page
+    const maturityInfo = getMaturityLevel(quizData.id, cappedScore);
+
+    // Calculate category scores exactly like the results page
     const categoryScores = Object.entries(
       quizData.questions.reduce(
         (acc, q) => {
@@ -188,13 +208,15 @@ export async function POST(request: Request) {
         },
         {} as Record<string, { score: number; maxScore: number }>
       )
-    ).map(([name, { score, maxScore }]) => ({
-      name,
-      score,
-      maxScore,
-    }));
+    ).map(([name, { score, maxScore }]) => {
+      // For initial evaluations, ensure category scores don't exceed their maximum
+      if (effectiveEvaluationType === "INITIAL" && score > maxScore) {
+        score = maxScore;
+      }
+      return { name, score, maxScore };
+    });
 
-    // Generate recommendations for each question
+    // Generate recommendations for each question exactly like the results page
     const recommendations = quizData.questions.map((question) => {
       const category = question.category || "General";
       const questionScore = finalAnswers[question.id] || 0;
@@ -273,53 +295,8 @@ export async function POST(request: Request) {
       baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
     }
 
-    // Helper function to get maturity level for results page
-    function getMaturityLevelBasedOnScore(
-      score: number,
-      evaluationType: string
-    ) {
-      // Use appropriate ranges based on evaluation type
-      if (evaluationType === "INITIAL") {
-        // Initial evaluation (max 45 points)
-        if (score <= 9)
-          return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-        if (score <= 19)
-          return {
-            level: "Nivel 2",
-            description: "Nivel Repetible pero intuitivo",
-          };
-        if (score <= 29)
-          return { level: "Nivel 3", description: "Nivel Definido" };
-        if (score <= 39)
-          return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
-        return { level: "Nivel 5", description: "Nivel Optimizado" };
-      } else {
-        // Advanced evaluation (max 100 points)
-        if (score <= 20)
-          return { level: "Nivel 1", description: "Nivel Inicial / Ad-hoc" };
-        if (score <= 45)
-          return {
-            level: "Nivel 2",
-            description: "Nivel Repetible pero intuitivo",
-          };
-        if (score <= 70)
-          return { level: "Nivel 3", description: "Nivel Definido" };
-        if (score <= 90)
-          return { level: "Nivel 4", description: "Nivel Gestionado y Medido" };
-        return { level: "Nivel 5", description: "Nivel Optimizado" };
-      }
-    }
-
-    const maturityInfo = getMaturityLevelBasedOnScore(
-      evaluation.score || 0,
-      effectiveEvaluationType
-    );
-
-    // Calculate maxScore based on evaluation type
-    const maxScore = effectiveEvaluationType === "INITIAL" ? 45 : 100;
-
     try {
-      // Send the email with the actual results
+      // Send the email with the calculated results (matching results page exactly)
       console.log(`Sending email to ${email} for evaluation ${evaluationId}`);
       const { data, error } = await resend.emails.send({
         from: "Evaluación de Ciberseguridad <info@ciberseguridadsimple.com>",
@@ -329,8 +306,8 @@ export async function POST(request: Request) {
           userInfo,
           evaluationId,
           baseUrl,
-          score: evaluation.score || 0,
-          maxScore,
+          score: cappedScore, // Use the capped score calculated like results page
+          maxScore: calculatedMaxScore, // Use the actual calculated max score
           maturityLevel: maturityInfo.level,
           maturityDescription: maturityInfo.description,
           categories: categoryScores,

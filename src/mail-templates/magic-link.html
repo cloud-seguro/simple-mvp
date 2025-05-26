@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Acceso rápido a tu cuenta - SIMPLE</title>
+    <!--[if mso]>
+      <noscript>
+        <xml>
+          <o:OfficeDocumentSettings>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+          </o:OfficeDocumentSettings>
+        </xml>
+      </noscript>
+    <![endif]-->
+    <style>
+      /* Reset styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Base styles */
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+
+      /* Container styles */
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Header styles */
+      .email-header {
+        background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        padding: 32px 24px;
+        text-align: center;
+      }
+
+      .logo-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        background-color: #facc15;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 24px;
+        color: #000000;
+      }
+
+      .logo-text {
+        font-size: 28px;
+        font-weight: bold;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+      }
+
+      .tagline {
+        color: #facc15;
+        font-size: 14px;
+        font-weight: 500;
+        margin-top: 8px;
+      }
+
+      /* Content styles */
+      .email-content {
+        padding: 40px 32px;
+      }
+
+      .content-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #000000;
+        margin-bottom: 16px;
+        line-height: 1.3;
+      }
+
+      .content-text {
+        font-size: 16px;
+        color: #333333;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      /* Button styles */
+      .button-container {
+        text-align: center;
+        margin: 32px 0;
+      }
+
+      .primary-button {
+        display: inline-block;
+        background-color: #000000;
+        color: #ffffff !important;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        border: 2px solid #000000;
+      }
+
+      .primary-button:hover {
+        background-color: #333333;
+        border-color: #333333;
+      }
+
+      /* Info box styles */
+      .info-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #facc15;
+        padding: 20px;
+        margin: 24px 0;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .info-box-title {
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 8px;
+      }
+
+      .info-box-text {
+        color: #666666;
+        font-size: 14px;
+      }
+
+      /* Warning box styles */
+      .warning-box {
+        background-color: #fef3cd;
+        border-left: 4px solid #f59e0b;
+        padding: 20px;
+        margin: 24px 0;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .warning-box-title {
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 8px;
+      }
+
+      .warning-box-text {
+        color: #92400e;
+        font-size: 14px;
+      }
+
+      /* Footer styles */
+      .email-footer {
+        background-color: #f8f9fa;
+        padding: 32px 24px;
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .footer-text {
+        color: #666666;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+
+      .footer-links {
+        margin-bottom: 16px;
+      }
+
+      .footer-link {
+        color: #000000;
+        text-decoration: none;
+        font-weight: 500;
+        margin: 0 12px;
+        font-size: 14px;
+      }
+
+      .footer-link:hover {
+        color: #facc15;
+      }
+
+      .footer-copyright {
+        color: #999999;
+        font-size: 12px;
+      }
+
+      /* Responsive styles */
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .email-header {
+          padding: 24px 16px;
+        }
+
+        .email-content {
+          padding: 24px 16px;
+        }
+
+        .email-footer {
+          padding: 24px 16px;
+        }
+
+        .content-title {
+          font-size: 20px;
+        }
+
+        .primary-button {
+          display: block;
+          width: 100%;
+          text-align: center;
+          margin-bottom: 12px;
+        }
+
+        .footer-link {
+          display: block;
+          margin: 8px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div style="background-color: #f8f9fa; padding: 20px 0">
+      <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+          <div class="logo-container">
+            <div class="logo-icon">S</div>
+            <div class="logo-text">SIMPLE</div>
+          </div>
+          <div class="tagline">Ciberseguridad Simple</div>
+        </div>
+
+        <!-- Content -->
+        <div class="email-content">
+          <h1 class="content-title">Acceso rápido a tu cuenta 🔐</h1>
+
+          <p class="content-text">
+            Hola,<br /><br />
+            Hemos recibido una solicitud para acceder a tu cuenta de SIMPLE. Haz
+            clic en el botón de abajo para iniciar sesión de forma segura:
+          </p>
+
+          <div class="button-container">
+            <a href="{{ .ConfirmationURL }}" class="primary-button"
+              >Acceder a mi cuenta</a
+            >
+          </div>
+
+          <div class="info-box">
+            <div class="info-box-title">🚀 Acceso sin contraseña</div>
+            <div class="info-box-text">
+              Este enlace mágico te permite acceder a tu cuenta de forma segura
+              sin necesidad de recordar tu contraseña. Es una forma más rápida y
+              segura de iniciar sesión.
+            </div>
+          </div>
+
+          <div class="warning-box">
+            <div class="warning-box-title">⚠️ Importante - Seguridad</div>
+            <div class="warning-box-text">
+              • Este enlace es válido por 60 minutos<br />
+              • Solo funciona una vez<br />
+              • Si no solicitaste este acceso, ignora este email<br />
+              • Nunca compartas este enlace con nadie
+            </div>
+          </div>
+
+          <p class="content-text">Una vez que accedas, podrás:</p>
+
+          <ul style="margin-left: 20px; margin-bottom: 24px; color: #333333">
+            <li style="margin-bottom: 8px">
+              Ver tus evaluaciones de ciberseguridad
+            </li>
+            <li style="margin-bottom: 8px">
+              Acceder a recomendaciones personalizadas
+            </li>
+            <li style="margin-bottom: 8px">
+              Gestionar la configuración de tu cuenta
+            </li>
+            <li style="margin-bottom: 8px">Contactar con especialistas</li>
+          </ul>
+
+          <p class="content-text">
+            Si tienes problemas para acceder o no solicitaste este enlace,
+            contáctanos inmediatamente respondiendo a este email.
+          </p>
+
+          <p class="content-text" style="margin-bottom: 0">
+            <strong>El equipo de SIMPLE</strong><br />
+            <em>Tu seguridad es nuestra prioridad.</em>
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="email-footer">
+          <p class="footer-text">
+            Este email fue enviado por <strong>SIMPLE</strong> - Ciberseguridad
+            Simple
+          </p>
+
+          <div class="footer-links">
+            <a href="{{ .SiteURL }}/contacto" class="footer-link">Contacto</a>
+            <a href="{{ .SiteURL }}/terminos" class="footer-link">Términos</a>
+          </div>
+
+          <p class="footer-copyright">
+            © 2025 SIMPLE. Todos los derechos reservados.<br />
+            Bogotá, Colombia
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

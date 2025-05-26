@@ -38,6 +38,12 @@ interface BlogPost {
     firstName: string | null;
     lastName: string | null;
   };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string;
+  } | null;
 }
 
 interface BlogListResponse {
@@ -132,6 +138,9 @@ export function BlogManagement() {
                 <div className="h-5 w-16 bg-gray-200 animate-pulse rounded"></div>
               </TableHead>
               <TableHead>
+                <div className="h-5 w-20 bg-gray-200 animate-pulse rounded"></div>
+              </TableHead>
+              <TableHead>
                 <div className="h-5 w-16 bg-gray-200 animate-pulse rounded"></div>
               </TableHead>
               <TableHead>
@@ -147,6 +156,9 @@ export function BlogManagement() {
               <TableRow key={i}>
                 <TableCell>
                   <div className="h-6 w-72 bg-gray-200 animate-pulse rounded"></div>
+                </TableCell>
+                <TableCell>
+                  <div className="h-5 w-24 bg-gray-200 animate-pulse rounded"></div>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="opacity-50">
@@ -214,6 +226,7 @@ export function BlogManagement() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Título</TableHead>
+                  <TableHead>Categoría</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Última actualización</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
@@ -223,6 +236,23 @@ export function BlogManagement() {
                 {posts.map((post) => (
                   <TableRow key={post.id}>
                     <TableCell className="font-medium">{post.title}</TableCell>
+                    <TableCell>
+                      {post.category ? (
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full border border-gray-300"
+                            style={{
+                              backgroundColor: post.category.color || "#6B7280",
+                            }}
+                          />
+                          <span className="text-sm">{post.category.name}</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">
+                          Sin categoría
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {post.published ? (
                         <Badge>Publicado</Badge>

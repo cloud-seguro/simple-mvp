@@ -8,6 +8,10 @@ import MessageThread from "@/components/contrata/message-thread";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Image from "next/image";
+import {
+  SERVICE_PACKAGE_NAMES,
+  URGENCY_LEVEL_NAMES,
+} from "@/lib/constants/service-packages";
 
 export const metadata = {
   title: "Detalles del Contrato | CONTRATA | SIMPLE",
@@ -113,12 +117,12 @@ export default async function EngagementDetailPage({
     },
     include: {
       specialist: true,
-      deal: true,
       messages: {
         orderBy: {
           sentAt: "asc",
         },
       },
+      attachments: true,
     },
   });
 
@@ -199,17 +203,72 @@ export default async function EngagementDetailPage({
                 {engagement.description}
               </p>
 
-              {engagement.deal && (
+              {engagement.servicePackage && (
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold mb-3">
-                    Paquete Seleccionado
+                    Servicio Contratado
                   </h2>
                   <div className="border rounded-lg p-4">
-                    <h3 className="font-medium">{engagement.deal.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Precio: ${engagement.deal.price} • Duración:{" "}
-                      {engagement.deal.durationDays} días
-                    </p>
+                    <h3 className="font-medium">
+                      {SERVICE_PACKAGE_NAMES[engagement.servicePackage] ||
+                        engagement.servicePackage}
+                    </h3>
+                    {engagement.urgency && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Urgencia:{" "}
+                        {URGENCY_LEVEL_NAMES[engagement.urgency] ||
+                          engagement.urgency}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {engagement.attachments && engagement.attachments.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold mb-3">
+                    Archivos Adjuntos
+                  </h2>
+                  <div className="space-y-2">
+                    {engagement.attachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div className="flex items-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 mr-2 text-muted-foreground"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                            />
+                          </svg>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {attachment.fileName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {Math.round(attachment.fileSize / 1024)} KB
+                            </p>
+                          </div>
+                        </div>
+                        <a
+                          href={attachment.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition"
+                        >
+                          Descargar
+                        </a>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

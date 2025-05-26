@@ -103,7 +103,6 @@ export async function PATCH(
         contactEmail:
           data.contactEmail !== undefined ? data.contactEmail : undefined,
         imageUrl: data.imageUrl !== undefined ? data.imageUrl : undefined,
-        hourlyRate: data.hourlyRate !== undefined ? data.hourlyRate : undefined,
         linkedinProfileUrl:
           data.linkedinProfileUrl !== undefined
             ? data.linkedinProfileUrl

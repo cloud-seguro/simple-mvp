@@ -13,7 +13,9 @@ import {
   AlertCircle,
   CheckCircle2,
   XCircle,
+  DollarSign,
 } from "lucide-react";
+import { STANDARD_PRICING } from "@/lib/constants/service-packages";
 
 export const dynamic = "force-dynamic";
 
@@ -198,6 +200,35 @@ export default async function SpecialistsPage() {
               );
             })}
           </div>
+        </div>
+
+        {/* Pricing Overview Section */}
+        <div className="bg-white rounded-lg shadow-sm p-4 border md:col-span-2">
+          <div className="flex items-center mb-4">
+            <DollarSign className="w-5 h-5 mr-2 text-green-600" />
+            <h2 className="text-lg font-medium">
+              Precios Estándar de Servicios
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {Object.entries(STANDARD_PRICING).map(([key, service]) => (
+              <div
+                key={key}
+                className="flex justify-between items-center p-2 bg-gray-50 rounded-md"
+              >
+                <div>
+                  <p className="text-sm font-medium">{service.description}</p>
+                  <p className="text-xs text-gray-500">{service.duration}</p>
+                </div>
+                <span className="text-sm font-bold text-green-600">
+                  ${service.price}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            Precios uniformes aplicados a todos los especialistas
+          </p>
         </div>
       </div>
 

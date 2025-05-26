@@ -26,10 +26,11 @@ type Post = {
   description?: string;
   featuredImage?: string;
   status: BlogPostStatus;
+  categoryId?: string;
 };
 
 export default async function BlogPostPage({ params }: any) {
-  const paramValues = params as PostParams;
+  const paramValues = (await params) as PostParams;
   const supabase = createServerComponentClient({ cookies });
   const {
     data: { session },
@@ -71,6 +72,7 @@ export default async function BlogPostPage({ params }: any) {
       description: dbPost.description || undefined,
       featuredImage: dbPost.featuredImage || undefined,
       status: dbPost.status,
+      categoryId: dbPost.categoryId || undefined,
     };
   }
 

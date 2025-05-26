@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // This endpoint requires authentication
     const supabase = createRouteHandlerClient({ cookies });
@@ -113,10 +113,20 @@ export async function GET() {
       );
     }
 
+    // Get sorting parameter from query string
+    const { searchParams } = new URL(request.url);
+    const sortOrder = searchParams.get("sortOrder") || "desc"; // default to newest first
+
+    // Validate sortOrder parameter
+    const validSortOrders = ["asc", "desc"];
+    const finalSortOrder = validSortOrders.includes(sortOrder)
+      ? sortOrder
+      : "desc";
+
     // Get the user's evaluations using Prisma
     const evaluations = await prisma.evaluation.findMany({
       where: { profileId: userProfile.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: finalSortOrder as "asc" | "desc" },
     });
 
     return NextResponse.json({ evaluations });

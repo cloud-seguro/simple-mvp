@@ -29,6 +29,14 @@ export async function GET(
             lastName: true,
           },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
       },
     });
 
@@ -108,8 +116,26 @@ export async function PUT(
       );
     }
 
+    // Validate category if provided
+    if (body.categoryId && body.categoryId !== "none") {
+      const categoryExists = await prisma.blogCategory.findUnique({
+        where: { id: body.categoryId },
+        select: { id: true },
+      });
+
+      if (!categoryExists) {
+        return NextResponse.json(
+          { error: "Invalid category selected" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Generate slug from title if not provided
     const slug = body.slug || generateSlug(body.title);
+
+    // Convert "none" to null for categoryId
+    const categoryId = body.categoryId === "none" ? null : body.categoryId;
 
     // Update post
     const updatedPost = await prisma.blogPost.update({
@@ -125,6 +151,23 @@ export async function PUT(
         featuredImage: body.featuredImage,
         slug,
         tags: body.tags || [],
+        categoryId: categoryId,
+      },
+      include: {
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
       },
     });
 

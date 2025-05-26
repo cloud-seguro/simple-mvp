@@ -1,5 +1,8 @@
 import { Metadata } from "next";
 import { BlogManagement } from "@/components/dashboard/blog/blog-management";
+import { CategoryManagement } from "@/components/dashboard/blog/category-management";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, Tag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +23,26 @@ export default async function BlogManagementPage() {
         </div>
       </div>
 
-      <BlogManagement />
+      <Tabs defaultValue="posts" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="posts" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Artículos
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="flex items-center gap-2">
+            <Tag className="h-4 w-4" />
+            Categorías
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="posts" className="space-y-6">
+          <BlogManagement />
+        </TabsContent>
+
+        <TabsContent value="categories" className="space-y-6">
+          <CategoryManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

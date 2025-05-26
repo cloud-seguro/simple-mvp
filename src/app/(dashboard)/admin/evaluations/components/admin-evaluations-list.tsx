@@ -73,12 +73,8 @@ export function AdminEvaluationsList({
   const normalizeScore = (evaluation: EvaluationWithProfile): number => {
     if (evaluation.score === null) return 0;
 
-    // For initial evaluations, convert from out of 45 to percentage
-    if (evaluation.type === "INITIAL") {
-      return Math.round((evaluation.score / 45) * 100);
-    }
-
-    // Advanced evaluations are already out of 100
+    // Both initial and advanced evaluations already store percentage scores (0-100)
+    // calculated by calculateSecurityScore function, so just return the rounded score
     return Math.round(evaluation.score);
   };
 
@@ -398,7 +394,6 @@ export function AdminEvaluationsList({
           columns={columns}
           searchable={true}
           searchField="title"
-
           defaultSort={{ field: "createdAt", direction: "desc" }}
           rowSelection={false}
           pageSize={15}

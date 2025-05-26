@@ -7,6 +7,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { format } from "date-fns";
 import { ArrowLeft } from "lucide-react";
+import {
+  SERVICE_PACKAGE_NAMES,
+  URGENCY_LEVEL_NAMES,
+} from "@/lib/constants/service-packages";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +71,8 @@ export default async function SpecialistsEngagementsPage() {
       budget: true,
       startDate: true,
       createdAt: true,
+      servicePackage: true,
+      urgency: true,
       profile: {
         select: {
           id: true,
@@ -82,13 +88,6 @@ export default async function SpecialistsEngagementsPage() {
           name: true,
           imageUrl: true,
           expertiseAreas: true,
-        },
-      },
-      deal: {
-        select: {
-          id: true,
-          title: true,
-          price: true,
         },
       },
     },
@@ -213,6 +212,21 @@ export default async function SpecialistsEngagementsPage() {
                                 Cliente: {engagement.profile.firstName}{" "}
                                 {engagement.profile.lastName}
                               </p>
+                              {engagement.servicePackage && (
+                                <p className="text-sm text-blue-600 font-medium">
+                                  Servicio:{" "}
+                                  {SERVICE_PACKAGE_NAMES[
+                                    engagement.servicePackage
+                                  ] || engagement.servicePackage}
+                                </p>
+                              )}
+                              {engagement.urgency && (
+                                <p className="text-sm text-orange-600">
+                                  Urgencia:{" "}
+                                  {URGENCY_LEVEL_NAMES[engagement.urgency] ||
+                                    engagement.urgency}
+                                </p>
+                              )}
                             </div>
                           </div>
                           <div className="space-y-1 md:text-right">

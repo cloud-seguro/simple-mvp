@@ -1,9 +1,7 @@
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { prisma } from "@/lib/prisma";
-import { EvaluationsList } from "./components/evaluations-list";
-import { CompareEvaluationsButton } from "./components/compare-evaluations-button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EvaluationsClient } from "./components/evaluations-client";
 
 export const dynamic = "force-dynamic";
 
@@ -51,38 +49,21 @@ export default async function EvaluationsPage() {
     );
   }
 
-  // Get the user's evaluations
+  // Get the user's evaluations with default descending order
   const evaluations = await prisma.evaluation.findMany({
     where: { profileId: profile.id },
     orderBy: { createdAt: "desc" },
   });
 
-  // Split evaluations by type
-  const initialEvaluations = evaluations.filter((e) => e.type === "INITIAL");
-  const advancedEvaluations = evaluations.filter((e) => e.type === "ADVANCED");
-
   return (
     <div className="container py-8">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center mb-4">
-          <CompareEvaluationsButton evaluations={evaluations} />
-        </div>
-
-        <Tabs defaultValue="initial" className="w-full">
-          <TabsList className="grid grid-cols-2 w-[400px] mb-6">
-            <TabsTrigger value="initial">Evaluaciones Iniciales</TabsTrigger>
-            <TabsTrigger value="advanced">Evaluaciones Avanzadas</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="initial">
-            <EvaluationsList evaluations={initialEvaluations} />
-          </TabsContent>
-
-          <TabsContent value="advanced">
-            <EvaluationsList evaluations={advancedEvaluations} />
-          </TabsContent>
-        </Tabs>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Historial de Evaluaciones</h1>
+        <p className="text-muted-foreground mt-2">
+          Gestiona y compara tus evaluaciones de ciberseguridad
+        </p>
       </div>
+      <EvaluationsClient evaluations={evaluations} />
     </div>
   );
 }

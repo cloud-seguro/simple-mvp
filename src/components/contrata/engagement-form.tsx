@@ -25,9 +25,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { secureSupabaseClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { X, Upload, File, Paperclip } from "lucide-react";
+import {
+  X,
+  Upload,
+  File,
+  Paperclip,
+  Clock,
+  DollarSign,
+  CheckCircle2,
+} from "lucide-react";
+import {
+  SERVICE_PACKAGES,
+  URGENCY_LEVELS,
+} from "@/lib/constants/service-packages";
 
 // Types for the component props
 type SpecialistInfo = {
@@ -35,7 +55,7 @@ type SpecialistInfo = {
   name: string;
   expertiseAreas: ExpertiseArea[];
   contactEmail: string;
-  deals: {
+  deals?: {
     id: string;
     title: string;
     description: string;
@@ -43,14 +63,6 @@ type SpecialistInfo = {
     durationDays: number;
   }[];
 };
-
-type DealInfo = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  durationDays: number;
-} | null;
 
 // Define the form schema
 const engagementFormSchema = z.object({
@@ -81,7 +93,8 @@ const engagementFormSchema = z.object({
   timeframe: z.string().min(1, {
     message: "Por favor selecciona un plazo.",
   }),
-  dealId: z.string().optional(),
+  servicePackage: z.string().optional(),
+  urgency: z.enum(["LOW", "MEDIUM", "HIGH"]).default("MEDIUM"),
 });
 
 type EngagementFormValues = z.infer<typeof engagementFormSchema>;
@@ -97,44 +110,61 @@ type FileUpload = {
 export const EngagementForm = ({
   specialist,
   profileId,
-  selectedDeal,
 }: {
   specialist: SpecialistInfo;
   profileId: string;
-  selectedDeal: DealInfo;
+  selectedDeal?: {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    durationDays: number;
+  }; // Keep for backward compatibility but not used
 }) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [files, setFiles] = useState<FileUpload[]>([]);
+  const [selectedPackage, setSelectedPackage] = useState<string>("");
 
   const form = useForm<EngagementFormValues>({
     resolver: zodResolver(engagementFormSchema),
     defaultValues: {
-      title: selectedDeal ? `${selectedDeal.title} Service Request` : "",
-      description: selectedDeal ? selectedDeal.description : "",
-      budget: selectedDeal ? selectedDeal.price.toString() : "",
-      timeframe: selectedDeal ? selectedDeal.durationDays.toString() : "",
-      dealId: selectedDeal?.id,
+      title: "",
+      description: "",
+      budget: "",
+      timeframe: "",
+      servicePackage: "",
+      urgency: "MEDIUM",
     },
   });
 
   const { setValue, watch, handleSubmit } = form;
 
-  // Watch for dealId changes to update form values
-  const watchDealId = watch("dealId");
+  // Watch for service package changes to update form values
+  const watchServicePackage = watch("servicePackage");
 
   useEffect(() => {
-    if (watchDealId) {
-      const deal = specialist.deals.find((d) => d.id === watchDealId);
-      if (deal) {
-        setValue("title", `${deal.title} Service Request`);
-        setValue("description", deal.description);
-        setValue("budget", deal.price.toString());
-        setValue("timeframe", deal.durationDays.toString());
+    if (watchServicePackage && watchServicePackage !== "custom") {
+      const packageInfo =
+        SERVICE_PACKAGES[
+          watchServicePackage.toUpperCase() as keyof typeof SERVICE_PACKAGES
+        ];
+      if (packageInfo) {
+        setValue("title", packageInfo.title);
+        setValue("description", packageInfo.description);
+        setValue("budget", packageInfo.price.toString());
+        setValue("timeframe", packageInfo.durationDays.toString());
+        setSelectedPackage(watchServicePackage);
       }
+    } else if (watchServicePackage === "custom") {
+      setValue("title", "");
+      setValue("description", "");
+      setValue("budget", "");
+      setValue("timeframe", "");
+      setSelectedPackage("custom");
     }
-  }, [watchDealId, specialist.deals, setValue]);
+  }, [watchServicePackage, setValue]);
 
   // Clean up file preview URLs when component unmounts
   useEffect(() => {
@@ -241,7 +271,8 @@ export const EngagementForm = ({
         timeframe: data.timeframe ? parseInt(data.timeframe) : null,
         specialistId: specialist.id,
         profileId: profileId,
-        dealId: data.dealId || null,
+        servicePackage: data.servicePackage,
+        urgency: data.urgency,
         attachments: attachments,
       };
 
@@ -281,107 +312,90 @@ export const EngagementForm = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-semibold">Contratar a {specialist.name}</h2>
+        <h2 className="text-2xl font-semibold">
+          Contratar a {specialist.name}
+        </h2>
         <p className="text-muted-foreground mt-1">
-          Complete el formulario a continuación para enviar una solicitud de
-          contratación.
+          Selecciona un paquete de servicios o crea una solicitud personalizada.
         </p>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Predefined Packages */}
-          {specialist.deals.length > 0 && (
-            <div className="mb-8">
-              <label className="block text-sm font-medium mb-2">
-                Choose a Predefined Package (Optional)
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {specialist.deals.map((deal) => (
-                  <div
-                    key={deal.id}
-                    onClick={() => {
-                      setValue("dealId", deal.id);
-                      setValue("timeframe", deal.durationDays.toString());
-                    }}
-                    className={`p-4 border rounded-lg cursor-pointer transition ${
-                      watchDealId === deal.id
-                        ? "border-primary bg-primary/5"
-                        : "hover:border-muted"
-                    }`}
-                  >
-                    <div className="flex items-center mb-2">
-                      <input
-                        type="radio"
-                        id={`deal-${deal.id}`}
-                        value={deal.id}
-                        checked={watchDealId === deal.id}
-                        className="h-4 w-4 text-primary border-muted focus:ring-primary"
-                      />
-                      <label
-                        htmlFor={`deal-${deal.id}`}
-                        className="ml-2 block text-sm font-medium"
-                      >
-                        {deal.title}
-                      </label>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {deal.description}
+      {/* Service Packages Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <DollarSign className="h-5 w-5" />
+            <span>Paquetes de Servicios</span>
+          </CardTitle>
+          <CardDescription>
+            Selecciona un paquete estándar o crea una solicitud personalizada
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Object.entries(SERVICE_PACKAGES).map(([key, packageInfo]) => (
+              <div
+                key={key}
+                onClick={() => setValue("servicePackage", packageInfo.id)}
+                className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                  selectedPackage === packageInfo.id
+                    ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                    : "hover:border-muted-foreground/50"
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm mb-1">
+                      {packageInfo.title}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {packageInfo.description}
                     </p>
-                    <div className="flex justify-between">
-                      <span className="text-sm font-semibold">
-                        ${deal.price}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {deal.durationDays} days
-                      </span>
-                    </div>
                   </div>
-                ))}
-                <div
-                  onClick={() => {
-                    setValue("dealId", undefined);
-                    setValue("title", "");
-                    setValue("description", "");
-                    setValue("budget", "");
-                    setValue("timeframe", "");
-                  }}
-                  className={`p-4 border rounded-lg cursor-pointer transition ${
-                    !watchDealId
-                      ? "border-primary bg-primary/5"
-                      : "hover:border-muted"
-                  }`}
-                >
-                  <div className="flex items-center mb-2">
-                    <input
-                      type="radio"
-                      id="custom-service"
-                      checked={!watchDealId}
-                      onChange={() => {
-                        setValue("dealId", undefined);
-                        setValue("title", "");
-                        setValue("description", "");
-                        setValue("budget", "");
-                        setValue("timeframe", "");
-                      }}
-                      className="h-4 w-4 text-primary border-muted focus:ring-primary"
-                    />
-                    <label
-                      htmlFor="custom-service"
-                      className="ml-2 block text-sm font-medium"
+                  <div className="text-right ml-4">
+                    {packageInfo.price > 0 ? (
+                      <Badge variant="secondary" className="mb-1">
+                        ${packageInfo.price}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="mb-1">
+                        Cotizar
+                      </Badge>
+                    )}
+                    <p className="text-xs text-muted-foreground flex items-center">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {packageInfo.duration}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  {packageInfo.features.map((feature, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center text-xs text-muted-foreground"
                     >
-                      Custom Service Request
-                    </label>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Create a custom request based on your specific needs
-                  </p>
+                      <CheckCircle2 className="h-3 w-3 mr-2 text-green-500" />
+                      {feature}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Form {...form}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Hidden service package field */}
+          <FormField
+            control={form.control}
+            name="servicePackage"
+            render={({ field }) => <input type="hidden" {...field} />}
+          />
 
           {/* Request Details */}
           <FormField
@@ -394,6 +408,9 @@ export const EngagementForm = ({
                   <Input
                     placeholder="Ej: Auditoría de Seguridad de la Red Corporativa"
                     {...field}
+                    disabled={
+                      selectedPackage !== "custom" && selectedPackage !== ""
+                    }
                   />
                 </FormControl>
                 <FormDescription>
@@ -412,14 +429,59 @@ export const EngagementForm = ({
                 <FormLabel>Descripción del Proyecto</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Describe los detalles de tu proyecto, objetivos, alcance, y cualquier otra información relevante..."
+                    placeholder="Describe los detalles específicos de tu proyecto, objetivos, alcance, y cualquier información adicional relevante..."
                     className="min-h-32"
                     {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  Proporciona información detallada para que el especialista
-                  pueda entender tus necesidades.
+                  {selectedPackage !== "custom" && selectedPackage !== ""
+                    ? "Agrega detalles específicos adicionales para personalizar el servicio."
+                    : "Proporciona información detallada para que el especialista pueda entender tus necesidades."}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Urgency Level */}
+          <FormField
+            control={form.control}
+            name="urgency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nivel de Urgencia</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona el nivel de urgencia" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(URGENCY_LEVELS).map(([key, urgency]) => (
+                      <SelectItem key={key} value={urgency.id}>
+                        <div className="flex items-center">
+                          <div
+                            className={`w-2 h-2 rounded-full mr-2 ${
+                              urgency.color === "green"
+                                ? "bg-green-500"
+                                : urgency.color === "yellow"
+                                  ? "bg-yellow-500"
+                                  : "bg-red-500"
+                            }`}
+                          ></div>
+                          {urgency.label} ({urgency.description})
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  El nivel de urgencia puede afectar la disponibilidad y el
+                  cronograma.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -428,7 +490,7 @@ export const EngagementForm = ({
 
           {/* File Attachments */}
           <div>
-            <FormLabel>Archivos Adjuntos</FormLabel>
+            <FormLabel>Archivos Adjuntos (Opcional)</FormLabel>
             <div className="mt-2 border-2 border-dashed rounded-md p-6">
               <div className="flex flex-col items-center justify-center">
                 <Paperclip className="h-8 w-8 text-muted-foreground mb-2" />
@@ -513,10 +575,19 @@ export const EngagementForm = ({
                 <FormItem>
                   <FormLabel>Presupuesto (USD)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ej: 500" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="Ej: 500"
+                      {...field}
+                      disabled={
+                        selectedPackage !== "custom" && selectedPackage !== ""
+                      }
+                    />
                   </FormControl>
                   <FormDescription>
-                    Tu presupuesto disponible para este proyecto.
+                    {selectedPackage !== "custom" && selectedPackage !== ""
+                      ? "Precio fijo según el paquete seleccionado."
+                      : "Tu presupuesto disponible para este proyecto."}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -528,10 +599,13 @@ export const EngagementForm = ({
               name="timeframe"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Plazo de Tiempo</FormLabel>
+                  <FormLabel>Plazo de Tiempo (días)</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={
+                      selectedPackage !== "custom" && selectedPackage !== ""
+                    }
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -539,16 +613,21 @@ export const EngagementForm = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="1">1 día</SelectItem>
+                      <SelectItem value="2">2 días</SelectItem>
+                      <SelectItem value="3">3 días</SelectItem>
+                      <SelectItem value="5">5 días</SelectItem>
                       <SelectItem value="7">1 semana</SelectItem>
                       <SelectItem value="14">2 semanas</SelectItem>
                       <SelectItem value="30">1 mes</SelectItem>
                       <SelectItem value="60">2 meses</SelectItem>
                       <SelectItem value="90">3 meses</SelectItem>
-                      <SelectItem value="180">6 meses</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    El tiempo que esperas que dure el proyecto.
+                    {selectedPackage !== "custom" && selectedPackage !== ""
+                      ? "Duración estándar según el paquete seleccionado."
+                      : "El tiempo que esperas que dure el proyecto."}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

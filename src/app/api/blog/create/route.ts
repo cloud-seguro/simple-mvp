@@ -40,6 +40,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate category if provided
+    if (body.categoryId && body.categoryId !== "none") {
+      const categoryExists = await prisma.blogCategory.findUnique({
+        where: { id: body.categoryId },
+        select: { id: true },
+      });
+
+      if (!categoryExists) {
+        return NextResponse.json(
+          { error: "Invalid category selected" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Generate slug from title if not provided
     const slug = body.slug || generateSlug(body.title);
 
@@ -55,6 +70,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Convert "none" to null for categoryId
+    const categoryId = body.categoryId === "none" ? null : body.categoryId;
+
     // Create post
     const newPost = await prisma.blogPost.create({
       data: {
@@ -69,6 +87,23 @@ export async function POST(request: NextRequest) {
         slug,
         authorId: profile.id,
         tags: body.tags || [],
+        categoryId: categoryId,
+      },
+      include: {
+        author: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
       },
     });
 

@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>¡Bienvenido a SIMPLE! - SIMPLE</title>
+    <!--[if mso]>
+      <noscript>
+        <xml>
+          <o:OfficeDocumentSettings>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+          </o:OfficeDocumentSettings>
+        </xml>
+      </noscript>
+    <![endif]-->
+    <style>
+      /* Reset styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Base styles */
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+
+      /* Container styles */
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Header styles */
+      .email-header {
+        background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        padding: 32px 24px;
+        text-align: center;
+      }
+
+      .logo-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        background-color: #facc15;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 24px;
+        color: #000000;
+      }
+
+      .logo-text {
+        font-size: 28px;
+        font-weight: bold;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+      }
+
+      .tagline {
+        color: #facc15;
+        font-size: 14px;
+        font-weight: 500;
+        margin-top: 8px;
+      }
+
+      /* Content styles */
+      .email-content {
+        padding: 40px 32px;
+      }
+
+      .content-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #000000;
+        margin-bottom: 16px;
+        line-height: 1.3;
+      }
+
+      .content-text {
+        font-size: 16px;
+        color: #333333;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      /* Button styles */
+      .button-container {
+        text-align: center;
+        margin: 32px 0;
+      }
+
+      .primary-button {
+        display: inline-block;
+        background-color: #000000;
+        color: #ffffff !important;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        border: 2px solid #000000;
+        margin: 8px;
+      }
+
+      .primary-button:hover {
+        background-color: #333333;
+        border-color: #333333;
+      }
+
+      .secondary-button {
+        display: inline-block;
+        background-color: #facc15;
+        color: #000000 !important;
+        text-decoration: none;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        border: 2px solid #facc15;
+        margin: 8px;
+      }
+
+      .secondary-button:hover {
+        background-color: #f59e0b;
+        border-color: #f59e0b;
+      }
+
+      /* Features grid */
+      .features-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 32px 0;
+      }
+
+      .feature-item {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        border-left: 4px solid #facc15;
+      }
+
+      .feature-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+      }
+
+      .feature-title {
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+
+      .feature-text {
+        color: #666666;
+        font-size: 14px;
+      }
+
+      /* Steps section */
+      .steps-container {
+        background-color: #ecfdf5;
+        border-left: 4px solid #10b981;
+        padding: 24px;
+        margin: 32px 0;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .steps-title {
+        font-weight: 600;
+        color: #065f46;
+        margin-bottom: 16px;
+        font-size: 18px;
+      }
+
+      .step-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        color: #065f46;
+      }
+
+      .step-number {
+        background-color: #10b981;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 12px;
+        margin-right: 12px;
+        flex-shrink: 0;
+      }
+
+      .step-text {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      /* Footer styles */
+      .email-footer {
+        background-color: #f8f9fa;
+        padding: 32px 24px;
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .footer-text {
+        color: #666666;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+
+      .footer-links {
+        margin-bottom: 16px;
+      }
+
+      .footer-link {
+        color: #000000;
+        text-decoration: none;
+        font-weight: 500;
+        margin: 0 12px;
+        font-size: 14px;
+      }
+
+      .footer-link:hover {
+        color: #facc15;
+      }
+
+      .footer-copyright {
+        color: #999999;
+        font-size: 12px;
+      }
+
+      /* Responsive styles */
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .email-header {
+          padding: 24px 16px;
+        }
+
+        .email-content {
+          padding: 24px 16px;
+        }
+
+        .email-footer {
+          padding: 24px 16px;
+        }
+
+        .content-title {
+          font-size: 20px;
+        }
+
+        .primary-button,
+        .secondary-button {
+          display: block;
+          width: 100%;
+          text-align: center;
+          margin: 8px 0;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        .footer-link {
+          display: block;
+          margin: 8px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div style="background-color: #f8f9fa; padding: 20px 0">
+      <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+          <div class="logo-container">
+            <div class="logo-icon">S</div>
+            <div class="logo-text">SIMPLE</div>
+          </div>
+          <div class="tagline">Ciberseguridad Simple</div>
+        </div>
+
+        <!-- Content -->
+        <div class="email-content">
+          <h1 class="content-title">¡Bienvenido a SIMPLE! 🎉</h1>
+
+          <p class="content-text">
+            Hola,<br /><br />
+            ¡Felicidades! Tu cuenta en SIMPLE ha sido activada exitosamente.
+            Ahora formas parte de una comunidad que está transformando la manera
+            en que las empresas abordan la ciberseguridad.
+          </p>
+
+          <p class="content-text">
+            En SIMPLE, creemos que la ciberseguridad no debe ser complicada ni
+            costosa. Hemos diseñado nuestra plataforma para que cualquier
+            empresa, sin importar su tamaño, pueda protegerse de manera
+            efectiva.
+          </p>
+
+          <div class="button-container">
+            <a href="{{ .SiteURL }}/dashboard" class="primary-button"
+              >Ir a mi Dashboard</a
+            >
+            <a href="{{ .SiteURL }}/evaluation/initial" class="secondary-button"
+              >Comenzar Evaluación</a
+            >
+          </div>
+
+          <div class="features-grid">
+            <div class="feature-item">
+              <div class="feature-icon">🔍</div>
+              <div class="feature-title">Evaluaciones Completas</div>
+              <div class="feature-text">
+                Analiza tu nivel de seguridad actual con nuestras evaluaciones
+                especializadas
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">📊</div>
+              <div class="feature-title">Dashboard Intuitivo</div>
+              <div class="feature-text">
+                Visualiza tu progreso y métricas de seguridad de forma clara
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">💡</div>
+              <div class="feature-title">Recomendaciones</div>
+              <div class="feature-text">
+                Recibe consejos personalizados para mejorar tu seguridad
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">👥</div>
+              <div class="feature-title">Soporte Experto</div>
+              <div class="feature-text">
+                Conecta con especialistas certificados en ciberseguridad
+              </div>
+            </div>
+          </div>
+
+          <div class="steps-container">
+            <div class="steps-title">🚀 Primeros pasos recomendados:</div>
+
+            <div class="step-item">
+              <div class="step-number">1</div>
+              <div class="step-text">
+                <strong>Completa tu perfil:</strong> Añade información sobre tu
+                empresa para recibir recomendaciones más precisas.
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-number">2</div>
+              <div class="step-text">
+                <strong>Realiza tu primera evaluación:</strong> Comienza con
+                nuestra evaluación inicial para conocer tu nivel actual de
+                seguridad.
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-number">3</div>
+              <div class="step-text">
+                <strong>Revisa tus resultados:</strong> Analiza las
+                recomendaciones personalizadas que generamos para tu empresa.
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-number">4</div>
+              <div class="step-text">
+                <strong>Implementa mejoras:</strong> Sigue nuestras guías paso a
+                paso para fortalecer tu seguridad.
+              </div>
+            </div>
+          </div>
+
+          <p class="content-text">
+            <strong>¿Necesitas ayuda?</strong><br />
+            Nuestro equipo está aquí para apoyarte en cada paso. Puedes:
+          </p>
+
+          <ul style="margin-left: 20px; margin-bottom: 24px; color: #333333">
+            <li style="margin-bottom: 8px">
+              Responder a este email con tus preguntas
+            </li>
+            <li style="margin-bottom: 8px">Visitar nuestro centro de ayuda</li>
+            <li style="margin-bottom: 8px">Programar una consulta gratuita</li>
+            <li style="margin-bottom: 8px">Unirte a nuestra comunidad</li>
+          </ul>
+
+          <p class="content-text" style="margin-bottom: 0">
+            <strong>El equipo de SIMPLE</strong><br />
+            <em>Hacemos lo complejo de la ciberseguridad, simple.</em>
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="email-footer">
+          <p class="footer-text">
+            Este email fue enviado por <strong>SIMPLE</strong> - Ciberseguridad
+            Simple
+          </p>
+
+          <div class="footer-links">
+            <a href="{{ .SiteURL }}/contacto" class="footer-link">Contacto</a>
+            <a href="{{ .SiteURL }}/ayuda" class="footer-link"
+              >Centro de Ayuda</a
+            >
+          </div>
+
+          <p class="footer-copyright">
+            © 2025 SIMPLE. Todos los derechos reservados.<br />
+            Bogotá, Colombia
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

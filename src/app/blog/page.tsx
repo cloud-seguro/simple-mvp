@@ -37,6 +37,35 @@ export default async function BlogPage() {
             lastName: true,
           },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
+      },
+    });
+
+    // Fetch all active categories for filtering
+    const categories = await prisma.blogCategory.findMany({
+      where: {
+        active: true,
+      },
+      include: {
+        _count: {
+          select: {
+            posts: {
+              where: {
+                published: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        name: "asc",
       },
     });
 
@@ -60,12 +89,20 @@ export default async function BlogPage() {
         coverImage: post.coverImage || undefined,
         tags: post.tags || [],
         readingTime,
+        category: post.category
+          ? {
+              id: post.category.id,
+              name: post.category.name,
+              slug: post.category.slug,
+              color: post.category.color || "#6B7280",
+            }
+          : undefined,
       };
     });
 
-    return <BlogIndexClient posts={posts} />;
+    return <BlogIndexClient posts={posts} categories={categories} />;
   } catch (error) {
     console.error("Error fetching blog posts:", error);
-    return <BlogIndexClient posts={[]} />;
+    return <BlogIndexClient posts={[]} categories={[]} />;
   }
 }

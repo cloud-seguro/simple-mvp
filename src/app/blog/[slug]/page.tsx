@@ -63,6 +63,14 @@ export default async function BlogPostPage({ params }: any) {
             lastName: true,
           },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
       },
     });
 
@@ -89,6 +97,14 @@ export default async function BlogPostPage({ params }: any) {
       coverImage: dbPost.coverImage || undefined,
       tags: dbPost.tags,
       readingTime,
+      category: dbPost.category
+        ? {
+            id: dbPost.category.id,
+            name: dbPost.category.name,
+            slug: dbPost.category.slug,
+            color: dbPost.category.color || "#6B7280",
+          }
+        : undefined,
     };
 
     return <BlogPostClient post={post} />;
