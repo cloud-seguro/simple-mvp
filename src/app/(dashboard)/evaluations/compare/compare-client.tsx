@@ -144,7 +144,7 @@ export function ComparePageClient({
     newerEvaluation.score !== null && olderEvaluation.score !== null
       ? Math.round(
           ((newerEvaluation.score - olderEvaluation.score) /
-            olderEvaluation.score) *
+            Math.max(0.1, olderEvaluation.score)) *
             100
         )
       : null;
@@ -365,8 +365,8 @@ export function ComparePageClient({
                     className={`font-medium text-base ${isImprovement ? "text-green-600" : "text-red-600"}`}
                   >
                     {isImprovement
-                      ? `📈 Mejora del ${improvementPercentage}% entre las evaluaciones`
-                      : `📉 Disminución del ${Math.abs(improvementPercentage)}% entre las evaluaciones`}
+                      ? `📈 Mejora del ${improvementPercentage}% entre las evaluaciones (de ${Math.round(olderEvaluation.score || 0)}% a ${Math.round(newerEvaluation.score || 0)}%)`
+                      : `📉 Disminución del ${Math.abs(improvementPercentage)}% entre las evaluaciones (de ${Math.round(olderEvaluation.score || 0)}% a ${Math.round(newerEvaluation.score || 0)}%)`}
                   </p>
                   <p className="text-sm mt-2">
                     {isImprovement
