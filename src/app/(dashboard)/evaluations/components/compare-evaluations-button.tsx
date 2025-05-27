@@ -74,14 +74,6 @@ export function CompareEvaluationsButton({
     }
   };
 
-  // Format evaluation option label
-  const formatEvaluationLabel = (evaluation: Evaluation) => {
-    const date = format(new Date(evaluation.createdAt), "d MMM yyyy", {
-      locale: es,
-    });
-    return `${evaluation.title} - ${date}`;
-  };
-
   // Check if there are at least 2 evaluations of a specific type
   const initialEvaluationsCount = evaluations.filter(
     (e) => e.type === "INITIAL"
@@ -192,13 +184,110 @@ export function CompareEvaluationsButton({
                       }
                     }}
                   >
-                    <SelectTrigger id="first-evaluation">
-                      <SelectValue placeholder="Selecciona una evaluación" />
+                    <SelectTrigger
+                      id="first-evaluation"
+                      className="h-auto py-2"
+                    >
+                      {firstEvaluationId ? (
+                        <div className="flex flex-col items-start text-left">
+                          <span className="font-medium">
+                            {
+                              availableFirstEvaluations.find(
+                                (e) => e.id === firstEvaluationId
+                              )?.title
+                            }
+                          </span>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <span>
+                              {format(
+                                new Date(
+                                  availableFirstEvaluations.find(
+                                    (e) => e.id === firstEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "d MMM yyyy",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span className="font-semibold">
+                              {format(
+                                new Date(
+                                  availableFirstEvaluations.find(
+                                    (e) => e.id === firstEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "HH:mm",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span
+                              className={`ml-2 px-1.5 py-0.5 rounded ${(() => {
+                                const score = availableFirstEvaluations.find(
+                                  (e) => e.id === firstEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? score >= 70
+                                    ? "bg-green-100 text-green-800"
+                                    : score >= 50
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800";
+                              })()}`}
+                            >
+                              {(() => {
+                                const score = availableFirstEvaluations.find(
+                                  (e) => e.id === firstEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? `${Math.round(score)}%`
+                                  : "N/A";
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <SelectValue placeholder="Selecciona una evaluación" />
+                      )}
                     </SelectTrigger>
                     <SelectContent>
                       {availableFirstEvaluations.map((evaluation) => (
                         <SelectItem key={evaluation.id} value={evaluation.id}>
-                          {formatEvaluationLabel(evaluation)}
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {evaluation.title}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "d MMM yyyy",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span className="font-semibold">
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "HH:mm",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span
+                                className={`ml-2 px-1.5 py-0.5 rounded ${
+                                  evaluation.score !== null
+                                    ? evaluation.score >= 70
+                                      ? "bg-green-100 text-green-800"
+                                      : evaluation.score >= 50
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {evaluation.score !== null
+                                  ? `${Math.round(evaluation.score)}%`
+                                  : "N/A"}
+                              </span>
+                            </div>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -217,13 +306,110 @@ export function CompareEvaluationsButton({
                     onValueChange={setSecondEvaluationId}
                     disabled={!firstEvaluationId}
                   >
-                    <SelectTrigger id="second-evaluation">
-                      <SelectValue placeholder="Selecciona una evaluación" />
+                    <SelectTrigger
+                      id="second-evaluation"
+                      className="h-auto py-2"
+                    >
+                      {secondEvaluationId ? (
+                        <div className="flex flex-col items-start text-left">
+                          <span className="font-medium">
+                            {
+                              availableSecondEvaluations.find(
+                                (e) => e.id === secondEvaluationId
+                              )?.title
+                            }
+                          </span>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <span>
+                              {format(
+                                new Date(
+                                  availableSecondEvaluations.find(
+                                    (e) => e.id === secondEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "d MMM yyyy",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span className="font-semibold">
+                              {format(
+                                new Date(
+                                  availableSecondEvaluations.find(
+                                    (e) => e.id === secondEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "HH:mm",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span
+                              className={`ml-2 px-1.5 py-0.5 rounded ${(() => {
+                                const score = availableSecondEvaluations.find(
+                                  (e) => e.id === secondEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? score >= 70
+                                    ? "bg-green-100 text-green-800"
+                                    : score >= 50
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800";
+                              })()}`}
+                            >
+                              {(() => {
+                                const score = availableSecondEvaluations.find(
+                                  (e) => e.id === secondEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? `${Math.round(score)}%`
+                                  : "N/A";
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <SelectValue placeholder="Selecciona una evaluación" />
+                      )}
                     </SelectTrigger>
                     <SelectContent>
                       {availableSecondEvaluations.map((evaluation) => (
                         <SelectItem key={evaluation.id} value={evaluation.id}>
-                          {formatEvaluationLabel(evaluation)}
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {evaluation.title}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "d MMM yyyy",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span className="font-semibold">
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "HH:mm",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span
+                                className={`ml-2 px-1.5 py-0.5 rounded ${
+                                  evaluation.score !== null
+                                    ? evaluation.score >= 70
+                                      ? "bg-green-100 text-green-800"
+                                      : evaluation.score >= 50
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {evaluation.score !== null
+                                  ? `${Math.round(evaluation.score)}%`
+                                  : "N/A"}
+                              </span>
+                            </div>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -251,13 +437,110 @@ export function CompareEvaluationsButton({
                       }
                     }}
                   >
-                    <SelectTrigger id="first-evaluation-advanced">
-                      <SelectValue placeholder="Selecciona una evaluación" />
+                    <SelectTrigger
+                      id="first-evaluation-advanced"
+                      className="h-auto py-2"
+                    >
+                      {firstEvaluationId ? (
+                        <div className="flex flex-col items-start text-left">
+                          <span className="font-medium">
+                            {
+                              availableFirstEvaluations.find(
+                                (e) => e.id === firstEvaluationId
+                              )?.title
+                            }
+                          </span>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <span>
+                              {format(
+                                new Date(
+                                  availableFirstEvaluations.find(
+                                    (e) => e.id === firstEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "d MMM yyyy",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span className="font-semibold">
+                              {format(
+                                new Date(
+                                  availableFirstEvaluations.find(
+                                    (e) => e.id === firstEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "HH:mm",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span
+                              className={`ml-2 px-1.5 py-0.5 rounded ${(() => {
+                                const score = availableFirstEvaluations.find(
+                                  (e) => e.id === firstEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? score >= 70
+                                    ? "bg-green-100 text-green-800"
+                                    : score >= 50
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800";
+                              })()}`}
+                            >
+                              {(() => {
+                                const score = availableFirstEvaluations.find(
+                                  (e) => e.id === firstEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? `${Math.round(score)}%`
+                                  : "N/A";
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <SelectValue placeholder="Selecciona una evaluación" />
+                      )}
                     </SelectTrigger>
                     <SelectContent>
                       {availableFirstEvaluations.map((evaluation) => (
                         <SelectItem key={evaluation.id} value={evaluation.id}>
-                          {formatEvaluationLabel(evaluation)}
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {evaluation.title}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "d MMM yyyy",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span className="font-semibold">
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "HH:mm",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span
+                                className={`ml-2 px-1.5 py-0.5 rounded ${
+                                  evaluation.score !== null
+                                    ? evaluation.score >= 70
+                                      ? "bg-green-100 text-green-800"
+                                      : evaluation.score >= 50
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {evaluation.score !== null
+                                  ? `${Math.round(evaluation.score)}%`
+                                  : "N/A"}
+                              </span>
+                            </div>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -276,13 +559,110 @@ export function CompareEvaluationsButton({
                     onValueChange={setSecondEvaluationId}
                     disabled={!firstEvaluationId}
                   >
-                    <SelectTrigger id="second-evaluation-advanced">
-                      <SelectValue placeholder="Selecciona una evaluación" />
+                    <SelectTrigger
+                      id="second-evaluation-advanced"
+                      className="h-auto py-2"
+                    >
+                      {secondEvaluationId ? (
+                        <div className="flex flex-col items-start text-left">
+                          <span className="font-medium">
+                            {
+                              availableSecondEvaluations.find(
+                                (e) => e.id === secondEvaluationId
+                              )?.title
+                            }
+                          </span>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <span>
+                              {format(
+                                new Date(
+                                  availableSecondEvaluations.find(
+                                    (e) => e.id === secondEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "d MMM yyyy",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span className="font-semibold">
+                              {format(
+                                new Date(
+                                  availableSecondEvaluations.find(
+                                    (e) => e.id === secondEvaluationId
+                                  )?.createdAt || new Date()
+                                ),
+                                "HH:mm",
+                                { locale: es }
+                              )}
+                            </span>
+                            <span
+                              className={`ml-2 px-1.5 py-0.5 rounded ${(() => {
+                                const score = availableSecondEvaluations.find(
+                                  (e) => e.id === secondEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? score >= 70
+                                    ? "bg-green-100 text-green-800"
+                                    : score >= 50
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800";
+                              })()}`}
+                            >
+                              {(() => {
+                                const score = availableSecondEvaluations.find(
+                                  (e) => e.id === secondEvaluationId
+                                )?.score;
+                                return score !== null && score !== undefined
+                                  ? `${Math.round(score)}%`
+                                  : "N/A";
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <SelectValue placeholder="Selecciona una evaluación" />
+                      )}
                     </SelectTrigger>
                     <SelectContent>
                       {availableSecondEvaluations.map((evaluation) => (
                         <SelectItem key={evaluation.id} value={evaluation.id}>
-                          {formatEvaluationLabel(evaluation)}
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {evaluation.title}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "d MMM yyyy",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span className="font-semibold">
+                                {format(
+                                  new Date(evaluation.createdAt),
+                                  "HH:mm",
+                                  { locale: es }
+                                )}
+                              </span>
+                              <span
+                                className={`ml-2 px-1.5 py-0.5 rounded ${
+                                  evaluation.score !== null
+                                    ? evaluation.score >= 70
+                                      ? "bg-green-100 text-green-800"
+                                      : evaluation.score >= 50
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-red-100 text-red-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {evaluation.score !== null
+                                  ? `${Math.round(evaluation.score)}%`
+                                  : "N/A"}
+                              </span>
+                            </div>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

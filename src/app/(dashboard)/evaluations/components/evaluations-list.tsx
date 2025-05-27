@@ -65,11 +65,16 @@ export function EvaluationsList({ evaluations }: EvaluationsListProps) {
       header: "Fecha",
       accessorKey: "createdAt",
       cell: ({ row }) => (
-        <div className="flex items-center">
-          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-          <span>
-            {format(new Date(row.createdAt), "d MMM yyyy", { locale: es })}
-          </span>
+        <div className="flex flex-col">
+          <div className="flex items-center">
+            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span>
+              {format(new Date(row.createdAt), "d MMM yyyy", { locale: es })}
+            </span>
+          </div>
+          <div className="text-xs text-muted-foreground ml-6 mt-1">
+            {format(new Date(row.createdAt), "HH:mm", { locale: es })}
+          </div>
         </div>
       ),
     },

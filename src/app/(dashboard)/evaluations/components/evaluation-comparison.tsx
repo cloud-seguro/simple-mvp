@@ -135,7 +135,7 @@ export function EvaluationComparison({
   const scoreDifference = secondEvaluation.score - firstEvaluation.score;
   const percentageDifference =
     firstEvaluation.score > 0
-      ? (scoreDifference / firstEvaluation.score) * 100
+      ? (scoreDifference / Math.max(0.1, firstEvaluation.score)) * 100
       : 0;
 
   // Format dates
@@ -179,7 +179,7 @@ export function EvaluationComparison({
     category.difference = category.secondScore - category.firstScore;
     category.percentageDifference =
       category.firstScore > 0
-        ? (category.difference / category.firstScore) * 100
+        ? (category.difference / Math.max(0.1, category.firstScore)) * 100
         : 0;
   }
 
@@ -191,7 +191,7 @@ export function EvaluationComparison({
       const maxScore = Math.max(...question.options.map((o) => o.value));
       const difference = secondScore - firstScore;
       const percentageDifference =
-        firstScore > 0 ? (difference / firstScore) * 100 : 0;
+        firstScore > 0 ? (difference / Math.max(0.1, firstScore)) * 100 : 0;
 
       return {
         id: question.id,
@@ -323,7 +323,12 @@ export function EvaluationComparison({
                       getDifferenceColor(scoreDifference)
                     )}
                   >
-                    {Math.round(percentageDifference)}%
+                    {Math.round(percentageDifference)}%{" "}
+                    {scoreDifference > 0 ? "de mejora" : "de disminución"}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    De {Math.round(firstEvaluation.score)}% a{" "}
+                    {Math.round(secondEvaluation.score)}%
                   </p>
                 </div>
                 <div className="text-xs text-gray-500">
@@ -432,7 +437,9 @@ export function EvaluationComparison({
                           <p className="text-sm text-green-700 font-medium">
                             ✅ La puntuación ha mejorado un{" "}
                             {Math.abs(Math.round(percentageDifference))}% desde
-                            la Evaluación 1.
+                            la Evaluación 1 (de{" "}
+                            {Math.round(firstEvaluation.score)}% a{" "}
+                            {Math.round(secondEvaluation.score)}%).
                           </p>
                           <p className="text-sm text-gray-600">
                             Esto indica un progreso positivo en la madurez de
@@ -445,7 +452,9 @@ export function EvaluationComparison({
                           <p className="text-sm text-red-700 font-medium">
                             ⚠️ La puntuación ha disminuido un{" "}
                             {Math.abs(Math.round(percentageDifference))}% desde
-                            la Evaluación 1.
+                            la Evaluación 1 (de{" "}
+                            {Math.round(firstEvaluation.score)}% a{" "}
+                            {Math.round(secondEvaluation.score)}%).
                           </p>
                           <p className="text-sm text-gray-600">
                             Esta disminución podría indicar nuevas
