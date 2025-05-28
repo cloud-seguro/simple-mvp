@@ -242,6 +242,73 @@ export function EvaluationComparison({
     return "Optimizado (Nivel 5)";
   };
 
+  // Function to get progress bar colors based on score percentage
+  const getProgressBarColors = (percentage: number) => {
+    if (percentage <= 20) {
+      return {
+        background: "#fee2e2", // red-100
+        indicator: "#dc2626", // red-600
+      };
+    } else if (percentage <= 40) {
+      return {
+        background: "#fed7aa", // orange-100
+        indicator: "#ea580c", // orange-600
+      };
+    } else if (percentage <= 60) {
+      return {
+        background: "#fef3c7", // yellow-100
+        indicator: "#ca8a04", // yellow-600
+      };
+    } else if (percentage <= 80) {
+      return {
+        background: "#dcfce7", // green-100
+        indicator: "#16a34a", // green-600
+      };
+    } else {
+      return {
+        background: "#dbeafe", // blue-100
+        indicator: "#2563eb", // blue-600
+      };
+    }
+  };
+
+  // Custom progress bar component
+  const CustomProgressBar = ({
+    value,
+    color = "blue",
+    className = "",
+  }: {
+    value: number;
+    color?: "blue" | "green";
+    className?: string;
+  }) => {
+    const colors =
+      color === "blue"
+        ? {
+            background: "#dbeafe", // blue-100
+            indicator: "#2563eb", // blue-600
+          }
+        : {
+            background: "#dcfce7", // green-100
+            indicator: "#16a34a", // green-600
+          };
+
+    return (
+      <div
+        className={`relative h-3 w-full overflow-hidden rounded-full ${className}`}
+        style={{ backgroundColor: colors.background }}
+      >
+        <div
+          className="h-full transition-all duration-300 ease-in-out rounded-full"
+          style={{
+            width: `${Math.min(100, Math.max(0, value))}%`,
+            backgroundColor: colors.indicator,
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -635,12 +702,12 @@ export function EvaluationComparison({
                               </span>
                             </div>
                             <div className="flex items-center justify-between mb-2">
-                              <Progress
+                              <CustomProgressBar
                                 value={
                                   (category.firstScore / category.firstMax) *
                                   100
                                 }
-                                className="flex-1 h-3 bg-white"
+                                color="blue"
                               />
                               <span className="ml-3 text-sm font-bold text-blue-700">
                                 {Math.round(
@@ -663,12 +730,12 @@ export function EvaluationComparison({
                               </span>
                             </div>
                             <div className="flex items-center justify-between mb-2">
-                              <Progress
+                              <CustomProgressBar
                                 value={
                                   (category.secondScore / category.secondMax) *
                                   100
                                 }
-                                className="flex-1 h-3 bg-white"
+                                color="green"
                               />
                               <span className="ml-3 text-sm font-bold text-green-700">
                                 {Math.round(
@@ -766,12 +833,12 @@ export function EvaluationComparison({
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <Progress
+                              <CustomProgressBar
                                 value={
                                   (question.firstScore / question.maxScore) *
                                   100
                                 }
-                                className="flex-1 h-3 bg-white"
+                                color="blue"
                               />
                               <span className="ml-3 text-sm font-bold text-blue-700">
                                 {question.firstScore}/{question.maxScore}
@@ -787,12 +854,12 @@ export function EvaluationComparison({
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <Progress
+                              <CustomProgressBar
                                 value={
                                   (question.secondScore / question.maxScore) *
                                   100
                                 }
-                                className="flex-1 h-3 bg-white"
+                                color="green"
                               />
                               <span className="ml-3 text-sm font-bold text-green-700">
                                 {question.secondScore}/{question.maxScore}

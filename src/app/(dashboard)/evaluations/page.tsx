@@ -2,6 +2,9 @@ import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { prisma } from "@/lib/prisma";
 import { EvaluationsClient } from "./components/evaluations-client";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -57,11 +60,19 @@ export default async function EvaluationsPage() {
 
   return (
     <div className="container py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Historial de Evaluaciones</h1>
-        <p className="text-muted-foreground mt-2">
-          Gestiona y compara tus evaluaciones de ciberseguridad
-        </p>
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold">Historial de Evaluaciones</h1>
+          <p className="text-muted-foreground mt-2">
+            Gestiona y compara tus evaluaciones de ciberseguridad
+          </p>
+        </div>
+        <Link href="/quiz">
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Nueva Evaluación
+          </Button>
+        </Link>
       </div>
       <EvaluationsClient evaluations={evaluations} />
     </div>
