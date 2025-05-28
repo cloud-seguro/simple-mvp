@@ -64,11 +64,27 @@ async function getDetailedEvaluationData(id: string) {
     // Calculate max possible score based on evaluation type
     const maxScore = evaluation.type === "INITIAL" ? 45 : 100;
 
-    // Ensure score doesn't exceed max possible score for initial evaluations
-    const score =
-      evaluation.type === "INITIAL" && (evaluation.score || 0) > maxScore
-        ? maxScore
-        : evaluation.score || 0;
+    // Handle score conversion for initial evaluations
+    // Old evaluations stored scores as percentages (0-100)
+    // New evaluations store raw scores (0-45 for initial, 0-100 for advanced)
+    let score = evaluation.score || 0;
+
+    if (evaluation.type === "INITIAL") {
+      // If the score is greater than 45, it's likely a percentage from the old system
+      // Convert it back to raw score
+      if (score > maxScore) {
+        // Convert percentage back to raw score
+        // Calculate actual score from answers to get the correct raw score
+        const actualRawScore = Object.values(answers).reduce(
+          (sum, value) => sum + value,
+          0
+        );
+        score = actualRawScore;
+        console.log(
+          `Converted old percentage score ${evaluation.score} to raw score ${score} for initial evaluation`
+        );
+      }
+    }
 
     // Calculate maturity level based on capped score
     const maturity = getMaturityLevel(quizId, score);

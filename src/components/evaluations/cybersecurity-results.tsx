@@ -511,8 +511,13 @@ export function CybersecurityResults({
 
   // Calculate overall percentage early in the component
   // After maturity is defined, add an overall percentage calculation for use with colors
+  const cappedOverallScore =
+    quizData.id === "evaluacion-inicial"
+      ? Math.min(overallScore, maxPossibleScore)
+      : overallScore;
+
   const overallPercentage = Math.round(
-    (overallScore /
+    (cappedOverallScore /
       (quizData.id === "evaluacion-avanzada" ? 100 : maxPossibleScore)) *
       100
   );
@@ -680,8 +685,7 @@ export function CybersecurityResults({
                       : maxPossibleScore}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    {displayPercentage > 100 ? 100 : displayPercentage}% de
-                    madurez
+                    {displayPercentage}% de madurez
                   </p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
