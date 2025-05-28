@@ -220,7 +220,7 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
     const { evaluation } = data;
 
     return (
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -246,13 +246,20 @@ export default async function EvaluationPage({ params }: EvaluationPageProps) {
           </div>
         </div>
 
-        <EvaluationContent {...data} evaluationData={detailedData} />
+        <EvaluationContent
+          {...data}
+          evaluation={{
+            ...evaluation,
+            createdAt: evaluation.createdAt.toISOString(),
+          }}
+          evaluationData={detailedData}
+        />
       </div>
     );
   } catch (error) {
     console.error("Error loading evaluation:", error);
     return (
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <h2 className="text-2xl font-bold text-red-600 mb-4">
             Error al cargar la evaluación

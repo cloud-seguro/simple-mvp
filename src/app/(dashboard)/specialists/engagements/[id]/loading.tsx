@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function SpecialistEngagementDetailLoading() {
+export default function EngagementDetailLoading() {
   return (
-    <div className="container py-8 space-y-8">
+    <div className="w-full py-8 space-y-8">
       {/* Header with back button and title */}
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">

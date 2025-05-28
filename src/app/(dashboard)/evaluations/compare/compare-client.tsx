@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   Calendar,
-  Download,
   FileType,
   ArrowUpDown,
   User,
@@ -204,7 +203,7 @@ export function ComparePageClient({
         </div>
       )}
     >
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">

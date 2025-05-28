@@ -22,7 +22,7 @@ export default async function EvaluationsPage() {
 
   if (!session) {
     return (
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <h2 className="text-2xl font-bold">Sesión no encontrada</h2>
           <p className="text-muted-foreground">
@@ -33,7 +33,7 @@ export default async function EvaluationsPage() {
     );
   }
 
-  // Get the user's profile
+  // Get the user's profile to check their role
   const profile = await prisma.profile.findUnique({
     where: { userId: session.user.id },
     select: { id: true, firstName: true, lastName: true },
@@ -41,7 +41,7 @@ export default async function EvaluationsPage() {
 
   if (!profile) {
     return (
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <h2 className="text-2xl font-bold">Perfil no encontrado</h2>
           <p className="text-muted-foreground">
@@ -59,7 +59,7 @@ export default async function EvaluationsPage() {
   });
 
   return (
-    <div className="container py-8">
+    <div className="w-full py-8">
       <div className="mb-6 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold">Historial de Evaluaciones</h1>

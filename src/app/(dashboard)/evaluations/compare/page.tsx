@@ -29,7 +29,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
 
     if (!first || !second) {
       return (
-        <div className="container py-8">
+        <div className="w-full py-8">
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <h2 className="text-2xl font-bold mb-4">
               Parámetros de comparación incompletos
@@ -58,7 +58,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
     // Check if both evaluations are of the same type
     if (firstEvaluation.type !== secondEvaluation.type) {
       return (
-        <div className="container py-8">
+        <div className="w-full py-8">
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <h2 className="text-2xl font-bold mb-4">
               No se pueden comparar evaluaciones de diferentes tipos
@@ -112,7 +112,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   } catch (error) {
     console.error("Error comparing evaluations:", error);
     return (
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <h2 className="text-2xl font-bold text-red-600 mb-4">
             Error al comparar evaluaciones

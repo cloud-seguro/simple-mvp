@@ -589,7 +589,7 @@ export function CybersecurityResults({
       )}
 
       <main className={cn("flex-grow", isSharedView ? "p-4 md:p-8" : "p-0")}>
-        <div className={cn("mx-auto", isSharedView ? "max-w-3xl" : "w-full")}>
+        <div className={cn(isSharedView ? "mx-auto max-w-3xl" : "w-full")}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

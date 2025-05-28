@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { QuizData, UserInfo } from "./types";
 
 interface PDFTemplateProps {
@@ -755,10 +756,12 @@ export function PDFTemplate({
             paddingTop: "15px",
           }}
         >
-          <img
+          <Image
             src="https://ciberseguridadsimple.com/logo.png"
             alt="Ciberseguridad Simple Logo"
-            style={{ width: "150px", marginBottom: "10px" }}
+            width={150}
+            height={50}
+            style={{ marginBottom: "10px" }}
             onError={(e) => (e.currentTarget.style.display = "none")}
           />
           <p style={{ fontSize: "14px", fontWeight: "bold", margin: "5px 0" }}>

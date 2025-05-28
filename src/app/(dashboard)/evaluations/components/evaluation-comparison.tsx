@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -236,40 +235,10 @@ export function EvaluationComparison({
   // Function to get maturity level label
   const getMaturityLevel = (score: number) => {
     if (score < 20) return "Inicial (Nivel 1)";
-    if (score < 40) return "Repetible (Nivel 2)";
+    if (score < 40) return "Básico (Nivel 2)";
     if (score < 60) return "Definido (Nivel 3)";
     if (score < 80) return "Gestionado (Nivel 4)";
     return "Optimizado (Nivel 5)";
-  };
-
-  // Function to get progress bar colors based on score percentage
-  const getProgressBarColors = (percentage: number) => {
-    if (percentage <= 20) {
-      return {
-        background: "#fee2e2", // red-100
-        indicator: "#dc2626", // red-600
-      };
-    } else if (percentage <= 40) {
-      return {
-        background: "#fed7aa", // orange-100
-        indicator: "#ea580c", // orange-600
-      };
-    } else if (percentage <= 60) {
-      return {
-        background: "#fef3c7", // yellow-100
-        indicator: "#ca8a04", // yellow-600
-      };
-    } else if (percentage <= 80) {
-      return {
-        background: "#dcfce7", // green-100
-        indicator: "#16a34a", // green-600
-      };
-    } else {
-      return {
-        background: "#dbeafe", // blue-100
-        indicator: "#2563eb", // blue-600
-      };
-    }
   };
 
   // Custom progress bar component

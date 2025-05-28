@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
-export default function ContrataHireLoading() {
+export default function HireLoading() {
   return (
-    <div className="container py-8 space-y-8">
+    <div className="w-full py-8 space-y-8">
       <div className="space-y-2">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-5 w-full max-w-2xl" />
