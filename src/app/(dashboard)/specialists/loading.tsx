@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function SpecialistsLoading() {
   return (
-    <div className="container py-8 space-y-8">
+    <div className="w-full py-8 space-y-8">
       <div className="space-y-2">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-5 w-full max-w-2xl" />

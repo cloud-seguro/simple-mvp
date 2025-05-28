@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function ContrataLoading() {
   return (
-    <div className="container py-8 space-y-8">
+    <div className="w-full py-8 space-y-8">
       <div className="space-y-2">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-5 w-full max-w-2xl" />

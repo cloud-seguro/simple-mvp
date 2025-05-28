@@ -22,22 +22,6 @@ export async function getEvaluationData(id: string) {
     throw new Error(`Quiz data not found for type: ${evaluation.type}`);
   }
 
-  // Calculate max possible score based on evaluation type
-  const maxScore = evaluation.type === "INITIAL" ? 45 : 100;
-
-  // Ensure score doesn't exceed max possible score for initial evaluations
-  const cappedScore =
-    evaluation.type === "INITIAL" && (evaluation.score || 0) > maxScore
-      ? maxScore
-      : evaluation.score || 0;
-
-  // Prepare user info
-  const userInfo: UserInfo = {
-    firstName: evaluation.profile?.firstName || "Usuario",
-    lastName: evaluation.profile?.lastName || "",
-    email: evaluation.profile?.email || "",
-  };
-
   // Ensure answers is a valid Record<string, number>
   const answers: Record<string, number> = {};
 
@@ -59,6 +43,38 @@ export async function getEvaluationData(id: string) {
       }
     }
   }
+
+  // Calculate max possible score based on evaluation type
+  const maxScore = evaluation.type === "INITIAL" ? 45 : 100;
+
+  // Handle score conversion for initial evaluations
+  // Old evaluations stored scores as percentages (0-100)
+  // New evaluations store raw scores (0-45 for initial, 0-100 for advanced)
+  let cappedScore = evaluation.score || 0;
+
+  if (evaluation.type === "INITIAL") {
+    // If the score is greater than 45, it's likely a percentage from the old system
+    // Convert it back to raw score
+    if (cappedScore > maxScore) {
+      // Convert percentage back to raw score
+      // Calculate actual score from answers to get the correct raw score
+      const actualRawScore = Object.values(answers).reduce(
+        (sum, value) => sum + value,
+        0
+      );
+      cappedScore = actualRawScore;
+      console.log(
+        `Converted old percentage score ${evaluation.score} to raw score ${cappedScore} for initial evaluation`
+      );
+    }
+  }
+
+  // Prepare user info
+  const userInfo: UserInfo = {
+    firstName: evaluation.profile?.firstName || "Usuario",
+    lastName: evaluation.profile?.lastName || "",
+    email: evaluation.profile?.email || "",
+  };
 
   return {
     evaluation: {

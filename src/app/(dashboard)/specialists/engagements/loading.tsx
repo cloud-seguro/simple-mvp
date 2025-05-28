@@ -5,9 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingTable } from "@/components/table/loading-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function SpecialistsEngagementsLoading() {
+export default function SpecialistEngagementsLoading() {
   return (
-    <div className="container py-8 space-y-8">
+    <div className="w-full py-8 space-y-8">
       <div className="space-y-2">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-5 w-full max-w-2xl" />

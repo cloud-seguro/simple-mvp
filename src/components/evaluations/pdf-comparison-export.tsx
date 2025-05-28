@@ -4,45 +4,35 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import html2pdf from "html2pdf.js";
-import { PDFTemplate } from "./pdf-template";
+import { PDFComparisonTemplate } from "./pdf-comparison-template";
 import type { QuizData, UserInfo } from "./types";
 
-interface PDFExportProps {
-  evaluationId: string;
-  score: number;
-  maxScore: number;
-  maturityDescription: string;
-  maturityLevelNumber: number;
-  categories: Array<{
-    name: string;
-    score: number;
-    maxScore: number;
-  }>;
-  recommendations: Array<{
-    score: number;
-    maxScore: number;
-    text: string;
-    selectedOption: string;
-    category: string;
-    recommendation: string;
-  }>;
-  quizData: QuizData;
+interface ComparisonData {
+  id: string;
+  title: string;
+  date: Date;
+  answers: Record<string, number>;
   userInfo: UserInfo;
-  children: React.ReactNode;
+  score: number;
 }
 
-export function PDFExport({
-  evaluationId,
-  score,
-  maxScore,
-  maturityDescription,
-  maturityLevelNumber,
-  categories,
-  recommendations,
+interface PDFComparisonExportProps {
+  firstEvaluation: ComparisonData;
+  secondEvaluation: ComparisonData;
+  quizData: QuizData;
+  evaluationType: "INITIAL" | "ADVANCED";
+  children: React.ReactNode;
+  renderButtons?: (exportButton: React.ReactNode) => React.ReactNode;
+}
+
+export function PDFComparisonExport({
+  firstEvaluation,
+  secondEvaluation,
   quizData,
-  userInfo,
+  evaluationType,
   children,
-}: PDFExportProps) {
+  renderButtons,
+}: PDFComparisonExportProps) {
   const [isExporting, setIsExporting] = useState(false);
   const templateRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +48,7 @@ export function PDFExport({
 
       const opt = {
         margin: 0.5,
-        filename: `evaluacion-${evaluationId}.pdf`,
+        filename: `comparacion-evaluaciones-${firstEvaluation.id}-${secondEvaluation.id}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,
@@ -91,49 +81,43 @@ export function PDFExport({
       // Hide the template after export
       element.style.display = "none";
     } catch (error) {
-      console.error("Error exporting PDF:", error);
+      console.error("Error exporting comparison PDF:", error);
     } finally {
       setIsExporting(false);
     }
   };
 
+  const exportButton = (
+    <Button
+      variant="outline"
+      className="gap-2 bg-yellow-500 text-black hover:bg-yellow-600"
+      onClick={handleExportPDF}
+      disabled={isExporting}
+    >
+      <Download className="h-4 w-4" />
+      {isExporting ? "Generando PDF..." : "Exportar PDF"}
+    </Button>
+  );
+
   return (
     <div className="relative w-full">
-      <div className="absolute top-0 right-0 z-10">
-        <Button
-          variant="outline"
-          className="gap-2 bg-yellow-500 text-black hover:bg-yellow-600"
-          onClick={handleExportPDF}
-          disabled={isExporting}
-        >
-          <Download className="h-4 w-4" />
-          {isExporting ? "Generando PDF..." : "Exportar PDF"}
-        </Button>
-      </div>
+      {/* Conditionally render buttons based on renderButtons prop */}
+      {renderButtons ? (
+        renderButtons(exportButton)
+      ) : (
+        <div className="absolute top-0 right-0 z-10">{exportButton}</div>
+      )}
 
       {/* Regular display content */}
-      <div className="bg-white p-8 rounded-xl shadow-sm w-full max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Resultados de Evaluación
-          </h1>
-          <p className="text-gray-600">ID de Evaluación: {evaluationId}</p>
-        </div>
-        <div className="space-y-6">{children}</div>
-      </div>
+      <div className="w-full">{children}</div>
 
       {/* Hidden PDF template that will be used for export */}
       <div className="hidden print-only" ref={templateRef}>
-        <PDFTemplate
-          evaluationId={evaluationId}
-          score={score}
-          maxScore={maxScore}
-          maturityDescription={maturityDescription}
-          maturityLevelNumber={maturityLevelNumber}
-          categories={categories}
-          recommendations={recommendations}
+        <PDFComparisonTemplate
+          firstEvaluation={firstEvaluation}
+          secondEvaluation={secondEvaluation}
           quizData={quizData}
-          userInfo={userInfo}
+          evaluationType={evaluationType}
         />
       </div>
     </div>

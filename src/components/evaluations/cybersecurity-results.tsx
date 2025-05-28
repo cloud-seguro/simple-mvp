@@ -511,8 +511,13 @@ export function CybersecurityResults({
 
   // Calculate overall percentage early in the component
   // After maturity is defined, add an overall percentage calculation for use with colors
+  const cappedOverallScore =
+    quizData.id === "evaluacion-inicial"
+      ? Math.min(overallScore, maxPossibleScore)
+      : overallScore;
+
   const overallPercentage = Math.round(
-    (overallScore /
+    (cappedOverallScore /
       (quizData.id === "evaluacion-avanzada" ? 100 : maxPossibleScore)) *
       100
   );
@@ -584,7 +589,7 @@ export function CybersecurityResults({
       )}
 
       <main className={cn("flex-grow", isSharedView ? "p-4 md:p-8" : "p-0")}>
-        <div className={cn("mx-auto", isSharedView ? "max-w-3xl" : "w-full")}>
+        <div className={cn(isSharedView ? "mx-auto max-w-3xl" : "w-full")}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -661,7 +666,7 @@ export function CybersecurityResults({
               </div>
             )}
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 page-break-after">
               <h2 className="text-2xl font-semibold mb-8 text-gray-800">
                 Resumen General
               </h2>
@@ -680,8 +685,7 @@ export function CybersecurityResults({
                       : maxPossibleScore}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    {displayPercentage > 100 ? 100 : displayPercentage}% de
-                    madurez
+                    {displayPercentage}% de madurez
                   </p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -732,7 +736,12 @@ export function CybersecurityResults({
               </div>
             </div>
 
-            <div className={cn("p-6 rounded-lg shadow-sm", "bg-white")}>
+            <div
+              className={cn(
+                "p-6 rounded-lg shadow-sm",
+                "bg-white page-break-after"
+              )}
+            >
               <h2 className="text-xl font-semibold mb-4 text-gray-800">
                 Nivel de Madurez Actual
               </h2>
@@ -1065,7 +1074,7 @@ export function CybersecurityResults({
                       </div>
                     </CollapsibleTrigger>
                   </motion.div>
-                  <CollapsibleContent>
+                  <CollapsibleContent className="space-y-2 pt-3 avoid-page-break">
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
@@ -1520,37 +1529,25 @@ export function CybersecurityResults({
               </Collapsible>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-semibold mb-8 text-gray-800">
-                Desglose por Categoría y Recomendaciones
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 page-break-after">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+                Resultados por Categoría
               </h2>
-
-              {/* Show categories one by one with their questions */}
               <div className="space-y-8">
                 {categoryMaturityLevels.map(({ category, total, max }) => {
                   const percentage = Math.round((total / max) * 100);
-                  // Get all recommendations for this category
-                  const categoryRecommendations = recommendations.filter(
-                    (rec) => rec.category === category
-                  );
+                  const colorClass = getColorByPercentage(percentage);
 
                   return (
-                    <div key={category} className="space-y-4">
+                    <div
+                      key={category}
+                      className="p-4 rounded-lg border border-gray-200 bg-gray-50 avoid-page-break"
+                    >
                       {/* Category heading and score */}
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <h3
-                            className={`text-lg font-semibold ${
-                              percentage <= 20
-                                ? "text-red-600"
-                                : percentage <= 40
-                                  ? "text-orange-600"
-                                  : percentage <= 60
-                                    ? "text-yellow-600"
-                                    : percentage <= 80
-                                      ? "text-green-600"
-                                      : "text-blue-600"
-                            }`}
+                            className={`text-lg font-semibold ${colorClass.color}`}
                           >
                             {category}{" "}
                             {percentage <= 20
@@ -1583,19 +1580,7 @@ export function CybersecurityResults({
                           )}
                         />
                         <div className="flex justify-end mt-1">
-                          <span
-                            className={`text-xs ${
-                              percentage <= 20
-                                ? "text-red-600"
-                                : percentage <= 40
-                                  ? "text-orange-600"
-                                  : percentage <= 60
-                                    ? "text-yellow-600"
-                                    : percentage <= 80
-                                      ? "text-green-600"
-                                      : "text-blue-600"
-                            }`}
-                          >
+                          <span className={`text-xs ${colorClass.color}`}>
                             {percentage <= 20
                               ? "Crítico"
                               : percentage <= 40
@@ -1611,81 +1596,53 @@ export function CybersecurityResults({
 
                       {/* Questions in this category */}
                       <div className="pl-2 border-l-2 ml-2 space-y-4">
-                        {categoryRecommendations.map((rec) => {
-                          const questionPercentage = Math.round(
-                            (rec.score / rec.maxScore) * 100
-                          );
+                        {recommendations
+                          .filter((rec) => rec.category === category)
+                          .map((rec) => {
+                            const questionPercentage = Math.round(
+                              (rec.score / rec.maxScore) * 100
+                            );
 
-                          return (
-                            <div
-                              key={`${rec.category}-${rec.text}`}
-                              className="bg-gray-50 p-4 rounded-lg border border-gray-200"
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="flex-1">
-                                  <p className="font-medium text-gray-800 text-sm">
-                                    {rec.text}
-                                  </p>
-                                  <p className="text-xs text-gray-600 mt-1">
-                                    Respuesta: {rec.selectedOption}
-                                  </p>
-                                </div>
-                                <div className="text-right ml-4 flex-shrink-0">
-                                  <div
-                                    className={`text-sm font-medium ${
-                                      questionPercentage <= 20
-                                        ? "text-red-600"
-                                        : questionPercentage <= 40
-                                          ? "text-orange-600"
-                                          : questionPercentage <= 60
-                                            ? "text-yellow-600"
-                                            : questionPercentage <= 80
-                                              ? "text-green-600"
-                                              : "text-blue-600"
-                                    }`}
-                                  >
-                                    {rec.score}/{rec.maxScore}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    {questionPercentage}%
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Add progress bar for individual question score */}
-                              <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3">
-                                <div
-                                  className={`h-full rounded-full ${
-                                    questionPercentage <= 20
-                                      ? "bg-red-600"
-                                      : questionPercentage <= 40
-                                        ? "bg-orange-600"
-                                        : questionPercentage <= 60
-                                          ? "bg-yellow-600"
-                                          : questionPercentage <= 80
-                                            ? "bg-green-600"
-                                            : "bg-blue-600"
-                                  }`}
-                                  style={{ width: `${questionPercentage}%` }}
-                                ></div>
-                              </div>
-
+                            return (
                               <div
-                                className={`mt-3 pt-3 border-t border-gray-200 ${
-                                  questionPercentage <= 20
-                                    ? "bg-red-50"
-                                    : questionPercentage <= 40
-                                      ? "bg-orange-50"
-                                      : questionPercentage <= 60
-                                        ? "bg-yellow-50"
-                                        : questionPercentage <= 80
-                                          ? "bg-green-50"
-                                          : "bg-blue-50"
-                                } rounded-b-lg -mx-4 -mb-4 px-4 pb-4`}
+                                key={`${rec.category}-${rec.text}`}
+                                className="bg-gray-50 p-4 rounded-lg border border-gray-200 avoid-page-break"
                               >
-                                <p className="text-xs font-medium text-gray-700 flex items-center">
-                                  <span
-                                    className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-gray-800 text-sm">
+                                      {rec.text}
+                                    </p>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                      Respuesta: {rec.selectedOption}
+                                    </p>
+                                  </div>
+                                  <div className="text-right ml-4 flex-shrink-0">
+                                    <div
+                                      className={`text-sm font-medium ${
+                                        questionPercentage <= 20
+                                          ? "text-red-600"
+                                          : questionPercentage <= 40
+                                            ? "text-orange-600"
+                                            : questionPercentage <= 60
+                                              ? "text-yellow-600"
+                                              : questionPercentage <= 80
+                                                ? "text-green-600"
+                                                : "text-blue-600"
+                                      }`}
+                                    >
+                                      {rec.score}/{rec.maxScore}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {questionPercentage}%
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Add progress bar for individual question score */}
+                                <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3">
+                                  <div
+                                    className={`h-full rounded-full ${
                                       questionPercentage <= 20
                                         ? "bg-red-600"
                                         : questionPercentage <= 40
@@ -1696,40 +1653,197 @@ export function CybersecurityResults({
                                               ? "bg-green-600"
                                               : "bg-blue-600"
                                     }`}
-                                  ></span>
-                                  <span
-                                    className={`${
-                                      questionPercentage <= 20
-                                        ? "text-red-600"
-                                        : questionPercentage <= 40
-                                          ? "text-orange-600"
-                                          : questionPercentage <= 60
-                                            ? "text-yellow-600"
-                                            : questionPercentage <= 80
-                                              ? "text-green-600"
-                                              : "text-blue-600"
+                                    style={{ width: `${questionPercentage}%` }}
+                                  ></div>
+                                </div>
+
+                                <div
+                                  className={`mt-3 pt-3 border-t border-gray-200 ${
+                                    questionPercentage <= 20
+                                      ? "bg-red-50"
+                                      : questionPercentage <= 40
+                                        ? "bg-orange-50"
+                                        : questionPercentage <= 60
+                                          ? "bg-yellow-50"
+                                          : questionPercentage <= 80
+                                            ? "bg-green-50"
+                                            : "bg-blue-50"
+                                  } rounded-b-lg -mx-4 -mb-4 px-4 pb-4`}
+                                >
+                                  <p className="text-xs font-medium text-gray-700 flex items-center">
+                                    <span
+                                      className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                                        questionPercentage <= 20
+                                          ? "bg-red-600"
+                                          : questionPercentage <= 40
+                                            ? "bg-orange-600"
+                                            : questionPercentage <= 60
+                                              ? "bg-yellow-600"
+                                              : questionPercentage <= 80
+                                                ? "bg-green-600"
+                                                : "bg-blue-600"
+                                      }`}
+                                    ></span>
+                                    <span
+                                      className={`${
+                                        questionPercentage <= 20
+                                          ? "text-red-600"
+                                          : questionPercentage <= 40
+                                            ? "text-orange-600"
+                                            : questionPercentage <= 60
+                                              ? "text-yellow-600"
+                                              : questionPercentage <= 80
+                                                ? "text-green-600"
+                                                : "text-blue-600"
+                                      }`}
+                                    >
+                                      {questionPercentage <= 40
+                                        ? "Acción prioritaria"
+                                        : questionPercentage <= 70
+                                          ? "Acción recomendada"
+                                          : "Mantener"}
+                                    </span>
+                                  </p>
+                                  <p
+                                    className={`text-xs leading-relaxed mt-1 ${
+                                      questionPercentage <= 40
+                                        ? "font-medium"
+                                        : "font-normal"
                                     }`}
                                   >
-                                    {questionPercentage <= 40
-                                      ? "Acción prioritaria"
-                                      : questionPercentage <= 70
-                                        ? "Acción recomendada"
-                                        : "Mantener"}
-                                  </span>
-                                </p>
-                                <p
-                                  className={`text-xs leading-relaxed mt-1 ${
-                                    questionPercentage <= 40
-                                      ? "font-medium"
-                                      : "font-normal"
-                                  }`}
-                                >
-                                  {rec.recommendation}
-                                </p>
+                                    {rec.recommendation}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 page-break-after">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+                Recomendaciones Personalizadas
+              </h2>
+              <div className="space-y-8">
+                {recommendations.map((rec) => {
+                  const questionPercentage = Math.round(
+                    (rec.score / rec.maxScore) * 100
+                  );
+
+                  return (
+                    <div
+                      key={`${rec.category}-${rec.text}`}
+                      className="bg-gray-50 p-4 rounded-lg border border-gray-200 avoid-page-break"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800 text-sm">
+                            {rec.text}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Respuesta: {rec.selectedOption}
+                          </p>
+                        </div>
+                        <div className="text-right ml-4 flex-shrink-0">
+                          <div
+                            className={`text-sm font-medium ${
+                              questionPercentage <= 20
+                                ? "text-red-600"
+                                : questionPercentage <= 40
+                                  ? "text-orange-600"
+                                  : questionPercentage <= 60
+                                    ? "text-yellow-600"
+                                    : questionPercentage <= 80
+                                      ? "text-green-600"
+                                      : "text-blue-600"
+                            }`}
+                          >
+                            {rec.score}/{rec.maxScore}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {questionPercentage}%
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Add progress bar for individual question score */}
+                      <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3">
+                        <div
+                          className={`h-full rounded-full ${
+                            questionPercentage <= 20
+                              ? "bg-red-600"
+                              : questionPercentage <= 40
+                                ? "bg-orange-600"
+                                : questionPercentage <= 60
+                                  ? "bg-yellow-600"
+                                  : questionPercentage <= 80
+                                    ? "bg-green-600"
+                                    : "bg-blue-600"
+                          }`}
+                          style={{ width: `${questionPercentage}%` }}
+                        ></div>
+                      </div>
+
+                      <div
+                        className={`mt-3 pt-3 border-t border-gray-200 ${
+                          questionPercentage <= 20
+                            ? "bg-red-50"
+                            : questionPercentage <= 40
+                              ? "bg-orange-50"
+                              : questionPercentage <= 60
+                                ? "bg-yellow-50"
+                                : questionPercentage <= 80
+                                  ? "bg-green-50"
+                                  : "bg-blue-50"
+                        } rounded-b-lg -mx-4 -mb-4 px-4 pb-4`}
+                      >
+                        <p className="text-xs font-medium text-gray-700 flex items-center">
+                          <span
+                            className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                              questionPercentage <= 20
+                                ? "bg-red-600"
+                                : questionPercentage <= 40
+                                  ? "bg-orange-600"
+                                  : questionPercentage <= 60
+                                    ? "bg-yellow-600"
+                                    : questionPercentage <= 80
+                                      ? "bg-green-600"
+                                      : "bg-blue-600"
+                            }`}
+                          ></span>
+                          <span
+                            className={`${
+                              questionPercentage <= 20
+                                ? "text-red-600"
+                                : questionPercentage <= 40
+                                  ? "text-orange-600"
+                                  : questionPercentage <= 60
+                                    ? "text-yellow-600"
+                                    : questionPercentage <= 80
+                                      ? "text-green-600"
+                                      : "text-blue-600"
+                            }`}
+                          >
+                            {questionPercentage <= 40
+                              ? "Acción prioritaria"
+                              : questionPercentage <= 70
+                                ? "Acción recomendada"
+                                : "Mantener"}
+                          </span>
+                        </p>
+                        <p
+                          className={`text-xs leading-relaxed mt-1 ${
+                            questionPercentage <= 40
+                              ? "font-medium"
+                              : "font-normal"
+                          }`}
+                        >
+                          {rec.recommendation}
+                        </p>
                       </div>
                     </div>
                   );

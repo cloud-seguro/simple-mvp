@@ -58,10 +58,12 @@ export function canAccessDashboard(userRole?: string | null): boolean {
 /**
  * Calculates the security score based on evaluation answers
  * @param answers - JSON object containing question IDs and selected option values
- * @returns A score between 0 and 100
+ * @param evaluationType - The type of evaluation ("INITIAL" or "ADVANCED")
+ * @returns For initial evaluations: raw score (0-45), for advanced evaluations: percentage (0-100)
  */
 export function calculateSecurityScore(
-  answers: Record<string, number>
+  answers: Record<string, number>,
+  evaluationType?: "INITIAL" | "ADVANCED"
 ): number {
   if (!answers || Object.keys(answers).length === 0) {
     return 0;
@@ -70,11 +72,17 @@ export function calculateSecurityScore(
   // Get all the values (selected option scores)
   const values = Object.values(answers);
 
-  // Calculate the total possible score (assuming max value of 3 per question)
-  const maxPossibleScore = Object.keys(answers).length * 3;
-
   // Calculate the actual score
   const actualScore = values.reduce((sum, value) => sum + value, 0);
+
+  // For initial evaluations, return the raw score (max 45)
+  if (evaluationType === "INITIAL") {
+    return actualScore;
+  }
+
+  // For advanced evaluations, calculate percentage (0-100)
+  // Calculate the total possible score (assuming max value of 3 per question)
+  const maxPossibleScore = Object.keys(answers).length * 3;
 
   // Convert to a 0-100 scale
   return Math.round((actualScore / maxPossibleScore) * 100);
@@ -126,7 +134,7 @@ export async function createEvaluation(data: {
 
   try {
     // Calculate the security score
-    const score = calculateSecurityScore(data.answers);
+    const score = calculateSecurityScore(data.answers, data.type);
 
     // Create the evaluation with interest data if provided
     const evaluation = await prisma.evaluation.create({

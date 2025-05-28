@@ -82,7 +82,7 @@ export function EvaluationsList({ evaluations }: EvaluationsListProps) {
       id: "actions",
       header: "Acciones",
       cell: ({ row }) => (
-        <div className="text-right">
+        <div className="flex justify-center">
           <Button
             variant="ghost"
             size="sm"
@@ -104,15 +104,6 @@ export function EvaluationsList({ evaluations }: EvaluationsListProps) {
     },
   ];
 
-  // Calculate average score
-  const averageScore =
-    evaluations.length > 0
-      ? Math.round(
-          evaluations.reduce((acc, curr) => acc + (curr.score || 0), 0) /
-            evaluations.length
-        )
-      : null;
-
   return (
     <DataTable
       title="Tus Evaluaciones"
@@ -125,12 +116,6 @@ export function EvaluationsList({ evaluations }: EvaluationsListProps) {
       rowSelection={false}
       pageSize={10}
       onRowClick={(row) => handleViewEvaluation(row.id)}
-      customActions={[
-        {
-          label: `Promedio: ${averageScore !== null ? `${averageScore}%` : "N/A"}`,
-          onClick: () => {},
-        },
-      ]}
     />
   );
 }

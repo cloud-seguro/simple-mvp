@@ -131,7 +131,7 @@ async function AdminEvaluationsContent() {
 
 export default function AdminEvaluationsPage() {
   return (
-    <div className="container py-8">
+    <div className="w-full py-8">
       <Suspense>
         <AdminEvaluationsContent />
       </Suspense>

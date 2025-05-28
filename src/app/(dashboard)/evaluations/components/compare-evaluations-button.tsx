@@ -153,14 +153,12 @@ export function CompareEvaluationsButton({
                 disabled={initialEvaluationsCount < 2}
               >
                 Evaluaciones Iniciales{" "}
-                {initialEvaluationsCount < 2 ? "(Insuficientes)" : ""}
               </TabsTrigger>
               <TabsTrigger
                 value="ADVANCED"
                 disabled={advancedEvaluationsCount < 2}
               >
                 Evaluaciones Avanzadas{" "}
-                {advancedEvaluationsCount < 2 ? "(Insuficientes)" : ""}
               </TabsTrigger>
             </TabsList>
 

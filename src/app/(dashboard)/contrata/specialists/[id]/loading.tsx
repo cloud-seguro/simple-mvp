@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function SpecialistDetailLoading() {
   return (
-    <div className="container py-8 space-y-8">
+    <div className="w-full py-8 space-y-8">
       {/* Header with back button */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/contrata/specialists">

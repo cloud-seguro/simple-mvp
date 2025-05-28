@@ -2,6 +2,9 @@ import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { prisma } from "@/lib/prisma";
 import { EvaluationsClient } from "./components/evaluations-client";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +22,7 @@ export default async function EvaluationsPage() {
 
   if (!session) {
     return (
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <h2 className="text-2xl font-bold">Sesión no encontrada</h2>
           <p className="text-muted-foreground">
@@ -30,7 +33,7 @@ export default async function EvaluationsPage() {
     );
   }
 
-  // Get the user's profile
+  // Get the user's profile to check their role
   const profile = await prisma.profile.findUnique({
     where: { userId: session.user.id },
     select: { id: true, firstName: true, lastName: true },
@@ -38,7 +41,7 @@ export default async function EvaluationsPage() {
 
   if (!profile) {
     return (
-      <div className="container py-8">
+      <div className="w-full py-8">
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <h2 className="text-2xl font-bold">Perfil no encontrado</h2>
           <p className="text-muted-foreground">
@@ -56,12 +59,20 @@ export default async function EvaluationsPage() {
   });
 
   return (
-    <div className="container py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Historial de Evaluaciones</h1>
-        <p className="text-muted-foreground mt-2">
-          Gestiona y compara tus evaluaciones de ciberseguridad
-        </p>
+    <div className="w-full py-8">
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold">Historial de Evaluaciones</h1>
+          <p className="text-muted-foreground mt-2">
+            Gestiona y compara tus evaluaciones de ciberseguridad
+          </p>
+        </div>
+        <Link href="/quiz">
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Nueva Evaluación
+          </Button>
+        </Link>
       </div>
       <EvaluationsClient evaluations={evaluations} />
     </div>
