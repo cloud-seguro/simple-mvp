@@ -28,11 +28,13 @@ interface EvaluationData {
 
 interface Evaluation {
   id: string;
+  title: string;
+  createdAt: string;
   // Add other properties of the evaluation object as needed
 }
 
 interface EvaluationContentProps {
-  evaluation: Evaluation; // Replaced 'any' with a defined interface
+  evaluation: Evaluation;
   quizData: QuizData;
   answers: Record<string, number>;
   userInfo: UserInfo;
@@ -49,7 +51,17 @@ export function EvaluationContent({
   const id = evaluation.id;
 
   return (
-    <PDFExport evaluationId={id}>
+    <PDFExport
+      evaluationId={id}
+      score={evaluationData.score}
+      maxScore={evaluationData.maxScore}
+      maturityDescription={evaluationData.maturityDescription}
+      maturityLevelNumber={evaluationData.maturityLevelNumber}
+      categories={evaluationData.categories}
+      recommendations={evaluationData.recommendations}
+      quizData={quizData}
+      userInfo={userInfo}
+    >
       <CybersecurityResults
         score={evaluationData.score}
         maxScore={evaluationData.maxScore}

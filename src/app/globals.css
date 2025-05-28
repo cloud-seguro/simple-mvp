@@ -334,3 +334,76 @@ body:not([data-navigation-active="true"]) .content-wrapper {
   opacity: 0;
   transition: opacity 0.2s;
 }
+
+/* PDF Export Page Break Styles */
+@media print {
+  .page-break-after {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .avoid-page-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Ensure .print-only elements are visible when printing/generating PDFs */
+  .print-only {
+    display: block !important;
+  }
+
+  /* PDF Document specific styles */
+  .pdf-document {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+
+  /* Ensure each section has proper spacing */
+  .pdf-document > div > div {
+    margin-bottom: 15px !important;
+  }
+
+  /* Override any fixed positioning which can cause issues in PDFs */
+  .fixed,
+  .absolute,
+  .sticky {
+    position: relative !important;
+  }
+
+  /* Hide elements that shouldn't be in the PDF */
+  button,
+  nav,
+  header:not(.print-header) {
+    display: none !important;
+  }
+
+  /* Ensure proper rendering of backgrounds and colors */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reset any flex/grid to block for better PDF rendering */
+  .grid {
+    display: block !important;
+  }
+
+  /* Increase font sizes slightly for better readability in PDF */
+  body {
+    font-size: 12pt;
+  }
+
+  h1 {
+    font-size: 18pt;
+  }
+
+  h2 {
+    font-size: 16pt;
+  }
+
+  h3 {
+    font-size: 14pt;
+  }
+}
