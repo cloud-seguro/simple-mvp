@@ -4,10 +4,22 @@ import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import Stripe from "stripe";
 import { UserRole, Prisma } from "@prisma/client";
+import { Resend } from "resend";
+import { SubscriptionPaymentSuccessEmail } from "@/components/emails/subscription-payment-success";
+import { SubscriptionPaymentFailedEmail } from "@/components/emails/subscription-payment-failed";
+import React from "react";
+
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Define a proper interface that extends Stripe.Subscription
 interface StripeSubscriptionWithPeriod extends Stripe.Subscription {
   current_period_end: number;
+}
+
+// Define interface for invoice with subscription
+interface StripeInvoiceWithSubscription extends Stripe.Invoice {
+  subscription: string | Stripe.Subscription | null;
 }
 
 // Define an interface for the update data to fix TypeScript errors
@@ -48,6 +60,174 @@ function getOneMonthFromNow(): Date {
   const date = new Date();
   date.setMonth(date.getMonth() + 1);
   return date;
+}
+
+// Helper function to find user by customer ID
+async function findUserByCustomerId(
+  customerId: string
+): Promise<string | null> {
+  try {
+    const customer = (await stripe.customers.retrieve(
+      customerId
+    )) as Stripe.Customer;
+    return customer.metadata?.userId || null;
+  } catch (error) {
+    console.error(`❌ Error retrieving customer ${customerId}:`, error);
+    return null;
+  }
+}
+
+// Helper function to get user profile data
+async function getUserProfile(userId: string) {
+  try {
+    const profile = await db.profile.findUnique({
+      where: { userId },
+      select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        stripeSubscriptionId: true,
+        stripePriceId: true,
+        stripeCurrentPeriodEnd: true,
+      },
+    });
+    return profile;
+  } catch (error) {
+    console.error(`❌ Error retrieving user profile ${userId}:`, error);
+    return null;
+  }
+}
+
+// Helper function to format amount from Stripe (cents to currency)
+function formatAmountFromStripe(amount: number): string {
+  return (amount / 100).toFixed(2);
+}
+
+// Helper function to format date to readable string
+function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+}
+
+// Helper function to get subscription type from price ID
+function getSubscriptionType(priceId: string | null): string {
+  // You can customize this based on your actual price IDs
+  if (!priceId) return "Premium";
+
+  // Add logic to determine subscription type based on price ID
+  // This is a placeholder - adjust based on your actual pricing structure
+  if (priceId.includes("monthly")) return "Premium Mensual";
+  if (priceId.includes("yearly")) return "Premium Anual";
+  return "Premium";
+}
+
+// Helper function to send payment success email
+async function sendPaymentSuccessEmail(
+  userId: string,
+  invoice: StripeInvoiceWithSubscription
+) {
+  try {
+    const profile = await getUserProfile(userId);
+    if (!profile || !profile.email) {
+      console.error(`❌ No profile or email found for user ${userId}`);
+      return;
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const amount = formatAmountFromStripe(invoice.amount_paid || 0);
+    const currency = (invoice.currency || "usd").toLowerCase();
+
+    // Calculate next billing date (current period end + 1 month/year)
+    const currentPeriodEnd = profile.stripeCurrentPeriodEnd;
+    const nextBillingDate = currentPeriodEnd
+      ? formatDate(currentPeriodEnd)
+      : "Próximamente";
+
+    const subscriptionType = getSubscriptionType(profile.stripePriceId);
+
+    console.log(`📧 Sending payment success email to ${profile.email}`);
+
+    const { data, error } = await resend.emails.send({
+      from: "Facturación SIMPLE <info@ciberseguridadsimple.com>",
+      to: [profile.email],
+      subject: "✅ Pago procesado exitosamente - SIMPLE",
+      react: React.createElement(SubscriptionPaymentSuccessEmail, {
+        firstName: profile.firstName || "Usuario",
+        baseUrl,
+        amount,
+        currency,
+        nextBillingDate,
+        subscriptionType,
+      }),
+    });
+
+    if (error) {
+      console.error("❌ Error sending payment success email:", error);
+    } else {
+      console.log(`✅ Payment success email sent - ID: ${data?.id}`);
+    }
+  } catch (error) {
+    console.error("❌ Error in sendPaymentSuccessEmail:", error);
+  }
+}
+
+// Helper function to send payment failed email
+async function sendPaymentFailedEmail(
+  userId: string,
+  invoice: StripeInvoiceWithSubscription,
+  subscription: Stripe.Subscription
+) {
+  try {
+    const profile = await getUserProfile(userId);
+    if (!profile || !profile.email) {
+      console.error(`❌ No profile or email found for user ${userId}`);
+      return;
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const amount = formatAmountFromStripe(invoice.amount_due || 0);
+    const currency = (invoice.currency || "usd").toLowerCase();
+
+    // Calculate retry date (usually next attempt is in a few days)
+    const retryDate = new Date();
+    retryDate.setDate(retryDate.getDate() + 3); // Stripe typically retries in 3 days
+    const formattedRetryDate = formatDate(retryDate);
+
+    const subscriptionType = getSubscriptionType(profile.stripePriceId);
+
+    // Get failure reason if available
+    const failureReason = subscription.latest_invoice
+      ? "Fondos insuficientes o tarjeta rechazada"
+      : "Error en el procesamiento del pago";
+
+    console.log(`📧 Sending payment failed email to ${profile.email}`);
+
+    const { data, error } = await resend.emails.send({
+      from: "Facturación SIMPLE <info@ciberseguridadsimple.com>",
+      to: [profile.email],
+      subject: "⚠️ Problema con tu pago - SIMPLE",
+      react: React.createElement(SubscriptionPaymentFailedEmail, {
+        firstName: profile.firstName || "Usuario",
+        baseUrl,
+        amount,
+        currency,
+        failureReason,
+        retryDate: formattedRetryDate,
+        subscriptionType,
+      }),
+    });
+
+    if (error) {
+      console.error("❌ Error sending payment failed email:", error);
+    } else {
+      console.log(`✅ Payment failed email sent - ID: ${data?.id}`);
+    }
+  } catch (error) {
+    console.error("❌ Error in sendPaymentFailedEmail:", error);
+  }
 }
 
 /**
@@ -109,47 +289,82 @@ export async function POST(req: NextRequest) {
     );
 
     // Handle different event types
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        console.log(`💰 Checkout session completed: ${session.id}`);
+    try {
+      switch (event.type) {
+        case "checkout.session.completed": {
+          const session = event.data.object as Stripe.Checkout.Session;
+          console.log(`💰 Checkout session completed: ${session.id}`);
+          await handleCheckoutSessionCompleted(session);
+          break;
+        }
 
-        // Log all metadata to debug
-        console.log(`📄 Session metadata:`, session.metadata);
-        console.log(`📄 Customer ID: ${session.customer}`);
-        console.log(`📄 Subscription ID: ${session.subscription}`);
+        case "checkout.session.expired": {
+          const session = event.data.object as Stripe.Checkout.Session;
+          console.log(`⏰ Checkout session expired: ${session.id}`);
+          await handleCheckoutSessionExpired(session);
+          break;
+        }
 
-        await handleCheckoutSessionCompleted(session);
-        break;
+        case "customer.created": {
+          const customer = event.data.object as Stripe.Customer;
+          console.log(`👤 Customer created: ${customer.id}`);
+          await handleCustomerCreated(customer);
+          break;
+        }
+
+        case "customer.subscription.created": {
+          const subscription = event.data.object as Stripe.Subscription;
+          console.log(`🆕 Subscription created: ${subscription.id}`);
+          await handleSubscriptionCreated(subscription);
+          break;
+        }
+
+        case "customer.subscription.updated": {
+          const subscription = event.data.object as Stripe.Subscription;
+          console.log(`🔄 Subscription updated: ${subscription.id}`);
+          await handleSubscriptionUpdated(subscription);
+          break;
+        }
+
+        case "customer.subscription.deleted": {
+          const subscription = event.data.object as Stripe.Subscription;
+          console.log(`🗑️ Subscription deleted: ${subscription.id}`);
+          await handleSubscriptionDeleted(subscription);
+          break;
+        }
+
+        case "invoice.payment_succeeded": {
+          const invoice = event.data.object as StripeInvoiceWithSubscription;
+          console.log(`💳 Payment succeeded for invoice: ${invoice.id}`);
+          await handleInvoicePaymentSucceeded(invoice);
+          break;
+        }
+
+        case "invoice.payment_failed": {
+          const invoice = event.data.object as StripeInvoiceWithSubscription;
+          console.log(`💸 Payment failed for invoice: ${invoice.id}`);
+          await handleInvoicePaymentFailed(invoice);
+          break;
+        }
+
+        default:
+          console.log(`ℹ️ Unhandled event type: ${event.type}`);
       }
 
-      case "customer.subscription.created": {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCreated(subscription);
-        break;
-      }
-
-      case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(subscription);
-        break;
-      }
-
-      case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(subscription);
-        break;
-      }
-
-      default:
-        console.log(`ℹ️ Unhandled event type: ${event.type}`);
+      // Always return 200 to acknowledge successful processing
+      return NextResponse.json({ received: true }, { status: 200 });
+    } catch (error) {
+      console.error(`❌ Error processing event ${event.type}:`, error);
+      // Return 500 for processing errors to trigger Stripe retry
+      return NextResponse.json(
+        { error: "Error processing webhook event" },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("❌ Error processing webhook:", error);
+    console.error("❌ Critical error processing webhook:", error);
     return NextResponse.json(
-      { error: "Error processing webhook" },
+      { error: "Critical error processing webhook" },
       { status: 500 }
     );
   }
@@ -161,19 +376,19 @@ export async function POST(req: NextRequest) {
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session
 ) {
-  // Extract the userId from session metadata
-  const userId = session.metadata?.userId;
+  try {
+    // Extract the userId from session metadata
+    const userId = session.metadata?.userId;
 
-  if (!userId) {
-    console.error("No userId found in session metadata");
-    return;
-  }
+    if (!userId) {
+      console.error("❌ No userId found in session metadata");
+      return;
+    }
 
-  console.log(`📋 Processing checkout session for user: ${userId}`);
+    console.log(`📋 Processing checkout session for user: ${userId}`);
 
-  if (session.mode === "subscription") {
-    // Get subscription details
-    if (session.subscription) {
+    if (session.mode === "subscription" && session.subscription) {
+      // Get subscription details
       const subscriptionId =
         typeof session.subscription === "string"
           ? session.subscription
@@ -189,82 +404,80 @@ async function handleCheckoutSessionCompleted(
         console.log(
           `✅ Retrieved subscription: ${subscription.id}, status: ${subscription.status}`
         );
-        console.log(`👤 Customer ID: ${subscription.customer}`);
 
         // Update user profile with Stripe info and set to PREMIUM if active
-        console.log(
-          `⬆️ Upgrading user ${userId} to PREMIUM role via Stripe subscription`
-        );
-
-        try {
-          // Update both role and Stripe fields in a single operation
-          const customerId = subscription.customer as string;
-          const priceId = subscription.items.data[0]?.price.id || null;
-
-          // Safely convert the period_end to Date
-          const periodEndTimestamp = (
-            subscription as unknown as StripeSubscriptionWithPeriod
-          ).current_period_end;
-          console.log(
-            `🕒 Subscription period_end timestamp: ${periodEndTimestamp}`
-          );
-          const periodEnd = safelyConvertTimestampToDate(periodEndTimestamp);
-
-          // Create a fallback date 1 month from now
-          const oneMonthFromNow = getOneMonthFromNow();
-
-          console.log(`📊 Stripe data to save:
-            - Customer ID: ${customerId}
-            - Subscription ID: ${subscriptionId}
-            - Price ID: ${priceId}
-            - Period End: ${periodEnd ? periodEnd.toISOString() : "using fallback: " + oneMonthFromNow.toISOString()}
-          `);
-
-          // Create update data object with correct camelCase field names
-          const updateData: ProfileStripeUpdate = {
-            role: UserRole.PREMIUM,
-            stripeCustomerId: customerId,
-            stripeSubscriptionId: subscriptionId,
-            stripePriceId: priceId,
-            // Use the period end from Stripe or fall back to one month from now
-            stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
-          };
-
-          await db.profile.update({
-            where: { userId },
-            data: updateData as unknown as Prisma.ProfileUpdateInput,
-          });
-          console.log(
-            `✅ User profile updated to PREMIUM with subscription details`
-          );
-        } catch (error) {
-          console.error(`❌ Error updating user profile:`, error);
-
-          // Try updating just the role if the full update failed
-          try {
-            await db.profile.update({
-              where: { userId },
-              data: {
-                role: UserRole.PREMIUM,
-              } as unknown as Prisma.ProfileUpdateInput,
-            });
-            console.log(
-              `⚠️ Only updated user role, stripe details update failed`
-            );
-          } catch (secondError) {
-            console.error(`❌ Error updating role:`, secondError);
-          }
+        if (subscription.status === "active") {
+          await updateUserSubscription(userId, subscription);
         }
       } catch (error) {
         console.error("❌ Error retrieving subscription details:", error);
+        throw error;
       }
     } else {
-      console.error(
-        "❌ No subscription found in the completed checkout session"
-      );
+      console.log(`ℹ️ Session mode is not subscription: ${session.mode}`);
     }
-  } else {
-    console.log(`ℹ️ Session mode is not subscription: ${session.mode}`);
+  } catch (error) {
+    console.error("❌ Error handling checkout session completed:", error);
+    throw error;
+  }
+}
+
+/**
+ * Handle checkout.session.expired event
+ */
+async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
+  try {
+    // Extract the userId from session metadata
+    const userId = session.metadata?.userId;
+
+    if (!userId) {
+      console.error("❌ No userId found in session metadata");
+      return;
+    }
+
+    console.log(`⏰ Checkout session expired: ${session.id}`);
+
+    // Downgrade user to FREE plan and clear subscription details
+    await downgradeUser(userId, true);
+  } catch (error) {
+    console.error("❌ Error handling checkout session expired:", error);
+    throw error;
+  }
+}
+
+/**
+ * Handle customer.created event
+ */
+async function handleCustomerCreated(customer: Stripe.Customer) {
+  try {
+    console.log(`👤 Customer created: ${customer.id}`);
+
+    const userId = customer.metadata?.userId;
+
+    if (!userId) {
+      console.log(
+        "ℹ️ No userId found in customer metadata - likely a direct Stripe customer creation"
+      );
+      return;
+    }
+
+    console.log(`👤 User ID from metadata: ${userId}`);
+
+    // Try to update user profile with customer ID
+    try {
+      await db.profile.update({
+        where: { userId },
+        data: {
+          stripeCustomerId: customer.id,
+        } as unknown as Prisma.ProfileUpdateInput,
+      });
+      console.log(`✅ User profile updated with Stripe customer ID`);
+    } catch (error) {
+      console.error(`❌ Error updating user profile with customer ID:`, error);
+    }
+  } catch (error) {
+    console.error("❌ Error handling customer created event:", error);
+    throw error;
   }
 }
 
@@ -277,85 +490,23 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       `🆕 New subscription created: ${subscription.id}, status: ${subscription.status}`
     );
 
-    // Extract customer ID and get customer details
     const customerId = subscription.customer as string;
-    console.log(`🔍 Retrieving customer details for: ${customerId}`);
+    const userId = await findUserByCustomerId(customerId);
 
-    const customer = (await stripe.customers.retrieve(
-      customerId
-    )) as Stripe.Customer;
-
-    // Find user by customer metadata
-    const userId = customer.metadata.userId;
-    console.log(`👤 User ID from metadata: ${userId || "not found"}`);
-
-    if (userId) {
-      // Update user profile with Stripe info
-      console.log(
-        `⬆️ Upgrading user ${userId} to PREMIUM role via subscription creation`
-      );
-
-      try {
-        // Safely convert the period_end to Date
-        const periodEndTimestamp = (
-          subscription as unknown as StripeSubscriptionWithPeriod
-        ).current_period_end;
-        console.log(
-          `🕒 Subscription period_end timestamp: ${periodEndTimestamp}`
-        );
-        const periodEnd = safelyConvertTimestampToDate(periodEndTimestamp);
-        const priceId = subscription.items.data[0]?.price.id || null;
-
-        // Create a fallback date 1 month from now
-        const oneMonthFromNow = getOneMonthFromNow();
-
-        console.log(`📊 Stripe data to save:
-          - Customer ID: ${customerId}
-          - Subscription ID: ${subscription.id}
-          - Price ID: ${priceId}
-          - Period End: ${periodEnd ? periodEnd.toISOString() : "using fallback: " + oneMonthFromNow.toISOString()}
-        `);
-
-        // Create update data object with correct camelCase field names
-        const updateData: ProfileStripeUpdate = {
-          role: UserRole.PREMIUM,
-          stripeCustomerId: customerId,
-          stripeSubscriptionId: subscription.id,
-          stripePriceId: priceId,
-          // Use the period end from Stripe or fall back to one month from now
-          stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
-        };
-
-        await db.profile.update({
-          where: { userId },
-          data: updateData as unknown as Prisma.ProfileUpdateInput,
-        });
-        console.log(
-          `✅ User profile updated to PREMIUM with subscription details`
-        );
-      } catch (error) {
-        console.error(`❌ Error updating user profile:`, error);
-
-        // Try updating just the role if the full update failed
-        try {
-          await db.profile.update({
-            where: { userId },
-            data: {
-              role: UserRole.PREMIUM,
-            } as unknown as Prisma.ProfileUpdateInput,
-          });
-          console.log(
-            `⚠️ Only updated user role, stripe details update failed`
-          );
-        } catch (secondError) {
-          console.error(`❌ Error updating role:`, secondError);
-        }
-      }
-    } else {
+    if (!userId) {
       console.error("❌ No userId found in customer metadata");
+      return;
+    }
+
+    console.log(`👤 User ID from metadata: ${userId}`);
+
+    // Update user profile with Stripe info if subscription is active
+    if (subscription.status === "active") {
+      await updateUserSubscription(userId, subscription);
     }
   } catch (error) {
     console.error("❌ Error handling subscription created event:", error);
+    throw error;
   }
 }
 
@@ -364,84 +515,34 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
  */
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   try {
-    // Extract customer ID and get customer details
+    console.log(
+      `🔄 Subscription updated: ${subscription.id}, status: ${subscription.status}`
+    );
+
     const customerId = subscription.customer as string;
-    const customer = (await stripe.customers.retrieve(
-      customerId
-    )) as Stripe.Customer;
+    const userId = await findUserByCustomerId(customerId);
 
-    // Find user by customer metadata
-    const userId = customer.metadata.userId;
+    if (!userId) {
+      console.error("❌ No userId found in customer metadata");
+      return;
+    }
 
-    if (userId) {
-      // Check subscription status
-      if (subscription.status === "active") {
-        // Safely convert the period_end to Date
-        const periodEndTimestamp = (
-          subscription as unknown as StripeSubscriptionWithPeriod
-        ).current_period_end;
-        const periodEnd = safelyConvertTimestampToDate(periodEndTimestamp);
-        const priceId = subscription.items.data[0]?.price.id || null;
-
-        // Create a fallback date 1 month from now
-        const oneMonthFromNow = getOneMonthFromNow();
-
-        try {
-          // Create update data object with correct camelCase field names
-          const updateData: ProfileStripeUpdate = {
-            role: UserRole.PREMIUM,
-            stripeSubscriptionId: subscription.id,
-            stripePriceId: priceId,
-            // Use the period end from Stripe or fall back to one month from now
-            stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
-          };
-
-          await db.profile.update({
-            where: { userId },
-            data: updateData as unknown as Prisma.ProfileUpdateInput,
-          });
-          console.log(`✅ User profile updated on subscription update`);
-        } catch (error) {
-          console.error(`❌ Error updating user profile:`, error);
-        }
-      } else if (
-        subscription.status === "past_due" ||
-        subscription.status === "canceled" ||
-        subscription.status === "unpaid"
-      ) {
-        // Downgrade user if subscription is no longer active
-        try {
-          if (subscription.status === "canceled") {
-            await db.profile.update({
-              where: { userId },
-              data: {
-                role: UserRole.FREE,
-                stripeSubscriptionId: null,
-                stripePriceId: null,
-                stripeCurrentPeriodEnd: null,
-              } as unknown as Prisma.ProfileUpdateInput,
-            });
-          } else {
-            await db.profile.update({
-              where: { userId },
-              data: {
-                role: UserRole.FREE,
-                stripeSubscriptionId: subscription.id,
-              } as unknown as Prisma.ProfileUpdateInput,
-            });
-          }
-          console.log(
-            `✅ User downgraded to FREE due to subscription status: ${subscription.status}`
-          );
-        } catch (error) {
-          console.error(`❌ Error downgrading user:`, error);
-        }
-      }
-    } else {
-      console.error("No userId found in customer metadata");
+    // Handle different subscription statuses
+    if (subscription.status === "active") {
+      // Subscription is active - update user to premium
+      await updateUserSubscription(userId, subscription);
+    } else if (
+      subscription.status === "past_due" ||
+      subscription.status === "canceled" ||
+      subscription.status === "unpaid" ||
+      subscription.status === "incomplete_expired"
+    ) {
+      // Subscription is no longer active - downgrade user
+      await downgradeUser(userId, subscription.status === "canceled");
     }
   } catch (error) {
-    console.error("Error handling subscription updated event:", error);
+    console.error("❌ Error handling subscription updated event:", error);
+    throw error;
   }
 }
 
@@ -450,35 +551,211 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
  */
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
-    // Extract customer ID and get customer details
+    console.log(`🗑️ Subscription deleted: ${subscription.id}`);
+
     const customerId = subscription.customer as string;
-    const customer = (await stripe.customers.retrieve(
-      customerId
-    )) as Stripe.Customer;
+    const userId = await findUserByCustomerId(customerId);
 
-    // Find user by customer metadata
-    const userId = customer.metadata.userId;
-
-    if (userId) {
-      // Downgrade user to FREE plan and clear subscription details
-      try {
-        await db.profile.update({
-          where: { userId },
-          data: {
-            role: UserRole.FREE,
-            stripeSubscriptionId: null,
-            stripePriceId: null,
-            stripeCurrentPeriodEnd: null,
-          } as unknown as Prisma.ProfileUpdateInput,
-        });
-        console.log(`✅ User subscription details cleared on deletion`);
-      } catch (error) {
-        console.error(`❌ Error clearing user subscription details:`, error);
-      }
-    } else {
-      console.error("No userId found in customer metadata");
+    if (!userId) {
+      console.error("❌ No userId found in customer metadata");
+      return;
     }
+
+    // Downgrade user to FREE plan and clear subscription details
+    await downgradeUser(userId, true);
   } catch (error) {
-    console.error("Error handling subscription deleted event:", error);
+    console.error("❌ Error handling subscription deleted event:", error);
+    throw error;
+  }
+}
+
+/**
+ * Handle invoice.payment_succeeded event (for subscription renewals)
+ */
+async function handleInvoicePaymentSucceeded(
+  invoice: StripeInvoiceWithSubscription
+) {
+  try {
+    console.log(`💳 Payment succeeded for invoice: ${invoice.id}`);
+
+    // Check if this is for a subscription
+    if (!invoice.subscription) {
+      console.log("ℹ️ Invoice is not for a subscription, skipping");
+      return;
+    }
+
+    const subscriptionId =
+      typeof invoice.subscription === "string"
+        ? invoice.subscription
+        : invoice.subscription.id;
+
+    // Get the subscription details
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    const customerId = subscription.customer as string;
+    const userId = await findUserByCustomerId(customerId);
+
+    if (!userId) {
+      console.error("❌ No userId found in customer metadata");
+      return;
+    }
+
+    console.log(`💰 Subscription payment succeeded for user: ${userId}`);
+
+    // Update the subscription details (this extends the period)
+    if (subscription.status === "active") {
+      await updateUserSubscription(userId, subscription);
+      console.log(`✅ Subscription renewed for user: ${userId}`);
+    }
+
+    await sendPaymentSuccessEmail(userId, invoice);
+  } catch (error) {
+    console.error("❌ Error handling invoice payment succeeded:", error);
+    throw error;
+  }
+}
+
+/**
+ * Handle invoice.payment_failed event
+ */
+async function handleInvoicePaymentFailed(
+  invoice: StripeInvoiceWithSubscription
+) {
+  try {
+    console.log(`💸 Payment failed for invoice: ${invoice.id}`);
+
+    // Check if this is for a subscription
+    if (!invoice.subscription) {
+      console.log("ℹ️ Invoice is not for a subscription, skipping");
+      return;
+    }
+
+    const subscriptionId =
+      typeof invoice.subscription === "string"
+        ? invoice.subscription
+        : invoice.subscription.id;
+
+    // Get the subscription details
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    const customerId = subscription.customer as string;
+    const userId = await findUserByCustomerId(customerId);
+
+    if (!userId) {
+      console.error("❌ No userId found in customer metadata");
+      return;
+    }
+
+    console.log(`💸 Subscription payment failed for user: ${userId}`);
+
+    // If subscription is past due or unpaid, downgrade user
+    if (
+      subscription.status === "past_due" ||
+      subscription.status === "unpaid"
+    ) {
+      await downgradeUser(userId, false);
+      console.log(`⬇️ User downgraded due to payment failure: ${userId}`);
+    }
+
+    await sendPaymentFailedEmail(userId, invoice, subscription);
+  } catch (error) {
+    console.error("❌ Error handling invoice payment failed:", error);
+    throw error;
+  }
+}
+
+/**
+ * Helper function to update user subscription to premium
+ */
+async function updateUserSubscription(
+  userId: string,
+  subscription: Stripe.Subscription
+) {
+  try {
+    console.log(`⬆️ Upgrading user ${userId} to PREMIUM role`);
+
+    const customerId = subscription.customer as string;
+    const priceId = subscription.items.data[0]?.price.id || null;
+
+    // Safely convert the period_end to Date
+    const periodEndTimestamp = (
+      subscription as unknown as StripeSubscriptionWithPeriod
+    ).current_period_end;
+    console.log(`🕒 Subscription period_end timestamp: ${periodEndTimestamp}`);
+    const periodEnd = safelyConvertTimestampToDate(periodEndTimestamp);
+
+    // Create a fallback date 1 month from now
+    const oneMonthFromNow = getOneMonthFromNow();
+
+    console.log(`📊 Stripe data to save:
+      - Customer ID: ${customerId}
+      - Subscription ID: ${subscription.id}
+      - Price ID: ${priceId}
+      - Period End: ${periodEnd ? periodEnd.toISOString() : "using fallback: " + oneMonthFromNow.toISOString()}
+    `);
+
+    // Create update data object with correct camelCase field names
+    const updateData: ProfileStripeUpdate = {
+      role: UserRole.PREMIUM,
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscription.id,
+      stripePriceId: priceId,
+      // Use the period end from Stripe or fall back to one month from now
+      stripeCurrentPeriodEnd: periodEnd || oneMonthFromNow,
+    };
+
+    await db.profile.update({
+      where: { userId },
+      data: updateData as unknown as Prisma.ProfileUpdateInput,
+    });
+
+    console.log(`✅ User profile updated to PREMIUM with subscription details`);
+  } catch (error) {
+    console.error(`❌ Error updating user subscription:`, error);
+
+    // Try updating just the role if the full update failed
+    try {
+      await db.profile.update({
+        where: { userId },
+        data: {
+          role: UserRole.PREMIUM,
+        } as unknown as Prisma.ProfileUpdateInput,
+      });
+      console.log(`⚠️ Only updated user role, stripe details update failed`);
+    } catch (secondError) {
+      console.error(`❌ Error updating role:`, secondError);
+      throw secondError;
+    }
+  }
+}
+
+/**
+ * Helper function to downgrade user from premium
+ */
+async function downgradeUser(userId: string, clearSubscriptionData: boolean) {
+  try {
+    console.log(`⬇️ Downgrading user ${userId} to FREE role`);
+
+    const updateData: Partial<ProfileStripeUpdate> = {
+      role: UserRole.FREE,
+    };
+
+    if (clearSubscriptionData) {
+      updateData.stripeSubscriptionId = null;
+      updateData.stripePriceId = null;
+      updateData.stripeCurrentPeriodEnd = null;
+    }
+
+    await db.profile.update({
+      where: { userId },
+      data: updateData as unknown as Prisma.ProfileUpdateInput,
+    });
+
+    console.log(
+      `✅ User downgraded to FREE${clearSubscriptionData ? " and subscription data cleared" : ""}`
+    );
+  } catch (error) {
+    console.error(`❌ Error downgrading user:`, error);
+    throw error;
   }
 }
