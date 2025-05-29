@@ -124,11 +124,10 @@ export default function Navbar() {
                 [
                   { href: "#evaluacion", label: "Evaluación" },
                   { href: "#modulos", label: "Módulos" },
-                  { href: "#beneficios", label: "Beneficios" },
-                  { href: "#testimonios", label: "Testimonios" },
                   { href: "/nosotros", label: "Nosotros", isLink: true },
                   { href: "/pricing", label: "Precios", isLink: true },
                   { href: "/blog", label: "Blog", isLink: true },
+                  { href: "/ayuda", label: "Ayuda", isLink: true },
                 ].map((item) =>
                   item.isLink ? (
                     <Link
@@ -163,8 +162,6 @@ export default function Navbar() {
                 [
                   { href: "/#evaluacion", label: "Evaluación", isLink: true },
                   { href: "/#modulos", label: "Módulos", isLink: true },
-                  { href: "/#beneficios", label: "Beneficios", isLink: true },
-                  { href: "/#testimonios", label: "Testimonios", isLink: true },
                   {
                     href: "/nosotros",
                     label: "Nosotros",
@@ -183,6 +180,12 @@ export default function Navbar() {
                     isLink: true,
                     current:
                       pathname === "/blog" || pathname.startsWith("/blog/"),
+                  },
+                  {
+                    href: "/ayuda",
+                    label: "Ayuda",
+                    isLink: true,
+                    current: pathname === "/ayuda",
                   },
                 ].map((item) => (
                   <Link href={item.href} key={item.href} legacyBehavior={false}>
@@ -257,6 +260,7 @@ export default function Navbar() {
                     { href: "/nosotros", label: "Nosotros", isLink: true },
                     { href: "/pricing", label: "Precios", isLink: true },
                     { href: "/blog", label: "Blog", isLink: true },
+                    { href: "/ayuda", label: "Ayuda", isLink: true },
                   ].map((item) =>
                     item.isLink ? (
                       <Link
@@ -316,6 +320,12 @@ export default function Navbar() {
                       isLink: true,
                       current:
                         pathname === "/blog" || pathname.startsWith("/blog/"),
+                    },
+                    {
+                      href: "/ayuda",
+                      label: "Ayuda",
+                      isLink: true,
+                      current: pathname === "/ayuda",
                     },
                   ].map((item) => (
                     <Link
