@@ -24,6 +24,7 @@ const Testimonial = lazy(
 const SimplifiedPricing = lazy(
   () => import("@/components/views/landing-page/simplified-pricing")
 );
+const HelpCTA = lazy(() => import("@/components/views/landing-page/help-cta"));
 const Footer = lazy(() => import("@/components/views/landing-page/Footer"));
 
 // Loading fallbacks
@@ -71,6 +72,11 @@ export default function Home() {
       <Suspense fallback={<SectionLoading />}>
         <section id="precios" className="py-24 bg-gray-50">
           <SimplifiedPricing />
+        </section>
+      </Suspense>
+      <Suspense fallback={<SectionLoading />}>
+        <section id="ayuda" className="py-24 bg-white">
+          <HelpCTA />
         </section>
       </Suspense>
       <Suspense fallback={<div className="h-48 bg-gray-100"></div>}>
