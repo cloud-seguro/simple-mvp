@@ -8,6 +8,7 @@ import { RecentEvaluations } from "./components/recent-evaluations";
 import { EvaluationType } from "@prisma/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SubscriptionSuccessAlert } from "@/components/dashboard/subscription-success-alert";
+import { WelcomeEmailSender } from "@/components/dashboard/welcome-email-sender";
 
 // Add at the top of the file, below any imports
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export default async function DashboardPage() {
   // We don't need to check role here as it's already checked in the layout
   const profile = await prisma.profile.findUnique({
     where: { userId: user.id },
-    select: { id: true, firstName: true, lastName: true },
+    select: { id: true, firstName: true, lastName: true, email: true },
   });
 
   if (!profile) {
@@ -145,6 +146,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Welcome Email Sender - invisible component that sends email on subscription success */}
+      <WelcomeEmailSender
+        firstName={profile.firstName || "Usuario"}
+        email={profile.email || user.email || ""}
+      />
+
       <DashboardHeader
         userName={userName}
         hasMultipleEvaluations={hasMultipleEvaluations}
