@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ChevronDown,
-  ChevronUp,
-  HelpCircle,
-  Expand,
-  Minimize2,
-} from "lucide-react";
+import { ChevronDown, HelpCircle, Expand, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FAQItem {
