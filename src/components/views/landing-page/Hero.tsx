@@ -41,7 +41,7 @@ export default function Hero() {
               className="text-4xl font-bold leading-tight text-black"
               startOnView={true}
             >
-              Hacemos lo complejo de la ciberseguridad, SIMPLE.
+              Hacemos lo complejo de la Ciberseguridad Simple
             </HyperText>
           </motion.div>
 
@@ -111,11 +111,17 @@ export default function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-center"
           >
+            <p className="text-lg mb-4 text-black font-medium">
+              Simplificamos la ciberseguridad para startups y fintechs.
+            </p>
+            <p className="text-lg mb-6 text-black">
+              Muchas empresas no acceden a servicios de ciberseguridad por falta
+              de tiempo, conocimiento técnico o alto costo.
+            </p>
             <p className="text-lg mb-8 text-black">
-              Muchas empresas no acceden a servicios de ciberseguridad porque
-              son costosos, técnicos o difíciles de entender. En Ciberseguridad
-              Simple, transformamos lo difícil en soluciones claras, accesibles
-              y accionables. Evalúa, mejora y protege tu empresa sin enredos.
+              Ciberseguridad Simple te permite evaluar tu nivel de madurez,
+              identificar brechas y vulnerabilidades, y fortalecer tu seguridad
+              paso a paso.
             </p>
             <div className="flex flex-col gap-4">
               <Button
@@ -144,16 +150,19 @@ export default function Hero() {
               className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-black"
               startOnView={true}
             >
-              Hacemos lo complejo de la ciberseguridad, SIMPLE.
+              Hacemos lo complejo de la Ciberseguridad Simple
             </HyperText>
-            <p className="text-xl mb-8 text-black">
-              Muchas empresas no acceden a servicios de ciberseguridad porque
-              son costosos, técnicos o difíciles de entender. En Ciberseguridad
-              Simple, transformamos lo difícil en soluciones claras, accesibles
-              y accionables. Evalúa, mejora y protege tu empresa sin enredos.
+            <p className="text-xl mb-4 text-black font-medium">
+              Simplificamos la ciberseguridad para startups y fintechs.
             </p>
-            <p className="text-xl font-bold mb-8 text-black">
-              🎯 Todo desde un solo lugar.
+            <p className="text-xl mb-6 text-black">
+              Muchas empresas no acceden a servicios de ciberseguridad por falta
+              de tiempo, conocimiento técnico o alto costo.
+            </p>
+            <p className="text-xl mb-8 text-black">
+              Ciberseguridad Simple te permite evaluar tu nivel de madurez,
+              identificar brechas y vulnerabilidades, y fortalecer tu seguridad
+              paso a paso.
             </p>
             <div className="flex flex-row gap-4">
               <Button

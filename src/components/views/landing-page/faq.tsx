@@ -11,46 +11,40 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
   {
-    question:
-      "¿Qué es exactamente esta plataforma de capacitación en ciberseguridad?",
+    question: "¿Qué es Ciberseguridad Simple?",
     answer:
-      "Es una plataforma integral de aprendizaje que combina módulos teóricos interactivos, simulaciones prácticas y evaluaciones continuas para formar profesionales en ciberseguridad. Utilizamos metodologías modernas y escenarios reales para garantizar un aprendizaje efectivo.",
+      "Es una plataforma diseñada para que startups, fintechs y pymes evalúen, mejoren y gestionen su ciberseguridad de forma clara, rápida y sin complicaciones técnicas. Comienza con una evaluación y escala con módulos (add-ons) según tus necesidades.",
   },
   {
-    question: "¿Necesito experiencia previa en ciberseguridad para comenzar?",
+    question: "¿Puedo comprar cada módulo por separado?",
     answer:
-      "No es necesario. Nuestros módulos están diseñados para adaptarse a diferentes niveles de conocimiento, desde principiantes hasta profesionales experimentados. El sistema se ajusta automáticamente a tu ritmo de aprendizaje.",
+      "Sí. Puedes activar solo los módulos que necesites, como análisis de vulnerabilidades, revisión de APIs o sesiones con expertos. Pagas solo por lo que usas, cuando lo necesitas y de forma mensual.",
   },
   {
-    question: "¿Cómo funcionan las evaluaciones y certificaciones?",
+    question: "¿Qué estándares cumple Ciberseguridad Simple?",
     answer:
-      "Las evaluaciones son continuas e incluyen ejercicios prácticos, simulaciones de ataques reales y pruebas teóricas. Al completar exitosamente los módulos, recibes certificaciones reconocidas en la industria que validan tus competencias.",
+      "Nuestra evaluación avanzada está basada en estándares internacionales como ISO/IEC 27001, adaptados al contexto de LATAM. También tomamos como referencia NIST en módulos específicos para fintechs que lo requieren.",
   },
   {
-    question: "¿Puedo acceder al contenido desde cualquier dispositivo?",
+    question: "¿Quién está detrás de Ciberseguridad Simple?",
     answer:
-      "Sí, la plataforma es completamente responsive y funciona en computadoras, tablets y dispositivos móviles. Tu progreso se sincroniza automáticamente entre todos tus dispositivos.",
+      "Contamos con un equipo de expertos en ciberseguridad con más de 15 años de experiencia en la industria, reconocidos en Latinoamérica por acompañar a empresas en el cumplimiento de normativas, prevención de ataques y mejora continua de su seguridad digital. El equipo detrás es parte de Cloud Seguro empresa de ciberseguridad y pentesting con todo tipo de clientes en Latam.",
   },
   {
-    question: "¿Qué tipo de soporte técnico ofrecen?",
+    question: "¿Qué información guarda Ciberseguridad Simple?",
     answer:
-      "Ofrecemos soporte técnico 24/7 a través de chat en vivo, email y videoconferencias. También tenemos una comunidad activa de usuarios y mentores expertos disponibles para resolver dudas específicas.",
-  },
-  {
-    question: "¿Los contenidos se actualizan regularmente?",
-    answer:
-      "Absolutamente. El mundo de la ciberseguridad evoluciona constantemente, por lo que actualizamos nuestros contenidos mensualmente para incluir las últimas amenazas, técnicas de defensa y mejores prácticas de la industria.",
+      "No almacenamos datos personales ni información sensible. Toda la información que recopilamos cumple con buenas prácticas de seguridad de la información y es usada únicamente para mejorar tu diagnóstico y recomendar acciones concretas.",
   },
   {
     question:
-      "¿Puedo usar la plataforma para entrenar a mi equipo corporativo?",
+      "¿La ciberseguridad se resuelve solo con una evaluación o checklist?",
     answer:
-      "Sí, ofrecemos planes empresariales con dashboards administrativos, reportes de progreso, asignación de cursos personalizados y métricas detalladas de desempeño para equipos y organizaciones.",
+      "No. La evaluación es solo el punto de partida. La ciberseguridad efectiva requiere acción continua y formación. Por eso, en Ciberseguridad Simple no solo te damos un diagnóstico, también te ofrecemos módulos prácticos, mentoría con expertos y recursos para formar a tu equipo y fortalecer la cultura de seguridad.",
   },
   {
-    question: "¿Hay alguna garantía de satisfacción?",
+    question: "¿Cómo funciona Simple Contrata?",
     answer:
-      "Ofrecemos una garantía de satisfacción de 30 días. Si no estás completamente satisfecho con la plataforma, te reembolsamos el 100% de tu inversión, sin preguntas.",
+      "Muchas startups y pymes no tienen la facilidad de contar con un asesor de ciberseguridad en su equipo. Simple Contrata te permite acceder a un grupo de profesionales especializados en diferentes áreas de seguridad, sin necesidad de contratar un servicio permanente. Solo eliges el tema que necesitas resolver, y nosotros te conectamos con el experto adecuado. Pagas por una sesión de 45 minutos, donde puedes resolver dudas puntuales, recibir orientación o apoyo en decisiones técnicas, normativas o estratégicas.",
   },
 ];
 
@@ -143,8 +137,8 @@ export default function FAQ() {
           Preguntas Frecuentes
         </h2>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Resolvemos las dudas más comunes sobre nuestra plataforma de
-          capacitación en ciberseguridad
+          Resolvemos las dudas más comunes sobre Ciberseguridad Simple y
+          nuestros servicios
         </p>
 
         {/* Expand/Collapse All Button */}

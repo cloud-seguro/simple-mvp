@@ -15,29 +15,46 @@ const faqCategories = [
     items: [
       {
         id: "general-1",
-        question:
-          "¿Qué es exactamente esta plataforma de capacitación en ciberseguridad?",
+        question: "¿Qué es Ciberseguridad Simple?",
         answer:
-          "Es una plataforma integral de aprendizaje que combina módulos teóricos interactivos, simulaciones prácticas y evaluaciones continuas para formar profesionales en ciberseguridad. Utilizamos metodologías modernas y escenarios reales para garantizar un aprendizaje efectivo.",
+          "Es una plataforma diseñada para que startups, fintechs y pymes evalúen, mejoren y gestionen su ciberseguridad de forma clara, rápida y sin complicaciones técnicas. Comienza con una evaluación y escala con módulos (add-ons) según tus necesidades.",
       },
       {
         id: "general-2",
-        question:
-          "¿Necesito experiencia previa en ciberseguridad para comenzar?",
+        question: "¿Puedo comprar cada módulo por separado?",
         answer:
-          "No es necesario. Nuestros módulos están diseñados para adaptarse a diferentes niveles de conocimiento, desde principiantes hasta profesionales experimentados. El sistema se ajusta automáticamente a tu ritmo de aprendizaje.",
+          "Sí. Puedes activar solo los módulos que necesites, como análisis de vulnerabilidades, revisión de APIs o sesiones con expertos. Pagas solo por lo que usas, cuando lo necesitas y de forma mensual.",
       },
       {
         id: "general-3",
-        question: "¿Puedo acceder al contenido desde cualquier dispositivo?",
+        question: "¿Qué estándares cumple Ciberseguridad Simple?",
         answer:
-          "Sí, la plataforma es completamente responsive y funciona en computadoras, tablets y dispositivos móviles. Tu progreso se sincroniza automáticamente entre todos tus dispositivos.",
+          "Nuestra evaluación avanzada está basada en estándares internacionales como ISO/IEC 27001, adaptados al contexto de LATAM. También tomamos como referencia NIST en módulos específicos para fintechs que lo requieren.",
       },
       {
         id: "general-4",
-        question: "¿Los contenidos se actualizan regularmente?",
+        question: "¿Quién está detrás de Ciberseguridad Simple?",
         answer:
-          "Absolutamente. El mundo de la ciberseguridad evoluciona constantemente, por lo que actualizamos nuestros contenidos mensualmente para incluir las últimas amenazas, técnicas de defensa y mejores prácticas de la industria.",
+          "Contamos con un equipo de expertos en ciberseguridad con más de 15 años de experiencia en la industria, reconocidos en Latinoamérica por acompañar a empresas en el cumplimiento de normativas, prevención de ataques y mejora continua de su seguridad digital. El equipo detrás es parte de Cloud Seguro empresa de ciberseguridad y pentesting con todo tipo de clientes en Latam.",
+      },
+      {
+        id: "general-5",
+        question: "¿Qué información guarda Ciberseguridad Simple?",
+        answer:
+          "No almacenamos datos personales ni información sensible. Toda la información que recopilamos cumple con buenas prácticas de seguridad de la información y es usada únicamente para mejorar tu diagnóstico y recomendar acciones concretas.",
+      },
+      {
+        id: "general-6",
+        question:
+          "¿La ciberseguridad se resuelve solo con una evaluación o checklist?",
+        answer:
+          "No. La evaluación es solo el punto de partida. La ciberseguridad efectiva requiere acción continua y formación. Por eso, en Ciberseguridad Simple no solo te damos un diagnóstico, también te ofrecemos módulos prácticos, mentoría con expertos y recursos para formar a tu equipo y fortalecer la cultura de seguridad.",
+      },
+      {
+        id: "general-7",
+        question: "¿Cómo funciona Simple Contrata?",
+        answer:
+          "Muchas startups y pymes no tienen la facilidad de contar con un asesor de ciberseguridad en su equipo. Simple Contrata te permite acceder a un grupo de profesionales especializados en diferentes áreas de seguridad, sin necesidad de contratar un servicio permanente. Solo eliges el tema que necesitas resolver, y nosotros te conectamos con el experto adecuado. Pagas por una sesión de 45 minutos, donde puedes resolver dudas puntuales, recibir orientación o apoyo en decisiones técnicas, normativas o estratégicas.",
       },
     ],
   },

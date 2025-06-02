@@ -34,8 +34,8 @@ export default function ModulesSection() {
             🧩 Nuestros módulos (addons)
           </h2>
           <p className="text-lg max-w-3xl mx-auto mb-6">
-            Conecta solo lo que tu empresa necesita. Cada módulo es un addon que
-            puedes activar con un clic desde tu dashboard.
+            Activa solo los módulos que realmente necesitas desde tu dashboard.
+            Cada módulo aborda un aspecto específico de la ciberseguridad.
           </p>
         </motion.div>
 
@@ -109,6 +109,22 @@ export default function ModulesSection() {
           </table>
         </motion.div>
 
+        {/* Second section - Module activation description */}
+        <motion.div
+          className="text-center mb-12 bg-yellow-50 rounded-xl p-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <p className="text-lg md:text-xl max-w-4xl mx-auto text-black leading-relaxed">
+            Activa solo los módulos que realmente necesitas: desde detectar
+            filtraciones, analizar vulnerabilidades en tu web o APIs, hasta
+            recibir orientación puntual de expertos según el reto que estés
+            enfrentando.
+          </p>
+        </motion.div>
+
         {/* Why Choose Simple */}
         <motion.div
           className="bg-gray-50 rounded-xl p-8 shadow-lg"
@@ -126,7 +142,9 @@ export default function ModulesSection() {
                 <Shield className="h-5 w-5 text-orange-400" />
               </div>
               <div>
-                <p className="font-medium">Sin tecnicismos innecesarios.</p>
+                <p className="font-medium">
+                  Diseñado para startups y fintechs.
+                </p>
               </div>
             </div>
 
@@ -136,7 +154,7 @@ export default function ModulesSection() {
               </div>
               <div>
                 <p className="font-medium">
-                  Herramientas accionables y modulares.
+                  Herramientas modulares y accionables.
                 </p>
               </div>
             </div>
@@ -147,7 +165,7 @@ export default function ModulesSection() {
               </div>
               <div>
                 <p className="font-medium">
-                  Ideal para startups, pymes y fintechs.
+                  Sin necesidad de conocimiento técnico previo.
                 </p>
               </div>
             </div>
@@ -158,7 +176,7 @@ export default function ModulesSection() {
               </div>
               <div>
                 <p className="font-medium">
-                  Ahorra tiempo y mejora tu seguridad desde hoy.
+                  Fortalece tu seguridad paso a paso.
                 </p>
               </div>
             </div>

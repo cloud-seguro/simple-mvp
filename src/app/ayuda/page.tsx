@@ -25,8 +25,8 @@ export default function AyudaPage() {
                 ¿Cómo podemos ayudarte?
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                Encuentra respuestas a todas tus preguntas sobre nuestra
-                plataforma de capacitación en ciberseguridad
+                Encuentra respuestas a todas tus preguntas sobre Ciberseguridad
+                Simple y nuestros servicios
               </p>
 
               {/* Search Input */}
