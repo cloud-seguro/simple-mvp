@@ -9,51 +9,53 @@ datasource db {
 }
 
 model Profile {
-  id              String           @id @default(cuid())
-  userId          String           @unique
-  avatarUrl       String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  active          Boolean          @default(true)
-  firstName       String?          @map("first_name")
-  lastName        String?          @map("last_name")
-  role            UserRole         @default(FREE)
-  company         String?
-  company_role    String?
-  email           String?          @unique
-  phoneNumber     String?          @map("phone_number")
-  stripeCustomerId String?         @map("stripe_customer_id")
-  stripeSubscriptionId String?     @map("stripe_subscription_id")
-  stripePriceId   String?          @map("stripe_price_id")
-  stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
-  blogPosts       BlogPost[]
-  blogCategories  BlogCategory[]
-  engagements     Engagement[]
-  evaluations     Evaluation[]
-  specialistDeals SpecialistDeal[]
-  specialists     Specialist[]
+  id                     String                @id @default(cuid())
+  userId                 String                @unique
+  avatarUrl              String?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  active                 Boolean               @default(true)
+  firstName              String?               @map("first_name")
+  lastName               String?               @map("last_name")
+  role                   UserRole              @default(FREE)
+  company                String?
+  company_role           String?
+  email                  String?               @unique
+  phoneNumber            String?               @map("phone_number")
+  stripeCustomerId       String?               @map("stripe_customer_id")
+  stripeSubscriptionId   String?               @map("stripe_subscription_id")
+  stripePriceId          String?               @map("stripe_price_id")
+  stripeCurrentPeriodEnd DateTime?             @map("stripe_current_period_end")
+  blogPosts              BlogPost[]
+  blogCategories         BlogCategory[]
+  engagements            Engagement[]
+  evaluations            Evaluation[]
+  specialistDeals        SpecialistDeal[]
+  specialists            Specialist[]
+  breachSearchRequests   BreachSearchRequest[]
+  breachSearchHistory    BreachSearchHistory[]
 
   @@index([userId])
   @@map("profiles")
 }
 
 model Evaluation {
-  id          String         @id @default(cuid())
-  type        EvaluationType
-  title       String
-  score       Float?
-  profileId   String?
-  answers     Json
-  createdAt   DateTime       @default(now())
-  completedAt DateTime?
-  metadata    Json?
-  accessCode  String?
-  guestEmail  String?
-  guestFirstName String?
-  guestLastName  String?
-  guestCompany   String?
+  id               String         @id @default(cuid())
+  type             EvaluationType
+  title            String
+  score            Float?
+  profileId        String?
+  answers          Json
+  createdAt        DateTime       @default(now())
+  completedAt      DateTime?
+  metadata         Json?
+  accessCode       String?
+  guestEmail       String?
+  guestFirstName   String?
+  guestLastName    String?
+  guestCompany     String?
   guestPhoneNumber String?
-  profile     Profile?       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile          Profile?       @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId])
   @@index([accessCode])
@@ -61,23 +63,23 @@ model Evaluation {
 }
 
 model Specialist {
-  id               String           @id @default(cuid())
-  name             String
-  bio              String
-  expertiseAreas   ExpertiseArea[]
-  contactEmail     String
-  imageUrl         String?
-  hourlyRate       Float?
+  id                 String           @id @default(cuid())
+  name               String
+  bio                String
+  expertiseAreas     ExpertiseArea[]
+  contactEmail       String
+  imageUrl           String?
+  hourlyRate         Float?
   linkedinProfileUrl String?
-  skills           String[]
-  location         String?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  active           Boolean          @default(true)
-  createdById      String
-  engagements      Engagement[]
-  deals            SpecialistDeal[]
-  createdBy        Profile          @relation(fields: [createdById], references: [id])
+  skills             String[]
+  location           String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  active             Boolean          @default(true)
+  createdById        String
+  engagements        Engagement[]
+  deals              SpecialistDeal[]
+  createdBy          Profile          @relation(fields: [createdById], references: [id])
 
   @@index([createdById])
   @@map("specialists")
@@ -125,26 +127,26 @@ model BlogCategory {
 }
 
 model Engagement {
-  id           String           @id @default(cuid())
-  title        String
-  description  String
-  status       EngagementStatus @default(PENDING)
-  budget       Float?
-  startDate    DateTime?
-  endDate      DateTime?
-  servicePackage String?        // New field for service package ID
-  urgency      String?          // New field for urgency level (LOW, MEDIUM, HIGH)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  profileId    String
-  specialistId String
-  dealId       String?
-  messages     Message[]
-  attachments  Attachment[]
-  statusHistory StatusChange[]
-  deal         SpecialistDeal?  @relation(fields: [dealId], references: [id])
-  profile      Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  specialist   Specialist       @relation(fields: [specialistId], references: [id])
+  id             String           @id @default(cuid())
+  title          String
+  description    String
+  status         EngagementStatus @default(PENDING)
+  budget         Float?
+  startDate      DateTime?
+  endDate        DateTime?
+  servicePackage String? // New field for service package ID
+  urgency        String? // New field for urgency level (LOW, MEDIUM, HIGH)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  profileId      String
+  specialistId   String
+  dealId         String?
+  messages       Message[]
+  attachments    Attachment[]
+  statusHistory  StatusChange[]
+  deal           SpecialistDeal?  @relation(fields: [dealId], references: [id])
+  profile        Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  specialist     Specialist       @relation(fields: [specialistId], references: [id])
 
   @@index([profileId])
   @@index([specialistId])
@@ -199,16 +201,111 @@ model Attachment {
 }
 
 model StatusChange {
-  id           String          @id @default(cuid())
+  id             String           @id @default(cuid())
   previousStatus EngagementStatus
-  newStatus    EngagementStatus
-  reason       String?
-  changedAt    DateTime        @default(now())
-  engagementId String
-  engagement   Engagement      @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  newStatus      EngagementStatus
+  reason         String?
+  changedAt      DateTime         @default(now())
+  engagementId   String
+  engagement     Engagement       @relation(fields: [engagementId], references: [id], onDelete: Cascade)
 
   @@index([engagementId])
   @@map("engagement_status_history")
+}
+
+model BreachSearchRequest {
+  id               String               @id @default(cuid())
+  type             BreachSearchType
+  searchValue      String
+  profileId        String
+  status           BreachRequestStatus  @default(PENDING)
+  createdAt        DateTime             @default(now())
+  completedAt      DateTime?
+  errorMessage     String?
+  totalBreaches    Int?
+  riskLevel        RiskLevel?
+  profile          Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  results          BreachResult[]
+  passwordAnalysis PasswordAnalysis[]
+  searchHistory    BreachSearchHistory?
+
+  @@index([profileId])
+  @@index([createdAt])
+  @@index([type, searchValue])
+  @@map("breach_search_requests")
+}
+
+model BreachDataSource {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  url         String?
+  lastUpdated DateTime?
+  isActive    Boolean        @default(true)
+  breachCount Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  results     BreachResult[]
+
+  @@map("breach_data_sources")
+}
+
+model BreachResult {
+  id               String              @id @default(cuid())
+  requestId        String
+  sourceId         String?
+  breachName       String
+  breachDate       DateTime
+  affectedEmails   String[]
+  affectedDomains  String[]
+  dataTypes        String[] // ["passwords", "emails", "names", etc.]
+  severity         BreachSeverity      @default(MEDIUM)
+  description      String?
+  verificationDate DateTime            @default(now())
+  isVerified       Boolean             @default(false)
+  metadata         Json? // Store additional breach data
+  request          BreachSearchRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  source           BreachDataSource?   @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@index([requestId])
+  @@index([sourceId])
+  @@index([breachDate])
+  @@map("breach_results")
+}
+
+model PasswordAnalysis {
+  id             String              @id @default(cuid())
+  requestId      String
+  passwordHash   String // Store hashed version for security
+  strength       PasswordStrength
+  occurrences    Int
+  recommendation String
+  crackTime      String? // "Instantly", "1 day", etc.
+  patterns       String[] // Common patterns found
+  entropy        Float? // Password entropy score
+  createdAt      DateTime            @default(now())
+  request        BreachSearchRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([strength])
+  @@map("password_analysis")
+}
+
+model BreachSearchHistory {
+  id          String              @id @default(cuid())
+  requestId   String              @unique
+  profileId   String
+  searchType  BreachSearchType
+  searchValue String
+  breachCount Int
+  riskLevel   RiskLevel
+  timestamp   DateTime            @default(now())
+  profile     Profile             @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  request     BreachSearchRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([timestamp])
+  @@map("breach_search_history")
 }
 
 enum UserRole {
@@ -248,4 +345,39 @@ enum EngagementStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum BreachSearchType {
+  EMAIL
+  DOMAIN
+}
+
+enum BreachRequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  TIMEOUT
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BreachSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum PasswordStrength {
+  VERY_WEAK
+  WEAK
+  MEDIUM
+  STRONG
+  VERY_STRONG
 }

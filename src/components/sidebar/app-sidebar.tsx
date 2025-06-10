@@ -15,7 +15,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { UserRole } from "@prisma/client";
 import { useMemo, useEffect } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Users, FileText, Shield, LineChart } from "lucide-react";
+import { Users, FileText, Shield, LineChart, UserPlus } from "lucide-react";
 
 export function AppSidebar({
   className,
@@ -28,27 +28,34 @@ export function AppSidebar({
   const navGroups = useMemo(() => {
     const groups = [...sidebarData.navGroups];
 
-    // Add CONTRATA link for PREMIUM and SUPERADMIN users
+    // Add Add-ons section for PREMIUM and SUPERADMIN users
     if (
       profile?.role === UserRole.PREMIUM ||
       profile?.role === UserRole.SUPERADMIN
     ) {
-      // Find or create Services group
-      let servicesGroup = groups.find((group) => group.title === "Services");
+      // Find or create Add-ons group
+      let addonsGroup = groups.find((group) => group.title === "Add-ons");
 
-      if (!servicesGroup) {
-        servicesGroup = {
+      if (!addonsGroup) {
+        addonsGroup = {
           title: "Add-ons",
           items: [],
         };
-        groups.push(servicesGroup);
+        groups.push(addonsGroup);
       }
 
+      // Add BREACH link (available for both PREMIUM and SUPERADMIN)
+      addonsGroup.items.push({
+        title: "BREACH",
+        url: "/breach-verification",
+        icon: Shield,
+      });
+
       // Add CONTRATA link
-      servicesGroup.items.push({
+      addonsGroup.items.push({
         title: "CONTRATA",
         url: "/contrata",
-        icon: Shield,
+        icon: UserPlus,
       });
     }
 

@@ -1,8 +1,4 @@
-import {
-  LayoutDashboard,
-  FileBarChart,
-  Command
-} from "lucide-react";
+import { LayoutDashboard, FileBarChart, Command } from "lucide-react";
 import type { SidebarData } from "../types";
 
 export const sidebarData: SidebarData = {
@@ -31,7 +27,7 @@ export const sidebarData: SidebarData = {
           title: "Evaluaciones",
           url: "/evaluations",
           icon: FileBarChart,
-        }
+        },
       ],
     },
   ],
