@@ -12,8 +12,9 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { SearchHistory } from "@/types/breach-verification";
-import { History, Search, Trash2 } from "lucide-react";
+import { History, Search, Trash2, Eye } from "lucide-react";
 import { RiskLevel, BreachSearchType } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 interface SearchHistoryTableProps {
   history: SearchHistory[];
@@ -27,11 +28,11 @@ function getRiskLevelColor(riskLevel: RiskLevel): string {
     case RiskLevel.CRITICAL:
       return "destructive";
     case RiskLevel.MEDIUM:
-      return "secondary";
+      return "yellow";
     case RiskLevel.LOW:
-      return "default";
+      return "green";
     default:
-      return "outline";
+      return "secondary";
   }
 }
 
@@ -59,6 +60,8 @@ export function SearchHistoryTable({
   onSearchAgain,
   onClearHistory,
 }: SearchHistoryTableProps) {
+  const router = useRouter();
+
   const formatDate = (date: Date | string) => {
     try {
       // Ensure we have a valid Date object
@@ -80,6 +83,10 @@ export function SearchHistoryTable({
       console.error("Error formatting date:", error, date);
       return "Fecha inválida";
     }
+  };
+
+  const handleViewDetails = (requestId: string) => {
+    router.push(`/breach-verification/${requestId}`);
   };
 
   if (history.length === 0) {
@@ -181,22 +188,33 @@ export function SearchHistoryTable({
                     {formatDate(item.timestamp)}
                   </TableCell>
                   <TableCell className="p-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        onSearchAgain(
-                          item.searchType === BreachSearchType.EMAIL
-                            ? "email"
-                            : "domain",
-                          item.searchValue
-                        )
-                      }
-                      className="text-xs"
-                    >
-                      <Search className="h-3 w-3 mr-1" />
-                      Buscar
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(item.requestId)}
+                        className="text-xs"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Ver Detalles
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          onSearchAgain(
+                            item.searchType === BreachSearchType.EMAIL
+                              ? "email"
+                              : "domain",
+                            item.searchValue
+                          )
+                        }
+                        className="text-xs"
+                      >
+                        <Search className="h-3 w-3 mr-1" />
+                        Repetir
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

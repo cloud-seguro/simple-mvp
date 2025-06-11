@@ -15,6 +15,7 @@ import { PasswordStrength } from "@prisma/client";
 
 interface PasswordAnalysisTableProps {
   analysis: PasswordAnalysis[];
+  showHashes?: boolean;
 }
 
 function getPasswordStrengthColor(strength: PasswordStrength): string {
@@ -23,12 +24,12 @@ function getPasswordStrengthColor(strength: PasswordStrength): string {
     case PasswordStrength.WEAK:
       return "destructive";
     case PasswordStrength.MEDIUM:
-      return "secondary";
+      return "yellow";
     case PasswordStrength.STRONG:
     case PasswordStrength.VERY_STRONG:
-      return "default";
+      return "green";
     default:
-      return "outline";
+      return "secondary";
   }
 }
 
@@ -51,12 +52,30 @@ function getPasswordStrengthLabel(strength: PasswordStrength): string {
 
 export function PasswordAnalysisTable({
   analysis,
+  showHashes = false,
 }: PasswordAnalysisTableProps) {
+  if (analysis.length === 0) {
+    return (
+      <Card className="border-2">
+        <CardContent className="p-8 text-center space-y-4">
+          <div className="space-y-2">
+            <p className="text-lg font-medium text-muted-foreground">
+              No se encontraron contraseñas
+            </p>
+            <p className="text-sm text-muted-foreground">
+              No se detectaron contraseñas expuestas para esta búsqueda
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="border-2">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl font-semibold flex items-center gap-2">
-          🔐 Análisis de Contraseñas Encontradas
+          🔐 Análisis de Contraseñas Encontradas ({analysis.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -65,7 +84,7 @@ export function PasswordAnalysisTable({
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="p-4 font-semibold text-base">
-                  Contraseña
+                  {showHashes ? "Hash de Contraseña" : "Contraseña"}
                 </TableHead>
                 <TableHead className="p-4 font-semibold text-base">
                   Apariciones
@@ -75,6 +94,9 @@ export function PasswordAnalysisTable({
                 </TableHead>
                 <TableHead className="p-4 font-semibold text-base">
                   Tiempo de Crackeo
+                </TableHead>
+                <TableHead className="p-4 font-semibold text-base">
+                  Entropía
                 </TableHead>
                 <TableHead className="p-4 font-semibold text-base">
                   Recomendación
@@ -88,12 +110,18 @@ export function PasswordAnalysisTable({
                   className="hover:bg-muted/30 transition-colors"
                 >
                   <TableCell className="p-4 font-mono text-sm">
-                    <span
-                      className="blur-sm hover:blur-none transition-all cursor-pointer bg-muted/50 px-2 py-1 rounded"
-                      title="Hover para revelar hash de contraseña"
-                    >
-                      {"•".repeat(12)}
-                    </span>
+                    {showHashes ? (
+                      <span className="text-muted-foreground bg-muted/50 px-2 py-1 rounded max-w-[200px] break-all">
+                        {item.passwordHash}
+                      </span>
+                    ) : (
+                      <span
+                        className="blur-sm hover:blur-none transition-all cursor-pointer bg-muted/50 px-2 py-1 rounded"
+                        title="Hover para revelar representación visual"
+                      >
+                        {"•".repeat(Math.min(item.passwordHash.length / 2, 12))}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="p-4">
                     <span className="font-semibold text-lg">
@@ -110,6 +138,9 @@ export function PasswordAnalysisTable({
                   </TableCell>
                   <TableCell className="p-4 text-sm">
                     {item.crackTime || "N/A"}
+                  </TableCell>
+                  <TableCell className="p-4 text-sm">
+                    {item.entropy ? item.entropy.toFixed(1) : "N/A"}
                   </TableCell>
                   <TableCell className="p-4 text-sm font-medium text-muted-foreground">
                     {item.recommendation}

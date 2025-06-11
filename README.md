@@ -240,3 +240,125 @@ El sistema ahora incluye funcionalidades para conectar a los usuarios con especi
 ## Licencia
 
 Propiedad de BORING.
+
+# Simple MVP Project
+
+A full-stack Next.js application with authentication, breach verification, and evaluation systems.
+
+## Features
+
+- User authentication with Supabase
+- Profile management
+- Breach verification system with detailed analysis
+- Evaluation system
+- Dashboard with analytics
+
+## Breach Verification System
+
+### Overview
+
+The breach verification system allows users to search for data breaches affecting emails or domains. It provides comprehensive analysis including:
+
+- Real-time breach detection using external APIs
+- Password strength analysis
+- Risk level assessment
+- Detailed reporting and export capabilities
+
+### New Features Added
+
+#### Detailed Analysis View
+
+- **Route**: `/breach-verification/[requestId]`
+- **Purpose**: Shows comprehensive breach analysis for a specific search request
+- **Features**:
+  - Full breach details with affected data types
+  - Password analysis with strength ratings
+  - Risk assessment with visual indicators
+  - Export capabilities (PDF/CSV)
+  - Security-focused hash display options
+
+#### Enhanced Search History
+
+- **View Details Button**: Navigate to detailed analysis from search history
+- **Improved UI**: Better visualization of risk levels and breach counts
+- **Quick Actions**: Repeat searches or view full analysis
+
+### API Endpoints
+
+#### Main Breach Verification
+
+- `POST /api/breach-verification` - Perform new breach search
+- `GET /api/breach-verification` - Get search history
+
+#### Detailed Analysis
+
+- `GET /api/breach-verification/[requestId]` - Get detailed breach analysis
+
+### Components
+
+#### Core Components
+
+- `BreachVerificationPage` - Main search interface
+- `DetailedAnalysisPage` - Comprehensive analysis view
+- `SearchHistoryTable` - Enhanced history with navigation
+- `BreachResultsTable` - Breach data display
+- `PasswordAnalysisTable` - Password analysis with hash visibility toggle
+
+#### Navigation Flow
+
+1. User performs breach search on main page
+2. Results are displayed with summary
+3. Search is saved to history
+4. User can click "View Details" in history to see full analysis
+5. Detailed page shows comprehensive breakdown with export options
+
+### Security Features
+
+- Password hashes are stored securely (not plain text)
+- Optional hash visibility with security warnings
+- Risk level calculations based on multiple factors
+- Rate limiting and caching for external API calls
+
+### Technical Implementation
+
+- Uses Dehashed API for breach data
+- Simple password strength analysis (OpenAI integration available)
+- Prisma ORM for database operations
+- React Query for state management
+- Next.js App Router for routing
+
+## Environment Variables
+
+```env
+# Database
+DATABASE_URL="your_database_url"
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL="your_supabase_url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your_supabase_anon_key"
+
+# Breach Verification APIs
+DEHASHED_API_KEY="your_dehashed_api_key"
+OPENAI_API_KEY="your_openai_api_key" # Optional
+```
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables
+4. Run database migrations: `npx prisma db push`
+5. Start development server: `npm run dev`
+
+## Database Schema
+
+The application uses Prisma with PostgreSQL and includes models for:
+
+- User profiles and authentication
+- Breach search requests and results
+- Password analysis and security assessments
+- Search history and data sources
+
+## Contributing
+
+Please ensure all new features include proper TypeScript types, error handling, and are tested with the existing UI components and patterns.
