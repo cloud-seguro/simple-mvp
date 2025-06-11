@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
-  BreachSearchRequest,
   BreachSearchResponse,
   SearchHistory,
 } from "@/types/breach-verification";

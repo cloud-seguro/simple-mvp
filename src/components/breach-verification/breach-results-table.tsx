@@ -10,11 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { BreachResult } from "@/types/breach-verification";
+import type { BreachResultAPI } from "@/types/breach-verification";
 import { formatBreachDate } from "@/lib/utils/breach-verification";
 
 interface BreachResultsTableProps {
-  results: BreachResult[];
+  results: BreachResultAPI[];
 }
 
 export function BreachResultsTable({ results }: BreachResultsTableProps) {
@@ -57,11 +57,7 @@ export function BreachResultsTable({ results }: BreachResultsTableProps) {
                     {result.breachName}
                   </TableCell>
                   <TableCell className="p-4 text-sm">
-                    {formatBreachDate(
-                      result.breachDate instanceof Date
-                        ? result.breachDate.toISOString()
-                        : result.breachDate.toString()
-                    )}
+                    {formatBreachDate(result.breachDate)}
                   </TableCell>
                   <TableCell className="p-4">
                     <div className="flex flex-wrap gap-1">

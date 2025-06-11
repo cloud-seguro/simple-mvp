@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -26,36 +26,21 @@ import {
 import { BreachResultsTable } from "@/components/breach-verification/breach-results-table";
 import { PasswordAnalysisTable } from "@/components/breach-verification/password-analysis-table";
 import { RiskLevel, BreachSearchType } from "@prisma/client";
-import type { BreachSearchRequest } from "@/types/breach-verification";
+import type {
+  BreachSearchRequest,
+  BreachResultAPI,
+  PasswordAnalysisAPI,
+} from "@/types/breach-verification";
 
 interface DetailedAnalysisPageProps {
-  params: {
+  params: Promise<{
     requestId: string;
-  };
+  }>;
 }
 
 interface DetailedBreachData extends BreachSearchRequest {
-  results: Array<{
-    id: string;
-    breachName: string;
-    breachDate: Date;
-    affectedEmails: string[];
-    affectedDomains: string[];
-    dataTypes: string[];
-    severity: string;
-    description: string;
-    isVerified: boolean;
-  }>;
-  passwordAnalysis: Array<{
-    id: string;
-    passwordHash: string;
-    strength: string;
-    occurrences: number;
-    recommendation: string;
-    crackTime: string;
-    patterns: string[];
-    entropy: number;
-  }>;
+  results: BreachResultAPI[];
+  passwordAnalysis: PasswordAnalysisAPI[];
 }
 
 export default function DetailedAnalysisPage({
@@ -63,6 +48,16 @@ export default function DetailedAnalysisPage({
 }: DetailedAnalysisPageProps) {
   const router = useRouter();
   const [showPasswordHashes, setShowPasswordHashes] = useState(false);
+  const [requestId, setRequestId] = useState<string | null>(null);
+
+  // Resolve the params Promise
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setRequestId(resolvedParams.requestId);
+    };
+    resolveParams();
+  }, [params]);
 
   // Fetch detailed breach data
   const {
@@ -70,11 +65,11 @@ export default function DetailedAnalysisPage({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["breach-details", params.requestId],
+    queryKey: ["breach-details", requestId],
     queryFn: async (): Promise<DetailedBreachData> => {
-      const response = await fetch(
-        `/api/breach-verification/${params.requestId}`
-      );
+      if (!requestId) throw new Error("Request ID not available");
+
+      const response = await fetch(`/api/breach-verification/${requestId}`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch breach details");
@@ -87,13 +82,10 @@ export default function DetailedAnalysisPage({
         completedAt: result.data.completedAt
           ? new Date(result.data.completedAt)
           : null,
-        results:
-          result.data.results?.map((r: any) => ({
-            ...r,
-            breachDate: new Date(r.breachDate),
-          })) || [],
+        results: result.data.results || [],
       };
     },
+    enabled: !!requestId, // Only run query when requestId is available
   });
 
   const getRiskLevelDisplay = (riskLevel: RiskLevel) => {
@@ -129,12 +121,12 @@ export default function DetailedAnalysisPage({
 
   const handleDownloadPDF = () => {
     // TODO: Implement PDF download functionality
-    console.log("Downloading PDF report for request:", params.requestId);
+    console.log("Downloading PDF report for request:", requestId);
   };
 
   const handleExportCSV = () => {
     // TODO: Implement CSV export functionality
-    console.log("Exporting CSV for request:", params.requestId);
+    console.log("Exporting CSV for request:", requestId);
   };
 
   if (isLoading) {
@@ -190,7 +182,7 @@ export default function DetailedAnalysisPage({
     );
   }
 
-  const riskData = getRiskLevelDisplay(breachData.riskLevel);
+  const riskData = getRiskLevelDisplay(breachData.riskLevel || RiskLevel.LOW);
   const searchTypeData = getSearchTypeDisplay(breachData.type);
 
   return (
@@ -269,7 +261,13 @@ export default function DetailedAnalysisPage({
                 Nivel de Riesgo
               </p>
               <Badge
-                variant={riskData.color as any}
+                variant={
+                  riskData.color === "destructive"
+                    ? "destructive"
+                    : riskData.color === "green"
+                      ? "secondary"
+                      : "outline"
+                }
                 className="flex items-center gap-2 w-fit"
               >
                 <riskData.icon className="h-4 w-4" />
@@ -304,7 +302,7 @@ export default function DetailedAnalysisPage({
               </p>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{formatDate(breachData.completedAt)}</span>
+                <span>{formatDate(breachData.completedAt || null)}</span>
               </div>
             </div>
           </div>
@@ -335,7 +333,13 @@ export default function DetailedAnalysisPage({
               <div className="text-center">
                 <riskData.icon className="h-16 w-16 mx-auto mb-2" />
                 <Badge
-                  variant={riskData.color as any}
+                  variant={
+                    riskData.color === "destructive"
+                      ? "destructive"
+                      : riskData.color === "green"
+                        ? "secondary"
+                        : "outline"
+                  }
                   className="text-lg px-4 py-2"
                 >
                   {riskData.level}

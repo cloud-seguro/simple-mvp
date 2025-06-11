@@ -11,7 +11,6 @@ import {
   PasswordStrength,
 } from "@prisma/client";
 import { validateEmail, validateDomain } from "@/lib/utils/breach-verification";
-import OpenAI from "openai";
 
 const searchRequestSchema = z.object({
   type: z.enum(["EMAIL", "DOMAIN"]),
@@ -20,41 +19,24 @@ const searchRequestSchema = z.object({
 
 // Configuration
 const DEHASHED_API_KEY = process.env.DEHASHED_API_KEY;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const DEHASHED_API_URL = "https://api.dehashed.com/v2/search";
 const EXTERNAL_RESULT_LIMIT = 100;
 const CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 const RATE_LIMIT_COUNT = 10;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 
-// Personal email domains
-const PERSONAL_DOMAINS = new Set([
-  "gmail.com",
-  "googlemail.com",
-  "yahoo.com",
-  "yahoo.es",
-  "outlook.com",
-  "hotmail.com",
-  "live.com",
-  "aol.com",
-  "msn.com",
-  "icloud.com",
-  "protonmail.com",
-  "zoho.com",
-  "gmx.com",
-  "mail.com",
-  "yandex.com",
-]);
-
 // In-memory cache and rate limiting
-const apiCache = new Map<string, { data: any; expiresAt: number }>();
+const apiCache = new Map<
+  string,
+  {
+    data: { breachCount: number; riskLevel: RiskLevel };
+    expiresAt: number;
+  }
+>();
 const requestCounts = new Map<
   string,
   { count: number; firstRequestTime: number }
 >();
-
-// Initialize OpenAI client
-const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
 interface DehashedEntry {
   email?: string | string[];
@@ -66,6 +48,8 @@ interface DehashedEntry {
 interface DehashedResponse {
   entries: DehashedEntry[];
   total: number;
+  balance?: number;
+  success?: boolean;
 }
 
 interface GroupedData {
@@ -147,7 +131,7 @@ function calculateRiskScore(
   let reusedPasswordsFound = false;
 
   // Collect all breaches and check for passwords/hashes
-  for (const [email, emailData] of Object.entries(groupedData)) {
+  for (const [, emailData] of Object.entries(groupedData)) {
     emailData.breaches.forEach((breach) => allBreaches.add(breach));
 
     if (emailData.passwords.length > 0) {
@@ -176,7 +160,7 @@ function calculateRiskScore(
   if (passwordsFound) {
     factors.push(`${totalPasswordsAnalyzed} contraseñas en texto plano`);
 
-    for (const [pwd, analysis] of Object.entries(analysisData)) {
+    for (const [, analysis] of Object.entries(analysisData)) {
       const strengthText = analysis.strength.toLowerCase();
       const isReused = analysis.reused;
 
@@ -338,8 +322,8 @@ async function performBreachSearch(
       hasEntries: !!apiData.entries,
       entriesLength: apiData.entries?.length || 0,
       total: apiData.total,
-      balance: (apiData as any).balance, // Dehashed includes balance info
-      success: (apiData as any).success,
+      balance: apiData.balance, // Dehashed includes balance info
+      success: apiData.success,
     });
 
     const entries = apiData.entries || [];
@@ -542,7 +526,18 @@ async function performBreachSearch(
     console.log(`Risk calculation result: score=${score}, level=${riskLevel}`);
 
     // Store breach results in database
-    const breachResults = [];
+    const breachResults: Array<{
+      requestId: string;
+      breachName: string;
+      breachDate: Date;
+      affectedEmails: string[];
+      affectedDomains: string[];
+      dataTypes: string[];
+      severity: BreachSeverity;
+      description: string;
+      isVerified: boolean;
+    }> = [];
+
     for (const [email, emailData] of Object.entries(groupedData)) {
       for (const breachName of emailData.breaches) {
         breachResults.push({
@@ -572,7 +567,17 @@ async function performBreachSearch(
     }
 
     // Store password analysis in database
-    const passwordAnalysisResults = [];
+    const passwordAnalysisResults: Array<{
+      requestId: string;
+      passwordHash: string;
+      strength: PasswordStrength;
+      occurrences: number;
+      recommendation: string;
+      crackTime: string;
+      patterns: string[];
+      entropy: number;
+    }> = [];
+
     for (const [password, analysis] of Object.entries(analysisData)) {
       passwordAnalysisResults.push({
         requestId,
@@ -633,7 +638,9 @@ async function performBreachSearch(
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = createRouteHandlerClient({
+      cookies: () => Promise.resolve(cookieStore),
+    });
 
     // Get user session
     const {
@@ -646,7 +653,9 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting
     const clientIp =
-      request.ip || request.headers.get("x-forwarded-for") || "unknown";
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
     if (isRateLimited(clientIp)) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
@@ -671,17 +680,22 @@ export async function POST(request: NextRequest) {
     console.log(`Search Value: ${validatedData.searchValue}`);
     console.log(`User: ${session.user.email}`);
     console.log(`Profile ID: ${profile.id}`);
-    
+
     // Check if this is a test email
     const testEmails = [
       "test@example.com",
       "demo@breach.test",
-      "sample@test.com"
+      "sample@test.com",
     ];
-    
-    if (validatedData.type === "EMAIL" && testEmails.includes(validatedData.searchValue.toLowerCase())) {
+
+    if (
+      validatedData.type === "EMAIL" &&
+      testEmails.includes(validatedData.searchValue.toLowerCase())
+    ) {
       console.log(`⚠️  Test email detected: ${validatedData.searchValue}`);
-      console.log(`This will help us debug if the issue is with the API or data processing.`);
+      console.log(
+        `This will help us debug if the issue is with the API or data processing.`
+      );
     }
 
     // Validate search value based on type
@@ -811,10 +825,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = createRouteHandlerClient({
+      cookies: () => Promise.resolve(cookieStore),
+    });
 
     // Get user session
     const {

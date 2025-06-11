@@ -32,7 +32,7 @@ import {
   useBreachSearchForm,
 } from "@/hooks/use-breach-verification";
 import { validateEmail, validateDomain } from "@/lib/utils/breach-verification";
-import { RiskLevel } from "@prisma/client";
+import { RiskLevel } from "@/types/breach-verification";
 
 export default function BreachVerificationPage() {
   const {
@@ -42,7 +42,6 @@ export default function BreachVerificationPage() {
     searchResults,
     isSearchSuccess,
     searchHistory,
-    isLoadingHistory,
     clearValidationError,
     resetSearch,
   } = useBreachVerification();
@@ -321,7 +320,13 @@ export default function BreachVerificationPage() {
                     </div>
                     {riskData && (
                       <Badge
-                        variant={riskData.color as any}
+                        variant={
+                          riskData.color === "destructive"
+                            ? "destructive"
+                            : riskData.color === "green"
+                              ? "secondary"
+                              : "outline"
+                        }
                         className="flex items-center gap-2 px-4 py-2 text-base"
                       >
                         <riskData.icon className="h-4 w-4" />

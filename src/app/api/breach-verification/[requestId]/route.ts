@@ -4,15 +4,18 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     requestId: string;
-  };
+  }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const { requestId } = await params;
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = createRouteHandlerClient({
+      cookies: () => Promise.resolve(cookieStore),
+    });
 
     // Get user session
     const {
@@ -35,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Fetch the breach search request with all related data
     const breachRequest = await prisma.breachSearchRequest.findFirst({
       where: {
-        id: params.requestId,
+        id: requestId,
         profileId: profile.id, // Ensure user can only access their own requests
       },
       include: {
@@ -49,7 +52,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             strength: "asc",
           },
         },
-        dataSources: true,
       },
     });
 
@@ -66,6 +68,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       results:
         breachRequest.results?.map((result) => ({
           id: result.id,
+          requestId: result.requestId,
+          sourceId: result.sourceId,
           breachName: result.breachName,
           breachDate: result.breachDate,
           affectedEmails: result.affectedEmails,
@@ -73,11 +77,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           dataTypes: result.dataTypes,
           severity: result.severity,
           description: result.description,
+          verificationDate: result.verificationDate,
           isVerified: result.isVerified,
+          metadata: result.metadata,
         })) || [],
       passwordAnalysis:
         breachRequest.passwordAnalysis?.map((analysis) => ({
           id: analysis.id,
+          requestId: analysis.requestId,
           passwordHash: analysis.passwordHash,
           strength: analysis.strength,
           occurrences: analysis.occurrences,
@@ -85,14 +92,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           crackTime: analysis.crackTime,
           patterns: analysis.patterns,
           entropy: analysis.entropy,
-        })) || [],
-      dataSources:
-        breachRequest.dataSources?.map((source) => ({
-          id: source.id,
-          name: source.name,
-          lastUpdated: source.lastUpdated,
-          totalRecords: source.totalRecords,
-          description: source.description,
+          createdAt: analysis.createdAt,
         })) || [],
     };
 

@@ -178,7 +178,13 @@ export function SearchHistoryTable({
                   </TableCell>
                   <TableCell className="p-4">
                     <Badge
-                      variant={getRiskLevelColor(item.riskLevel) as any}
+                      variant={
+                        getRiskLevelColor(item.riskLevel) === "destructive"
+                          ? "destructive"
+                          : getRiskLevelColor(item.riskLevel) === "green"
+                            ? "secondary"
+                            : "outline"
+                      }
                       className="px-3 py-1 text-sm"
                     >
                       {getRiskLevelLabel(item.riskLevel)}

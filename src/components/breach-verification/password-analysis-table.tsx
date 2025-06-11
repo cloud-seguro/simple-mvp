@@ -10,11 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { PasswordAnalysis } from "@/types/breach-verification";
+import type { PasswordAnalysisAPI } from "@/types/breach-verification";
 import { PasswordStrength } from "@prisma/client";
 
 interface PasswordAnalysisTableProps {
-  analysis: PasswordAnalysis[];
+  analysis: PasswordAnalysisAPI[];
   showHashes?: boolean;
 }
 
@@ -130,7 +130,14 @@ export function PasswordAnalysisTable({
                   </TableCell>
                   <TableCell className="p-4">
                     <Badge
-                      variant={getPasswordStrengthColor(item.strength) as any}
+                      variant={
+                        getPasswordStrengthColor(item.strength) ===
+                        "destructive"
+                          ? "destructive"
+                          : getPasswordStrengthColor(item.strength) === "green"
+                            ? "secondary"
+                            : "outline"
+                      }
                       className="px-3 py-1 text-sm"
                     >
                       {getPasswordStrengthLabel(item.strength)}

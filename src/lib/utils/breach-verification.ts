@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import type { RiskLevel } from "@/types/breach-verification";
+import type { RiskLevelDisplay } from "@/types/breach-verification";
 
-export function getRiskLevel(breachCount: number): RiskLevel {
+export function getRiskLevel(breachCount: number): RiskLevelDisplay {
   if (breachCount >= 3) {
     return {
       level: "Alto",

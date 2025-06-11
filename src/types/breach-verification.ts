@@ -5,7 +5,18 @@ import type {
   BreachSeverity,
   PasswordStrength,
 } from "@prisma/client";
+import React from "react";
 
+// Re-export Prisma enums for easier consumption
+export {
+  RiskLevel,
+  BreachSearchType,
+  BreachRequestStatus,
+  BreachSeverity,
+  PasswordStrength,
+} from "@prisma/client";
+
+// Database model interfaces (with Date objects)
 export interface BreachResult {
   id: string;
   requestId: string;
@@ -19,7 +30,24 @@ export interface BreachResult {
   description?: string;
   verificationDate: Date;
   isVerified: boolean;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
+}
+
+// API response interfaces (with string dates due to JSON serialization)
+export interface BreachResultAPI {
+  id: string;
+  requestId: string;
+  sourceId?: string;
+  breachName: string;
+  breachDate: string;
+  affectedEmails: string[];
+  affectedDomains: string[];
+  dataTypes: string[];
+  severity: BreachSeverity;
+  description?: string;
+  verificationDate: string;
+  isVerified: boolean;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PasswordAnalysis {
@@ -35,10 +63,23 @@ export interface PasswordAnalysis {
   createdAt: Date;
 }
 
+export interface PasswordAnalysisAPI {
+  id: string;
+  requestId: string;
+  passwordHash: string;
+  strength: PasswordStrength;
+  occurrences: number;
+  recommendation: string;
+  crackTime?: string;
+  patterns: string[];
+  entropy?: number;
+  createdAt: string;
+}
+
 export interface RiskLevelDisplay {
   level: "Alto" | "Medio" | "Bajo";
   color: "destructive" | "yellow" | "green";
-  icon: any; // Lucide icon component
+  icon: React.ComponentType<{ className?: string }>; // Lucide icon component
 }
 
 export interface BreachSearchRequest {
@@ -58,8 +99,8 @@ export interface BreachSearchResponse {
   requestId: string;
   breachCount: number;
   riskLevel: RiskLevel;
-  results: BreachResult[];
-  passwordAnalysis: PasswordAnalysis[];
+  results: BreachResultAPI[];
+  passwordAnalysis: PasswordAnalysisAPI[];
 }
 
 export interface SearchHistory {
