@@ -10,9 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Shield,
   ArrowLeft,
-  Download,
-  FileSpreadsheet,
-  AlertTriangle,
+  TriangleAlert,
   CheckCircle,
   XCircle,
   Calendar,
@@ -22,9 +20,12 @@ import {
   Lock,
   Eye,
   EyeOff,
+  Loader2,
+  FileText,
 } from "lucide-react";
 import { BreachResultsTable } from "@/components/breach-verification/breach-results-table";
 import { PasswordAnalysisTable } from "@/components/breach-verification/password-analysis-table";
+import { generateBreachReportPDF } from "@/lib/utils/pdf-export";
 import { RiskLevel, BreachSearchType } from "@prisma/client";
 import type {
   BreachSearchRequest,
@@ -49,6 +50,7 @@ export default function DetailedAnalysisPage({
   const router = useRouter();
   const [showPasswordHashes, setShowPasswordHashes] = useState(false);
   const [requestId, setRequestId] = useState<string | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // Resolve the params Promise
   useEffect(() => {
@@ -64,15 +66,16 @@ export default function DetailedAnalysisPage({
     data: breachData,
     isLoading,
     error,
+    isFetching,
   } = useQuery({
     queryKey: ["breach-details", requestId],
     queryFn: async (): Promise<DetailedBreachData> => {
-      if (!requestId) throw new Error("Request ID not available");
+      if (!requestId) throw new Error("ID de solicitud no disponible");
 
       const response = await fetch(`/api/breach-verification/${requestId}`);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch breach details");
+        throw new Error("Error al obtener los detalles de la brecha");
       }
 
       const result = await response.json();
@@ -86,6 +89,7 @@ export default function DetailedAnalysisPage({
       };
     },
     enabled: !!requestId, // Only run query when requestId is available
+    staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
   });
 
   const getRiskLevelDisplay = (riskLevel: RiskLevel) => {
@@ -94,7 +98,7 @@ export default function DetailedAnalysisPage({
       case RiskLevel.CRITICAL:
         return { level: "Alto", color: "destructive", icon: XCircle };
       case RiskLevel.MEDIUM:
-        return { level: "Medio", color: "yellow", icon: AlertTriangle };
+        return { level: "Medio", color: "yellow", icon: TriangleAlert };
       case RiskLevel.LOW:
         return { level: "Bajo", color: "green", icon: CheckCircle };
       default:
@@ -119,17 +123,51 @@ export default function DetailedAnalysisPage({
       : { label: "Dominio", icon: Globe };
   };
 
-  const handleDownloadPDF = () => {
-    // TODO: Implement PDF download functionality
-    console.log("Downloading PDF report for request:", requestId);
+  const handleDownloadPDF = async () => {
+    if (!breachData) {
+      console.error("❌ No breach data available for PDF generation");
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    try {
+      // Create comprehensive data object for PDF
+      const pdfData = {
+        searchValue: breachData.searchValue,
+        searchType: breachData.type,
+        breachCount: breachData.totalBreaches || 0,
+        riskLevel: breachData.riskLevel || RiskLevel.LOW,
+        results: breachData.results || [],
+        passwordAnalysis: breachData.passwordAnalysis || [],
+        timestamp: breachData.createdAt,
+        completedAt: breachData.completedAt,
+        summary: {
+          searchTypeLabel: getSearchTypeDisplay(breachData.type).label,
+          riskLevelLabel: getRiskLevelDisplay(
+            breachData.riskLevel || RiskLevel.LOW
+          ).level,
+          verifiedResults:
+            breachData.results?.filter((result) => result.isVerified).length ||
+            0,
+          totalDataTypes: Array.from(
+            new Set(
+              breachData.results?.flatMap((result) => result.dataTypes) || []
+            )
+          ).length,
+        },
+      };
+
+      await generateBreachReportPDF(pdfData);
+    } catch (error) {
+      console.error("❌ Error generando PDF:", error);
+      alert("Error al generar el PDF. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
-  const handleExportCSV = () => {
-    // TODO: Implement CSV export functionality
-    console.log("Exporting CSV for request:", requestId);
-  };
-
-  if (isLoading) {
+  // Enhanced loading component
+  if (isLoading || isFetching) {
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-8">
         <div className="flex items-center space-x-4">
@@ -142,9 +180,16 @@ export default function DetailedAnalysisPage({
 
         <Card>
           <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+            <div className="flex items-center justify-center py-16">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Cargando análisis detallado...
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -215,13 +260,22 @@ export default function DetailedAnalysisPage({
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleDownloadPDF}>
-              <Download className="h-4 w-4 mr-2" />
-              PDF
-            </Button>
-            <Button variant="outline" onClick={handleExportCSV}>
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              CSV
+            <Button
+              variant="outline"
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
+            >
+              {isGeneratingPDF ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Descargar PDF
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -313,7 +367,7 @@ export default function DetailedAnalysisPage({
       <Card className="border-2">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
+            <TriangleAlert className="h-5 w-5" />
             Análisis de Riesgo
           </CardTitle>
         </CardHeader>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, CheckCircle, Smartphone } from "lucide-react";
+import { TriangleAlert, CheckCircle, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -132,7 +132,7 @@ export function MobileOptimization({ className }: MobileOptimizationProps) {
           </Accordion>
         ) : (
           <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
-            <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+            <TriangleAlert className="h-5 w-5 text-amber-500 flex-shrink-0" />
             <p className="text-sm text-amber-800">
               Mobile optimization improves user experience on small screens.
               Click below to see guidelines.

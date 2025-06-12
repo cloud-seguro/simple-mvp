@@ -18,7 +18,7 @@ import { validateCorporateEmail } from "@/lib/utils/email-validation";
 import { toast } from "@/components/ui/use-toast";
 import { AnimatedSecuritySVG } from "@/components/ui/animated-security-svg";
 import { SimpleHeader } from "@/components/ui/simple-header";
-import { AlertTriangle } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 // Define schema for user info with validation
 const userInfoSchema = z.object({
@@ -210,7 +210,7 @@ export function EmailCollection({ onUserInfoSubmit }: UserInfoCollectionProps) {
                       {emailError && (
                         <div className="flex items-center gap-2.5 mt-2 p-3 bg-red-50 border border-red-200 rounded-md shadow-sm animate-in fade-in duration-200">
                           <div className="p-1 bg-red-100 rounded-full">
-                            <AlertTriangle className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
+                            <TriangleAlert className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
                           </div>
                           <span className="text-sm text-red-700 font-medium">
                             {emailError}

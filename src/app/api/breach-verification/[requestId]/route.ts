@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 interface RouteParams {
   params: Promise<{
@@ -9,13 +10,18 @@ interface RouteParams {
   }>;
 }
 
+// Cache the Supabase client creation
+const createServerSupabaseClient = cache(() => {
+  const cookieStore = cookies();
+  return createRouteHandlerClient({
+    cookies: () => cookieStore,
+  });
+});
+
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { requestId } = await params;
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({
-      cookies: () => Promise.resolve(cookieStore),
-    });
+    const supabase = createServerSupabaseClient();
 
     // Get user session
     const {

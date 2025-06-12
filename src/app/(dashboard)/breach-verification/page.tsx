@@ -16,12 +16,13 @@ import {
   Shield,
   Search,
   Download,
-  FileSpreadsheet,
-  AlertTriangle,
+  TriangleAlert,
   CheckCircle,
   XCircle,
   X,
   RotateCcw,
+  Loader2,
+  FileText,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BreachResultsTable } from "@/components/breach-verification/breach-results-table";
@@ -32,6 +33,7 @@ import {
   useBreachSearchForm,
 } from "@/hooks/use-breach-verification";
 import { validateEmail, validateDomain } from "@/lib/utils/breach-verification";
+import { generateBreachReportPDF } from "@/lib/utils/pdf-export";
 import { RiskLevel } from "@/types/breach-verification";
 
 export default function BreachVerificationPage() {
@@ -42,8 +44,10 @@ export default function BreachVerificationPage() {
     searchResults,
     isSearchSuccess,
     searchHistory,
+    isLoadingHistory,
     clearValidationError,
     resetSearch,
+    clearHistory,
   } = useBreachVerification();
 
   const {
@@ -57,6 +61,7 @@ export default function BreachVerificationPage() {
   } = useBreachSearchForm();
 
   const [validationError, setValidationError] = useState("");
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +115,7 @@ export default function BreachVerificationPage() {
       case RiskLevel.CRITICAL:
         return { level: "Alto", color: "destructive", icon: XCircle };
       case RiskLevel.MEDIUM:
-        return { level: "Medio", color: "yellow", icon: AlertTriangle };
+        return { level: "Medio", color: "yellow", icon: TriangleAlert };
       case RiskLevel.LOW:
         return { level: "Bajo", color: "green", icon: CheckCircle };
       default:
@@ -118,14 +123,49 @@ export default function BreachVerificationPage() {
     }
   };
 
-  const handleDownloadPDF = () => {
-    // Placeholder for PDF download functionality
-    console.log("Downloading PDF...");
-  };
+  const handleDownloadPDF = async () => {
+    if (!searchResults) {
+      console.error(
+        "❌ No hay resultados de búsqueda disponibles para generar PDF"
+      );
+      return;
+    }
 
-  const handleExportCSV = () => {
-    // Placeholder for CSV export functionality
-    console.log("Exporting CSV...");
+    setIsGeneratingPDF(true);
+    try {
+      // Create comprehensive data object for PDF
+      const pdfData = {
+        searchValue,
+        searchType,
+        breachCount: searchResults.breachCount || 0,
+        riskLevel: searchResults.riskLevel,
+        results: searchResults.results || [],
+        passwordAnalysis: searchResults.passwordAnalysis || [],
+        timestamp: new Date(),
+        summary: {
+          searchTypeLabel:
+            searchType === "EMAIL" ? "📧 Correo Electrónico" : "🌐 Dominio",
+          riskLevelLabel: searchResults.riskLevel
+            ? getRiskLevelDisplay(searchResults.riskLevel).level
+            : "Bajo",
+          verifiedResults:
+            searchResults.results?.filter((result) => result.isVerified)
+              .length || 0,
+          totalDataTypes: Array.from(
+            new Set(
+              searchResults.results?.flatMap((result) => result.dataTypes) || []
+            )
+          ).length,
+        },
+      };
+
+      await generateBreachReportPDF(pdfData);
+    } catch (error) {
+      console.error("❌ Error generando PDF:", error);
+      alert("Error al generar el PDF. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const currentError = validationError || searchError;
@@ -239,64 +279,58 @@ export default function BreachVerificationPage() {
                 size="lg"
                 className="px-8 py-3 text-base font-medium min-w-[160px]"
               >
-                <Search className="h-5 w-5 mr-2" />
-                {isSearching
-                  ? "Buscando..."
-                  : hasSearched
-                    ? "Buscar Nuevamente"
-                    : "Iniciar Búsqueda"}
+                {isSearching ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Buscando...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-5 w-5 mr-2" />
+                    {hasSearched ? "Buscar Nuevamente" : "Iniciar Búsqueda"}
+                  </>
+                )}
               </Button>
 
-              {searchValue && (
+              {isSearchSuccess && searchResults && (
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={handleClearInput}
+                  onClick={handleDownloadPDF}
                   size="lg"
                   className="px-6 py-3 text-base"
+                  disabled={isGeneratingPDF}
                 >
-                  <RotateCcw className="h-5 w-5 mr-2" />
-                  Limpiar Búsqueda
+                  {isGeneratingPDF ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Generando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-5 w-5 mr-2" />
+                      Descargar PDF
+                    </>
+                  )}
                 </Button>
-              )}
-
-              {isSearchSuccess && (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleDownloadPDF}
-                    size="lg"
-                    className="px-6 py-3 text-base"
-                  >
-                    <Download className="h-5 w-5 mr-2" />
-                    Descargar PDF
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleExportCSV}
-                    size="lg"
-                    className="px-6 py-3 text-base"
-                  >
-                    <FileSpreadsheet className="h-5 w-5 mr-2" />
-                    Exportar CSV
-                  </Button>
-                </>
               )}
             </div>
           </form>
 
-          {/* Loading Indicator */}
+          {/* Enhanced Loading Indicator */}
           {isSearching && (
             <div className="flex flex-col items-center justify-center py-16 space-y-6">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
+                <div className="absolute inset-0 rounded-full h-16 w-16 border-2 border-primary/20"></div>
+              </div>
               <div className="text-center space-y-2">
                 <p className="text-muted-foreground text-lg font-medium">
-                  Contactando servidor...
+                  Analizando brechas de seguridad...
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Analizando bases de datos de brechas
+                  Esto puede tomar unos segundos mientras consultamos múltiples
+                  bases de datos
                 </p>
               </div>
             </div>
@@ -305,7 +339,7 @@ export default function BreachVerificationPage() {
           {/* Results Area */}
           {isSearchSuccess && !isSearching && searchResults && (
             <div className="space-y-8">
-              {/* Summary */}
+              {/* Enhanced Summary */}
               <Card className="border-2 bg-gradient-to-r from-background to-muted/20">
                 <div className="p-6">
                   <div className="flex items-center justify-between">
@@ -314,24 +348,26 @@ export default function BreachVerificationPage() {
                         Se encontraron {searchResults.breachCount || 0} brechas
                         para:
                       </p>
-                      <p className="text-muted-foreground font-mono text-sm">
+                      <p className="text-muted-foreground font-mono text-sm bg-muted/50 px-2 py-1 rounded inline-block">
                         {searchValue}
                       </p>
                     </div>
                     {riskData && (
-                      <Badge
-                        variant={
-                          riskData.color === "destructive"
-                            ? "destructive"
-                            : riskData.color === "green"
-                              ? "secondary"
-                              : "outline"
-                        }
-                        className="flex items-center gap-2 px-4 py-2 text-base"
-                      >
-                        <riskData.icon className="h-4 w-4" />
-                        Riesgo {riskData.level}
-                      </Badge>
+                      <div className="text-center">
+                        <riskData.icon className="h-8 w-8 mx-auto mb-2 text-current" />
+                        <Badge
+                          variant={
+                            riskData.color === "destructive"
+                              ? "destructive"
+                              : riskData.color === "green"
+                                ? "secondary"
+                                : "outline"
+                          }
+                          className="flex items-center gap-2 px-4 py-2 text-base"
+                        >
+                          Riesgo {riskData.level}
+                        </Badge>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -358,12 +394,22 @@ export default function BreachVerificationPage() {
         </div>
       </Card>
 
-      {/* Search History */}
-      <SearchHistoryTable
-        history={searchHistory}
-        onSearchAgain={handleSearchAgain}
-        onClearHistory={() => {}}
-      />
+      {/* Enhanced Search History with Loading State */}
+      <div className="relative">
+        {isLoadingHistory && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+            <div className="flex items-center space-x-3 bg-background border rounded-lg px-6 py-4 shadow-lg">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span className="text-sm font-medium">Cargando historial...</span>
+            </div>
+          </div>
+        )}
+        <SearchHistoryTable
+          history={searchHistory}
+          onSearchAgain={handleSearchAgain}
+          onClearHistory={clearHistory}
+        />
+      </div>
     </div>
   );
 }

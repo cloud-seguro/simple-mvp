@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
+import { TriangleAlert, CheckCircle2, ShieldAlert } from "lucide-react";
 
 interface Recommendation {
   id: string;
@@ -42,7 +42,7 @@ export function RecommendationsList({
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case "Alta":
-        return <AlertTriangle className="h-4 w-4 text-red-600" />;
+        return <TriangleAlert className="h-4 w-4 text-red-600" />;
       case "Media":
         return <ShieldAlert className="h-4 w-4 text-yellow-600" />;
       case "Baja":

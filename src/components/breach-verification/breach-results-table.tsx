@@ -1,112 +1,209 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/table/data-table";
+import type { Column } from "@/components/table/types";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { BreachResultAPI } from "@/types/breach-verification";
 import { formatBreachDate } from "@/lib/utils/breach-verification";
+import { TriangleAlert, Shield, ExternalLink } from "lucide-react";
 
 interface BreachResultsTableProps {
   results: BreachResultAPI[];
 }
 
 export function BreachResultsTable({ results }: BreachResultsTableProps) {
-  return (
-    <Card className="border-2">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-semibold flex items-center gap-2">
-          📊 Resultados de Brechas de Datos
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="p-4 font-semibold text-base">
-                  Nombre de la Brecha
-                </TableHead>
-                <TableHead className="p-4 font-semibold text-base">
-                  Fecha
-                </TableHead>
-                <TableHead className="p-4 font-semibold text-base">
-                  Datos Afectados
-                </TableHead>
-                <TableHead className="p-4 font-semibold text-base">
-                  Severidad
-                </TableHead>
-                <TableHead className="p-4 font-semibold text-base">
-                  Estado
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {results.map((result) => (
-                <TableRow
-                  key={result.id}
-                  className="hover:bg-muted/30 transition-colors"
-                >
-                  <TableCell className="p-4 font-medium">
-                    {result.breachName}
-                  </TableCell>
-                  <TableCell className="p-4 text-sm">
-                    {formatBreachDate(result.breachDate)}
-                  </TableCell>
-                  <TableCell className="p-4">
-                    <div className="flex flex-wrap gap-1">
-                      {result.dataTypes.map((type, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {type}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-4">
-                    <Badge
-                      variant={
-                        result.severity === "HIGH" ||
-                        result.severity === "CRITICAL"
-                          ? "destructive"
-                          : result.severity === "MEDIUM"
-                            ? "secondary"
-                            : "outline"
-                      }
-                      className="px-3 py-1 text-sm"
-                    >
-                      {result.severity === "HIGH"
-                        ? "Alta"
-                        : result.severity === "MEDIUM"
-                          ? "Media"
-                          : result.severity === "CRITICAL"
-                            ? "Crítica"
-                            : "Baja"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="p-4">
-                    <Badge
-                      variant={result.isVerified ? "default" : "secondary"}
-                      className="px-3 py-1 text-sm"
-                    >
-                      {result.isVerified ? "Verificado" : "Sin verificar"}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+  const getSeverityIcon = (severity: string) => {
+    switch (severity.toUpperCase()) {
+      case "CRITICAL":
+      case "HIGH":
+        return TriangleAlert;
+      default:
+        return Shield;
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity.toUpperCase()) {
+      case "CRITICAL":
+        return "destructive";
+      case "HIGH":
+        return "destructive";
+      case "MEDIUM":
+        return "secondary";
+      case "LOW":
+      default:
+        return "outline";
+    }
+  };
+
+  const getSeverityLabel = (severity: string) => {
+    switch (severity.toUpperCase()) {
+      case "CRITICAL":
+        return "Crítica";
+      case "HIGH":
+        return "Alta";
+      case "MEDIUM":
+        return "Media";
+      case "LOW":
+      default:
+        return "Baja";
+    }
+  };
+
+  const columns: Column<BreachResultAPI>[] = [
+    {
+      id: "breachName",
+      header: "Nombre de la Brecha",
+      cell: ({ row }) => (
+        <div className="space-y-1">
+          <p className="font-medium text-foreground">{row.breachName}</p>
+          {row.sourceId && (
+            <p className="text-xs text-muted-foreground font-mono">
+              ID: {row.sourceId}
+            </p>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      ),
+    },
+    {
+      id: "breachDate",
+      header: "Fecha",
+      cell: ({ row }) => (
+        <div className="space-y-1">
+          <p className="text-sm font-medium">
+            {formatBreachDate(row.breachDate)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Verificado: {formatBreachDate(row.verificationDate)}
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: "dataTypes",
+      header: "Datos Afectados",
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1 max-w-[200px]">
+          {row.dataTypes.map((type, index) => (
+            <Badge key={index} variant="outline" className="text-xs capitalize">
+              {type}
+            </Badge>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "severity",
+      header: "Severidad",
+      cell: ({ row }) => {
+        const SeverityIcon = getSeverityIcon(row.severity);
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant={getSeverityColor(row.severity) as any}
+                  className="flex items-center gap-1 px-3 py-1 text-sm font-medium cursor-help w-fit"
+                >
+                  <SeverityIcon className="h-4 w-4" />
+                  {getSeverityLabel(row.severity)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  Nivel de severidad basado en el tipo de datos comprometidos y
+                  el alcance de la brecha
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      },
+    },
+    {
+      id: "isVerified",
+      header: "Estado",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-2 h-2 rounded-full ${
+              row.isVerified ? "bg-green-500" : "bg-yellow-500"
+            }`}
+          />
+          <span className="text-sm">
+            {row.isVerified ? "Verificado" : "Sin verificar"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      id: "description",
+      header: "Descripción",
+      cell: ({ row }) => (
+        <div className="max-w-[300px]">
+          <p className="text-sm text-muted-foreground line-clamp-3">
+            {row.description || "No hay descripción disponible"}
+          </p>
+          {row.sourceUrl && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2 p-0 h-6 text-xs text-primary hover:text-primary/80"
+                    onClick={() => window.open(row.sourceUrl, "_blank")}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Ver fuente
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Abrir enlace a la fuente original</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  if (results.length === 0) {
+    return (
+      <div className="text-center py-8 space-y-4">
+        <Shield className="h-16 w-16 text-green-500 mx-auto" />
+        <div className="space-y-2">
+          <p className="text-lg font-medium text-muted-foreground">
+            No se encontraron brechas
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Tu información no aparece en ninguna brecha conocida
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <DataTable
+      title={`Brechas Detectadas (${results.length})`}
+      description="Detalles de las brechas de datos encontradas durante el análisis"
+      data={results}
+      columns={columns}
+      searchable={true}
+      searchField="breachName"
+      defaultSort={{ field: "breachDate", direction: "desc" }}
+      rowSelection={false}
+      pageSize={10}
+      pageSizeOptions={[5, 10, 20]}
+    />
   );
 }

@@ -13,7 +13,6 @@ interface BreachSearchData {
 interface APIResponse<T> {
   success: boolean;
   data: T;
-  error?: string;
 }
 
 export function useBreachVerification() {
@@ -35,7 +34,9 @@ export function useBreachVerification() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to perform breach search");
+        throw new Error(
+          errorData.error || "Error al realizar la búsqueda de brechas"
+        );
       }
 
       const result: APIResponse<BreachSearchResponse> = await response.json();
@@ -51,18 +52,20 @@ export function useBreachVerification() {
     },
   });
 
-  // Search history query
+  // Search history query with enhanced loading states
   const {
     data: searchHistory = [],
     isLoading: isLoadingHistory,
     error: historyError,
+    isFetching: isFetchingHistory,
+    refetch: refetchHistory,
   } = useQuery({
     queryKey: ["breach-search-history"],
     queryFn: async (): Promise<SearchHistory[]> => {
       const response = await fetch("/api/breach-verification");
 
       if (!response.ok) {
-        throw new Error("Failed to fetch search history");
+        throw new Error("Error al obtener el historial de búsquedas");
       }
 
       const result: APIResponse<SearchHistory[]> = await response.json();
@@ -76,6 +79,8 @@ export function useBreachVerification() {
             : new Date(item.timestamp),
       }));
     },
+    staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const performSearch = async (searchData: BreachSearchData) => {
@@ -87,6 +92,20 @@ export function useBreachVerification() {
     setValidationError("");
   };
 
+  const clearHistory = async () => {
+    try {
+      const response = await fetch("/api/breach-verification/history", {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ["breach-search-history"] });
+      }
+    } catch (error) {
+      console.error("Error al limpiar el historial:", error);
+    }
+  };
+
   return {
     // Search functionality
     performSearch,
@@ -95,10 +114,12 @@ export function useBreachVerification() {
     searchResults: searchMutation.data,
     isSearchSuccess: searchMutation.isSuccess,
 
-    // Search history
+    // Search history with enhanced loading states
     searchHistory,
-    isLoadingHistory,
+    isLoadingHistory: isLoadingHistory || isFetchingHistory,
     historyError: historyError?.message,
+    refetchHistory,
+    clearHistory,
 
     // Utilities
     clearValidationError,

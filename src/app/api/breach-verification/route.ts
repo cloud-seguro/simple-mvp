@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { cache } from "react";
 import {
   BreachSearchType,
   BreachRequestStatus,
@@ -635,12 +636,17 @@ async function performBreachSearch(
   }
 }
 
+// Cache the Supabase client creation
+const createServerSupabaseClient = cache(() => {
+  const cookieStore = cookies();
+  return createRouteHandlerClient({
+    cookies: () => cookieStore,
+  });
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({
-      cookies: () => Promise.resolve(cookieStore),
-    });
+    const supabase = createServerSupabaseClient();
 
     // Get user session
     const {
@@ -827,10 +833,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({
-      cookies: () => Promise.resolve(cookieStore),
-    });
+    const supabase = createServerSupabaseClient();
 
     // Get user session
     const {

@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { TriangleAlert, CheckCircle, XCircle } from "lucide-react";
 import type { RiskLevelDisplay } from "@/types/breach-verification";
 
 export function getRiskLevel(breachCount: number): RiskLevelDisplay {
@@ -13,7 +13,7 @@ export function getRiskLevel(breachCount: number): RiskLevelDisplay {
     return {
       level: "Medio",
       color: "yellow",
-      icon: AlertTriangle,
+      icon: TriangleAlert,
     };
   }
   return {
