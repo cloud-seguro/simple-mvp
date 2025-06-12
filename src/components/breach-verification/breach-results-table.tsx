@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/table/data-table";
 import type { Column } from "@/components/table/types";
 import {
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { BreachResultAPI } from "@/types/breach-verification";
 import { formatBreachDate } from "@/lib/utils/breach-verification";
-import { TriangleAlert, Shield, ExternalLink } from "lucide-react";
+import { TriangleAlert, Shield } from "lucide-react";
 
 interface BreachResultsTableProps {
   results: BreachResultAPI[];
@@ -109,7 +108,12 @@ export function BreachResultsTable({ results }: BreachResultsTableProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge
-                  variant={getSeverityColor(row.severity) as any}
+                  variant={
+                    getSeverityColor(row.severity) as
+                      | "destructive"
+                      | "secondary"
+                      | "outline"
+                  }
                   className="flex items-center gap-1 px-3 py-1 text-sm font-medium cursor-help w-fit"
                 >
                   <SeverityIcon className="h-4 w-4" />
@@ -151,26 +155,6 @@ export function BreachResultsTable({ results }: BreachResultsTableProps) {
           <p className="text-sm text-muted-foreground line-clamp-3">
             {row.description || "No hay descripción disponible"}
           </p>
-          {row.sourceUrl && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-2 p-0 h-6 text-xs text-primary hover:text-primary/80"
-                    onClick={() => window.open(row.sourceUrl, "_blank")}
-                  >
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    Ver fuente
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Abrir enlace a la fuente original</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
       ),
     },

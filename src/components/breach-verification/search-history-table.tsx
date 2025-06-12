@@ -24,7 +24,6 @@ import {
 import type { SearchHistory } from "@/types/breach-verification";
 import {
   History,
-  Search,
   Trash2,
   Eye,
   RefreshCw,
@@ -85,10 +84,6 @@ function getRiskLevelIcon(riskLevel: RiskLevel) {
     default:
       return CheckCircle;
   }
-}
-
-function getSearchTypeLabel(searchType: BreachSearchType): string {
-  return searchType === BreachSearchType.EMAIL ? "📧 Email" : "🌐 Dominio";
 }
 
 function getSearchTypeIcon(searchType: BreachSearchType) {
@@ -162,12 +157,12 @@ export function SearchHistoryTable({
       id: "type",
       header: "Tipo",
       cell: ({ row }) => {
-        const TypeIcon = getSearchTypeIcon(row.type);
+        const TypeIcon = getSearchTypeIcon(row.searchType);
         return (
           <div className="flex items-center gap-2">
             <TypeIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm">
-              {row.type === BreachSearchType.EMAIL ? "Email" : "Dominio"}
+              {row.searchType === BreachSearchType.EMAIL ? "Email" : "Dominio"}
             </span>
           </div>
         );
@@ -221,7 +216,12 @@ export function SearchHistoryTable({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge
-                  variant={getRiskLevelColor(row.riskLevel) as any}
+                  variant={
+                    getRiskLevelColor(row.riskLevel) as
+                      | "destructive"
+                      | "secondary"
+                      | "outline"
+                  }
                   className="flex items-center gap-1 px-3 py-1 text-sm font-medium cursor-help w-fit"
                 >
                   <RiskIcon className="h-4 w-4" />
@@ -267,7 +267,7 @@ export function SearchHistoryTable({
                   size="sm"
                   onClick={() =>
                     onSearchAgain(
-                      row.type === BreachSearchType.EMAIL ? "email" : "domain",
+                      row.searchType === BreachSearchType.EMAIL ? "email" : "domain",
                       row.searchValue
                     )
                   }

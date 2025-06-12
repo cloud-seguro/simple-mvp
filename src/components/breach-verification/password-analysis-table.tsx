@@ -58,14 +58,14 @@ export function PasswordAnalysisTable({
     }
   };
 
-  const maskPassword = (password: string): string => {
-    if (password.length <= 4) {
-      return "*".repeat(password.length);
+  const maskPassword = (passwordHash: string): string => {
+    if (passwordHash.length <= 4) {
+      return "*".repeat(passwordHash.length);
     }
     return (
-      password.substring(0, 2) +
-      "*".repeat(password.length - 4) +
-      password.substring(password.length - 2)
+      passwordHash.substring(0, 2) +
+      "*".repeat(passwordHash.length - 4) +
+      passwordHash.substring(passwordHash.length - 2)
     );
   };
 
@@ -81,7 +81,7 @@ export function PasswordAnalysisTable({
                 <TooltipTrigger asChild>
                   <div className="cursor-help p-2 bg-muted/30 rounded border">
                     <span className="text-xs break-all">
-                      {row.passwordHash || maskPassword(row.password)}
+                      {row.passwordHash || "No disponible"}
                     </span>
                   </div>
                 </TooltipTrigger>
@@ -94,7 +94,9 @@ export function PasswordAnalysisTable({
             </TooltipProvider>
           ) : (
             <div className="p-2 bg-muted/30 rounded border">
-              <span className="text-xs">{maskPassword(row.password)}</span>
+              <span className="text-xs">
+                {maskPassword(row.passwordHash || "")}
+              </span>
             </div>
           )}
         </div>
@@ -130,7 +132,12 @@ export function PasswordAnalysisTable({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge
-                  variant={getStrengthColor(row.strength) as any}
+                  variant={
+                    getStrengthColor(row.strength) as
+                      | "secondary"
+                      | "outline"
+                      | "destructive"
+                  }
                   className="flex items-center gap-1 px-3 py-1 text-sm font-medium cursor-help w-fit"
                 >
                   <StrengthIcon className="h-4 w-4" />
@@ -213,7 +220,7 @@ export function PasswordAnalysisTable({
         data={analysis}
         columns={columns}
         searchable={true}
-        searchField="password"
+        searchField="passwordHash"
         defaultSort={{ field: "occurrences", direction: "desc" }}
         rowSelection={false}
         pageSize={10}

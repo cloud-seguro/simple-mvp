@@ -1,6 +1,5 @@
 import html2pdf from "html2pdf.js";
 import type {
-  BreachSearchResponse,
   BreachResultAPI,
   PasswordAnalysisAPI,
 } from "@/types/breach-verification";
@@ -75,37 +74,6 @@ const getSeverityLabel = (severity: string): string => {
     case "LOW":
     default:
       return "Baja";
-  }
-};
-
-const getStrengthClass = (strength: string): string => {
-  switch (strength.toUpperCase()) {
-    case "VERY_WEAK":
-    case "WEAK":
-      return "severity-critical";
-    case "MEDIUM":
-      return "severity-medium";
-    case "STRONG":
-    case "VERY_STRONG":
-    default:
-      return "severity-low";
-  }
-};
-
-const getStrengthLabel = (strength: string): string => {
-  switch (strength.toUpperCase()) {
-    case "VERY_WEAK":
-      return "Muy Débil";
-    case "WEAK":
-      return "Débil";
-    case "MEDIUM":
-      return "Media";
-    case "STRONG":
-      return "Fuerte";
-    case "VERY_STRONG":
-      return "Muy Fuerte";
-    default:
-      return "Desconocida";
   }
 };
 
@@ -537,7 +505,7 @@ export const generateBreachReportPDF = async (
                   (pwd) => `
                 <tr>
                   <td style="font-family: monospace; background: #f5f5f5; padding: 8px;">
-                    ${pwd.password.substring(0, 4)}${"*".repeat(Math.max(0, pwd.password.length - 4))}
+                    ${pwd.passwordHash.substring(0, 4)}${"*".repeat(Math.max(0, pwd.passwordHash.length - 4))}
                   </td>
                   <td style="text-align: center; font-weight: bold; color: ${pwd.occurrences > 100 ? "#dc2626" : "#d97706"};">
                     ${pwd.occurrences.toLocaleString()}
@@ -581,26 +549,21 @@ export const generateBreachReportPDF = async (
 
   // Configure html2pdf options for better quality
   const opt = {
-    margin: [10, 10, 10, 10],
+    margin: 10,
     filename: `breach-analysis-${searchValue}-${new Date().toISOString().split("T")[0]}.pdf`,
     image: { type: "jpeg", quality: 0.98 },
     html2canvas: {
       scale: 2,
       useCORS: true,
       letterRendering: true,
-      scrollX: 0,
       scrollY: 0,
     },
     jsPDF: {
       unit: "mm",
       format: "a4",
       orientation: "portrait",
-      compress: true,
     },
   };
-
-  // Import html2pdf dynamically to avoid SSR issues
-  const html2pdf = (await import("html2pdf.js")).default;
 
   try {
     await html2pdf().set(opt).from(element).save();
